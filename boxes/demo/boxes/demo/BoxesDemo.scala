@@ -182,14 +182,14 @@ object BoxesDemo {
   }
 
   def main(args: Array[String]) {
-    //simpleCalc
-    //simplePath
-    //separateBIDIReactions
+    simpleCalc
+    simplePath
+    separateBIDIReactions
     nonConflictingReactions
 
-    //bidiPath
+    bidiPath
 
-    //conflictingReactions
+//    conflictingReactions
   }
 
 }

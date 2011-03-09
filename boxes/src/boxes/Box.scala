@@ -1,43 +1,9 @@
 package boxes
 
-import boxes.util.WeakMultiMap
-import collection.mutable.{WeakHashMap, ListBuffer, HashMap}
-import ref.WeakReference
-import util.WeakMultiMap
+import collection.mutable._
+import util.{WeakHashSet, WeakMultiMap}
 
 object Box {
-
-
-  //Weak maps used to associate reactions to sources and targets.
-  //Weakness is used to ensure we do not retain anything except
-  //the reactions required for Boxes that are retained OUTSIDE these
-  //maps. See comments on targetsToReactions for more details.
-
-  //Current sources for each known reaction - weak for keys AND values
-  private val reactionsToSources = new WeakMultiMap[Reaction, Box]()
-
-  //Current reactions for each known source - weak for keys AND values
-  private val sourcesToReactions = new WeakMultiMap[Box, Reaction]()
-
-  //Current targets for each known reaction - weak for keys AND values
-  private val reactionsToTargets = new WeakMultiMap[Reaction, Box]()
-
-  //Current reactions for each known target - weak for keys only
-  //Note that this does NOT use weak references to reactions in the Set.
-  //This is deliberate, with the intention that we retain any Reaction as long as
-  //it targets a Box that is otherwise retained. So if Box b is still in this map, that implies
-  //it is referenced outside this map. This causes the set of Reactions to be retained, and
-  //in turn causes each individual reaction to be retained.
-  //Note that there are two types of reactions:
-  // Firstly, reactions that have no side effects other than writing to their targets. By definition
-  // these should be retained exactly as long as their targets. Once their targets are GCed, there is
-  // no reason for the targets still to be executed, and so the reactions can be GCed too.
-  // Secondly, reactions that act as views, and so do not write to their targets, but do have
-  // side effects (updating a UI, logging changes, etc.). These must be retained by whatever
-  // external objects require the side effects, and so we should not retain them at all. For example,
-  // a UI will have a hierarchy of UI components, and each component should retain whatever reactions
-  // it uses to update itself, otherwise they will be GCed.
-  private val targetsToReactions = new WeakHashMap[Box, scala.collection.mutable.Set[Reaction]]() with collection.mutable.MultiMap[Box, Reaction]
 
 
   //Currently active reaction - if there is one, it is responsible
@@ -46,9 +12,6 @@ object Box {
 
   //Reactions that WILL be processed this cycle
   private val reactionsPending = ListBuffer[Reaction]()
-
-  //Current PENDING reactions for each known target
-  private val targetsToPendingReactions = new HashMap[Box, scala.collection.mutable.Set[Reaction]]() with collection.mutable.MultiMap[Box, Reaction]
 
   //Track reactions that are newly added to the system (added AFTER the most recent full cycle), and so may need extra checks.
   private val newReactions = new scala.collection.mutable.HashSet[Reaction]()
@@ -90,14 +53,14 @@ object Box {
   }
 
   private def associateReactionSource(r:Reaction, b:Box) {
-    sourcesToReactions.addBinding(b, r)
-    reactionsToSources.addBinding(r, b)
+    r.sources.add(b)
+    b.sourcingReactions.add(r)
     //println(b + " is now source of " + r)
   }
 
   private def associateReactionTarget(r:Reaction, b:Box) {
-    targetsToReactions.addBinding(b, r)
-    reactionsToTargets.addBinding(r, b)
+    r.targets.add(b)
+    b.targettingReactions.add(r)
     //println(b + " is now target of " + r)
   }
 
@@ -122,8 +85,7 @@ object Box {
 
     //Any reactions on this box are now pending
     for {
-      reactions <- sourcesToReactions.get(b)
-      reaction <- reactions
+      reaction <- b.sourcingReactions
     } pendReaction(reaction)
 
     cycle
@@ -134,12 +96,6 @@ object Box {
       reactionsPending.append(r)
 
       //println("Pending reaction " + r + ", pending count " + reactionsPending.size)
-
-      //Now reaction is pending, it should be in the map for each expected target
-      for {
-        targets <- reactionsToTargets.get(r)
-        target <- targets
-      } targetsToPendingReactions.addBinding(target, r)
     }
   }
 
@@ -182,7 +138,7 @@ object Box {
       //Which reaction (if any) has written each box, this cycle. Used to detect conflicts.
       val targetsToCurrentCycleReaction = new HashMap[Box, Reaction]()
 
-      val conflictReactions = new scala.collection.mutable.HashSet[Reaction]()
+      val conflictReactions = new HashSet[Reaction]()
 
       //Keep cycling until we clear all reactions
       while (!reactionsPending.isEmpty) {
@@ -203,13 +159,14 @@ object Box {
         //Clear this targets expected targets and sources,
         //so that they can be added from fresh by calling
         //reaction.respond and then applying that response
-        reactionsToTargets.remove(nextReaction)
-        targetsToReactions.foreach{p => p._2.remove(nextReaction)}
-        reactionsToSources.remove(nextReaction)
-        sourcesToReactions.foreach{p => p._2.remove(nextReaction)}
-
-        //Same for pending reactions map
-        targetsToPendingReactions.foreach{p => p._2.remove(nextReaction)}
+        for {
+          target <- nextReaction.targets
+        } target.targettingReactions.remove(nextReaction)
+        nextReaction.targets.clear
+        for {
+          source <- nextReaction.sources
+        } source.sourcingReactions.remove(nextReaction)
+        nextReaction.sources.clear
 
         //println("Reaction " + nextReaction + " about to respond")
         reactionRespondAndApply(nextReaction)
@@ -217,25 +174,13 @@ object Box {
 
         //We now have the correct targets for this reaction, so
         //we can track them for conflicts
-        reactionsToTargets.get(nextReaction).foreach(s => s.foreach(b => {
-          targetsToCurrentCycleReaction.put(b, nextReaction).foreach(conflictBox => conflictReactions.add(nextReaction))
-        }))
+        
+        for {
+          target <- nextReaction.targets
+          conflictReaction <- targetsToCurrentCycleReaction.put(target, nextReaction)
+        } conflictReactions.add(conflictReaction)
 
       }
-
-      //           for each new reaction           get its targets, and if there are any                 get other reactions with same targets, and if ther are any, add them all as conflict reactions
-//      newReactions.foreach(newReaction =>
-//        reactionsToTargets.get(newReaction).foreach(newReactionTargetOption =>
-//          newReactionTargetOption.foreach(newReactionTarget =>
-//            targetsToReactions.get(newReactionTarget).foreach(targetConflictingReactionsOption =>
-//              targetConflictingReactionsOption.foreach(targetConflictingReaction =>
-//                conflictReactions.add(targetConflictingReaction)
-//              )
-//            )
-//          )
-//        )
-//      )
-//      newReactions.clear
 
       //Now that we know the targets affected by each new reaction, we will
       //mark any reactions targeting those same targets as conflictReactions.
@@ -248,10 +193,8 @@ object Box {
       //loop above.
       for {
         newReaction <- newReactions
-        newReactionTargetSet <- reactionsToTargets.get(newReaction)
-        newReactionTarget <- newReactionTargetSet
-        targetConflictingReactionSet <- targetsToReactions.get(newReactionTarget)
-        targetConflictingReaction <- targetConflictingReactionSet
+        newReactionTarget <- newReaction.targets
+        targetConflictingReaction <- newReactionTarget.targettingReactions
       } conflictReactions.add(targetConflictingReaction)
 
       newReactions.clear
@@ -271,8 +214,8 @@ object Box {
       //responses that do nothing if they are valid. Actually this is probably best.
       //println("Checking for conflicts...")
       checkingConflicts = true
-      conflictReactions.foreach{r =>
-        reactionRespondAndApply(r)
+      conflictReactions.foreach{
+        r => reactionRespondAndApply(r)
       }
       checkingConflicts = false
       //println("No conflicts")
@@ -284,9 +227,6 @@ object Box {
       //Done for this cycle
       cycling = false
 
-      //Check map is clear as expected, not counting empty sets
-      targetsToPendingReactions.foreach{p => if(!p._2.isEmpty) throw new RuntimeException("Finished a cycle with targetsToPendingReactions not empty")}
-      targetsToPendingReactions.clear
     }
   }
 
@@ -314,22 +254,7 @@ object Box {
 
 trait Box {
 
-//  val reactions = HashMap[Reaction,Int]()
-//
-//  def retainReaction(r:Reaction) = {
-//    val v = reactions.get(r) match {
-//      case Some(x) => x + 1
-//      case None => 1
-//    }
-//    reactions.put(r, v)
-//  }
-//
-//  def releaseReaction(r:Reaction) = {
-//    reactions.get(r) match {
-//      case Some(1) => reactions.remove(r)
-//      case Some(x) => reactions.put(r, x-1)
-//      case None => 1
-//    }
-//  }
+  private[boxes] val sourcingReactions = new WeakHashSet[Reaction]()
+  private[boxes] val targettingReactions = Set[Reaction]()
 
 }

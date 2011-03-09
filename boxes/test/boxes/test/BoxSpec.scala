@@ -91,6 +91,41 @@ class BoxSpec extends WordSpec {
 
   }
 
+  "Path" should {
+    "work for Person" in {
+
+      val cate = new Person()
+      cate.name() = "Cate"
+      val alice = new Person()
+      alice.name() = "Alice"
+      val bob = new Person()
+      bob.name() = "Bob"
+      bob.friend() = cate
+
+      val bobsFriendsName = Path(bob.friend().name)
+
+      assert(bobsFriendsName() === "Cate")
+
+      bob.friend() = alice
+
+      assert(bobsFriendsName() === "Alice")
+
+      //FIXME implement test - should see no changes to bobsFriendsName when something not
+      //in the path changes, even if it is deeply referenced, or used to be part of path, etc.
+      cate.name() = "Katey"
+
+      alice.name() = "Alicia"
+
+      assert(bobsFriendsName() === "Alicia")
+
+      bobsFriendsName() = "Alucard"
+
+      assert(bobsFriendsName() === "Alucard")
+      assert(alice.name() === "Alucard")
+
+    }
+  }
+
   "Box" should {
 
     "support multiple reactions targetting the same Box, where they do not conflict" in {
@@ -118,5 +153,6 @@ class BoxSpec extends WordSpec {
     }
 
   }
+
 
 }

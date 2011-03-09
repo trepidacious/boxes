@@ -1,8 +1,11 @@
 package boxes
 
+import scala.collection.mutable._
+
 object Reaction {
 
   class SingleTargetReaction[T](v:Var[T], result: =>T, name:String = "Unnamed Reaction") extends Reaction {
+
     def respond : (()=>Unit) = {
       //First apply the function, so that any reads are performed now
       val r = result
@@ -27,6 +30,9 @@ object Reaction {
 trait Reaction {
 
   def respond : (()=>Unit)
+
+  private[boxes] val sources = Set[Box]()
+  private[boxes] val targets = Set[Box]()
 
 }
 
