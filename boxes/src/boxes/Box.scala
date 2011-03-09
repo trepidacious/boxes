@@ -129,7 +129,8 @@ object Box {
 
   private def cycle = {
 
-    //FIXME consider resetting state in a finally block, to allow surviving a runtime exception
+    //FIXME Bad reactions should be disconnected form system and stored in a list during cycling, then
+    //an exception thrown when system is back in a valid state. This prevents exceptions destroying the system.
 
     //Only enter one cycle at a time
     if (!cycling) {
@@ -165,6 +166,9 @@ object Box {
         nextReaction.targets.clear
         for {
           source <- nextReaction.sources
+          //FIXME should use temp set for tracking new sources, then
+          //modify the sourceReactions from this, to allow for keeping the same
+          //weak references (if appropriate) rather than regenerating every cycle.
         } source.sourcingReactions.remove(nextReaction)
         nextReaction.sources.clear
 
