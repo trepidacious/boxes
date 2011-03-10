@@ -91,6 +91,34 @@ class BoxSpec extends WordSpec {
 
   }
 
+  "Box" should {
+
+    "support multiple reactions targetting the same Box, where they do not conflict" in {
+      val x = Var(2d)
+      val y = Var(0d)
+
+      Reaction(y, x() * 2, "double")
+      assert(x() === 2d)
+      assert(y() === 4d)
+
+      Reaction(y, x() * 2, "also double")
+      assert(x() === 2d)
+      assert(y() === 4d)
+    }
+
+    "throw FailedReactionsException if reactions conflict" in {
+      val x = Var(2d)
+      val y = Var(0d)
+
+      Reaction(y, x() * 2, "double")
+
+      intercept[FailedReactionsException] {
+        Reaction(y, x() * 4, "quadruple")
+      }
+    }
+
+  }
+
   "Path" should {
     "work for Person" in {
 
@@ -124,34 +152,6 @@ class BoxSpec extends WordSpec {
       assert(alice.name() === "Alucard")
 
     }
-  }
-
-  "Box" should {
-
-    "support multiple reactions targetting the same Box, where they do not conflict" in {
-      val x = Var(2d)
-      val y = Var(0d)
-
-      Reaction(y, x() * 2, "double")
-      assert(x() === 2d)
-      assert(y() === 4d)
-
-      Reaction(y, x() * 2, "also double")
-      assert(x() === 2d)
-      assert(y() === 4d)
-    }
-
-    "throw ConflictException if reactions conflict" in {
-      val x = Var(2d)
-      val y = Var(0d)
-
-      Reaction(y, x() * 2, "double")
-
-      intercept[ConflictException] {
-        Reaction(y, x() * 4, "quadruple")
-      }
-    }
-
   }
 
 

@@ -31,7 +31,7 @@ object Box {
 
   def beforeRead(b:Box) = {
     //println("beforeRead " + b)
-    if (!canRead) throw new RuntimeException("Attempted to read incorrectly")
+    if (!canRead) throw new InvalidReadException(b)
   }
 
   def afterRead(b:Box) = {
@@ -48,7 +48,7 @@ object Box {
    */
   def beforeWrite(b:Box) = {
     //println("beforeWrite " + b)
-    if (!canWrite) throw new RuntimeException("Attempted to write incorrectly")
+    if (!canWrite) throw new InvalidWriteException(b)
     applyingReaction
   }
 
@@ -69,7 +69,7 @@ object Box {
 
     if (checkingConflicts) {
       activeReaction match {
-        case Some(r) => throw new ConflictException(r, b)
+        case Some(r) => throw new InvalidReactionException("Conflicting reaction", r, b)
         case None => {
           println("Code error - no active reaction")
           throw new RuntimeException("Conflicting reaction with no active reaction - code error")
@@ -136,6 +136,8 @@ object Box {
     if (!cycling) {
       cycling = true
 
+      val failedReactions = new HashSet[Reaction]()
+
       //Which reaction (if any) has written each box, this cycle. Used to detect conflicts.
       val targetsToCurrentCycleReaction = new HashMap[Box, Reaction]()
 
@@ -160,29 +162,31 @@ object Box {
         //Clear this targets expected targets and sources,
         //so that they can be added from fresh by calling
         //reaction.respond and then applying that response
-        for {
-          target <- nextReaction.targets
-        } target.targettingReactions.remove(nextReaction)
-        nextReaction.targets.clear
-        for {
-          source <- nextReaction.sources
-          //FIXME should use temp set for tracking new sources, then
-          //modify the sourceReactions from this, to allow for keeping the same
-          //weak references (if appropriate) rather than regenerating every cycle.
-        } source.sourcingReactions.remove(nextReaction)
-        nextReaction.sources.clear
+      //FIXME should use temp set for tracking new sources, then
+      //modify the sourceReactions from this, to allow for keeping the same
+      //weak references (if appropriate) rather than regenerating every cycle.
+        clearReactionSourcesAndTargets(nextReaction)
 
-        //println("Reaction " + nextReaction + " about to respond")
-        reactionRespondAndApply(nextReaction)
-        //println("Reaction " + nextReaction + " applied")
+        try {
 
-        //We now have the correct targets for this reaction, so
-        //we can track them for conflicts
-        
-        for {
-          target <- nextReaction.targets
-          conflictReaction <- targetsToCurrentCycleReaction.put(target, nextReaction)
-        } conflictReactions.add(conflictReaction)
+          reactionRespondAndApply(nextReaction)
+
+          //We now have the correct targets for this reaction, so
+          //we can track them for conflicts
+          for {
+            target <- nextReaction.targets
+            conflictReaction <- targetsToCurrentCycleReaction.put(target, nextReaction)
+          } conflictReactions.add(conflictReaction)
+
+        } catch {
+          case e:BoxException => {
+            //Remove the reaction completely from the system, but remember that it failed
+            clearReactionSourcesAndTargets(nextReaction)
+            conflictReactions.remove(nextReaction)
+            newReactions.remove(nextReaction)
+            failedReactions.add(nextReaction)
+          }
+        }
 
       }
 
@@ -219,10 +223,19 @@ object Box {
       //println("Checking for conflicts...")
       checkingConflicts = true
       conflictReactions.foreach{
-        r => reactionRespondAndApply(r)
+        r => {
+          try {
+            reactionRespondAndApply(r)
+          } catch {
+            case e:BoxException => {
+              //Remove the reaction completely from the system, but remember that it failed
+              clearReactionSourcesAndTargets(r)
+              failedReactions.add(r)
+            }
+          }
+        }
       }
       checkingConflicts = false
-      //println("No conflicts")
 
       //Write order is only valid during cycling
       boxToWriteIndex.clear
@@ -231,26 +244,42 @@ object Box {
       //Done for this cycle
       cycling = false
 
+      if (!failedReactions.isEmpty) {
+        //TODO make immutable copy of failed reactions for exception
+        throw new FailedReactionsException()//scala.collection.immutable.Set(failedReactions))
+      }
     }
+  }
+
+  def clearReactionSourcesAndTargets(r:Reaction) = {
+    for {
+      target <- r.targets
+    } target.targettingReactions.remove(r)
+    r.targets.clear
+    for {
+      source <- r.sources
+    } source.sourcingReactions.remove(r)
+    r.sources.clear
   }
 
   def reactionRespondAndApply(r:Reaction) = {
 
     activeReaction = Some(r)
+    try {
 
-    canWrite = false
-    val response = r.respond
-    canWrite = true
-    //println("Reaction " + nextReaction + " responded")
+      canWrite = false
+      val response = r.respond
+      canWrite = true
+      canRead = false
+      applyingReaction = true
+      response.apply
 
-    //println("Reaction " + nextReaction + " about to apply")
-    canRead = false
-    applyingReaction = true
-    response.apply
-    applyingReaction = false
-    canRead = true
-
-    activeReaction = None
+    } finally {
+      activeReaction = None
+      applyingReaction = false
+      canRead = true
+      canWrite = true
+    }
 
   }
 
