@@ -13,6 +13,9 @@ object Box {
   //Reactions that WILL be processed this cycle
   private val reactionsPending = ListBuffer[Reaction]()
 
+  //Reactions that are also views
+  private val viewReactionsPending = ListBuffer[Reaction]()
+
   //Track reactions that are newly added to the system (added AFTER the most recent full cycle), and so may need extra checks.
   private val newReactions = new scala.collection.mutable.HashSet[Reaction]()
 
@@ -30,13 +33,10 @@ object Box {
   private var applyingReaction = false
 
   def beforeRead(b:Box) = {
-    //println("beforeRead " + b)
     if (!canRead) throw new InvalidReadException(b)
   }
 
   def afterRead(b:Box) = {
-    //println("afterRead " + b)
-
     //This box is a source of any active reaction
     activeReaction.foreach(r => associateReactionSource(r, b))
   }
@@ -47,7 +47,6 @@ object Box {
    * to reject writes. E.g. Cal will only accept writes from Reactions.
    */
   def beforeWrite(b:Box) = {
-    //println("beforeWrite " + b)
     if (!canWrite) throw new InvalidWriteException(b)
     applyingReaction
   }
@@ -55,17 +54,14 @@ object Box {
   private def associateReactionSource(r:Reaction, b:Box) {
     r.sources.add(b)
     b.sourcingReactions.add(r)
-    //println(b + " is now source of " + r)
   }
 
   private def associateReactionTarget(r:Reaction, b:Box) {
     r.targets.add(b)
     b.targettingReactions.add(r)
-    //println(b + " is now target of " + r)
   }
 
   def commitWrite(b:Box) = {
-    //println("commitWrite " + b)
 
     if (checkingConflicts) {
       activeReaction match {
@@ -92,15 +88,21 @@ object Box {
   }
 
   private def pendReaction(r:Reaction) = {
-    if (!reactionsPending.contains(r)) {
-      reactionsPending.append(r)
-
-      //println("Pending reaction " + r + ", pending count " + reactionsPending.size)
+    r.isView match {
+      case false => {
+        if (!reactionsPending.contains(r)) {
+          reactionsPending.append(r)
+        }
+      }
+      case true => {
+        if (!viewReactionsPending.contains(r)) {
+          viewReactionsPending.append(r)
+        }
+      }
     }
   }
 
   def afterWrite(b:Box) = {
-    //println("afterWrite " + b)
   }
 
   def boxWriteIndex(b:Box) : Option[Int] = {
@@ -128,9 +130,6 @@ object Box {
   }
 
   private def cycle = {
-
-    //FIXME Bad reactions should be disconnected form system and stored in a list during cycling, then
-    //an exception thrown when system is back in a valid state. This prevents exceptions destroying the system.
 
     //Only enter one cycle at a time
     if (!cycling) {
@@ -236,6 +235,42 @@ object Box {
         }
       }
       checkingConflicts = false
+
+      //Now deal with any views
+      while (!viewReactionsPending.isEmpty) {
+        val nextViewReaction = viewReactionsPending.remove(0);
+
+        //Clear this target's expected targets and sources,
+        //so that they can be added from fresh by calling
+        //reaction.respond and then applying that response
+      //FIXME should use temp set for tracking new sources, then
+      //modify the sourceReactions from this, to allow for keeping the same
+      //weak references (if appropriate) rather than regenerating every cycle.
+        clearReactionSourcesAndTargets(nextViewReaction)
+
+        try {
+
+          activeReaction = Some(nextViewReaction)
+          try {
+            canWrite = false
+            nextViewReaction.respond
+          } finally {
+            activeReaction = None
+            canWrite = true
+          }
+
+        } catch {
+          case e:BoxException => {
+            //Remove the reaction completely from the system, but remember that it failed
+            clearReactionSourcesAndTargets(nextViewReaction)
+            conflictReactions.remove(nextViewReaction)
+            newReactions.remove(nextViewReaction)
+            failedReactions.add(nextViewReaction)
+          }
+        }
+
+      }
+
 
       //Write order is only valid during cycling
       boxToWriteIndex.clear

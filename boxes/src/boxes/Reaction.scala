@@ -14,6 +14,8 @@ object Reaction {
       {() => (v() = r)}
     }
 
+    def isView = false
+
     override def toString = "STR: " + name
 
   }
@@ -30,6 +32,7 @@ object Reaction {
 trait Reaction {
 
   def respond : (()=>Unit)
+  def isView : Boolean
 
   private[boxes] val sources = Set[Box]()
   private[boxes] val targets = Set[Box]()

@@ -52,6 +52,8 @@ object Path {
       }
     }
 
+    def isView = false
+
     override def toString = "PathBIDI: " + name
 
   }
