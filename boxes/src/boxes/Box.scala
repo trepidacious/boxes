@@ -1,10 +1,9 @@
 package boxes
 
 import collection.mutable._
-import util.{WeakHashSet, WeakMultiMap}
+import util.WeakHashSet
 
 object Box {
-
 
   //Currently active reaction - if there is one, it is responsible
   //for reads/writes, if there is none then reads/writes are external
@@ -20,7 +19,10 @@ object Box {
   private val newReactions = new scala.collection.mutable.HashSet[Reaction]()
 
   //During a cycle, maps each written box to the write index when it was FIRST written in the current cycle
-  private val boxToWriteIndex = new HashMap[Box, Int]()
+  private val boxToWriteIndex = new HashMap[Box[_], Int]()
+
+  //During a cycle, maps each written box to a list of changes applied to that list in the current cycle
+  private val boxToChanges = new HashMap[Box[_], Object]
 
   //The next write index to assign during cycling
   private var writeIndex = 0
@@ -32,11 +34,11 @@ object Box {
   private var cycling = false
   private var applyingReaction = false
 
-  def beforeRead(b:Box) = {
+  def beforeRead[C](b:Box[C]) = {
     if (!canRead) throw new InvalidReadException(b)
   }
 
-  def afterRead(b:Box) = {
+  def afterRead[C](b:Box[C]) = {
     //This box is a source of any active reaction
     activeReaction.foreach(r => associateReactionSource(r, b))
   }
@@ -46,22 +48,22 @@ object Box {
    * there is a reaction being applied, which can be used by Boxes
    * to reject writes. E.g. Cal will only accept writes from Reactions.
    */
-  def beforeWrite(b:Box) = {
+  def beforeWrite[C](b:Box[C]) = {
     if (!canWrite) throw new InvalidWriteException(b)
     applyingReaction
   }
 
-  private def associateReactionSource(r:Reaction, b:Box) {
+  private def associateReactionSource(r:Reaction, b:Box[_]) {
     r.sources.add(b)
     b.sourcingReactions.add(r)
   }
 
-  private def associateReactionTarget(r:Reaction, b:Box) {
+  private def associateReactionTarget(r:Reaction, b:Box[_]) {
     r.targets.add(b)
     b.targettingReactions.add(r)
   }
 
-  def commitWrite(b:Box) = {
+  def commitWrite[C](b:Box[C], change:C) = {
 
     if (checkingConflicts) {
       activeReaction match {
@@ -75,6 +77,11 @@ object Box {
 
     boxToWriteIndex.getOrElseUpdate(b, writeIndex)
     writeIndex = writeIndex + 1
+
+    boxToChanges.get(b) match {
+      case None => boxToChanges.put(b, Queue(change))
+      case Some(existingChanges) => boxToChanges.put(b, existingChanges.asInstanceOf[Queue[C]] :+ change)
+    }
 
     //This box is a target of any active reaction
     activeReaction.foreach(r => associateReactionTarget(r, b))
@@ -102,10 +109,10 @@ object Box {
     }
   }
 
-  def afterWrite(b:Box) = {
+  def afterWrite[C](b:Box[C]) = {
   }
 
-  def boxWriteIndex(b:Box) : Option[Int] = {
+  def boxWriteIndex(b:Box[_]) : Option[Int] = {
     //Reading a box's write index counts as reading it, and
     //so for example makes a reaction have the box as a source
     beforeRead(b)
@@ -113,6 +120,15 @@ object Box {
       return boxToWriteIndex.get(b)
     } finally {
       afterRead(b)
+    }
+  }
+
+  def boxChanges[C](b:Box[C]):Option[Queue[C]] = {
+    boxToChanges.get(b) match {
+      case None => None
+      //Note this is safe because we only ever accept changes
+      //from a Box[C] of type C, and add them to list
+      case Some(o) => Some(o.asInstanceOf[Queue[C]])
     }
   }
 
@@ -138,7 +154,7 @@ object Box {
       val failedReactions = new HashSet[Reaction]()
 
       //Which reaction (if any) has written each box, this cycle. Used to detect conflicts.
-      val targetsToCurrentCycleReaction = new HashMap[Box, Reaction]()
+      val targetsToCurrentCycleReaction = new HashMap[Box[_], Reaction]()
 
       val conflictReactions = new HashSet[Reaction]()
 
@@ -240,6 +256,7 @@ object Box {
       //Write order is only valid during cycling
       boxToWriteIndex.clear
       writeIndex = 0
+      boxToChanges.clear
 
       //Done for this cycle
       cycling = false
@@ -288,9 +305,12 @@ object Box {
 
 }
 
-trait Box {
+trait Box[C] {
 
   private[boxes] val sourcingReactions = new WeakHashSet[Reaction]()
   private[boxes] val targettingReactions = Set[Reaction]()
+
+  def changes = Box.boxChanges(this)
+  def writeIndex = Box.boxWriteIndex(this)
 
 }

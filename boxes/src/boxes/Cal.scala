@@ -22,7 +22,7 @@ class Cal[T] (private var t:T) extends Var[T] {
       }
       if (newT != t) {
         t = newT
-        Box.commitWrite(this)
+        Box.commitWrite(this, newT)
       }
     } finally {
       Box.afterWrite(this)

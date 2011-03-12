@@ -186,7 +186,14 @@ object BoxesDemo {
     val alice = new Person()
     alice.name() = "Alice"
 
-    val v = View{println(alice.name())}
+    val v = View{
+      println(alice.name())
+      for {
+        changes <- alice.name.changes
+        change <- changes
+      } print(" " + change)
+      println()
+    }
 //    val v2 = View{println(alice.name())}
 
     alice.name() = "Alicia"

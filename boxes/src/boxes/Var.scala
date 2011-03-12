@@ -22,8 +22,8 @@ object Path {
       } else {
 
         //Now find which of v and e has changed first (if either)
-        val vIndex = Box.boxWriteIndex(v)
-        val eIndex = Box.boxWriteIndex(e)
+        val vIndex = v.writeIndex
+        val eIndex = e.writeIndex
 
         println("vIndex = " + vIndex + ", eIndex = " + eIndex)
 
@@ -83,7 +83,7 @@ private class VarDefault[T] (private var t:T) extends Var[T] {
     try {
       if (newT != t) {
         t = newT
-        Box.commitWrite(this)
+        Box.commitWrite(this, newT)
       }
     } finally {
       Box.afterWrite(this)

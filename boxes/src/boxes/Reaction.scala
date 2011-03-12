@@ -34,8 +34,8 @@ trait Reaction {
   def respond : (()=>Unit)
   def isView : Boolean
 
-  private[boxes] val sources = Set[Box]()
-  private[boxes] val targets = Set[Box]()
+  private[boxes] val sources = Set[Box[_]]()
+  private[boxes] val targets = Set[Box[_]]()
 
 }
 

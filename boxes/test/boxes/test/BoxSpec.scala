@@ -131,6 +131,7 @@ class BoxSpec extends WordSpec {
       intercept[FailedReactionsException] {
         Reaction(y, x() * 4, "quadruple")
       }
+
     }
 
   }
