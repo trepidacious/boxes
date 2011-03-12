@@ -187,6 +187,7 @@ object BoxesDemo {
     alice.name() = "Alice"
 
     val v = View{println(alice.name())}
+//    val v2 = View{println(alice.name())}
 
     alice.name() = "Alicia"
 

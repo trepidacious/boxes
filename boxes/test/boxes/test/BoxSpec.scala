@@ -34,6 +34,7 @@ class BoxSpec extends WordSpec {
     }
 
     "permit simple unidirectional paths" in {
+
       val cate = new Person()
       cate.name() = "Cate"
 
@@ -46,21 +47,37 @@ class BoxSpec extends WordSpec {
 
       val bobsFriendsName = Cal(bob.friend().name())
 
+      var alterations = 0
+      val aView = View {
+        //Read this so that we are called when it changes
+        bobsFriendsName()
+        alterations += 1
+      }
+
+      //Starts from 1, because view is called once
+      //when registered
+      assert(alterations === 1)
+
       assert(bobsFriendsName() === "Cate")
 
       bob.friend() = alice
 
+      assert(alterations === 2)
+
       assert(bobsFriendsName() === "Alice")
 
-      //FIXME implement test - should see no changes to bobsFriendsName when something not
+      //Should see no changes to bobsFriendsName when something not
       //in the path changes, even if it is deeply referenced, or used to be part of path, etc.
-      //Reaction(bobsFriendsName, {bob.friend().name()})
       cate.name() = "Katey"
+
+      assert(alterations === 2)
 
       assert(bobsFriendsName() === "Alice")
 
       alice.name() = "Alicia"
       assert(bobsFriendsName() === "Alicia")
+
+      assert(alterations === 3)
     }
 
   }
@@ -78,7 +95,6 @@ class BoxSpec extends WordSpec {
       Reaction(x, doubleX()/2d, "x = doubleX / 2")
       assert(x() === 2d)
       assert(doubleX() === 4d)
-
 
       x() = 4
       assert(x() === 4d)
