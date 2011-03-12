@@ -143,8 +143,9 @@ object Box {
       val conflictReactions = new HashSet[Reaction]()
 
       //Keep cycling until we clear all reactions
-      while (!reactionsPending.isEmpty) {
-        val nextReaction = reactionsPending.remove(0);
+      while (!reactionsPending.isEmpty || !viewReactionsPending.isEmpty) {
+
+        val nextReaction = if (!reactionsPending.isEmpty) reactionsPending.remove(0) else viewReactionsPending.remove(0);
 
         //FIXME at this point we should consider delaying
         //execution of reactions that have sources which
@@ -236,42 +237,6 @@ object Box {
       }
       checkingConflicts = false
 
-      //Now deal with any views
-      while (!viewReactionsPending.isEmpty) {
-        val nextViewReaction = viewReactionsPending.remove(0);
-
-        //Clear this target's expected targets and sources,
-        //so that they can be added from fresh by calling
-        //reaction.respond and then applying that response
-      //FIXME should use temp set for tracking new sources, then
-      //modify the sourceReactions from this, to allow for keeping the same
-      //weak references (if appropriate) rather than regenerating every cycle.
-        clearReactionSourcesAndTargets(nextViewReaction)
-
-        try {
-
-          activeReaction = Some(nextViewReaction)
-          try {
-            canWrite = false
-            nextViewReaction.respond
-          } finally {
-            activeReaction = None
-            canWrite = true
-          }
-
-        } catch {
-          case e:BoxException => {
-            //Remove the reaction completely from the system, but remember that it failed
-            clearReactionSourcesAndTargets(nextViewReaction)
-            conflictReactions.remove(nextViewReaction)
-            newReactions.remove(nextViewReaction)
-            failedReactions.add(nextViewReaction)
-          }
-        }
-
-      }
-
-
       //Write order is only valid during cycling
       boxToWriteIndex.clear
       writeIndex = 0
@@ -305,9 +270,12 @@ object Box {
       canWrite = false
       val response = r.respond
       canWrite = true
-      canRead = false
-      applyingReaction = true
-      response.apply
+
+      if (!r.isView) {
+        canRead = false
+        applyingReaction = true
+        response.apply
+      }
 
     } finally {
       activeReaction = None

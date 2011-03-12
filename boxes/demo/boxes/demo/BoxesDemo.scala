@@ -181,15 +181,28 @@ object BoxesDemo {
 
   }
 
-  def main(args: Array[String]) {
-    simpleCalc
-    simplePath
-    separateBIDIReactions
-    nonConflictingReactions
+  def views() = {
 
-    bidiPath
+    val alice = new Person()
+    alice.name() = "Alice"
+
+    val v = View{println(alice.name())}
+
+    alice.name() = "Alicia"
+
+  }
+
+  def main(args: Array[String]) {
+//    simpleCalc
+//    simplePath
+//    separateBIDIReactions
+//    nonConflictingReactions
+//
+//    bidiPath
 
 //    conflictingReactions
+
+    views
   }
 
 }
