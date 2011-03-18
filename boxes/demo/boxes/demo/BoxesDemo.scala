@@ -198,6 +198,10 @@ object BoxesDemo {
 
     alice.name() = "Alicia"
 
+    println()
+
+    alice.name() = "Alucard"
+
   }
 
   def main(args: Array[String]) {

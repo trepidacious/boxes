@@ -25,7 +25,7 @@ object Path {
         val vIndex = v.writeIndex
         val eIndex = e.writeIndex
 
-        println("vIndex = " + vIndex + ", eIndex = " + eIndex)
+//        println("vIndex = " + vIndex + ", eIndex = " + eIndex)
 
         val fromEtoV = vIndex match {
           //We have a write to v
@@ -43,10 +43,10 @@ object Path {
         }
 
         if (fromEtoV) {
-          println("Copying from v to e");
+//          println("Copying from v to e");
           {() => (v() = eContents)}
         } else {
-          println("Copying from e to v");
+//          println("Copying from e to v");
           {() => (e() = vContents)}
         }
       }
@@ -79,8 +79,8 @@ trait Var[T] extends Ref[T] {
 private class VarDefault[T] (private var t:T) extends Var[T] {
 
   def update(newT:T) = {
-    Box.beforeWrite(this)
     try {
+      Box.beforeWrite(this)
       if (newT != t) {
         t = newT
         Box.commitWrite(this, newT)
@@ -91,8 +91,8 @@ private class VarDefault[T] (private var t:T) extends Var[T] {
   }
 
   def apply():T = {
-    Box.beforeRead(this)
     try {
+      Box.beforeRead(this)
       return t
     } finally {
       Box.afterRead(this)

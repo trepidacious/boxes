@@ -1,7 +1,7 @@
 package boxes.test
 
 import org.scalatest.WordSpec
-import scala.collection.mutable.Stack
+import scala.collection._
 import boxes._
 
 class BoxSpec extends WordSpec {
@@ -168,6 +168,30 @@ class BoxSpec extends WordSpec {
       assert(bobsFriendsName() === "Alucard")
       assert(alice.name() === "Alucard")
 
+    }
+  }
+
+  "View" should {
+    "report only changes from current cycle" in {
+
+      val alice = new Person()
+      alice.name() = "Alice"
+
+      var lastChanges:Option[immutable.Queue[String]] = Some(immutable.Queue("MustChange"))
+
+      val v = View{
+        lastChanges = alice.name.changes
+      }
+
+      assert(lastChanges === None)
+
+      alice.name() = "Alicia"
+
+      assert(lastChanges === Some(immutable.Queue("Alicia")))
+
+      alice.name() = "Alucard"
+
+      assert(lastChanges === Some(immutable.Queue("Alucard")))
     }
   }
 

@@ -14,8 +14,8 @@ trait Val[T] extends Ref[T]
 private class ValDefault[T] (private val t:T) extends Val[T] {
 
   def apply():T = {
-    Box.beforeRead(this)
     try {
+      Box.beforeRead(this)
       return t
     } finally {
       Box.afterRead(this)

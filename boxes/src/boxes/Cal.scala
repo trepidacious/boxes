@@ -30,8 +30,8 @@ class Cal[T] (private var t:T) extends Var[T] {
   }
 
   def apply():T = {
-    Box.beforeRead(this)
     try {
+      Box.beforeRead(this)
       return t
     } finally {
       Box.afterRead(this)
