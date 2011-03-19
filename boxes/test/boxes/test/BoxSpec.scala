@@ -155,11 +155,26 @@ class BoxSpec extends WordSpec {
 
       assert(bobsFriendsName() === "Alice")
 
-      //FIXME implement test - should see no changes to bobsFriendsName when something not
+      //Should see no changes to bobsFriendsName when something not
       //in the path changes, even if it is deeply referenced, or used to be part of path, etc.
+      var changed = false
+      val v = View{bobsFriendsName(); changed = true}
+
+      //Setting up the view leads to it being called
+      assert(changed === true)
+
+      //Now we reset, so we can see if we get a new change
+      changed = false
+
       cate.name() = "Katey"
 
+      //We shouldn't have a change to bobsFriendsName, from changing cate's name
+      assert(changed === false)
+
       alice.name() = "Alicia"
+
+      //NOW we should have a change
+      assert(changed === true)
 
       assert(bobsFriendsName() === "Alicia")
 
@@ -183,6 +198,7 @@ class BoxSpec extends WordSpec {
         lastChanges = alice.name.changes
       }
 
+      //View is called with no changes when it is first set up
       assert(lastChanges === None)
 
       alice.name() = "Alicia"
