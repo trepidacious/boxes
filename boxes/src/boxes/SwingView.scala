@@ -2,13 +2,13 @@ package boxes
 
 import scala.collection._
 import util.CoalescingResponder
+import javax.swing.SwingUtilities
 
 object SwingView {
 
   val viewToUpdates = new mutable.WeakHashMap[SwingView, mutable.ListBuffer[() => Unit]]()
   val responder = new CoalescingResponder(respond)
   val lock = new Object()
-  val responding = false;
 
   def addUpdate(v:SwingView, update: => Unit) = {
     lock.synchronized{
@@ -16,14 +16,6 @@ object SwingView {
         case None => viewToUpdates.put(v, mutable.ListBuffer(() => update))
         case Some(list) => list.append(() => update)
       }
-      request
-    }
-  }
-
-  private def request = {
-    //If we are already responding, we will deal with the new stuff
-    //in the same response, so no need to request again
-    if (!responding) {
       responder.request
     }
   }
@@ -31,26 +23,26 @@ object SwingView {
   def replaceUpdate(v:SwingView, update: => Unit) = {
     lock.synchronized{
       viewToUpdates.put(v, mutable.ListBuffer(() => update))
-      request
+      responder.request
     }
   }
 
   private def respond = {
-    var finished = false
-    do {
-      lock.synchronized{
-        someUpdates match {
-          case Some(updates) => {
-            for {
-              update <- updates
-            } update
+    SwingUtilities.invokeLater(new Runnable() {
+      override def run = {
+        while(
+          someUpdates match {
+            case Some(updates) => {
+              for {
+                update <- updates
+              } update.apply
+              true
+            }
+            case None => false
           }
-          case None => finished = true
-        }
-
+        ) {}
       }
-    } while (!finished)
-
+    })
   }
 
   /**
@@ -61,15 +53,15 @@ object SwingView {
    * retrieved
    */
   private def someUpdates = {
-    val keysIt = viewToUpdates.keysIterator;
-    if (keysIt.hasNext) {
-      val swingView = keysIt.next
-      viewToUpdates.remove(swingView) match {
-        case Some(updates) => updates
-        case None => throw new RuntimeException("Failed to retrieve any updates for key in viewToUpdates")
+    lock.synchronized{
+      val keysIt = viewToUpdates.keysIterator;
+      if (keysIt.hasNext) {
+        val r = viewToUpdates.remove(keysIt.next)
+        if (r == None) throw new RuntimeException("Got None for a key in viewToUpdates")
+        r
+      } else {
+        None
       }
-    } else {
-      None
     }
   }
 

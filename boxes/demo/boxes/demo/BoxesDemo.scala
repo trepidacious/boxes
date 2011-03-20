@@ -7,6 +7,8 @@
 package boxes.demo
 
 import boxes._
+import util.CoalescingResponder
+import javax.swing.SwingUtilities
 
 object BoxesDemo {
 
@@ -204,6 +206,49 @@ object BoxesDemo {
 
   }
 
+  def responder() = {
+    val responder = new CoalescingResponder(println("Hi!"))
+    responder.request
+    Thread.sleep(5000)
+    responder.request
+    responder.request
+    responder.request
+    responder.request
+    responder.request
+    responder.request
+    responder.request
+    Thread.sleep(5000)
+  }
+
+  def swingViews() = {
+
+    val alice = new Person()
+    alice.name() = "Alice"
+
+    val sv = new SwingView() {
+      val v = View{
+        val name = alice.name()
+        println("Got change: " + name)
+        SwingView.replaceUpdate(this, println("SwingView Update: " + name + " Swing thread? " + SwingUtilities.isEventDispatchThread ))
+      }
+    }
+
+    println("About to set Alicia")
+
+    alice.name() = "Alicia"
+
+    println("About to set Alucard")
+
+    alice.name() = "Alucard"
+    for (x <- 1 to 100) {
+      alice.name() = "Alucard " + x
+      Thread.sleep(10)
+    }
+
+    Thread.sleep(5000)
+
+  }
+
   def main(args: Array[String]) {
 //    simpleCalc
 //    simplePath
@@ -214,7 +259,8 @@ object BoxesDemo {
 
 //    conflictingReactions
 
-    views
+    swingViews
+//    responder
   }
 
 }
