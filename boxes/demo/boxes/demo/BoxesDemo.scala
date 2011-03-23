@@ -8,7 +8,7 @@ package boxes.demo
 
 import boxes._
 import util.CoalescingResponder
-import javax.swing.SwingUtilities
+import javax.swing.{JPanel, JFrame, JTextField, SwingUtilities}
 
 object BoxesDemo {
 
@@ -19,6 +19,69 @@ object BoxesDemo {
 
     //override def toString = name() + ", " + age() + ", friend: " + friend()
   }
+
+  class OptionPerson {
+    val name = Var("name")
+    val age = Var(32)
+    val friend:Var[Option[OptionPerson]] = Var(None)
+
+    override def toString = name() + ", " + age() + ", friend: " + friend()
+  }
+
+  def optionPath() = {
+
+    println()
+    println("optionPath")
+
+    val cate = new OptionPerson()
+    cate.name() = "Cate"
+    val alice = new OptionPerson()
+    alice.name() = "Alice"
+    val bob = new OptionPerson()
+    bob.name() = "Bob"
+
+//    println (for {
+//      friend <- bob.friend()
+//    } yield Some(friend.name))
+
+    bob.friend() = Some(alice)
+
+    println("bob.friend() = " + bob.friend())
+
+    println (for {
+      friend <- bob.friend.apply()
+    } yield friend.name)
+
+//    val bobsFriendsName = Path {
+//      for {
+//        friend <- bob.friend()
+//      } yield Some(friend.name)
+//    }
+
+//    println("Before change: " + bobsFriendsName())
+//
+//    bob.friend() = Some(alice)
+//
+//    println("After change: " + bobsFriendsName())
+
+//    println("About to change cate's name")
+//    cate.name() = "Katey"
+//
+//    println("After changing cate's name")
+//
+//    println("About to change alice's name")
+//    alice.name() = "Alicia"
+//
+//    println("After changing alice's name: " + bobsFriendsName())
+//
+//    println("About to change bobsFriendsName")
+//    bobsFriendsName() = "Alucard"
+//
+//    println("After changing bobsFriendsName: " + bobsFriendsName() + ", and alice's name is " + alice.name())
+
+
+  }
+
 
   def simpleCalc() = {
 
@@ -226,10 +289,14 @@ object BoxesDemo {
     alice.name() = "Alice"
 
     val sv = new SwingView() {
+      val c = new JTextField()
+      def component = c
       val v = View{
         val name = alice.name()
         println("Got change: " + name)
-        SwingView.replaceUpdate(this, println("SwingView Update: " + name + " Swing thread? " + SwingUtilities.isEventDispatchThread ))
+        replaceUpdate{
+          println("SwingView Update Run: " + name + " Swing thread? " + SwingUtilities.isEventDispatchThread )
+        }
       }
     }
 
@@ -249,6 +316,26 @@ object BoxesDemo {
 
   }
 
+  def textViews() = {
+    SwingUtilities.invokeLater(new Runnable(){
+      override def run = {
+        val s = Var("S")
+        val t = Var{""}
+        Reaction(t, s()+"_T")
+        val sView = new StringView(s)
+        val tView = new StringView(t)
+
+        val frame = new JFrame()
+        val panel = new JPanel()
+        panel.add(sView.component)
+        panel.add(tView.component)
+        frame.add(panel)
+        frame.pack
+        frame.setVisible(true)
+      }
+    })
+  }
+
   def main(args: Array[String]) {
 //    simpleCalc
 //    simplePath
@@ -259,8 +346,11 @@ object BoxesDemo {
 
 //    conflictingReactions
 
-    swingViews
+//    swingViews
 //    responder
+//    textViews
+    optionPath
   }
+
 
 }

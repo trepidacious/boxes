@@ -2,7 +2,9 @@ package boxes
 
 import scala.collection._
 import util.CoalescingResponder
-import javax.swing.SwingUtilities
+import java.awt.event.{FocusEvent, FocusListener, ActionEvent, ActionListener}
+import java.awt.Component
+import javax.swing._
 
 object SwingView {
 
@@ -69,4 +71,76 @@ object SwingView {
 
 trait SwingView {
 
+  def component():JComponent
+
+  def addUpdate(update: => Unit) = SwingView.addUpdate(this, update)
+  def replaceUpdate(update: => Unit) = SwingView.replaceUpdate(this, update)
 }
+
+class StringView(v:Var[String], multiline:Boolean = false) extends SwingView {
+
+  val text = if (multiline) new JTextArea(10, 20) else new LinkingJTextField(this);
+  val comp = if (multiline) new LinkingJScrollPane(this, text) else text;
+  val defaultBackground = text.getBackground()
+
+  //Note this is only updated from swing thread, so no need to sync
+  var valueAtStartOfEditing:Option[String] = None
+
+  {
+    if (!multiline) {
+      text.asInstanceOf[JTextField].addActionListener(new ActionListener() {
+				override def actionPerformed(e:ActionEvent) = commit
+			})
+    }
+
+    text.addFocusListener(new FocusListener() {
+      override def focusLost(e:FocusEvent) = commit
+
+      override def focusGained(e:FocusEvent) = {
+        display(v())
+        valueAtStartOfEditing = Some(text.getText())
+      }
+    })
+  }
+
+  //View the value of v, and when it changes,
+  //schedule an update to display the new value
+  val view = View{
+    val newV = v()
+    replaceUpdate{
+      //If not focused, always display
+      if(!text.isFocusOwner) {
+        display(newV)
+
+      //If focused, only update if value has actually changed since we started
+      } else {
+        valueAtStartOfEditing match {
+          case None => valueAtStartOfEditing = Some(text.getText)
+          case Some(string) => {
+            if (!string.equals(newV)) display(newV)
+            valueAtStartOfEditing = Some(text.getText)
+          }
+        }
+      }
+    }
+  }
+
+  private def commit = {
+    v() = text.getText
+  }
+
+  //Update display if necessary
+  private def display(s:String) {
+    if (!text.getText.equals(s)) {
+      text.setText(s)
+    }
+  }
+
+  def component() = comp
+
+}
+
+//Special versions of components that link back to the SwingView using them,
+//so that if users only retain the component, they still also retain the SwingView.
+class LinkingJTextField(sv:SwingView) extends JTextField {}
+class LinkingJScrollPane(sv:SwingView, contents:Component) extends JScrollPane(contents) {}
