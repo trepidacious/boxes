@@ -42,27 +42,48 @@ object BoxesDemo {
 
 //    println (for {
 //      friend <- bob.friend()
-//    } yield Some(friend.name))
-
-    bob.friend() = Some(alice)
-
-    println("bob.friend() = " + bob.friend())
-
-    println (for {
-      friend <- bob.friend.apply()
-    } yield friend.name)
-
-//    val bobsFriendsName = Path {
-//      for {
-//        friend <- bob.friend()
-//      } yield Some(friend.name)
-//    }
-
-//    println("Before change: " + bobsFriendsName())
+//    } yield friend.name)
 //
 //    bob.friend() = Some(alice)
 //
-//    println("After change: " + bobsFriendsName())
+//    println("bob.friend() = " + bob.friend())
+//
+//    println (for {
+//      friend <- bob.friend()
+//    } yield friend.name)
+
+//    val bobsFriendsName = PathWithDefault(
+//      for {
+//        friend <- bob.friend()
+//      } yield friend.name,
+//      "NONAME"
+//    )
+
+    val bobsFriendsName = PathWithOption(
+      for {
+        friend <- bob.friend()
+      } yield friend.name
+    )
+
+    println("Before change: " + bobsFriendsName())
+
+    bob.friend() = Some(alice)
+
+    println("After change: " + bobsFriendsName())
+
+    val bobsFriendsFriend = PathWithDefault(
+      for {
+        friend <- bob.friend()
+      } yield friend.friend,
+      None
+    )
+
+    println("Before alice has a friend: " + bobsFriendsFriend)
+
+    alice.friend() = Some(cate)
+
+    println("After alice has a friend: " + bobsFriendsFriend)
+
 
 //    println("About to change cate's name")
 //    cate.name() = "Katey"
