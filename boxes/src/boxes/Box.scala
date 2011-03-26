@@ -323,6 +323,17 @@ object Box {
 
 }
 
+/**
+ * One part of the boxes system. The other part is Reaction.
+ *
+ * Be VERY careful making Boxes equal each other when they are not the SAME
+ * Box (identical). This is because maps and sets are used for storing Boxes,
+ * for example which Boxes are affected by a Reaction, and so equal Boxes will
+ * be treated as the same Box - for example, only one of an equal set of Boxes
+ * will be updated by a Reaction that might be intended to update more than one of them.
+ *
+ * However it is unlikely that you will need to implement a new Box in any case.
+ */
 trait Box[C] {
 
   private[boxes] val sourcingReactions = new WeakHashSet[Reaction]()

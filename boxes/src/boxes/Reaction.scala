@@ -29,6 +29,13 @@ object Reaction {
 
 }
 
+/**
+ * One part of the boxes system, the other is Box.
+ *
+ * NEVER EVER change Reaction equals/hashCode methods - Reactions
+ * MUST only be equal when they are the same (identical) Reaction.
+ * This is because sets and maps are used to track them.
+ */
 trait Reaction {
 
   def respond : (()=>Unit)

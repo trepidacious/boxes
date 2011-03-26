@@ -153,15 +153,14 @@ object PathToOption {
   }
 }
 
-//Is this ever a good idea? Should it have explicit toOption and viaOption versions?
-//object PathWithDefault {
-//  def apply[T](path : => Option[Var[T]], defaultValue:T = None) = {
-//    val v = Var(defaultValue)
-//    val r = new PathBIDIReaction[T](v, path, defaultValue)
-//    Box.registerReaction(r)
-//    v
-//  }
-//}
+object PathWithDefault {
+  def apply[T](path : => Option[Var[T]], defaultValue:T = None) = {
+    val v = Var(defaultValue)
+    val r = new PathBIDIReaction[T](v, path, defaultValue)
+    Box.registerReaction(r)
+    v
+  }
+}
 
 /**
  * Creates paths that go VIA an option, but lead to a Var that contains a

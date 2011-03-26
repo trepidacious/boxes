@@ -33,7 +33,7 @@ object SwingView {
     SwingUtilities.invokeLater(new Runnable() {
       override def run = {
         while(
-          someUpdates match {
+          popUpdates match {
             case Some(updates) => {
               for {
                 update <- updates
@@ -54,7 +54,7 @@ object SwingView {
    * This is synchronized, so updates can't be added as they are being
    * retrieved
    */
-  private def someUpdates = {
+  private def popUpdates = {
     lock.synchronized{
       val keysIt = viewToUpdates.keysIterator;
       if (keysIt.hasNext) {
@@ -70,20 +70,17 @@ object SwingView {
 }
 
 trait SwingView {
-
   def component():JComponent
 
   def addUpdate(update: => Unit) = SwingView.addUpdate(this, update)
   def replaceUpdate(update: => Unit) = SwingView.replaceUpdate(this, update)
 }
 
+
 class StringView(v:Var[String], multiline:Boolean = false) extends SwingView {
 
   val text = if (multiline) new JTextArea(10, 20) else new LinkingJTextField(this);
-  val comp = if (multiline) new LinkingJScrollPane(this, text) else text;
-
-  //Note this is only used from swing thread, so no need to sync
-  var valueAtStartOfEditing:Option[String] = None
+  val component = if (multiline) new LinkingJScrollPane(this, text) else text;
 
   {
     if (!multiline) {
@@ -93,42 +90,16 @@ class StringView(v:Var[String], multiline:Boolean = false) extends SwingView {
     }
 
     text.addFocusListener(new FocusListener() {
-      override def focusLost(e:FocusEvent) = {
-        commit
-        valueAtStartOfEditing = None
-      }
-
-      override def focusGained(e:FocusEvent) = {
-        display(v())
-        valueAtStartOfEditing = Some(text.getText())
-      }
+      override def focusLost(e:FocusEvent) = commit
+      override def focusGained(e:FocusEvent) = display(v())
     })
   }
 
-  //View the value of v, and when it changes,
-  //schedule an update to display the new value
   val view = View{
+    //Store the value for later use on Swing Thread
     val newV = v()
-
     //This will be called from Swing Thread
-    replaceUpdate {
-      valueAtStartOfEditing match {
-        //If not focused, just display new value
-        case None => {
-          display(newV)
-        }
-        //If focused/editing then only update if the value
-        //is not the same as when we started editing
-        case Some(string) => {
-          if (!string.equals(newV)) {
-            display(newV)
-            //Track this new starting value, so we will ignore any future
-            //changes that yield same string value
-            valueAtStartOfEditing = Some(newV)
-          }
-        }
-      }
-    }
+    replaceUpdate {display(newV)}
   }
 
   private def commit = {v() = text.getText}
@@ -139,8 +110,6 @@ class StringView(v:Var[String], multiline:Boolean = false) extends SwingView {
       text.setText(s)
     }
   }
-
-  def component() = comp
 
 }
 
