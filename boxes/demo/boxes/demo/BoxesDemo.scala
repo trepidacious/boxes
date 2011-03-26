@@ -342,8 +342,8 @@ object BoxesDemo {
         val s = Var("S")
         val t = Var{""}
         Reaction(t, s()+"_T")
-        val sView = new StringView(s)
-        val tView = new StringView(t)
+        val sView = StringView(s)
+        val tView = StringView(t, true)
 
         val frame = new JFrame()
         val panel = new JPanel()
@@ -370,6 +370,7 @@ object BoxesDemo {
 //    responder
 //    textViews
     optionPath
+    textViews
   }
 
 
