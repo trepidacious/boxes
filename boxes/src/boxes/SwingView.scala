@@ -76,27 +76,27 @@ trait SwingView {
   def replaceUpdate(update: => Unit) = SwingView.replaceUpdate(this, update)
 }
 
-//Type G may be Option[T] or T.
+//Type G may be Option[T] or the bare type T.
 //toOption gets us from G to DEFINITELY an Option[T]
-//fromOption gets us from DEFINITELY an Option[T] to G
+//toG gets us from the bare type T to G
 //This means we can have a Var[Option[T]] or a Var[T] in
 //a view, and use the converter to treat it as a Var[Option[T]]
 //in a fairly straight forward way.
-trait OptionConverter[G, T] {
+trait GConverter[G, T] {
   def toOption(g:G):Option[T]
-  def fromOption(t:T):G
+  def toG(t:T):G
 }
 
-//OptionConverter for where G is just T
-class TConverter[T] extends OptionConverter[T, T] {
+//GConverter for where G is just T
+class TConverter[T] extends GConverter[T, T] {
   override def toOption(g:T):Option[T] = Some(g)
-  override def fromOption(t:T):T = t
+  override def toG(t:T):T = t
 }
 
-//OptionConverter for where G is Option T
-class OptionTConverter[T] extends OptionConverter[Option[T], T] {
+//GConverter for where G is Option T
+class OptionTConverter[T] extends GConverter[Option[T], T] {
   override def toOption(g:Option[T]):Option[T] = g
-  override def fromOption(t:T):Option[T] = Some(t)
+  override def toG(t:T):Option[T] = Some(t)
 }
 
 object StringView {
@@ -107,7 +107,7 @@ object StringOptionView {
   def apply(v:Var[Option[String]], multiline:Boolean = false) = new StringOptionView(v, new OptionTConverter[String], multiline)
 }
 
-class StringOptionView[G](v:Var[G], c:OptionConverter[G, String], multiline:Boolean) extends SwingView {
+class StringOptionView[G](v:Var[G], c:GConverter[G, String], multiline:Boolean) extends SwingView {
 
   val text = if (multiline) new JTextArea(10, 20) else new LinkingJTextField(this);
   val component = if (multiline) new LinkingJScrollPane(this, text) else text;
@@ -133,7 +133,7 @@ class StringOptionView[G](v:Var[G], c:OptionConverter[G, String], multiline:Bool
   }
 
   private def commit = {
-    v() = c.fromOption(text.getText)
+    v() = c.toG(text.getText)
   }
 
   //Update display if necessary
