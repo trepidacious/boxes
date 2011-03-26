@@ -64,10 +64,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="SwingView.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="SwingView.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/SwingView.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="82" column="33" selection-start="2233" selection-end="2233" vertical-scroll-proportion="0.0">
+            <state line="98" column="0" selection-start="2674" selection-end="2711" vertical-scroll-proportion="0.34084508">
               <folding />
             </state>
           </provider>
@@ -82,10 +82,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BoxesDemo.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="BoxesDemo.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="64" column="62" selection-start="1390" selection-end="1390" vertical-scroll-proportion="0.51267606">
+            <state line="75" column="40" selection-start="1616" selection-end="1616" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -121,7 +121,7 @@
       <file leaf-file-name="Path.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Path.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="153" column="0" selection-start="3832" selection-end="3832" vertical-scroll-proportion="0.0">
+            <state line="155" column="84" selection-start="4233" selection-end="4233" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -179,10 +179,10 @@
         <option value="$PROJECT_DIR$/boxes/src/boxes/Reaction.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/View.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/util/CoalescingResponder.scala" />
-        <option value="$PROJECT_DIR$/boxes/src/boxes/SwingView.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Var.scala" />
         <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Path.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/SwingView.scala" />
       </list>
     </option>
   </component>
@@ -222,6 +222,9 @@
       <sortByType />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
+      <pane id="Favorites" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -240,39 +243,8 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
           </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="BoxesProject" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="boxes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="BoxesProject" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="boxes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="boxes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
         </subPane>
       </pane>
-      <pane id="Favorites" />
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -571,6 +543,11 @@
         <state line="9" column="26" selection-start="353" selection-end="353" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Box.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="77" column="0" selection-start="2501" selection-end="2501" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
     <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/actors/threadpool/Executors.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="187" column="177" selection-start="8805" selection-end="8805" vertical-scroll-proportion="0.0" />
@@ -579,6 +556,11 @@
     <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/mutable/ListBuffer.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="27" column="174" selection-start="970" selection-end="970" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Var.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="6" column="0" selection-start="92" selection-end="92" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Cal.scala">
@@ -596,37 +578,23 @@
         <state line="5" column="26" selection-start="115" selection-end="115" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/SwingView.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="82" column="33" selection-start="2233" selection-end="2233" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Var.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="0" selection-start="92" selection-end="92" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Box.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="77" column="0" selection-start="2501" selection-end="2501" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Path.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="153" column="0" selection-start="3832" selection-end="3832" vertical-scroll-proportion="0.0">
+        <state line="155" column="84" selection-start="4233" selection-end="4233" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="64" column="62" selection-start="1390" selection-end="1390" vertical-scroll-proportion="0.51267606">
+        <state line="75" column="40" selection-start="1616" selection-end="1616" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/SwingView.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="98" column="0" selection-start="2674" selection-end="2711" vertical-scroll-proportion="0.34084508">
           <folding />
         </state>
       </provider>

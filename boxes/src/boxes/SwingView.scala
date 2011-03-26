@@ -81,9 +81,8 @@ class StringView(v:Var[String], multiline:Boolean = false) extends SwingView {
 
   val text = if (multiline) new JTextArea(10, 20) else new LinkingJTextField(this);
   val comp = if (multiline) new LinkingJScrollPane(this, text) else text;
-  val defaultBackground = text.getBackground()
 
-  //Note this is only updated from swing thread, so no need to sync
+  //Note this is only used from swing thread, so no need to sync
   var valueAtStartOfEditing:Option[String] = None
 
   {
@@ -94,7 +93,10 @@ class StringView(v:Var[String], multiline:Boolean = false) extends SwingView {
     }
 
     text.addFocusListener(new FocusListener() {
-      override def focusLost(e:FocusEvent) = commit
+      override def focusLost(e:FocusEvent) = {
+        commit
+        valueAtStartOfEditing = None
+      }
 
       override def focusGained(e:FocusEvent) = {
         display(v())
@@ -107,27 +109,29 @@ class StringView(v:Var[String], multiline:Boolean = false) extends SwingView {
   //schedule an update to display the new value
   val view = View{
     val newV = v()
-    replaceUpdate{
-      //If not focused, always display
-      if(!text.isFocusOwner) {
-        display(newV)
 
-      //If focused, only update if value has actually changed since we started
-      } else {
-        valueAtStartOfEditing match {
-          case None => valueAtStartOfEditing = Some(text.getText)
-          case Some(string) => {
-            if (!string.equals(newV)) display(newV)
-            valueAtStartOfEditing = Some(text.getText)
+    //This will be called from Swing Thread
+    replaceUpdate {
+      valueAtStartOfEditing match {
+        //If not focused, just display new value
+        case None => {
+          display(newV)
+        }
+        //If focused/editing then only update if the value
+        //is not the same as when we started editing
+        case Some(string) => {
+          if (!string.equals(newV)) {
+            display(newV)
+            //Track this new starting value, so we will ignore any future
+            //changes that yield same string value
+            valueAtStartOfEditing = Some(newV)
           }
         }
       }
     }
   }
 
-  private def commit = {
-    v() = text.getText
-  }
+  private def commit = {v() = text.getText}
 
   //Update display if necessary
   private def display(s:String) {

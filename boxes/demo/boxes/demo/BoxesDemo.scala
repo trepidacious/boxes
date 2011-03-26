@@ -59,7 +59,7 @@ object BoxesDemo {
 //      "NONAME"
 //    )
 
-    val bobsFriendsName = PathWithOption(
+    val bobsFriendsName = PathViaOption(
       for {
         friend <- bob.friend()
       } yield friend.name
@@ -71,11 +71,10 @@ object BoxesDemo {
 
     println("After change: " + bobsFriendsName())
 
-    val bobsFriendsFriend = PathWithDefault(
+    val bobsFriendsFriend = PathToOption(
       for {
         friend <- bob.friend()
-      } yield friend.friend,
-      None
+      } yield friend.friend
     )
 
     println("Before alice has a friend: " + bobsFriendsFriend)

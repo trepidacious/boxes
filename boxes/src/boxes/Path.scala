@@ -134,16 +134,44 @@ object Path {
 
 }
 
-object PathWithDefault {
-  def apply[T](path : => Option[Var[T]], defaultValue:T) = {
-    val v = Var(defaultValue)
-    val r = new PathBIDIReaction[T](v, path, defaultValue)
-    Box.registerReaction(r)
-    v
+/**
+ * Creates paths that go TO a Var[Option[T]], AND may also go VIA an option.
+ * If the path goes via an option, it may yield None, in which case the
+ * produced Var will contain None.
+ * If the path yields Some(Var[Option[T]]) then the produced Var will
+ * contain the value of the Var[Option[T]], which may be Some(tValue) or
+ * None.
+ *
+ * Note this is (slightly confusingly) equivalent to PathWithDefault(path, None),
+ * it just makes explicit that T from pathWithDefault is now Option[T], and the
+ * defaultValue is None. This is probably the most common way of using a path
+ * that leads to a Var[Option[T]].
+ */
+object PathToOption {
+  def apply[T](path : => Option[Var[Option[T]]]) = {
+    PathWithDefault(path)
   }
 }
 
-object PathWithOption {
+//Is this ever a good idea? Should it have explicit toOption and viaOption versions?
+//object PathWithDefault {
+//  def apply[T](path : => Option[Var[T]], defaultValue:T = None) = {
+//    val v = Var(defaultValue)
+//    val r = new PathBIDIReaction[T](v, path, defaultValue)
+//    Box.registerReaction(r)
+//    v
+//  }
+//}
+
+/**
+ * Creates paths that go VIA an option, but lead to a Var that contains a
+ * nonoptional value. So this covers the case where following the path
+ * may yield either None, OR a Var[T] for some non-optional type T.
+ * To allow for this, the returned Var is a Var[Option[T]], which contains
+ * Some(tValue) when the path yields a Var[T], and None when the
+ * path yields None.
+ */
+object PathViaOption {
   def apply[T](path : => Option[Var[T]]) = {
     val v:Var[Option[T]] = Var(None)
     val r = new PathBIDIOptionReaction[T](v, path)
