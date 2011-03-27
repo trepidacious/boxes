@@ -72,8 +72,8 @@ object SwingView {
 trait SwingView {
   def component():JComponent
 
-  def addUpdate(update: => Unit) = SwingView.addUpdate(this, update)
-  def replaceUpdate(update: => Unit) = SwingView.replaceUpdate(this, update)
+  private[boxes] def addUpdate(update: => Unit) = SwingView.addUpdate(this, update)
+  private[boxes] def replaceUpdate(update: => Unit) = SwingView.replaceUpdate(this, update)
 }
 
 //Type G may be Option[T] or the bare type T.
@@ -100,14 +100,14 @@ class OptionTConverter[T] extends GConverter[Option[T], T] {
 }
 
 object StringView {
-  def apply(v:Var[String], multiline:Boolean = false) = new StringOptionView(v, new TConverter[String], multiline)
+  def apply(v:Var[String], multiline:Boolean = false) = new StringOptionView(v, new TConverter[String], multiline).asInstanceOf[SwingView]
 }
 
 object StringOptionView {
-  def apply(v:Var[Option[String]], multiline:Boolean = false) = new StringOptionView(v, new OptionTConverter[String], multiline)
+  def apply(v:Var[Option[String]], multiline:Boolean = false) = new StringOptionView(v, new OptionTConverter[String], multiline).asInstanceOf[SwingView]
 }
 
-class StringOptionView[G](v:Var[G], c:GConverter[G, String], multiline:Boolean) extends SwingView {
+private class StringOptionView[G](v:Var[G], c:GConverter[G, String], multiline:Boolean) extends SwingView {
 
   val text = if (multiline) new JTextArea(10, 20) else new LinkingJTextField(this);
   val component = if (multiline) new LinkingJScrollPane(this, text) else text;

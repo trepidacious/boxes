@@ -101,10 +101,11 @@ class PathBIDIOptionReaction[T](v:Var[Option[T]], path : => Option[Var[T]]) exte
           if (fromEtoV) {
             {() => (v() = Some(eContents))}
 
-          //If v is None, we can't copy to e
+          //If v is None, we can't copy to e, so we
+          //always go from to v instead
           } else {
             vContents match {
-              case None => {()=>()}
+              case None => {() => (v() = Some(eContents))}
               case Some(vValue) => {() => (e() = vValue)}
             }
           }
@@ -153,7 +154,7 @@ object PathToOption {
   }
 }
 
-object PathWithDefault {
+private object PathWithDefault {
   def apply[T](path : => Option[Var[T]], defaultValue:T = None) = {
     val v = Var(defaultValue)
     val r = new PathBIDIReaction[T](v, path, defaultValue)
