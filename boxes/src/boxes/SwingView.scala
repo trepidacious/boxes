@@ -166,7 +166,7 @@ object BooleanOptionView {
 
 private class BooleanOptionView[G](v:Var[G], n:Ref[String], c:GConverter[G, Boolean], button:Boolean) extends SwingView {
 
-  val component = if (button) new LinkingJCheckBox(this) else new LinkingJToggleButton(this)
+  val component = if (!button) new LinkingJCheckBox(this) else new LinkingJToggleButton(this)
   private val model = new AutoButtonModel()
 
   {
@@ -191,7 +191,17 @@ private class BooleanOptionView[G](v:Var[G], n:Ref[String], c:GConverter[G, Bool
   }
 
   //Update display if necessary
-  private def display(s:G, newN:String) {
+  private def display(newV:G, newN:String) {
+    c.toOption(newV) match {
+      case None => {
+        model.enabled = false
+        model.selected = false
+      }
+      case Some(b) => {
+        model.enabled = true
+        model.selected = b
+      }
+    }
     model.fire
     if (newN != component.getText) {
       component.setText(newN)
@@ -199,28 +209,15 @@ private class BooleanOptionView[G](v:Var[G], n:Ref[String], c:GConverter[G, Bool
   }
 
   private class AutoButtonModel extends ToggleButtonModel {
-
-    def fire() {
-      fireStateChanged();
-    }
-
-    override def isSelected = {
-      c.toOption(v()) match {
-        case None => false
-        case Some(b) => b
-      }
-    }
-
-    override def isEnabled = {
-      c.toOption(v()) match {
-        case None => false
-        case Some(_) => true
-      }
-    }
+    var enabled = true
+    var selected = true
+    def fire() = fireStateChanged()
+    override def isSelected = selected
+    override def isEnabled = enabled
   }
 
 }
 
 class LinkingJCheckBox(sv:SwingView) extends JCheckBox {}
-class LinkingJToggleButton(sv:SwingView) extends JCheckBox {}
+class LinkingJToggleButton(sv:SwingView) extends JToggleButton {}
 

@@ -23,7 +23,7 @@ object Reaction {
   def apply[T](v:Var[T], result: =>T, name:String = "Unnamed Reaction") = {
     val r = new SingleTargetReaction(v, result, name)
     Box.registerReaction(r)
-    //v.retainReaction(r)
+    v.retainReaction(r)
     r
   }
 

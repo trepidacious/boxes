@@ -130,6 +130,7 @@ object Path {
     val r = new PathBIDIReaction[T](v, Some(path), eVal)  //Note that in this case, default doesn't matter
                                                           //since Option is always Some
     Box.registerReaction(r)
+    v.retainReaction(r)
     v
   }
 
@@ -159,6 +160,7 @@ private object PathWithDefault {
     val v = Var(defaultValue)
     val r = new PathBIDIReaction[T](v, path, defaultValue)
     Box.registerReaction(r)
+    v.retainReaction(r)
     v
   }
 }
@@ -176,6 +178,7 @@ object PathViaOption {
     val v:Var[Option[T]] = Var(None)
     val r = new PathBIDIOptionReaction[T](v, path)
     Box.registerReaction(r)
+    v.retainReaction(r)
     v
   }
 }

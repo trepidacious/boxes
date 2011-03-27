@@ -339,7 +339,12 @@ trait Box[C] {
   private[boxes] val sourcingReactions = new WeakHashSet[Reaction]()
   private[boxes] val targetingReactions = mutable.Set[Reaction]()
 
+  private[boxes] val retainedReactions = mutable.Set[Reaction]()
+
   def changes = Box.boxChanges(this)
   def writeIndex = Box.boxWriteIndex(this)
+
+  def retainReaction(r:Reaction) = retainedReactions.add(r)
+  def releaseReaction(r:Reaction) = retainedReactions.remove(r)
 
 }

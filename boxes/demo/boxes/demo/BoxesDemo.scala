@@ -8,7 +8,9 @@ package boxes.demo
 
 import boxes._
 import util.CoalescingResponder
-import javax.swing.{JPanel, JFrame, JTextField, SwingUtilities}
+import java.awt.Dimension
+import javax.swing._
+import java.awt.event.ActionEvent
 
 object BoxesDemo {
 
@@ -343,14 +345,37 @@ object BoxesDemo {
         val t = Var{""}
         Reaction(t, s()+"_T")
         val sView = StringView(s)
-        val tView = StringView(t, true)
+        val tView = StringView(t)
 
         val x = Var(true)
-        val y = Var(false)
-        Reaction(x, !y())
-        Reaction(y, !x())
+        val y:Var[Option[Boolean]] = Var(Some(false))
+        Reaction(x, {
+          y() match {
+            case None => {
+              println("y is None, should set x true")
+              true
+            }
+            case Some(b) => {
+              println("y is Some(" + b + "), should set x " + !b)
+              !b
+            }
+          }
+        })
+        Reaction(y, {
+          println("x is " + x() + " should set y to " + !x())
+          Some(!x())
+        })
         val xView = BooleanView(x, Val("X"))
-        val yView = BooleanView(y, Val("Y"))
+        val yView = BooleanOptionView(y, Val("Y"))
+
+        val button = new JButton(new AbstractAction() {
+          override def actionPerformed(e:ActionEvent) = {
+            println("Reactions targeting x:")
+            x.targetingReactions.foreach{r => println(r)}
+            println("Reactions targeting y:")
+            y.targetingReactions.foreach{r => println(r)}
+          }
+        })
 
         val frame = new JFrame()
         val panel = new JPanel()
@@ -358,8 +383,11 @@ object BoxesDemo {
         panel.add(tView.component)
         panel.add(xView.component)
         panel.add(yView.component)
+        panel.add(button)
         frame.add(panel)
         frame.pack
+        frame.setMinimumSize(new Dimension(300, 50))
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
         frame.setVisible(true)
       }
     })
