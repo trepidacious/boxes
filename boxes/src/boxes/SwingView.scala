@@ -5,6 +5,7 @@ import util.CoalescingResponder
 import java.awt.event.{FocusEvent, FocusListener, ActionEvent, ActionListener}
 import java.awt.Component
 import javax.swing._
+import javax.swing.JToggleButton.ToggleButtonModel
 
 object SwingView {
 
@@ -109,8 +110,8 @@ object StringOptionView {
 
 private class StringOptionView[G](v:Var[G], c:GConverter[G, String], multiline:Boolean) extends SwingView {
 
-  val text = if (multiline) new JTextArea(10, 20) else new LinkingJTextField(this);
-  val component = if (multiline) new LinkingJScrollPane(this, text) else text;
+  val text = if (multiline) new JTextArea(10, 20) else new LinkingJTextField(this)
+  val component = if (multiline) new LinkingJScrollPane(this, text) else text
 
   {
     if (!multiline) {
@@ -151,5 +152,75 @@ private class StringOptionView[G](v:Var[G], c:GConverter[G, String], multiline:B
 
 //Special versions of components that link back to the SwingView using them,
 //so that if users only retain the component, they still also retain the SwingView.
-class LinkingJTextField(sv:SwingView) extends JTextField {}
 class LinkingJScrollPane(sv:SwingView, contents:Component) extends JScrollPane(contents) {}
+class LinkingJTextField(sv:SwingView) extends JTextField {}
+
+
+object BooleanView {
+  def apply(v:Var[Boolean], n:Ref[String], button:Boolean = false) = new BooleanOptionView(v, n, new TConverter[Boolean], button).asInstanceOf[SwingView]
+}
+
+object BooleanOptionView {
+  def apply(v:Var[Option[Boolean]], n:Ref[String], button:Boolean = false) = new BooleanOptionView(v, n, new OptionTConverter[Boolean], button).asInstanceOf[SwingView]
+}
+
+private class BooleanOptionView[G](v:Var[G], n:Ref[String], c:GConverter[G, Boolean], button:Boolean) extends SwingView {
+
+  val component = if (button) new LinkingJCheckBox(this) else new LinkingJToggleButton(this)
+  private val model = new AutoButtonModel()
+
+  {
+    component.setModel(model)
+    component.addActionListener(new ActionListener(){
+      //On action, toggle value if it is not None
+      override def actionPerformed(e:ActionEvent) = {
+        c.toOption(v()) match {
+          case None => None
+          case Some(b) => v() = c.toG(!b)
+        }
+      }
+    })
+  }
+
+  val view = View{
+    //Store the values for later use on Swing Thread
+    val newV = v()
+    val newN = n()
+    //This will be called from Swing Thread
+    replaceUpdate { display(newV, newN) }
+  }
+
+  //Update display if necessary
+  private def display(s:G, newN:String) {
+    model.fire
+    if (newN != component.getText) {
+      component.setText(newN)
+    }
+  }
+
+  private class AutoButtonModel extends ToggleButtonModel {
+
+    def fire() {
+      fireStateChanged();
+    }
+
+    override def isSelected = {
+      c.toOption(v()) match {
+        case None => false
+        case Some(b) => b
+      }
+    }
+
+    override def isEnabled = {
+      c.toOption(v()) match {
+        case None => false
+        case Some(_) => true
+      }
+    }
+  }
+
+}
+
+class LinkingJCheckBox(sv:SwingView) extends JCheckBox {}
+class LinkingJToggleButton(sv:SwingView) extends JCheckBox {}
+

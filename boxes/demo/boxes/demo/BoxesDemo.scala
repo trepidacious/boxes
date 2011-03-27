@@ -345,10 +345,19 @@ object BoxesDemo {
         val sView = StringView(s)
         val tView = StringView(t, true)
 
+        val x = Var(true)
+        val y = Var(false)
+        Reaction(x, !y())
+        Reaction(y, !x())
+        val xView = BooleanView(x, Val("X"))
+        val yView = BooleanView(y, Val("Y"))
+
         val frame = new JFrame()
         val panel = new JPanel()
         panel.add(sView.component)
         panel.add(tView.component)
+        panel.add(xView.component)
+        panel.add(yView.component)
         frame.add(panel)
         frame.pack
         frame.setVisible(true)
