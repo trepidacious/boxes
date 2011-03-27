@@ -56,6 +56,9 @@ object Box {
   def beforeWrite[C](b:Box[C]) = {
     lock.lock
     if (!canWrite) throw new InvalidWriteException(b)
+
+    //This box is a target of any active reaction
+    activeReaction.foreach(r => associateReactionTarget(r, b))
     applyingReaction
   }
 
@@ -77,9 +80,6 @@ object Box {
       case None => boxToChanges.put(b, immutable.Queue(change))
       case Some(existingChanges) => boxToChanges.put(b, existingChanges.asInstanceOf[immutable.Queue[C]] :+ change)
     }
-
-    //This box is a target of any active reaction
-    activeReaction.foreach(r => associateReactionTarget(r, b))
 
     //Any reactions on this box are now pending
     for {

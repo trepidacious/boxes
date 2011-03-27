@@ -109,10 +109,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Path.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="Path.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Path.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="181" column="0" selection-start="5088" selection-end="5088" vertical-scroll-proportion="1.1966667">
+            <state line="181" column="0" selection-start="5088" selection-end="5088" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -136,10 +136,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Box.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="Box.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Box.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="346" column="6" selection-start="11578" selection-end="11578" vertical-scroll-proportion="-15.807693">
+            <state line="52" column="11" selection-start="1719" selection-end="1719" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -171,9 +171,9 @@
         <option value="$PROJECT_DIR$/boxes/src/boxes/Var.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/SwingView.scala" />
         <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
-        <option value="$PROJECT_DIR$/boxes/src/boxes/Box.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Reaction.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Path.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/Box.scala" />
       </list>
     </option>
   </component>
@@ -350,7 +350,7 @@
       <recent name="boxes" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.BoxesDemo">
+  <component name="RunManager" selected="ScalaTest.BoxSpec">
     <configuration default="false" name="BoxSpec" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true">
       <module name="boxes" />
       <setting name="path" value="boxes.test.BoxSpec" />
@@ -671,13 +671,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Box.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="346" column="6" selection-start="11578" selection-end="11578" vertical-scroll-proportion="-15.807693">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Reaction.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="25" column="6" selection-start="613" selection-end="613" vertical-scroll-proportion="0.0">
@@ -687,7 +680,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Path.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="181" column="0" selection-start="5088" selection-end="5088" vertical-scroll-proportion="1.1966667">
+        <state line="181" column="0" selection-start="5088" selection-end="5088" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Box.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="52" column="11" selection-start="1719" selection-end="1719" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
