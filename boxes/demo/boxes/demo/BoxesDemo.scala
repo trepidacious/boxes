@@ -377,12 +377,21 @@ object BoxesDemo {
           }
         })
 
+        val p = Var(10)
+        val q = Var(0)
+        Reaction(p, 10-q())
+        Reaction(q, 10-p())
+        val pView = RangeView(p, 0, 10)
+        val qView = RangeView(q, 0, 10)
+
         val frame = new JFrame()
         val panel = new JPanel()
         panel.add(sView.component)
         panel.add(tView.component)
         panel.add(xView.component)
         panel.add(yView.component)
+        panel.add(pView.component)
+        panel.add(qView.component)
         panel.add(button)
         frame.add(panel)
         frame.pack
