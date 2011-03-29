@@ -7,10 +7,10 @@
 package boxes.demo
 
 import boxes._
-import util.CoalescingResponder
 import java.awt.Dimension
 import javax.swing._
 import java.awt.event.ActionEvent
+import util.{StepSequence, CoalescingResponder}
 
 object BoxesDemo {
 
@@ -402,6 +402,14 @@ object BoxesDemo {
     })
   }
 
+  def sequences() {
+    val tensInt = new StepSequence(10)
+    val halvesDouble = new StepSequence(0.5)
+
+    println(tensInt.next(1))
+    println(halvesDouble.next(0.1))
+  }
+
   def main(args: Array[String]) {
 //    simpleCalc
 //    simplePath
@@ -415,8 +423,9 @@ object BoxesDemo {
 //    swingViews
 //    responder
 //    textViews
-    optionPath
-    textViews
+//    optionPath
+//    textViews
+    sequences
   }
 
 

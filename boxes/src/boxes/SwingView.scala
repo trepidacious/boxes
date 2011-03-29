@@ -293,3 +293,74 @@ private class RangeOptionView[G](v:Var[G], min:Int, max:Int, c:GConverter[G, Int
 class LinkingJSlider(sv:SwingView, brm:BoundedRangeModel) extends JSlider(brm) {}
 class LinkingJProgressBar(sv:SwingView, brm:BoundedRangeModel) extends JProgressBar(brm) {}
 
+
+//
+//
+//object NumberView {
+//  def apply[N <: Number](v:Var[N], min:Int, max:Int, progress:Boolean = false) = new NumberOptionView(v, min, max, new TConverter[Int], progress).asInstanceOf[SwingView]
+//}
+//
+//object NumberOptionView {
+//  def apply(v:Var[Option[Int]], min:Int, max:Int, progress:Boolean = false) = new NumberOptionView(v, min, max, new OptionTConverter[Int], progress).asInstanceOf[SwingView]
+//}
+//
+//private class NumberOptionView[G](v:Var[G], min:Int, max:Int, c:GConverter[G, Int], progress:Boolean) extends SwingView {
+//
+//  private val model = new AutoBoundedRangeModel(min, max)
+//  val component = if (!progress) new LinkingJSlider(this, model) else new LinkingJProgressBar(this, model)
+//
+//  val view = View{
+//    //Store the values for later use on Swing Thread
+//    val newV = v()
+//    //This will be called from Swing Thread
+//    replaceUpdate {
+//      c.toOption(newV) match {
+//        case None => {
+//          component.setEnabled(false)
+//          model.fireNewValue(model.getMinimum)
+//        }
+//        case Some(i) => {
+//          component.setEnabled(true)
+//          model.fireNewValue(i)
+//        }
+//      }
+//    }
+//  }
+//
+//  private class AutoBoundedRangeModel(min:Int, max:Int) extends DefaultBoundedRangeModel(min, 0, min, max) {
+//
+//    private var currentValue = 0
+//
+//		def fireNewValue(i:Int) = {
+//      //If necessary, extend range to cover value we have seen
+//      if (i < getMinimum) setMinimum(i)
+//      if (i > getMaximum) setMaximum(i)
+//      currentValue = i
+//
+//			fireStateChanged
+//		}
+//
+//		override def getValue = currentValue
+//
+//		override def getExtent = 0
+//
+//		override def setValue(n:Int) = currentValue = n
+//
+//		override def setValueIsAdjusting(b:Boolean) = {
+//			super.setValueIsAdjusting(b)
+//
+//			//When we stop adjusting, use the last set value,
+//      //unless value is None, in which case leave it unaltered
+//			if (!b) {
+//        c.toOption(v()) match {
+//          case None => None
+//          case Some(_) => v() = c.toG(currentValue)
+//        }
+//      }
+//		}
+//
+//	}
+//
+//}
+//
+//class LinkingJSpinner(sv:SwingView, m:SpinnerModel) extends JSpinner(m) {}
