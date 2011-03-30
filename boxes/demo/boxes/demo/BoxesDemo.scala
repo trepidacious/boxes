@@ -10,7 +10,7 @@ import boxes._
 import java.awt.Dimension
 import javax.swing._
 import java.awt.event.ActionEvent
-import util.{StepSequence, CoalescingResponder}
+import util.{StepSequence, CoalescingResponder, NumericClass}
 
 object BoxesDemo {
 
@@ -384,6 +384,9 @@ object BoxesDemo {
         val pView = RangeView(p, 0, 10)
         val qView = RangeView(q, 0, 10)
 
+        val pView2 = new NumberOptionView(p, new StepSequence[Int](1), new TConverter[Int])
+        val qView2 = new NumberOptionView(q, new StepSequence[Int](1), new TConverter[Int])
+
         val frame = new JFrame()
         val panel = new JPanel()
         panel.add(sView.component)
@@ -392,6 +395,8 @@ object BoxesDemo {
         panel.add(yView.component)
         panel.add(pView.component)
         panel.add(qView.component)
+        panel.add(pView2.component)
+        panel.add(qView2.component)
         panel.add(button)
         frame.add(panel)
         frame.pack
@@ -410,6 +415,15 @@ object BoxesDemo {
     println(halvesDouble.next(0.1))
   }
 
+  def printNumericClass[N](number:N)(implicit nc:NumericClass[N]) {
+    println(nc.numericClass)
+  }
+
+  def numericClass() {
+    printNumericClass(0.1)
+    printNumericClass(1)
+  }
+
   def main(args: Array[String]) {
 //    simpleCalc
 //    simplePath
@@ -422,10 +436,11 @@ object BoxesDemo {
 
 //    swingViews
 //    responder
-//    textViews
+    textViews
 //    optionPath
 //    textViews
-    sequences
+//    sequences
+//    numericClass
   }
 
 
