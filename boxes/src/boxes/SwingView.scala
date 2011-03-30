@@ -297,15 +297,15 @@ class LinkingJProgressBar(sv:SwingView, brm:BoundedRangeModel) extends JProgress
 
 
 
-//object NumberView {
-//  def apply[N](v:Var[N], s:Sequence[N]) = new NumberOptionView(v, s, new TConverter[N]).asInstanceOf[SwingView]
-//}
-//
-//object NumberOptionView {
-//  def apply[N](v:Var[Option[Int]], s:Sequence[N]) = new NumberOptionView(v, s, new OptionTConverter[N]).asInstanceOf[SwingView]
-//}
+object NumberView {
+  def apply[N](v:Var[N], s:Sequence[N])(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionView(v, s, new TConverter[N], n, nc).asInstanceOf[SwingView]
+}
 
-class NumberOptionView[G, N](v:Var[G], s:Sequence[N], c:GConverter[G, N])(implicit n:Numeric[N], nc:NumericClass[N]) extends SwingView {
+object NumberOptionView {
+  def apply[N](v:Var[Option[N]], s:Sequence[N])(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionView(v, s, new OptionTConverter[N], n, nc).asInstanceOf[SwingView]
+}
+
+private class NumberOptionView[G, N](v:Var[G], s:Sequence[N], c:GConverter[G, N], n:Numeric[N], nc:NumericClass[N]) extends SwingView {
 
   private val model = new AutoSpinnerModel()
   val component = new LinkingJSpinner(this, model)

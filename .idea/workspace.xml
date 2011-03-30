@@ -64,19 +64,19 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="SwingView.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="SwingView.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/SwingView.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="321" column="80" selection-start="9572" selection-end="9572" vertical-scroll-proportion="0.55630255">
+            <state line="304" column="29" selection-start="8978" selection-end="8978" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BoxesDemo.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="BoxesDemo.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="383" column="174" selection-start="8833" selection-end="8833" vertical-scroll-proportion="0.0">
+            <state line="390" column="0" selection-start="8981" selection-end="8981" vertical-scroll-proportion="0.43865547">
               <folding />
             </state>
           </provider>
@@ -85,7 +85,7 @@
       <file leaf-file-name="Sequence.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/util/Sequence.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="9" column="45" selection-start="149" selection-end="149" vertical-scroll-proportion="0.0">
+            <state line="12" column="67" selection-start="189" selection-end="189" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -170,10 +170,10 @@
         <option value="$PROJECT_DIR$/boxes/src/boxes/Reaction.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Path.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Box.scala" />
-        <option value="$PROJECT_DIR$/boxes/src/boxes/util/Sequence.scala" />
-        <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/util/NumericClass.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/SwingView.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/util/Sequence.scala" />
+        <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
       </list>
     </option>
   </component>
@@ -651,23 +651,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/util/Sequence.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="9" column="45" selection-start="149" selection-end="149" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar:///System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/classes.jar!/java/lang/Class.class">
       <provider selected="true" editor-type-id="text-editor">
         <state line="53" column="26" selection-start="3215" selection-end="3215" vertical-scroll-proportion="0.56162244">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="383" column="174" selection-start="8833" selection-end="8833" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -709,7 +695,21 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/SwingView.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="321" column="80" selection-start="9572" selection-end="9572" vertical-scroll-proportion="0.55630255">
+        <state line="304" column="29" selection-start="8978" selection-end="8978" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/util/Sequence.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="12" column="67" selection-start="189" selection-end="189" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="390" column="0" selection-start="8981" selection-end="8981" vertical-scroll-proportion="0.43865547">
           <folding />
         </state>
       </provider>
