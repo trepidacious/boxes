@@ -5,8 +5,8 @@ import java.awt.event.{FocusEvent, FocusListener, ActionEvent, ActionListener}
 import java.awt.Component
 import javax.swing._
 import javax.swing.JToggleButton.ToggleButtonModel
-import util.{NumericClass, CoalescingResponder, Sequence}
 import math.Numeric
+import util.{LogStep, NumericClass, CoalescingResponder, Sequence}
 
 object SwingView {
 
@@ -298,11 +298,11 @@ class LinkingJProgressBar(sv:SwingView, brm:BoundedRangeModel) extends JProgress
 
 
 object NumberView {
-  def apply[N](v:Var[N], s:Sequence[N])(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionView(v, s, new TConverter[N], n, nc).asInstanceOf[SwingView]
+  def apply[N](v:Var[N], s:Sequence[N] = LogStep(10))(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionView(v, s, new TConverter[N], n, nc).asInstanceOf[SwingView]
 }
 
 object NumberOptionView {
-  def apply[N](v:Var[Option[N]], s:Sequence[N])(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionView(v, s, new OptionTConverter[N], n, nc).asInstanceOf[SwingView]
+  def apply[N](v:Var[Option[N]], s:Sequence[N] = LogStep(10))(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionView(v, s, new OptionTConverter[N], n, nc).asInstanceOf[SwingView]
 }
 
 private class NumberOptionView[G, N](v:Var[G], s:Sequence[N], c:GConverter[G, N], n:Numeric[N], nc:NumericClass[N]) extends SwingView {

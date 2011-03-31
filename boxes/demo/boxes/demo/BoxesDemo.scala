@@ -10,7 +10,7 @@ import boxes._
 import java.awt.Dimension
 import javax.swing._
 import java.awt.event.ActionEvent
-import util.{Step, CoalescingResponder, NumericClass}
+import util.{LogStep, Step, CoalescingResponder, NumericClass}
 
 object BoxesDemo {
 
@@ -389,8 +389,8 @@ object BoxesDemo {
 
         val m = Var(1.0)
 
-        val mView = NumberView(m, Step(0.1))
-        val nView = NumberView(m, Step(0.1))
+        val mView = NumberView(m)
+        val nView = NumberView(m, LogStep(100))
 
 
         val frame = new JFrame()
@@ -421,6 +421,17 @@ object BoxesDemo {
 
     println(tensInt.next(1))
     println(halvesDouble.next(0.1))
+
+    val logTenths = LogStep(10)
+    println(logTenths.next(0.1))
+    println(logTenths.next(0.2))
+    println(logTenths.next(0.99))
+    println(logTenths.next(1))
+    println(logTenths.next(1.01))
+    println(logTenths.next(2))
+    println(logTenths.next(10))
+    println(logTenths.next(10.1))
+    println(logTenths.next(200))
   }
 
   def printNumericClass[N](number:N)(implicit nc:NumericClass[N]) {
@@ -444,9 +455,9 @@ object BoxesDemo {
 
 //    swingViews
 //    responder
-    textViews
-//    optionPath
 //    textViews
+//    optionPath
+    textViews
 //    sequences
 //    numericClass
   }
