@@ -276,14 +276,9 @@ private class RangeOptionView[G](v:Var[G], min:Int, max:Int, c:GConverter[G, Int
 
 		override def setValueIsAdjusting(b:Boolean) = {
 			super.setValueIsAdjusting(b)
-
-			//When we stop adjusting, use the last set value,
-      //unless value is None, in which case leave it unaltered
-			if (!b) {
-        c.toOption(v()) match {
-          case None => None
-          case Some(_) => v() = c.toG(currentValue)
-        }
+      c.toOption(v()) match {
+        case None => None
+        case Some(_) => v() = c.toG(currentValue)
       }
 		}
 
