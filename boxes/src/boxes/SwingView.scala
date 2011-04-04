@@ -78,6 +78,8 @@ trait SwingView {
   private[boxes] def replaceUpdate(update: => Unit) = SwingView.replaceUpdate(this, update)
 }
 
+//TODO Consider using Either[Ref[T], Ref[Option[T]] for the model type, then cases instead of converter
+
 //Type G may be Option[T] or the bare type T.
 //toOption gets us from G to DEFINITELY an Option[T]
 //toG gets us from the bare type T to G

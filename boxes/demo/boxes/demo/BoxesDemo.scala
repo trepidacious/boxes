@@ -6,11 +6,12 @@
  */
 package boxes.demo
 
-import boxes._
 import java.awt.Dimension
 import javax.swing._
 import java.awt.event.ActionEvent
-import util.{LogStep, Step, CoalescingResponder, NumericClass}
+import boxes.util.{LogStep, Step, CoalescingResponder, NumericClass}
+import boxes._
+import codec.{Persistence, DataPrintTarget, Coder}
 
 object BoxesDemo {
 
@@ -443,6 +444,33 @@ object BoxesDemo {
     printNumericClass(1)
   }
 
+  def codecAccessors() {
+    println("From class of person: " + Persistence.accessorsOfClass(classOf[Person]))
+    println("From Person: " + Persistence.accessors(new Person()))
+  }
+
+  def codec() {
+    val p = new Person()
+    val c = new Coder(new DataPrintTarget())
+
+    c.code(p)
+  }
+
+  def data() {
+    val d = new DataPrintTarget
+    d.openTag("Person")
+    d.openTag("Name")
+    d.putUTF("Bob")
+    d.closeTag
+    d.openTag("Address")
+    d.openTag("Street")
+    d.putUTF("One Way Street")
+    d.closeTag
+    d.closeTag
+    d.closeTag
+  }
+
+
   def main(args: Array[String]) {
 //    simpleCalc
 //    simplePath
@@ -457,10 +485,12 @@ object BoxesDemo {
 //    responder
 //    textViews
 //    optionPath
-    textViews
+//    textViews
 //    sequences
 //    numericClass
+//    codecAccessors
+//    codec
+    data
   }
-
 
 }
