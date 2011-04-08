@@ -11,11 +11,11 @@ import javax.swing._
 import java.awt.event.ActionEvent
 import boxes.util.{LogStep, Step, CoalescingResponder, NumericClass}
 import boxes._
-import codec.{Persistence, DataPrintTarget, Coder}
+import persistence.{DefaultCodecs, DataPrintTarget, Persistence, Node}
 
 object BoxesDemo {
 
-  class Person {
+  class Person extends Node{
     val name = Var("name")
     val age = Var(32)
     val friend:Var[Person] = Var(null)
@@ -23,7 +23,7 @@ object BoxesDemo {
     //override def toString = name() + ", " + age() + ", friend: " + friend()
   }
 
-  class OptionPerson {
+  class OptionPerson extends Node{
     val name = Var("name")
     val age = Var(32)
     val friend:Var[Option[OptionPerson]] = Var(None)
@@ -449,13 +449,6 @@ object BoxesDemo {
     println("From Person: " + Persistence.accessors(new Person()))
   }
 
-  def codec() {
-    val p = new Person()
-    val c = new Coder(new DataPrintTarget())
-
-    c.code(p)
-  }
-
   def data() {
     val d = new DataPrintTarget
     d.openTag("Person")
@@ -468,6 +461,13 @@ object BoxesDemo {
     d.closeTag
     d.closeTag
     d.closeTag
+  }
+
+  def codec() {
+//    val d = new DataPrintTarget
+//    val p = new OptionPerson
+//    val codec = DefaultCodecs.NodeCodec
+//    codec.code(p, d)
   }
 
 
@@ -489,8 +489,8 @@ object BoxesDemo {
 //    sequences
 //    numericClass
 //    codecAccessors
-//    codec
-    data
+    codec
+//    data
   }
 
 }

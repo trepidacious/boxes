@@ -1,4 +1,4 @@
-package boxes.codec
+package boxes.persistence
 
 import collection._
 
