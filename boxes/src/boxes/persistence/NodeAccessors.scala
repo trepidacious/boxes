@@ -4,7 +4,7 @@ import collection._
 import java.lang.reflect.{Method, Modifier}
 import boxes.Var
 
-object Persistence {
+object NodeAccessors {
 
   private val classToMethods = new mutable.HashMap[Class[_], Map[String, Method]]
 
@@ -39,14 +39,5 @@ object Persistence {
   }
 }
 
-//implicit object NodeCodec extends Codec[Node] {
-//  override def decode(target : DataSource) = new Node(){}
-//  override def code(n : Node, target : DataTarget) = {
-//    Persistence.accessors(n).foreach(entry => {
-//      target.openTag(entry._1)
-//      codeOn(entry._2.invoke(n).asInstanceOf[Var[_]].apply.toString, target)
-//      target.closeTag
-//    })
-//  }
-//}
+
 

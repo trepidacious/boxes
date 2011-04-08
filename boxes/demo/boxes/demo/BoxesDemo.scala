@@ -11,11 +11,11 @@ import javax.swing._
 import java.awt.event.ActionEvent
 import boxes.util.{LogStep, Step, CoalescingResponder, NumericClass}
 import boxes._
-import persistence.{DefaultCodecs, DataPrintTarget, Persistence, Node}
+import persistence.{CodecByClass, DataPrintTarget, NodeAccessors, Node}
 
 object BoxesDemo {
 
-  class Person extends Node{
+  class Person extends Node {
     val name = Var("name")
     val age = Var(32)
     val friend:Var[Person] = Var(null)
@@ -23,7 +23,7 @@ object BoxesDemo {
     //override def toString = name() + ", " + age() + ", friend: " + friend()
   }
 
-  class OptionPerson extends Node{
+  class OptionPerson extends Node {
     val name = Var("name")
     val age = Var(32)
     val friend:Var[Option[OptionPerson]] = Var(None)
@@ -445,8 +445,8 @@ object BoxesDemo {
   }
 
   def codecAccessors() {
-    println("From class of person: " + Persistence.accessorsOfClass(classOf[Person]))
-    println("From Person: " + Persistence.accessors(new Person()))
+    println("From class of person: " + NodeAccessors.accessorsOfClass(classOf[Person]))
+    println("From Person: " + NodeAccessors.accessors(new Person()))
   }
 
   def data() {
@@ -468,6 +468,15 @@ object BoxesDemo {
 //    val p = new OptionPerson
 //    val codec = DefaultCodecs.NodeCodec
 //    codec.code(p, d)
+//    val p = new Person()
+//    System.out.println(p.age().asInstanceOf[AnyRef].getClass)
+    val codec = new CodecByClass()
+    val target = new DataPrintTarget
+    val p = new OptionPerson()
+    val q = new OptionPerson()
+    p.friend() = Some(q)
+    q.name() = "q"
+    codec.code(p, target)
   }
 
 
