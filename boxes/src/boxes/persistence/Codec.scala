@@ -20,18 +20,13 @@ class CodecByClass extends Codec[Any] {
   private val codecs = mutable.Set[Codec[_]]()
 
   {
-    val int:Int = 1
-    val short:Short = 1
-    val byte:Byte = 1
-    val long:Long = 1
-    val float:Float = 1
-    val char:Char = 1
-    add(IntCodec, int.asInstanceOf[AnyRef].getClass)
-    add(ShortCodec, short.asInstanceOf[AnyRef].getClass)
-    add(ByteCodec, byte.asInstanceOf[AnyRef].getClass)
-    add(LongCodec, long.asInstanceOf[AnyRef].getClass)
-    add(FloatCodec, float.asInstanceOf[AnyRef].getClass)
-    add(CharCodec, char.asInstanceOf[AnyRef].getClass)
+    add(IntCodec, classOf[java.lang.Integer])
+    add(ShortCodec, classOf[java.lang.Short])
+    add(ByteCodec, classOf[java.lang.Byte])
+    add(LongCodec, classOf[java.lang.Long])
+    add(FloatCodec, classOf[java.lang.Float])
+    add(CharCodec, classOf[java.lang.Character])
+    add(BooleanCodec, classOf[java.lang.Boolean])
     add(StringCodec, classOf[String])
     add(new ListCodec(this), classOf[List[_]])
     add(new NodeCodec(this), classOf[Node])
@@ -50,13 +45,16 @@ class CodecByClass extends Codec[Any] {
 
   def get(clazz:Class[_]) = mostSpecific(root, clazz).codec
 
-  override def decode(target : DataSource) = null  //Need to look up class from tag, then use appropriate codec
+  //Need to look up class from tag, then use appropriate codec
+  override def decode(source : DataSource) = {
+    val c = source.peekOpenClassTag
+    val codec = get(c)
+    codec.decode(source)
+  }
 
   override def code(t : Any, target : DataTarget) = {
     val tClass = t.asInstanceOf[AnyRef].getClass
-    target.openTag(tClass.getCanonicalName)
     get(tClass).asInstanceOf[Codec[Any]].code(t, target)
-    target.closeTag
   }
 
   private def mostSpecific(node:CodecNode, clazz:Class[_]):CodecNode = {
@@ -73,45 +71,22 @@ class CodecByClass extends Codec[Any] {
 }
 
 object AnyCodec extends Codec[Any] {
-  override def decode(target : DataSource) = throw new RuntimeException("Can't decode Any")
+  override def decode(source : DataSource) = throw new RuntimeException("Can't decode Any")
   override def code(t : Any, target : DataTarget) = throw new RuntimeException("Can't code Any")
-}
-object IntCodec extends Codec[Int] {
-  override def decode(target : DataSource) = target.getInt
-  override def code(t : Int, target : DataTarget) = target.putInt(t.asInstanceOf[Int])
-}
-object ShortCodec extends Codec[Short] {
-  override def decode(target : DataSource) = target.getShort
-  override def code(t : Short, target : DataTarget) = target.putShort(t.asInstanceOf[Short])
-}
-object ByteCodec extends Codec[Byte] {
-  override def decode(target : DataSource) = target.getByte
-  override def code(t : Byte, target : DataTarget) = target.putByte(t.asInstanceOf[Byte])
-}
-object LongCodec extends Codec[Long] {
-  override def decode(target : DataSource) = target.getLong
-  override def code(t : Long, target : DataTarget) = target.putLong(t.asInstanceOf[Long])
-}
-object FloatCodec extends Codec[Float] {
-  override def decode(target : DataSource) = target.getFloat
-  override def code(t : Float, target : DataTarget) = target.putFloat(t.asInstanceOf[Float])
-}
-object DoubleCodec extends Codec[Double] {
-  override def decode(target : DataSource) = target.getDouble
-  override def code(t : Double, target : DataTarget) = target.putDouble(t.asInstanceOf[Double])
-}
-object CharCodec extends Codec[Char] {
-  override def decode(target : DataSource) = target.getChar
-  override def code(t : Char, target : DataTarget) = target.putChar(t.asInstanceOf[Char])
-}
-object StringCodec extends Codec[String] {
-  override def decode(target : DataSource) = target.getUTF
-  override def code(t : String, target : DataTarget) = target.putUTF(t.asInstanceOf[String])
 }
 
 class OptionCodec(delegate:Codec[Any]) extends Codec[Option[_]] {
-  override def decode(target : DataSource) = None
+  override def decode(source : DataSource) = {
+    source.getOpenClassTag(classOf[Option[_]])
+    val t = source.getOpenTag match {
+      case "None" => None
+      case "Some" => Some(delegate.decode(source))
+    }
+    source.getCloseTag
+    t
+  }
   override def code(o : Option[_], target : DataTarget) = {
+    target.openClassTag(classOf[Option[_]])
     o match {
       case None => {
         target.openTag("None")
@@ -123,27 +98,170 @@ class OptionCodec(delegate:Codec[Any]) extends Codec[Option[_]] {
         target.closeTag
       }
     }
+    target.closeTag
   }
 }
 
 class ListCodec(delegate:Codec[Any]) extends Codec[List[_]] {
-  override def decode(target : DataSource) = List[Any]()
+  override def decode(source : DataSource) = {
+    source.getOpenClassTag(classOf[List[_]])
+    val lb = mutable.ListBuffer[Any]()
+    while (!source.peekCloseTag) {
+      lb.append(delegate.decode(source))
+    }
+    source.getCloseTag
+    List(lb:_*)
+  }
   override def code(list : List[_], target : DataTarget) = {
-    target.openTag("Length")
-    target.putInt(list.length)
-    target.closeTag
+    target.openClassTag(classOf[List[_]])
     list.foreach(e => delegate.code(e, target))
+    target.closeTag
   }
 }
 
 class NodeCodec(delegate:Codec[Any]) extends Codec[Node] {
-  override def decode(target : DataSource) = new Node(){}
+  override def decode(source : DataSource) = {
+    val c = source.getOpenClassTag
+    val n = c.newInstance
+    val accMap = NodeAccessors.accessorsOfClass(c)
+    while (!source.peekCloseTag) {
+      val accessorName = source.getOpenTag
+      val accessorValue = delegate.decode(source)
+      accMap.get(accessorName) match {
+        case None => {}
+        case Some(m) => m.invoke(n).asInstanceOf[Var[Any]].update(accessorValue)
+      }
+      source.getCloseTag
+    }
+    n.asInstanceOf[Node]
+  }
   override def code(n : Node, target : DataTarget) = {
+    target.openClassTag(n.getClass)
     NodeAccessors.accessors(n).foreach(entry => {
       target.openTag(entry._1)
       delegate.code(entry._2.invoke(n).asInstanceOf[Var[_]].apply, target)
       target.closeTag
     })
+    target.closeTag
+  }
+}
+
+object IntCodec extends Codec[Int] {
+  override def decode(source : DataSource) = {
+    source.getOpenClassTag(classOf[java.lang.Integer])
+    val t = source.getInt
+    source.getCloseTag
+    t
+  }
+  override def code(t : Int, target : DataTarget) = {
+    target.openClassTag(classOf[java.lang.Integer])
+    target.putInt(t)
+    target.closeTag
+  }
+}
+object ShortCodec extends Codec[Short] {
+  override def decode(source : DataSource) = {
+    source.getOpenClassTag(classOf[java.lang.Short])
+    val t = source.getShort
+    source.getCloseTag
+    t
+  }
+  override def code(t : Short, target : DataTarget) = {
+    target.openClassTag(classOf[java.lang.Short])
+    target.putShort(t)
+    target.closeTag
+  }
+}
+object ByteCodec extends Codec[Byte] {
+  override def decode(source : DataSource) = {
+    source.getOpenClassTag(classOf[java.lang.Byte])
+    val t = source.getByte
+    source.getCloseTag
+    t
+  }
+  override def code(t : Byte, target : DataTarget) = {
+    target.openClassTag(classOf[java.lang.Byte])
+    target.putByte(t)
+    target.closeTag
+  }
+}
+object LongCodec extends Codec[Long] {
+  override def decode(source : DataSource) = {
+    source.getOpenClassTag(classOf[java.lang.Long])
+    val t = source.getLong
+    source.getCloseTag
+    t
+  }
+  override def code(t : Long, target : DataTarget) = {
+    target.openClassTag(classOf[java.lang.Long])
+    target.putLong(t)
+    target.closeTag
+  }
+}
+object FloatCodec extends Codec[Float] {
+  override def decode(source : DataSource) = {
+    source.getOpenClassTag(classOf[java.lang.Float])
+    val t = source.getFloat
+    source.getCloseTag
+    t
+  }
+  override def code(t : Float, target : DataTarget) = {
+    target.openClassTag(classOf[java.lang.Float])
+    target.putFloat(t)
+    target.closeTag
+  }
+}
+object DoubleCodec extends Codec[Double] {
+  override def decode(source : DataSource) = {
+    source.getOpenClassTag(classOf[java.lang.Double])
+    val t = source.getDouble
+    source.getCloseTag
+    t
+  }
+  override def code(t : Double, target : DataTarget) = {
+    target.openClassTag(classOf[java.lang.Double])
+    target.putDouble(t)
+    target.closeTag
+  }
+}
+object CharCodec extends Codec[Char] {
+  override def decode(source : DataSource) = {
+    source.getOpenClassTag(classOf[java.lang.Character])
+    val t = source.getChar
+    source.getCloseTag
+    t
+  }
+  override def code(t : Char, target : DataTarget) = {
+    target.openClassTag(classOf[java.lang.Character])
+    target.putChar(t)
+    target.closeTag
+  }
+}
+object BooleanCodec extends Codec[Boolean] {
+  override def decode(source : DataSource) = {
+    source.getOpenClassTag(classOf[java.lang.Boolean])
+    val t = source.getBoolean
+    source.getCloseTag
+    t
+  }
+  override def code(t : Boolean, target : DataTarget) = {
+    target.openClassTag(classOf[java.lang.Boolean])
+    target.putBoolean(t)
+    target.closeTag
+  }
+}
+
+object StringCodec extends Codec[String] {
+  override def decode(source : DataSource) = {
+    source.getOpenClassTag(classOf[java.lang.String])
+    val t = source.getUTF
+    source.getCloseTag
+    t
+  }
+  override def code(t : String, target : DataTarget) = {
+    target.openClassTag(classOf[String])
+    target.putUTF(t)
+    target.closeTag
   }
 }
 

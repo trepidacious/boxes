@@ -57,7 +57,7 @@ object Box {
     lock.lock
     if (!canWrite) throw new InvalidWriteException(b)
 
-    //This box is a target of any active reaction
+    //This box is a source of any active reaction
     activeReaction.foreach(r => associateReactionTarget(r, b))
     applyingReaction
   }
@@ -250,7 +250,7 @@ object Box {
       //the expectation of no writes to its targets.
       //TODO should we have a specific way of checking this, by asking reactions
       //whether they are valid? NOTE we can't just ask them to return something special
-      //from respond if they will do nothing, since this introduces a read of their target
+      //from respond if they will do nothing, since this introduces a read of their source
       //which is bad to have - adds lots of false sources on reactions that may well
       //only want to apply in one direction. The current system is fine as long as boxes
       //all check for and ignore writes that make no difference, OR reactions return

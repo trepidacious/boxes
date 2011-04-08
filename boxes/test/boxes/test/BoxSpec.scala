@@ -7,7 +7,7 @@ import boxes._
 class BoxSpec extends WordSpec {
 
   //FIXME we should try to test effect of GC - make sure that reactions
-  //are not GCed as long as they have a target
+  //are not GCed as long as they have a source
 
   class Person {
     val name = Var("name")

@@ -11,7 +11,7 @@ import javax.swing._
 import java.awt.event.ActionEvent
 import boxes.util.{LogStep, Step, CoalescingResponder, NumericClass}
 import boxes._
-import persistence.{CodecByClass, DataPrintTarget, NodeAccessors, Node}
+import persistence.{CodecByClass, XMLDataTarget, NodeAccessors, Node}
 
 object BoxesDemo {
 
@@ -27,6 +27,7 @@ object BoxesDemo {
     val name = Var("name")
     val age = Var(32)
     val friend:Var[Option[OptionPerson]] = Var(None)
+    val numbers = Var(List[Int]())
 
     override def toString = name() + ", " + age() + ", friend: " + friend()
   }
@@ -450,7 +451,7 @@ object BoxesDemo {
   }
 
   def data() {
-    val d = new DataPrintTarget
+    val d = new XMLDataTarget
     d.openTag("Person")
     d.openTag("Name")
     d.putUTF("Bob")
@@ -464,16 +465,18 @@ object BoxesDemo {
   }
 
   def codec() {
-//    val d = new DataPrintTarget
+//    val d = new XMLDataTarget
 //    val p = new OptionPerson
 //    val codec = DefaultCodecs.NodeCodec
 //    codec.code(p, d)
 //    val p = new Person()
 //    System.out.println(p.age().asInstanceOf[AnyRef].getClass)
     val codec = new CodecByClass()
-    val target = new DataPrintTarget
+    val target = new XMLDataTarget
+    target.alias(classOf[OptionPerson], "Person")
     val p = new OptionPerson()
     val q = new OptionPerson()
+    q.numbers()=List(1, 4, 9)
     p.friend() = Some(q)
     q.name() = "q"
     codec.code(p, target)
