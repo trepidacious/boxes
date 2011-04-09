@@ -11,7 +11,8 @@ import javax.swing._
 import java.awt.event.ActionEvent
 import boxes.util.{LogStep, Step, CoalescingResponder, NumericClass}
 import boxes._
-import persistence.{CodecByClass, XMLDataTarget, NodeAccessors, Node}
+import persistence._
+import io.Source
 
 object BoxesDemo {
 
@@ -29,7 +30,7 @@ object BoxesDemo {
     val friend:Var[Option[OptionPerson]] = Var(None)
     val numbers = Var(List[Int]())
 
-    override def toString = name() + ", " + age() + ", friend: " + friend()
+    override def toString = name() + ", " + age() + ", friend: " + friend() + ", numbers " + numbers()
   }
 
   def optionPath() = {
@@ -451,7 +452,8 @@ object BoxesDemo {
   }
 
   def data() {
-    val d = new XMLDataTarget
+    val a = new XMLAliases
+    val d = new XMLDataTarget(a)
     d.openTag("Person")
     d.openTag("Name")
     d.putUTF("Bob")
@@ -472,14 +474,26 @@ object BoxesDemo {
 //    val p = new Person()
 //    System.out.println(p.age().asInstanceOf[AnyRef].getClass)
     val codec = new CodecByClass()
-    val target = new XMLDataTarget
-    target.alias(classOf[OptionPerson], "Person")
+    val a = new XMLAliases
+    val target = new XMLDataTarget(a)
+    a.alias(classOf[OptionPerson], "Person")
     val p = new OptionPerson()
     val q = new OptionPerson()
     q.numbers()=List(1, 4, 9)
     p.friend() = Some(q)
     q.name() = "q"
     codec.code(p, target)
+  }
+
+  def decode() = {
+    val src = Source.fromString("<Person><name><java.lang.String>name</java.lang.String></name><friend><scala.Option><Some><Person><name><java.lang.String>q</java.lang.String></name><friend><scala.Option><None></None></scala.Option></friend><numbers><scala.collection.immutable.List><java.lang.Integer>1</java.lang.Integer><java.lang.Integer>4</java.lang.Integer><java.lang.Integer>9</java.lang.Integer></scala.collection.immutable.List></numbers><age><java.lang.Integer>32</java.lang.Integer></age></Person></Some></scala.Option></friend><numbers><scala.collection.immutable.List></scala.collection.immutable.List></numbers><age><java.lang.Integer>32</java.lang.Integer></age></Person>")
+    val codec = new CodecByClass()
+    val a = new XMLAliases
+    a.alias(classOf[OptionPerson], "Person")
+    val source = new XMLDataSource(src, a)
+
+    println(codec.decode(source))
+
   }
 
 
@@ -501,8 +515,9 @@ object BoxesDemo {
 //    sequences
 //    numericClass
 //    codecAccessors
-    codec
+//    codec
 //    data
+    decode
   }
 
 }

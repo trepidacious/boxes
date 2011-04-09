@@ -1,6 +1,10 @@
 package boxes.persistence
 
+import scala.xml._
+import scala.xml.pull._
+import scala.io.Source
 import collection._
+
 
 trait DataSource {
 //  def get():Int
@@ -93,9 +97,89 @@ trait DataTarget {
   def close()
 }
 
-class XMLDataTarget extends DataTarget {
+class XMLDataSource(s:Source, aliases:XMLAliases) extends DataSource {
 
-  private val tagStack = mutable.ListBuffer[String]()
+  val events = new XMLEventReader(s)
+  var nextEvent:Option[XMLEvent] = None
+
+  private def getNextEvent = {
+    val e = nextEvent.getOrElse(events.next)
+    nextEvent = None
+    e
+  }
+
+  private def peekNextEvent = {
+    nextEvent match {
+      case None => {
+        val e = events.next
+        nextEvent = Some(e)
+        e
+      }
+      case Some(e) => e
+    }
+  }
+
+  private def getText() = {
+    getNextEvent match {
+      case text:EvText => text.text
+      case wrong:Any => throw new RuntimeException("Next event is not text, it is " + wrong)
+    }
+  }
+
+  override def getBoolean() = getText.trim.toBoolean
+  override def getByte() = getText.trim.toByte
+  override def getShort() = getText.trim.toShort
+  override def getChar() = getText.trim.toCharArray.apply(0)
+  override def getInt() = getText.trim.toInt
+  override def getLong() = getText.trim.toLong
+  override def getFloat() = getText.trim.toFloat
+  override def getDouble() = getText.trim.toDouble
+  override def getUTF():String = getText
+
+  override def close() = s.close
+
+  override def getOpenTag() = {
+    getNextEvent match {
+      case start:EvElemStart => start.label
+      case wrong:Any => throw new RuntimeException("Next tag is not an open tag, it is " + wrong)
+    }
+  }
+
+  override def getOpenClassTag():Class[_] = {
+    aliases.forAlias(getOpenTag)
+  }
+
+  override def getOpenClassTag(c:Class[_]):Unit = {
+    val tagClass = getOpenClassTag
+    if (tagClass != c) throw new RuntimeException("Expected tag for class " + c + " but found " + tagClass)
+  }
+
+  override def peekOpenTag():String = {
+    peekNextEvent match {
+      case start:EvElemStart => start.label
+      case wrong:Any => throw new RuntimeException("Next tag is not an open tag, it is " + wrong)
+    }
+  }
+
+  override def peekOpenClassTag():Class[_] = {
+    aliases.forAlias(peekOpenTag)
+  }
+  override def peekCloseTag():Boolean = {
+    peekNextEvent match {
+      case end:EvElemEnd => true
+      case _ => false
+    }
+  }
+
+  override def getCloseTag() = {
+    getNextEvent match {
+      case end:EvElemEnd => {}
+      case wrong:Any => throw new RuntimeException("Next tag is not a close tag, it is " + wrong)
+    }
+  }
+}
+
+class XMLAliases {
   private val aliases = mutable.Map[Class[_], String]()
   private val aliasesReverse = mutable.Map[String, Class[_]]()
 
@@ -112,9 +196,24 @@ class XMLDataTarget extends DataTarget {
     aliasesReverse.put(s, c)
   }
 
+  def forClass(c:Class[_]) = aliases.getOrElse(c, c.getCanonicalName)
+
+  def forAlias(s:String) = {
+    aliasesReverse.get(s) match {
+      case None => Class.forName(s)
+      case Some(c) => c
+    }
+  }
+}
+
+class XMLDataTarget(aliases:XMLAliases) extends DataTarget {
+
+  private val tagStack = mutable.ListBuffer[String]()
+
   private def printWithTabs(s:String) = {
-    tagStack.foreach(_ => print("  "))
-    println(s)
+//    tagStack.foreach(_ => print("  "))
+//    println(s)
+    print(s)
   }
 
   def putBoolean(b:Boolean) = printWithTabs(""+b)
@@ -133,7 +232,7 @@ class XMLDataTarget extends DataTarget {
   }
 
   def openClassTag(c:Class[_]) = {
-    val s = aliases.getOrElse(c, c.getCanonicalName)
+    val s = aliases.forClass(c)
     printWithTabs("<" + s + ">")
     tagStack.append(s)
   }

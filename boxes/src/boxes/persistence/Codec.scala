@@ -2,6 +2,7 @@ package boxes.persistence
 
 import collection._
 import boxes.Var
+import boxes.Node
 
 /**
 * Codes objects to a DataTarget, and
@@ -11,8 +12,6 @@ trait Codec[T] {
   def decode(target : DataSource) : T
   def code(t : T, target : DataTarget) : Unit
 }
-
-trait Node
 
 class CodecByClass extends Codec[Any] {
 
@@ -82,7 +81,8 @@ class OptionCodec(delegate:Codec[Any]) extends Codec[Option[_]] {
       case "None" => None
       case "Some" => Some(delegate.decode(source))
     }
-    source.getCloseTag
+    source.getCloseTag  //Some/None
+    source.getCloseTag  //Option
     t
   }
   override def code(o : Option[_], target : DataTarget) = {
