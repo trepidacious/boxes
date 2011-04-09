@@ -138,6 +138,9 @@ class XMLDataSource(s:Source, aliases:XMLAliases) extends DataSource {
 
   override def close() = s.close
 
+  //TODO reduce duplicated data - get and peek methods are essentially the same,
+  //could just take a boolean parameter.
+
   override def getOpenTag() = {
     getNextEvent match {
       case start:EvElemStart => start.label

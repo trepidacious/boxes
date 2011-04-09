@@ -13,6 +13,9 @@ trait Codec[T] {
   def code(t : T, target : DataTarget) : Unit
 }
 
+//FIXME use ids and refs to ensure we only code each mutable object once. Multiples of immutable
+//objects are not so important. Really we are only concerned about Nodes.
+
 class CodecByClass extends Codec[Any] {
 
   private val root = new CodecNode(AnyCodec, classOf[Any])
@@ -145,6 +148,8 @@ class NodeCodec(delegate:Codec[Any]) extends Codec[Node] {
     target.closeTag
   }
 }
+
+//TODO make these share code, can we do something with implicits, similar to number spinners?
 
 object IntCodec extends Codec[Int] {
   override def decode(source : DataSource) = {
