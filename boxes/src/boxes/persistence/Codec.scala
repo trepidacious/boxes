@@ -13,6 +13,11 @@ trait Codec[T] {
   def code(t : T, target : DataTarget) : Unit
 }
 
+trait CodecWithClass[T] extends Codec[T]{
+  //Note this isn't Class[T] because of type erasure
+  def clazz():Class[_]
+}
+
 //FIXME use ids and refs to ensure we only code each mutable object once. Multiples of immutable
 //objects are not so important. Really we are only concerned about Nodes.
 
@@ -21,21 +26,40 @@ class CodecByClass extends Codec[Any] {
   private val root = new CodecNode(AnyCodec, classOf[Any])
   private val codecs = mutable.Set[Codec[_]]()
 
+  //Common default codecs
+
   {
-    add(IntCodec, classOf[java.lang.Integer])
-    add(ShortCodec, classOf[java.lang.Short])
-    add(ByteCodec, classOf[java.lang.Byte])
-    add(LongCodec, classOf[java.lang.Long])
-    add(FloatCodec, classOf[java.lang.Float])
-    add(CharCodec, classOf[java.lang.Character])
-    add(BooleanCodec, classOf[java.lang.Boolean])
-    add(StringCodec, classOf[String])
+    add(new ValCodec[Int](ValHandlers.IntHandler))
+    add(new ValCodec[Short](ValHandlers.ShortHandler))
+    add(new ValCodec[Byte](ValHandlers.ByteHandler))
+    add(new ValCodec[Long](ValHandlers.LongHandler))
+    add(new ValCodec[Float](ValHandlers.FloatHandler))
+    add(new ValCodec[Char](ValHandlers.CharHandler))
+    add(new ValCodec[Boolean](ValHandlers.BooleanHandler))
+    add(new ValCodec[String](ValHandlers.StringHandler))
+
+    //FIXME reinstate this shorter version if I ever work out why implicits
+    //aren't working
+//    add(ValCodec[Int])
+//    add(ValCodec[Short])
+//    add(ValCodec[Byte])
+//    add(ValCodec[Long])
+//    add(ValCodec[Float])
+//    add(ValCodec[Char])
+//    add(ValCodec[Boolean])
+//    add(ValCodec[String])
+
+
     add(new ListCodec(this), classOf[List[_]])
     add(new NodeCodec(this), classOf[Node])
     add(new OptionCodec(this), classOf[Option[_]])
   }
 
-  def add(codec:Codec[_], clazz:Class[_]) = {
+  def add(codec:CodecWithClass[_]):Unit = {
+    add(codec, codec.clazz)
+  }
+
+  def add(codec:Codec[_], clazz:Class[_]):Unit = {
     //Don't add the same codec twice
     if (!codecs.contains(codec)) {
       codecs.add(codec)
@@ -149,124 +173,21 @@ class NodeCodec(delegate:Codec[Any]) extends Codec[Node] {
   }
 }
 
-//TODO make these share code, can we do something with implicits, similar to number spinners?
-
-object IntCodec extends Codec[Int] {
-  override def decode(source : DataSource) = {
-    source.getOpenClassTag(classOf[java.lang.Integer])
-    val t = source.getInt
-    source.getCloseTag
-    t
-  }
-  override def code(t : Int, target : DataTarget) = {
-    target.openClassTag(classOf[java.lang.Integer])
-    target.putInt(t)
-    target.closeTag
-  }
-}
-object ShortCodec extends Codec[Short] {
-  override def decode(source : DataSource) = {
-    source.getOpenClassTag(classOf[java.lang.Short])
-    val t = source.getShort
-    source.getCloseTag
-    t
-  }
-  override def code(t : Short, target : DataTarget) = {
-    target.openClassTag(classOf[java.lang.Short])
-    target.putShort(t)
-    target.closeTag
-  }
-}
-object ByteCodec extends Codec[Byte] {
-  override def decode(source : DataSource) = {
-    source.getOpenClassTag(classOf[java.lang.Byte])
-    val t = source.getByte
-    source.getCloseTag
-    t
-  }
-  override def code(t : Byte, target : DataTarget) = {
-    target.openClassTag(classOf[java.lang.Byte])
-    target.putByte(t)
-    target.closeTag
-  }
-}
-object LongCodec extends Codec[Long] {
-  override def decode(source : DataSource) = {
-    source.getOpenClassTag(classOf[java.lang.Long])
-    val t = source.getLong
-    source.getCloseTag
-    t
-  }
-  override def code(t : Long, target : DataTarget) = {
-    target.openClassTag(classOf[java.lang.Long])
-    target.putLong(t)
-    target.closeTag
-  }
-}
-object FloatCodec extends Codec[Float] {
-  override def decode(source : DataSource) = {
-    source.getOpenClassTag(classOf[java.lang.Float])
-    val t = source.getFloat
-    source.getCloseTag
-    t
-  }
-  override def code(t : Float, target : DataTarget) = {
-    target.openClassTag(classOf[java.lang.Float])
-    target.putFloat(t)
-    target.closeTag
-  }
-}
-object DoubleCodec extends Codec[Double] {
-  override def decode(source : DataSource) = {
-    source.getOpenClassTag(classOf[java.lang.Double])
-    val t = source.getDouble
-    source.getCloseTag
-    t
-  }
-  override def code(t : Double, target : DataTarget) = {
-    target.openClassTag(classOf[java.lang.Double])
-    target.putDouble(t)
-    target.closeTag
-  }
-}
-object CharCodec extends Codec[Char] {
-  override def decode(source : DataSource) = {
-    source.getOpenClassTag(classOf[java.lang.Character])
-    val t = source.getChar
-    source.getCloseTag
-    t
-  }
-  override def code(t : Char, target : DataTarget) = {
-    target.openClassTag(classOf[java.lang.Character])
-    target.putChar(t)
-    target.closeTag
-  }
-}
-object BooleanCodec extends Codec[Boolean] {
-  override def decode(source : DataSource) = {
-    source.getOpenClassTag(classOf[java.lang.Boolean])
-    val t = source.getBoolean
-    source.getCloseTag
-    t
-  }
-  override def code(t : Boolean, target : DataTarget) = {
-    target.openClassTag(classOf[java.lang.Boolean])
-    target.putBoolean(t)
-    target.closeTag
-  }
+object ValCodec {
+  def apply[T]()(implicit handler:ValHandler[T]) = new ValCodec[T](handler)
 }
 
-object StringCodec extends Codec[String] {
+class ValCodec[T](handler:ValHandler[T]) extends CodecWithClass[T] {
   override def decode(source : DataSource) = {
-    source.getOpenClassTag(classOf[java.lang.String])
-    val t = source.getUTF
+    source.getOpenClassTag(handler.clazz)
+    val t = handler.get(source)
     source.getCloseTag
     t
   }
-  override def code(t : String, target : DataTarget) = {
-    target.openClassTag(classOf[String])
-    target.putUTF(t)
+  override def code(t : T, target : DataTarget) = {
+    target.openClassTag(handler.clazz)
+    handler.put(target, t)
     target.closeTag
   }
+  override def clazz() = handler.clazz
 }
-

@@ -13,6 +13,7 @@ import boxes.util.{LogStep, Step, CoalescingResponder, NumericClass}
 import boxes._
 import persistence._
 import io.Source
+import java.io.StringWriter
 
 object BoxesDemo {
 
@@ -452,8 +453,9 @@ object BoxesDemo {
   }
 
   def data() {
+    val s = new StringWriter()
     val a = new XMLAliases
-    val d = new XMLDataTarget(a)
+    val d = new XMLDataTarget(a, s)
     d.openTag("Person")
     d.openTag("Name")
     d.putUTF("Bob")
@@ -464,18 +466,15 @@ object BoxesDemo {
     d.closeTag
     d.closeTag
     d.closeTag
+
+    println(s.toString)
   }
 
-  def codec() {
-//    val d = new XMLDataTarget
-//    val p = new OptionPerson
-//    val codec = DefaultCodecs.NodeCodec
-//    codec.code(p, d)
-//    val p = new Person()
-//    System.out.println(p.age().asInstanceOf[AnyRef].getClass)
+  def code() = {
     val codec = new CodecByClass()
     val a = new XMLAliases
-    val target = new XMLDataTarget(a)
+    val s = new StringWriter()
+    val target = new XMLDataTarget(a, s)
     a.alias(classOf[OptionPerson], "Person")
     val p = new OptionPerson()
     val q = new OptionPerson()
@@ -483,10 +482,12 @@ object BoxesDemo {
     p.friend() = Some(q)
     q.name() = "q"
     codec.code(p, target)
+    println(s.toString)
+    s.toString
   }
 
-  def decode() = {
-    val src = Source.fromString("<Person><name><java.lang.String>name</java.lang.String></name><friend><scala.Option><Some><Person><name><java.lang.String>q</java.lang.String></name><friend><scala.Option><None></None></scala.Option></friend><numbers><scala.collection.immutable.List><java.lang.Integer>1</java.lang.Integer><java.lang.Integer>4</java.lang.Integer><java.lang.Integer>9</java.lang.Integer></scala.collection.immutable.List></numbers><age><java.lang.Integer>32</java.lang.Integer></age></Person></Some></scala.Option></friend><numbers><scala.collection.immutable.List></scala.collection.immutable.List></numbers><age><java.lang.Integer>32</java.lang.Integer></age></Person>")
+  def decode(xml:String) = {
+    val src = Source.fromString(xml)
     val codec = new CodecByClass()
     val a = new XMLAliases
     a.alias(classOf[OptionPerson], "Person")
@@ -515,9 +516,9 @@ object BoxesDemo {
 //    sequences
 //    numericClass
 //    codecAccessors
-//    codec
 //    data
-    decode
+    val xml = code
+    decode(xml)
   }
 
 }
