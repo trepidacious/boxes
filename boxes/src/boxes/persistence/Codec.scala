@@ -74,7 +74,7 @@ class CodecByClass extends Codec[Any] {
 
   //Need to look up class from tag, then use appropriate codec
   override def decode(source : DataSource) = {
-    val c = source.peekOpenClassTag
+    val c = source.peekOpenClassTag._1
     println("Decoding " + c)
     val codec = get(c)
     codec.decode(source)
@@ -106,7 +106,7 @@ object AnyCodec extends Codec[Any] {
 class OptionCodec(delegate:Codec[Any]) extends Codec[Option[_]] {
   override def decode(source : DataSource) = {
     source.getOpenClassTag(classOf[Option[_]])
-    val t = source.getOpenTag match {
+    val t = source.getOpenTag._1 match {
       case "None" => None
       case "Some" => Some(delegate.decode(source))
     }
@@ -155,10 +155,10 @@ class MapCodec(delegate:Codec[Any]) extends Codec[Map[_,_]] {
     val entries = mutable.ListBuffer[(Any,Any)]()
     while (!source.peekCloseTag) {
       println("Got a map entry")
-      if (source.getOpenTag != "key") throw new RuntimeException("Expected key tag for map")
+      if (source.getOpenTag._1 != "key") throw new RuntimeException("Expected key tag for map")
       val key = delegate.decode(source)
       source.getCloseTag
-      if (source.getOpenTag != "value") throw new RuntimeException("Expected value tag for map")
+      if (source.getOpenTag._1 != "value") throw new RuntimeException("Expected value tag for map")
       val value = delegate.decode(source)
       source.getCloseTag
       entries.append((key, value))
@@ -186,11 +186,13 @@ class MapCodec(delegate:Codec[Any]) extends Codec[Map[_,_]] {
 
 class NodeCodec(delegate:Codec[Any]) extends Codec[Node] {
   override def decode(source : DataSource) = {
-    val c = source.getOpenClassTag
+    val tagStuff = source.getOpenClassTag
+    val c = tagStuff._1
+    //TODO use ref/id to track
     val n = c.newInstance
     val accMap = NodeAccessors.accessorsOfClass(c)
     while (!source.peekCloseTag) {
-      val accessorName = source.getOpenTag
+      val accessorName = source.getOpenTag._1
       val accessorValue = delegate.decode(source)
       accMap.get(accessorName) match {
         case None => {}

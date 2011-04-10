@@ -4,6 +4,7 @@ import scala.xml.pull._
 import scala.io.Source
 import collection._
 import java.io.Writer
+import xml.Node
 
 class XMLAliases {
   private val aliases = mutable.Map[Class[_], String]()
@@ -116,39 +117,42 @@ class XMLDataSource(s:Source, aliases:XMLAliases) extends DataSource {
 
   override def close() = s.close
 
-  //TODO reduce duplicated code - get and peek methods are essentially the same, could just take a boolean parameter.
 
+  def intAttr(e:EvElemStart, name:String) = {
+    e.attrs(name) match {
+      case null => None
+      case id:Seq[Node] => Some(id(0).text.toInt)
+    }
+  }
+
+  //TODO reduce duplicated code - get and peek methods are essentially the same, could just take a boolean parameter.
   override def getOpenTag() = {
     getNextEvent() match {
-      case start:EvElemStart => start.label
+      case start:EvElemStart => (start.label, intAttr(start, "id"), intAttr(start, "ref"))
+      case wrong:Any => throw new RuntimeException("Next tag is not an open tag, it is " + wrong)
+    }
+  }
+  override def peekOpenTag() = {
+    peekNextEvent() match {
+      case start:EvElemStart => (start.label, intAttr(start, "id"), intAttr(start, "ref"))
       case wrong:Any => throw new RuntimeException("Next tag is not an open tag, it is " + wrong)
     }
   }
 
-  override def getOpenClassTag():Class[_] = {
-    aliases.forAlias(getOpenTag)
+  override def getOpenClassTag():(Class[_], Option[Int], Option[Int]) = {
+    val ot = getOpenTag
+    (aliases.forAlias(ot._1), ot._2, ot._3)
+  }
+  override def peekOpenClassTag():(Class[_], Option[Int], Option[Int]) = {
+    val ot = peekOpenTag
+    (aliases.forAlias(ot._1), ot._2, ot._3)
   }
 
-  override def getOpenClassTag(c:Class[_]):Unit = {
-    val tagClass = getOpenClassTag
-    if (tagClass != c) throw new RuntimeException("Expected tag for class " + c + " but found " + tagClass)
-  }
-
-  override def peekOpenTag():String = {
-    peekNextEvent() match {
-      case start:EvElemStart => start.label
-      case wrong:Any => throw new RuntimeException("Next tag is not an open tag, it is " + wrong)
-    }
-  }
-
-  override def peekOpenClassTag():Class[_] = {
-    aliases.forAlias(peekOpenTag)
-  }
-  override def peekCloseTag():Boolean = {
-    peekNextEvent() match {
-      case end:EvElemEnd => true
-      case _ => false
-    }
+  override def getOpenClassTag(c:Class[_], id:Option[Int], ref:Option[Int]):Unit = {
+    val tagStuff = getOpenClassTag
+    if (tagStuff._1 != c) throw new RuntimeException("Expected tag for class " + c + " but found " + tagStuff._1)
+    if (tagStuff._2 != id) throw new RuntimeException("Expected id " + id + " but found " + tagStuff._2)
+    if (tagStuff._3 != ref) throw new RuntimeException("Expected ref " + ref + " but found " + tagStuff._3)
   }
 
   override def getCloseTag() = {
@@ -157,6 +161,13 @@ class XMLDataSource(s:Source, aliases:XMLAliases) extends DataSource {
       case wrong:Any => throw new RuntimeException("Next tag is not a close tag, it is " + wrong)
     }
   }
+  override def peekCloseTag():Boolean = {
+    peekNextEvent() match {
+      case end:EvElemEnd => true
+      case _ => false
+    }
+  }
+
 }
 
 
@@ -189,8 +200,12 @@ class XMLDataTarget(aliases:XMLAliases, writer:Writer) extends DataTarget {
     tagStack.append((s, false))
   }
 
-  def openClassTag(c:Class[_]) = {
-    val s = aliases.forClass(c)
+  def openClassTag(c:Class[_], id:Option[Int], ref:Option[Int]) = {
+    var s = aliases.forClass(c)
+
+    id.foreach(id => s = s + " id='" + id + "'")
+    ref.foreach(ref => s = s + " ref='" + ref + "'")
+
     //When opening a string class tag, the contents
     //need to have no whitespace, so don't print a newline
     if (c == classOf[java.lang.String]) {

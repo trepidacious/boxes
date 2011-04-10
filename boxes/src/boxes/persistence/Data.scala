@@ -19,37 +19,51 @@ trait DataSource {
   /**
    * Consume the next open tag, or exception if the
    * next element is not an open tag. Returns the string
-   * in the tag
+   * in the tag, and optional id, then optional ref
    */
-  def getOpenTag():String
+  def getOpenTag():(String, Option[Int], Option[Int])
 
+  //TODO use a real class (case class?) for this tuple, and then
+  //get rid of the other form of getOpenClassTag, since it is
+  //easier to just compare the returned value
+  //Also just make the get/peek distinction be a boolean parameter
+  //"consume", false for peek, true for get. Call both methods
+  //getXXX.
+  //TODO DataSource should provide caching for users - when they
+  //decode something with an id they must put it in the cache
+  //for subsequent codecs to retrieve when they see a ref.
+  //DataTarget will do the other part - handing out new ids, and
+  //storing a map to look up the ref for use if an object is seen
+  //again.
   /**
    * Consume the next open class tag, or exception if the
    * next element is not an open class tag. Returns the class
-   * in the tag
+   * in the tag, optional id, then optional ref
    */
-  def getOpenClassTag():Class[_]
+  def getOpenClassTag():(Class[_], Option[Int], Option[Int])
 
   /**
    * Consume the next open class tag, or exception if the
    * next element is not an open class tag with the specified
-   * class
+   * class, id and ref
    */
-  def getOpenClassTag(c:Class[_])
+  def getOpenClassTag(c:Class[_], id:Option[Int]=None, ref:Option[Int]=None)
 
   /**
    * Get the string from next open tag, or exception if
    * next element is not an open tag
    * Does not consume the tag - leaves it in the source
+   * Returns the string
+   * in the tag, and optional id, then optional ref
    */
-  def peekOpenTag():String
+  def peekOpenTag():(String, Option[Int], Option[Int])
 
   /**
    * Get the class from next open class tag, or exception if
    * next element is not an open class tag
    * Does not consume the tag - leaves it in the source
    */
-  def peekOpenClassTag():Class[_]
+  def peekOpenClassTag():(Class[_], Option[Int], Option[Int])
 
   /**
    * True if next tag is a close tag, false otherwise
@@ -85,7 +99,7 @@ trait DataTarget {
   def putDouble(d:Double)
   def putUTF(s:String)
   def openTag(s:String)
-  def openClassTag(c:Class[_])
+  def openClassTag(c:Class[_], id:Option[Int]=None, ref:Option[Int]=None)
   def closeTag()
   def flush()
   def close()
