@@ -51,6 +51,7 @@ class CodecByClass extends Codec[Any] {
 
 
     add(new ListCodec(this), classOf[List[_]])
+    add(new MapCodec(this), classOf[Map[_,_]])
     add(new NodeCodec(this), classOf[Node])
     add(new OptionCodec(this), classOf[Option[_]])
   }
@@ -74,6 +75,7 @@ class CodecByClass extends Codec[Any] {
   //Need to look up class from tag, then use appropriate codec
   override def decode(source : DataSource) = {
     val c = source.peekOpenClassTag
+    println("Decoding " + c)
     val codec = get(c)
     codec.decode(source)
   }
@@ -146,6 +148,42 @@ class ListCodec(delegate:Codec[Any]) extends Codec[List[_]] {
   }
 }
 
+class MapCodec(delegate:Codec[Any]) extends Codec[Map[_,_]] {
+  override def decode(source : DataSource) = {
+    source.getOpenClassTag(classOf[Map[_,_]])
+    println("Decoding map")
+    val entries = mutable.ListBuffer[(Any,Any)]()
+    while (!source.peekCloseTag) {
+      println("Got a map entry")
+      if (source.getOpenTag != "key") throw new RuntimeException("Expected key tag for map")
+      val key = delegate.decode(source)
+      source.getCloseTag
+      if (source.getOpenTag != "value") throw new RuntimeException("Expected value tag for map")
+      val value = delegate.decode(source)
+      source.getCloseTag
+      entries.append((key, value))
+      println("Loaded entry " + (key, value))
+    }
+    source.getCloseTag
+    Map(entries:_*)
+  }
+
+  override def code(map : Map[_,_], target : DataTarget) = {
+    target.openClassTag(classOf[Map[_,_]])
+    println("Coding map")
+    map.foreach(entry => {
+      target.openTag("key")
+      delegate.code(entry._1, target)
+      target.closeTag
+      target.openTag("value")
+      delegate.code(entry._2, target)
+      target.closeTag
+    })
+    target.closeTag
+  }
+}
+
+
 class NodeCodec(delegate:Codec[Any]) extends Codec[Node] {
   override def decode(source : DataSource) = {
     val c = source.getOpenClassTag
@@ -160,6 +198,7 @@ class NodeCodec(delegate:Codec[Any]) extends Codec[Node] {
       }
       source.getCloseTag
     }
+    source.getCloseTag
     n.asInstanceOf[Node]
   }
   override def code(n : Node, target : DataTarget) = {

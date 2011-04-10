@@ -64,10 +64,19 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Codec.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="Codec.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="30" column="0" selection-start="732" selection-end="732" vertical-scroll-proportion="0.0">
+            <state line="200" column="22" selection-start="6018" selection-end="6018" vertical-scroll-proportion="0.3991655">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MapFactory.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/generic/MapFactory.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="47" column="6" selection-start="1795" selection-end="1795" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -76,7 +85,7 @@
       <file leaf-file-name="BoxesDemo.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="473" column="0" selection-start="11098" selection-end="11098" vertical-scroll-proportion="0.0">
+            <state line="482" column="17" selection-start="11515" selection-end="11515" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -100,28 +109,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="NodeDemo.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/NodeDemo.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="10" column="7" selection-start="136" selection-end="136" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Var.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Var.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="3" column="6" selection-start="34" selection-end="34" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Data.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="Data.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Data.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="305" column="31" selection-start="8719" selection-end="8719" vertical-scroll-proportion="0.47007042">
+            <state line="2" column="0" selection-start="27" selection-end="27" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="XMLData.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/XMLData.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="154" column="0" selection-start="4718" selection-end="4718" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -167,7 +167,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/NodeDemo.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Codec.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/codec/Codec.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/codec/Coder.scala" />
@@ -180,9 +179,10 @@
         <option value="$PROJECT_DIR$/boxes/src/boxes/Box.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Node.scala" />
         <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/XMLProto.scala" />
-        <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala" />
-        <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/Data.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/XMLData.scala" />
+        <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala" />
       </list>
     </option>
   </component>
@@ -312,6 +312,58 @@
               <option name="myItemId" value="persistence" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="XMLData.scala" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="BoxesProject" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="boxes" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="boxes" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="persistence" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="BoxesProject" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="boxes" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="boxes" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="persistence" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Data.scala" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
+            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -381,7 +433,13 @@
       <option name="PASS_PARENT_ENVS" value="true" />
       <module name="boxes" />
       <envs />
+      <RunnerSettings RunnerId="Debug">
+        <option name="DEBUG_PORT" value="50659" />
+        <option name="TRANSPORT" value="0" />
+        <option name="LOCAL" value="true" />
+      </RunnerSettings>
       <RunnerSettings RunnerId="Run" />
+      <ConfigurationWrapper RunnerId="Debug" />
       <ConfigurationWrapper RunnerId="Run" />
       <method />
     </configuration>
@@ -578,22 +636,22 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="22" width="1920" height="967" extended-state="6" />
-    <editor active="false" />
+    <frame x="0" y="22" width="1920" height="1054" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24959914" sideWeight="0.7782516" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3993576" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.20661157" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.20556745" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3290735" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.15606627" sideWeight="0.6663113" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32977018" sideWeight="0.7782516" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3997862" sideWeight="0.7782516" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32977018" sideWeight="0.72845334" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32977018" sideWeight="0.8222698" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.27154663" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.17773019" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3270366" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -638,16 +696,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/mutable/ListBuffer.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="254" column="6" selection-start="7484" selection-end="7484" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/NodeAccessors.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="22" column="19" selection-start="525" selection-end="525" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Box.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="34" column="47" selection-start="1271" selection-end="1271" vertical-scroll-proportion="0.0" />
@@ -697,13 +745,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="30" column="0" selection-start="732" selection-end="732" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/io/Source.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="326" column="142" selection-start="10436" selection-end="10436" vertical-scroll-proportion="0.0">
@@ -718,16 +759,37 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
+    <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/generic/MapFactory.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="473" column="0" selection-start="11098" selection-end="11098" vertical-scroll-proportion="0.0">
+        <state line="47" column="6" selection-start="1795" selection-end="1795" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Data.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="305" column="31" selection-start="8719" selection-end="8719" vertical-scroll-proportion="0.47007042">
+        <state line="2" column="0" selection-start="27" selection-end="27" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/XMLData.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="154" column="0" selection-start="4718" selection-end="4718" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="482" column="17" selection-start="11515" selection-end="11515" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="200" column="22" selection-start="6018" selection-end="6018" vertical-scroll-proportion="0.3991655">
           <folding />
         </state>
       </provider>

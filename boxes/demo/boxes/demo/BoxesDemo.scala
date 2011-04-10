@@ -30,8 +30,9 @@ object BoxesDemo {
     val age = Var(32)
     val friend:Var[Option[OptionPerson]] = Var(None)
     val numbers = Var(List[Int]())
+    val accounts = Var(Map[String, Int]())
 
-    override def toString = name() + ", " + age() + ", friend: " + friend() + ", numbers " + numbers()
+    override def toString = name() + ", " + age() + ", friend: " + friend() + ", numbers " + numbers() + ", accounts " + accounts()
   }
 
   def optionPath() = {
@@ -477,8 +478,11 @@ object BoxesDemo {
     val target = new XMLDataTarget(a, s)
     a.alias(classOf[OptionPerson], "Person")
     val p = new OptionPerson()
+    p.accounts() = Map("current" -> 10, "savings" -> 100, "secretswiss" -> 10000000)
+    p.numbers() = List(10,20,30)
+    p.age() = 100
     val q = new OptionPerson()
-    q.numbers()=List(1, 4, 9)
+    q.numbers() = List(1, 4, 9)
     p.friend() = Some(q)
     q.name() = "q"
     codec.code(p, target)
