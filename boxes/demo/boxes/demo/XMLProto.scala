@@ -1,6 +1,5 @@
 package boxes.demo
 
-import scala.xml._
 import scala.xml.pull._
 import scala.io.Source
 

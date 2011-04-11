@@ -186,30 +186,69 @@ class MapCodec(delegate:Codec[Any]) extends Codec[Map[_,_]] {
 
 class NodeCodec(delegate:Codec[Any]) extends Codec[Node] {
   override def decode(source : DataSource) = {
-    val c = source.getOpenClassTag(consume=true).clazz
-    //TODO use ref/id to track
-    val n = c.newInstance
-    val accMap = NodeAccessors.accessorsOfClass(c)
-    while (!source.peekCloseTag) {
-      val accessorName = source.getOpenTag(consume=true).text
-      val accessorValue = delegate.decode(source)
-      accMap.get(accessorName) match {
-        case None => {}
-        case Some(m) => m.invoke(n).asInstanceOf[Var[Any]].update(accessorValue)
+    val tag = source.getOpenClassTag(consume=true)
+    val c = tag.clazz
+
+    tag.ref match {
+      //If we have no ref, we are a new object, so create it
+      case None => {
+        val n = c.newInstance
+
+        //Cache the object for any future refs to it, if it has an id
+        //We do this early to allow nodes to refer to themselves in their
+        //own Vars, if really necessary!
+        tag.id match {
+          case None => throw new RuntimeException("No ref for " + n + ", so assumed we would have an id, but none found")
+          case Some(id) => source.cache(id, n)
+        }
+
+        //Fill out the node's Vars
+        val accMap = NodeAccessors.accessorsOfClass(c)
+        while (!source.peekCloseTag) {
+          val accessorName = source.getOpenTag(consume=true).text
+          val accessorValue = delegate.decode(source)
+          accMap.get(accessorName) match {
+            case None => {}
+            case Some(m) => m.invoke(n).asInstanceOf[Var[Any]].update(accessorValue)
+          }
+          source.getCloseTag
+        }
+        source.getCloseTag
+
+        n.asInstanceOf[Node]
       }
-      source.getCloseTag
+      //If we have a ref, then we just look ourselves up from cache
+      case Some(ref) => {
+        val o = source.retrieveCached(ref)
+        //Still need to close the tag - there is nothing inside the tag, since we are just a ref
+        source.getCloseTag
+        o.asInstanceOf[Node]
+      }
     }
-    source.getCloseTag
-    n.asInstanceOf[Node]
+
   }
   override def code(n : Node, target : DataTarget) = {
-    target.openClassTag(n.getClass)
-    NodeAccessors.accessors(n).foreach(entry => {
-      target.openTag(entry._1)
-      delegate.code(entry._2.invoke(n).asInstanceOf[Var[_]].apply, target)
-      target.closeTag
-    })
-    target.closeTag
+
+    //First, see if we are new
+    target.cache(n) match {
+      //We were cached, just write out as a ref
+      case Cached(ref) => {
+        target.openClassTag(n.getClass, None, Some(ref))
+        target.closeTag
+      }
+
+      //We are new, write out as normal, and include the id
+      case New(id) => {
+        target.openClassTag(n.getClass, Some(id), None)
+        NodeAccessors.accessors(n).foreach(entry => {
+          target.openTag(entry._1)
+          delegate.code(entry._2.invoke(n).asInstanceOf[Var[_]].apply, target)
+          target.closeTag
+        })
+        target.closeTag
+      }
+    }
+
   }
 }
 

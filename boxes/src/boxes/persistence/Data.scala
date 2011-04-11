@@ -4,10 +4,33 @@ trait AnyTag
 case class Tag(text:String, id:Option[Int]=None, ref:Option[Int]=None) extends AnyTag
 case class ClassTag(clazz:Class[_], id:Option[Int]=None, ref:Option[Int]=None) extends AnyTag
 
+//Result of checking for an object in the cache
+trait CacheResult
+//Object is already cached, use a ref as given
+case class Cached(ref:Int) extends CacheResult
+//Object was not cached, use an id as given
+case class New(id:Int) extends CacheResult
+
 trait DataSource {
 //  def get():Int
 //  def get(bytes:Array[Byte]):Int
 //  def get(bytes:Array[Byte], offset:Int, length:Int):Int
+
+  /**
+   * Store something in the cache.
+   * Must be called by any Codec that has
+   * just decoded something that had an
+   * id. This makes the decoded thing
+   * available for following codecs to
+   * retrieve if they encounter a ref.
+   */
+  def cache(id:Int, thing:Any)
+
+  /**
+   * Retrieve a thing cached by a previous
+   * codec with a given id.
+   */
+  def retrieveCached(ref:Int):Any
 
   def getBoolean():Boolean
   def getByte():Byte
@@ -29,13 +52,6 @@ trait DataSource {
    * data to be retrieved.
    */
   def getOpenTag(consume:Boolean):Tag
-
-  //TODO DataSource should provide caching for users - when they
-  //decode something with an id they must put it in the cache
-  //for subsequent codecs to retrieve when they see a ref.
-  //DataTarget will do the other part - handing out new ids, and
-  //storing a map to look up the ref for use if an object is seen
-  //again.
 
   /**
    * Return the details of the next open class tag.
@@ -80,6 +96,8 @@ trait DataTarget {
 //  def put(i:Int)
 //  def put(bytes:Array[Byte])
 //  def put(bytes:Array[Byte], offset:Int, length:Int)
+
+  def cache(thing:Any):CacheResult
 
   def putBoolean(b:Boolean)
   def putByte(i:Byte)

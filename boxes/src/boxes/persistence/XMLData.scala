@@ -56,6 +56,7 @@ class XMLDataSource(s:Source, aliases:XMLAliases) extends DataSource {
 
   val events = new XMLEventReader(s)
   var nextEvent:Option[XMLEvent] = None
+  private val cache = mutable.Map[Int, Any]()
 
   private def pullEvent(tag:Boolean) = {
     //Text events are only wanted if we are NOT looking for
@@ -105,6 +106,18 @@ class XMLDataSource(s:Source, aliases:XMLAliases) extends DataSource {
     }
   }
 
+  override def cache(id:Int, thing:Any) = {
+    cache.put(id, thing).foreach(existing => {
+      throw new RuntimeException("Tried to cache " + thing + " with id " + id + " but this was already used for " + existing)
+    })
+  }
+  override def retrieveCached(ref:Int) = {
+    cache.get(ref) match {
+      case None => throw new RuntimeException("Nothing found in cache for id (ref) " + ref)
+      case Some(thing) => thing
+    }
+  }
+
   override def getBoolean() = getText.trim.toBoolean
   override def getByte() = getText.trim.toByte
   override def getShort() = getText.trim.toShort
@@ -115,7 +128,10 @@ class XMLDataSource(s:Source, aliases:XMLAliases) extends DataSource {
   override def getDouble() = getText.trim.toDouble
   override def getUTF():String = getText
 
-  override def close() = s.close
+  override def close() = {
+    cache.clear
+    s.close
+  }
 
   def intAttr(e:EvElemStart, name:String) = {
     e.attrs(name) match {
@@ -158,13 +174,26 @@ class XMLDataSource(s:Source, aliases:XMLAliases) extends DataSource {
 
 }
 
-
-
 class XMLDataTarget(aliases:XMLAliases, writer:Writer) extends DataTarget {
 
   //Stack of info for open tags. String is the tag label, Boolean is whether
   //formatting should be skipped when closing the tag.
   private val tagStack = mutable.ListBuffer[(String, Boolean)]()
+
+  private val cache = mutable.Map[Any, Int]()
+  private var nextId = 0
+
+  override def cache(thing:Any) = {
+    cache.get(thing) match {
+      case None => {
+        val id = nextId
+        nextId = nextId + 1
+        cache.put(thing, id)
+        New(id)
+      }
+      case Some(ref) => Cached(ref)
+    }
+  }
 
   private def printWithFormatting(s:String, newline:Boolean = true, tabs:Boolean = true) = {
     if (tabs) tagStack.foreach(_ => writer.write("  "))
@@ -191,7 +220,8 @@ class XMLDataTarget(aliases:XMLAliases, writer:Writer) extends DataTarget {
   }
 
   def openClassTag(c:Class[_], id:Option[Int], ref:Option[Int]) = {
-    var s = aliases.forClass(c)
+    var label = aliases.forClass(c)
+    var s = label
 
     id.foreach(id => s = s + " id='" + id + "'")
     ref.foreach(ref => s = s + " ref='" + ref + "'")
@@ -200,10 +230,10 @@ class XMLDataTarget(aliases:XMLAliases, writer:Writer) extends DataTarget {
     //need to have no whitespace, so don't print a newline
     if (c == classOf[java.lang.String]) {
       printWithFormatting("<" + s + ">", false)
-      tagStack.append((s, true))
+      tagStack.append((label, true))
     } else {
       printWithFormatting("<" + s + ">")
-      tagStack.append((s, false))
+      tagStack.append((label, false))
     }
   }
 
@@ -225,6 +255,7 @@ class XMLDataTarget(aliases:XMLAliases, writer:Writer) extends DataTarget {
 
   def close() = {
     writer.close
+    cache.clear
     if (!tagStack.isEmpty) throw new RuntimeException("Closed XMLDataTarget with tags still open")
   }
 }

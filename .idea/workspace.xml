@@ -67,16 +67,16 @@
       <file leaf-file-name="Codec.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="221" column="53" selection-start="6795" selection-end="6795" vertical-scroll-proportion="-102.0">
+            <state line="203" column="40" selection-start="6275" selection-end="6275" vertical-scroll-proportion="10.307693">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BoxesDemo.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="BoxesDemo.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="482" column="17" selection-start="11515" selection-end="11515" vertical-scroll-proportion="0.0">
+            <state line="506" column="0" selection-start="12145" selection-end="12145" vertical-scroll-proportion="0.7112782">
               <folding />
             </state>
           </provider>
@@ -85,7 +85,7 @@
       <file leaf-file-name="Data.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Data.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="68" column="13" selection-start="2126" selection-end="2126" vertical-scroll-proportion="0.0">
+            <state line="11" column="42" selection-start="467" selection-end="467" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -94,16 +94,34 @@
       <file leaf-file-name="XMLData.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/XMLData.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="165" column="54" selection-start="5127" selection-end="5127" vertical-scroll-proportion="0.0">
+            <state line="233" column="28" selection-start="7386" selection-end="7386" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="XMLProto.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="XMLEventReader.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/xml/pull/XMLEventReader.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="52" column="6" selection-start="2326" selection-end="2326" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MapLike.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/mutable/MapLike.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="48" column="6" selection-start="1698" selection-end="1698" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="XMLProto.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/XMLProto.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="14" column="0" selection-start="971" selection-end="971" vertical-scroll-proportion="0.23140496">
+            <state line="2" column="0" selection-start="20" selection-end="20" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -133,11 +151,11 @@
         <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/NodeAccessors.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Box.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Node.scala" />
-        <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
-        <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala" />
+        <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/XMLProto.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/Data.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/XMLData.scala" />
-        <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/XMLProto.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala" />
+        <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
       </list>
     </option>
   </component>
@@ -500,9 +518,9 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.15606627" sideWeight="0.6663113" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32977018" sideWeight="0.7782516" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3997862" sideWeight="0.7782516" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32977018" sideWeight="0.8222698" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32977018" sideWeight="0.7430407" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.17773019" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25695932" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3270366" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -547,11 +565,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Var.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="3" column="6" selection-start="34" selection-end="34" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/util/NumericClass.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="4" column="105" selection-start="103" selection-end="103" vertical-scroll-proportion="0.0" />
@@ -567,19 +580,9 @@
         <state line="326" column="142" selection-start="10436" selection-end="10436" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/xml/pull/XMLEventReader.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="26" column="20" selection-start="1053" selection-end="1053" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/generic/MapFactory.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="47" column="6" selection-start="1795" selection-end="1795" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="482" column="17" selection-start="11515" selection-end="11515" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/xml/Node.scala">
@@ -590,27 +593,6 @@
     <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/IterableLike.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="83" column="17" selection-start="3521" selection-end="3521" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="221" column="53" selection-start="6795" selection-end="6795" vertical-scroll-proportion="-102.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Data.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="68" column="13" selection-start="2126" selection-end="2126" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/XMLData.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="165" column="54" selection-start="5127" selection-end="5127" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
       </provider>
     </entry>
     <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/xml/MetaData.scala">
@@ -636,7 +618,49 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/XMLProto.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="14" column="0" selection-start="971" selection-end="971" vertical-scroll-proportion="0.23140496">
+        <state line="2" column="0" selection-start="20" selection-end="20" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/mutable/MapLike.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="48" column="6" selection-start="1698" selection-end="1698" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/xml/pull/XMLEventReader.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="52" column="6" selection-start="2326" selection-end="2326" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Data.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="11" column="42" selection-start="467" selection-end="467" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/XMLData.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="233" column="28" selection-start="7386" selection-end="7386" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="203" column="40" selection-start="6275" selection-end="6275" vertical-scroll-proportion="10.307693">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="506" column="0" selection-start="12145" selection-end="12145" vertical-scroll-proportion="0.7112782">
           <folding />
         </state>
       </provider>
