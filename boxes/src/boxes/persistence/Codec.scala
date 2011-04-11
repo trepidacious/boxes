@@ -52,6 +52,7 @@ class CodecByClass extends Codec[Any] {
 
     add(new ListCodec(this), classOf[List[_]])
     add(new MapCodec(this), classOf[Map[_,_]])
+    add(new SetCodec(this), classOf[Set[_]])
     add(new NodeCodec(this), classOf[Node])
     add(new OptionCodec(this), classOf[Option[_]])
   }
@@ -75,7 +76,6 @@ class CodecByClass extends Codec[Any] {
   //Need to look up class from tag, then use appropriate codec
   override def decode(source : DataSource) = {
     val c = source.getOpenClassTag(false).clazz
-    println("Decoding " + c)
     val codec = get(c)
     codec.decode(source)
   }
@@ -148,13 +148,29 @@ class ListCodec(delegate:Codec[Any]) extends Codec[List[_]] {
   }
 }
 
+class SetCodec(delegate:Codec[Any]) extends Codec[Set[_]] {
+  override def decode(source : DataSource) = {
+    source.assertOpenClassTag(ClassTag(classOf[Set[_]]))
+    val lb = mutable.ListBuffer[Any]()
+    while (!source.peekCloseTag) {
+      lb.append(delegate.decode(source))
+    }
+    source.getCloseTag
+    Set(lb:_*)
+  }
+  override def code(list : Set[_], target : DataTarget) = {
+    target.openClassTag(classOf[Set[_]])
+    list.foreach(e => delegate.code(e, target))
+    target.closeTag
+  }
+}
+
+
 class MapCodec(delegate:Codec[Any]) extends Codec[Map[_,_]] {
   override def decode(source : DataSource) = {
     source.assertOpenClassTag(ClassTag(classOf[Map[_,_]]))
-    println("Decoding map")
     val entries = mutable.ListBuffer[(Any,Any)]()
     while (!source.peekCloseTag) {
-      println("Got a map entry")
       if (source.getOpenTag(consume=true).text != "key") throw new RuntimeException("Expected key tag for map")
       val key = delegate.decode(source)
       source.getCloseTag
@@ -162,7 +178,6 @@ class MapCodec(delegate:Codec[Any]) extends Codec[Map[_,_]] {
       val value = delegate.decode(source)
       source.getCloseTag
       entries.append((key, value))
-      println("Loaded entry " + (key, value))
     }
     source.getCloseTag
     Map(entries:_*)
@@ -170,7 +185,6 @@ class MapCodec(delegate:Codec[Any]) extends Codec[Map[_,_]] {
 
   override def code(map : Map[_,_], target : DataTarget) = {
     target.openClassTag(classOf[Map[_,_]])
-    println("Coding map")
     map.foreach(entry => {
       target.openTag("key")
       delegate.code(entry._1, target)

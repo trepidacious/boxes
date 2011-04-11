@@ -64,19 +64,19 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Codec.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="Codec.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="203" column="40" selection-start="6275" selection-end="6275" vertical-scroll-proportion="10.307693">
+            <state line="54" column="41" selection-start="1621" selection-end="1621" vertical-scroll-proportion="-3.2947369">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BoxesDemo.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="BoxesDemo.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="506" column="0" selection-start="12145" selection-end="12145" vertical-scroll-proportion="0.7112782">
+            <state line="496" column="64" selection-start="11896" selection-end="11896" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -94,7 +94,7 @@
       <file leaf-file-name="XMLData.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/XMLData.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="233" column="28" selection-start="7386" selection-end="7386" vertical-scroll-proportion="0.0">
+            <state line="26" column="51" selection-start="816" selection-end="816" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -154,8 +154,8 @@
         <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/XMLProto.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/Data.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/XMLData.scala" />
-        <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala" />
         <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala" />
       </list>
     </option>
   </component>
@@ -520,7 +520,7 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3997862" sideWeight="0.7782516" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32977018" sideWeight="0.7430407" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25695932" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25695932" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3270366" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -637,6 +637,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="496" column="64" selection-start="11896" selection-end="11896" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/XMLData.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="26" column="51" selection-start="816" selection-end="816" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Data.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="11" column="42" selection-start="467" selection-end="467" vertical-scroll-proportion="0.0">
@@ -644,23 +658,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/XMLData.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="233" column="28" selection-start="7386" selection-end="7386" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="203" column="40" selection-start="6275" selection-end="6275" vertical-scroll-proportion="10.307693">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="506" column="0" selection-start="12145" selection-end="12145" vertical-scroll-proportion="0.7112782">
+        <state line="54" column="41" selection-start="1621" selection-end="1621" vertical-scroll-proportion="-3.2947369">
           <folding />
         </state>
       </provider>
