@@ -13,7 +13,6 @@ object XMLProto {
     val e = er.next.asInstanceOf[EvElemStart]
     println(e.attrs("id").apply(0).text.toInt)
     println(e.attrs("ref").apply(0).text.toInt)
-//    er.foreach(e => println(e))
   }
 
 }

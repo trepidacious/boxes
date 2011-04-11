@@ -67,7 +67,7 @@
       <file leaf-file-name="Codec.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="160" column="30" selection-start="4837" selection-end="4837" vertical-scroll-proportion="0.0">
+            <state line="221" column="53" selection-start="6795" selection-end="6795" vertical-scroll-proportion="-102.0">
               <folding />
             </state>
           </provider>
@@ -82,10 +82,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Data.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="Data.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Data.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="36" column="10" selection-start="1246" selection-end="1246" vertical-scroll-proportion="0.58275384">
+            <state line="68" column="13" selection-start="2126" selection-end="2126" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -94,61 +94,16 @@
       <file leaf-file-name="XMLData.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/XMLData.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="134" column="28" selection-start="4206" selection-end="4206" vertical-scroll-proportion="0.0">
+            <state line="165" column="54" selection-start="5127" selection-end="5127" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Node.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/xml/Node.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="34" column="15" selection-start="1085" selection-end="1085" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="XMLProto.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="XMLProto.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/XMLProto.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="14" column="46" selection-start="1017" selection-end="1017" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="IterableLike.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/IterableLike.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="83" column="17" selection-start="3521" selection-end="3521" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="EvElemStart.class" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar://$USER_HOME$/scala/lib/scala-library.jar!/scala/xml/pull/EvElemStart.class">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="2" column="100" selection-start="143" selection-end="143" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="XMLEvent.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/xml/pull/XMLEvent.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="24" column="61" selection-start="1021" selection-end="1021" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="MetaData.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/xml/MetaData.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="74" column="15" selection-start="2938" selection-end="2938" vertical-scroll-proportion="0.0">
+            <state line="14" column="0" selection-start="971" selection-end="971" vertical-scroll-proportion="0.23140496">
               <folding />
             </state>
           </provider>
@@ -180,9 +135,9 @@
         <option value="$PROJECT_DIR$/boxes/src/boxes/Node.scala" />
         <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala" />
-        <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/XMLProto.scala" />
-        <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/XMLData.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/Data.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/XMLData.scala" />
+        <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/XMLProto.scala" />
       </list>
     </option>
   </component>
@@ -222,7 +177,7 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
+      <pane id="Favorites" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -264,10 +219,6 @@
               <option name="myItemId" value="src" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="boxes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -276,106 +227,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="boxes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="boxes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="util" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="BoxesProject" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="boxes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="boxes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="persistence" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="XMLData.scala" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="BoxesProject" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="boxes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="boxes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="persistence" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="BoxesProject" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="boxes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="boxes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="persistence" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Data.scala" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="BoxesProject" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="boxes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="demo" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -386,21 +237,21 @@
         </subPane>
       </pane>
       <pane id="PackagesPane" />
-      <pane id="Favorites" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="project.structure.last.edited" value="Modules" />
     <property name="GoToFile.includeJavaFiles" value="false" />
-    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.last.edited" value="Modules" />
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
-    <property name="recentsLimit" value="5" />
+    <property name="project.structure.proportion" value="0.15" />
     <property name="MemberChooser.sorted" value="false" />
+    <property name="recentsLimit" value="5" />
     <property name="MemberChooser.showClasses" value="true" />
-    <property name="project.structure.side.proportion" value="0.2" />
     <property name="GoToClass.includeLibraries" value="false" />
-    <property name="MemberChooser.copyJavadoc" value="false" />
+    <property name="project.structure.side.proportion" value="0.2" />
     <property name="dynamic.classpath" value="false" />
+    <property name="MemberChooser.copyJavadoc" value="false" />
   </component>
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
@@ -408,7 +259,7 @@
       <recent name="boxes" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.XMLProto">
+  <component name="RunManager" selected="Application.BoxesDemo">
     <configuration default="false" name="BoxSpec" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true">
       <module name="boxes" />
       <setting name="path" value="boxes.test.BoxSpec" />
@@ -703,105 +554,89 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/util/NumericClass.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="4" column="105" selection-start="103" selection-end="103" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="4" column="105" selection-start="103" selection-end="103" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/SwingView.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="301" column="72" selection-start="9003" selection-end="9003" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="301" column="72" selection-start="9003" selection-end="9003" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/io/Source.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="326" column="142" selection-start="10436" selection-end="10436" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="326" column="142" selection-start="10436" selection-end="10436" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/xml/pull/XMLEventReader.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="26" column="20" selection-start="1053" selection-end="1053" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="26" column="20" selection-start="1053" selection-end="1053" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/generic/MapFactory.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="47" column="6" selection-start="1795" selection-end="1795" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="47" column="6" selection-start="1795" selection-end="1795" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="482" column="17" selection-start="11515" selection-end="11515" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/xml/pull/XMLEvent.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="24" column="61" selection-start="1021" selection-end="1021" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/IterableLike.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="83" column="17" selection-start="3521" selection-end="3521" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/scala/lib/scala-library.jar!/scala/xml/pull/EvElemStart.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="100" selection-start="143" selection-end="143" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/xml/MetaData.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="74" column="15" selection-start="2938" selection-end="2938" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="482" column="17" selection-start="11515" selection-end="11515" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/xml/Node.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="34" column="15" selection-start="1085" selection-end="1085" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="34" column="15" selection-start="1085" selection-end="1085" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/IterableLike.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="83" column="17" selection-start="3521" selection-end="3521" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="160" column="30" selection-start="4837" selection-end="4837" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/XMLProto.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="14" column="46" selection-start="1017" selection-end="1017" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/XMLData.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="134" column="28" selection-start="4206" selection-end="4206" vertical-scroll-proportion="0.0">
+        <state line="221" column="53" selection-start="6795" selection-end="6795" vertical-scroll-proportion="-102.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Data.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="36" column="10" selection-start="1246" selection-end="1246" vertical-scroll-proportion="0.58275384">
+        <state line="68" column="13" selection-start="2126" selection-end="2126" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/XMLData.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="165" column="54" selection-start="5127" selection-end="5127" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/xml/MetaData.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="74" column="15" selection-start="2938" selection-end="2938" vertical-scroll-proportion="0.016689846">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/xml/pull/XMLEvent.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="24" column="61" selection-start="1021" selection-end="1021" vertical-scroll-proportion="0.29228687">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/scala/lib/scala-library.jar!/scala/xml/pull/EvElemStart.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="100" selection-start="143" selection-end="143" vertical-scroll-proportion="0.03305785">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/XMLProto.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="14" column="0" selection-start="971" selection-end="971" vertical-scroll-proportion="0.23140496">
           <folding />
         </state>
       </provider>

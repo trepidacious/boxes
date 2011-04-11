@@ -1,5 +1,9 @@
 package boxes.persistence
 
+trait AnyTag
+case class Tag(text:String, id:Option[Int]=None, ref:Option[Int]=None) extends AnyTag
+case class ClassTag(clazz:Class[_], id:Option[Int]=None, ref:Option[Int]=None) extends AnyTag
+
 trait DataSource {
 //  def get():Int
 //  def get(bytes:Array[Byte]):Int
@@ -14,56 +18,42 @@ trait DataSource {
   def getFloat():Float
   def getDouble():Double
   def getUTF():String
-  def close()
 
   /**
-   * Consume the next open tag, or exception if the
-   * next element is not an open tag. Returns the string
-   * in the tag, and optional id, then optional ref
+   * Return the details of the next open tag.
+   * If the next data is NOT an open tag, then
+   * a RunTimeException is thrown.
+   * If consume is true, the tag is removed from the source,
+   * and will not be returned again. Otherwise the tag
+   * will still be present in the source, as the next
+   * data to be retrieved.
    */
-  def getOpenTag():(String, Option[Int], Option[Int])
+  def getOpenTag(consume:Boolean):Tag
 
-  //TODO use a real class (case class?) for this tuple, and then
-  //get rid of the other form of getOpenClassTag, since it is
-  //easier to just compare the returned value
-  //Also just make the get/peek distinction be a boolean parameter
-  //"consume", false for peek, true for get. Call both methods
-  //getXXX.
   //TODO DataSource should provide caching for users - when they
   //decode something with an id they must put it in the cache
   //for subsequent codecs to retrieve when they see a ref.
   //DataTarget will do the other part - handing out new ids, and
   //storing a map to look up the ref for use if an object is seen
   //again.
-  /**
-   * Consume the next open class tag, or exception if the
-   * next element is not an open class tag. Returns the class
-   * in the tag, optional id, then optional ref
-   */
-  def getOpenClassTag():(Class[_], Option[Int], Option[Int])
 
   /**
-   * Consume the next open class tag, or exception if the
-   * next element is not an open class tag with the specified
-   * class, id and ref
+   * Return the details of the next open class tag.
+   * If the next data is NOT an open class tag, then
+   * a RunTimeException is thrown.
+   * If consume is true, the tag is removed from the source,
+   * and will not be returned again. Otherwise the tag
+   * will still be present in the source, as the next
+   * data to be retrieved.
    */
-  def getOpenClassTag(c:Class[_], id:Option[Int]=None, ref:Option[Int]=None)
+  def getOpenClassTag(consume:Boolean):ClassTag
 
   /**
-   * Get the string from next open tag, or exception if
-   * next element is not an open tag
-   * Does not consume the tag - leaves it in the source
-   * Returns the string
-   * in the tag, and optional id, then optional ref
+   * Equivalent to calling getOpenClassTag(true) and
+   * then throwing an exception if the tag is not
+   * equal to the expectedTag
    */
-  def peekOpenTag():(String, Option[Int], Option[Int])
-
-  /**
-   * Get the class from next open class tag, or exception if
-   * next element is not an open class tag
-   * Does not consume the tag - leaves it in the source
-   */
-  def peekOpenClassTag():(Class[_], Option[Int], Option[Int])
+  def assertOpenClassTag(expectedTag:ClassTag)
 
   /**
    * True if next tag is a close tag, false otherwise
@@ -76,6 +66,8 @@ trait DataSource {
    * next element is not a close tag
    */
   def getCloseTag()
+
+  def close()
 }
 
 /**

@@ -74,7 +74,7 @@ class CodecByClass extends Codec[Any] {
 
   //Need to look up class from tag, then use appropriate codec
   override def decode(source : DataSource) = {
-    val c = source.peekOpenClassTag._1
+    val c = source.getOpenClassTag(false).clazz
     println("Decoding " + c)
     val codec = get(c)
     codec.decode(source)
@@ -105,8 +105,8 @@ object AnyCodec extends Codec[Any] {
 
 class OptionCodec(delegate:Codec[Any]) extends Codec[Option[_]] {
   override def decode(source : DataSource) = {
-    source.getOpenClassTag(classOf[Option[_]])
-    val t = source.getOpenTag._1 match {
+    source.assertOpenClassTag(ClassTag(classOf[Option[_]]))
+    val t = source.getOpenTag(consume=true).text match {
       case "None" => None
       case "Some" => Some(delegate.decode(source))
     }
@@ -133,7 +133,7 @@ class OptionCodec(delegate:Codec[Any]) extends Codec[Option[_]] {
 
 class ListCodec(delegate:Codec[Any]) extends Codec[List[_]] {
   override def decode(source : DataSource) = {
-    source.getOpenClassTag(classOf[List[_]])
+    source.assertOpenClassTag(ClassTag(classOf[List[_]]))
     val lb = mutable.ListBuffer[Any]()
     while (!source.peekCloseTag) {
       lb.append(delegate.decode(source))
@@ -150,15 +150,15 @@ class ListCodec(delegate:Codec[Any]) extends Codec[List[_]] {
 
 class MapCodec(delegate:Codec[Any]) extends Codec[Map[_,_]] {
   override def decode(source : DataSource) = {
-    source.getOpenClassTag(classOf[Map[_,_]])
+    source.assertOpenClassTag(ClassTag(classOf[Map[_,_]]))
     println("Decoding map")
     val entries = mutable.ListBuffer[(Any,Any)]()
     while (!source.peekCloseTag) {
       println("Got a map entry")
-      if (source.getOpenTag._1 != "key") throw new RuntimeException("Expected key tag for map")
+      if (source.getOpenTag(consume=true).text != "key") throw new RuntimeException("Expected key tag for map")
       val key = delegate.decode(source)
       source.getCloseTag
-      if (source.getOpenTag._1 != "value") throw new RuntimeException("Expected value tag for map")
+      if (source.getOpenTag(consume=true).text != "value") throw new RuntimeException("Expected value tag for map")
       val value = delegate.decode(source)
       source.getCloseTag
       entries.append((key, value))
@@ -186,13 +186,12 @@ class MapCodec(delegate:Codec[Any]) extends Codec[Map[_,_]] {
 
 class NodeCodec(delegate:Codec[Any]) extends Codec[Node] {
   override def decode(source : DataSource) = {
-    val tagStuff = source.getOpenClassTag
-    val c = tagStuff._1
+    val c = source.getOpenClassTag(consume=true).clazz
     //TODO use ref/id to track
     val n = c.newInstance
     val accMap = NodeAccessors.accessorsOfClass(c)
     while (!source.peekCloseTag) {
-      val accessorName = source.getOpenTag._1
+      val accessorName = source.getOpenTag(consume=true).text
       val accessorValue = delegate.decode(source)
       accMap.get(accessorName) match {
         case None => {}
@@ -220,7 +219,7 @@ object ValCodec {
 
 class ValCodec[T](handler:ValHandler[T]) extends CodecWithClass[T] {
   override def decode(source : DataSource) = {
-    source.getOpenClassTag(handler.clazz)
+    source.assertOpenClassTag(ClassTag(handler.clazz))
     val t = handler.get(source)
     source.getCloseTag
     t

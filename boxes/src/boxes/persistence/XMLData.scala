@@ -72,20 +72,20 @@ class XMLDataSource(s:Source, aliases:XMLAliases) extends DataSource {
     }
   }
 
-  private def getNextEvent(tag:Boolean = true) = {
-    val e = nextEvent.getOrElse(pullEvent(tag))
-    nextEvent = None
-    e
-  }
-
-  private def peekNextEvent(tag:Boolean = true) = {
-    nextEvent match {
-      case None => {
-        val e = pullEvent(tag)
-        nextEvent = Some(e)
-        e
+  private def getNextEvent(consume:Boolean, tag:Boolean = true) = {
+    if (consume) {
+      val e = nextEvent.getOrElse(pullEvent(tag))
+      nextEvent = None
+      e
+    } else {
+      nextEvent match {
+        case None => {
+          val e = pullEvent(tag)
+          nextEvent = Some(e)
+          e
+        }
+        case Some(e) => e
       }
-      case Some(e) => e
     }
   }
 
@@ -95,9 +95,9 @@ class XMLDataSource(s:Source, aliases:XMLAliases) extends DataSource {
     //If we get a close tag, then we treat this as an empty string,
     //but don't consume the close tag, since it is meant for someone else.
     //If we get actual text, we consume and return it
-    peekNextEvent(false) match {
+    getNextEvent(consume=false, tag=false) match {
       case text:EvText => {
-        getNextEvent(false)
+        getNextEvent(consume=true, tag=false)
         text.text
       }
       case end:EvElemEnd => ""
@@ -117,7 +117,6 @@ class XMLDataSource(s:Source, aliases:XMLAliases) extends DataSource {
 
   override def close() = s.close
 
-
   def intAttr(e:EvElemStart, name:String) = {
     e.attrs(name) match {
       case null => None
@@ -125,44 +124,33 @@ class XMLDataSource(s:Source, aliases:XMLAliases) extends DataSource {
     }
   }
 
-  //TODO reduce duplicated code - get and peek methods are essentially the same, could just take a boolean parameter.
-  override def getOpenTag() = {
-    getNextEvent() match {
-      case start:EvElemStart => (start.label, intAttr(start, "id"), intAttr(start, "ref"))
-      case wrong:Any => throw new RuntimeException("Next tag is not an open tag, it is " + wrong)
-    }
-  }
-  override def peekOpenTag() = {
-    peekNextEvent() match {
-      case start:EvElemStart => (start.label, intAttr(start, "id"), intAttr(start, "ref"))
+  override def getOpenTag(consume:Boolean) = {
+    getNextEvent(consume) match {
+      case start:EvElemStart => Tag(start.label, intAttr(start, "id"), intAttr(start, "ref"))
       case wrong:Any => throw new RuntimeException("Next tag is not an open tag, it is " + wrong)
     }
   }
 
-  override def getOpenClassTag():(Class[_], Option[Int], Option[Int]) = {
-    val ot = getOpenTag
-    (aliases.forAlias(ot._1), ot._2, ot._3)
-  }
-  override def peekOpenClassTag():(Class[_], Option[Int], Option[Int]) = {
-    val ot = peekOpenTag
-    (aliases.forAlias(ot._1), ot._2, ot._3)
+  override def getOpenClassTag(consume:Boolean):ClassTag = {
+    val ot = getOpenTag(consume)
+    ClassTag(aliases.forAlias(ot.text), ot.id, ot.ref)
   }
 
-  override def getOpenClassTag(c:Class[_], id:Option[Int], ref:Option[Int]):Unit = {
-    val tagStuff = getOpenClassTag
-    if (tagStuff._1 != c) throw new RuntimeException("Expected tag for class " + c + " but found " + tagStuff._1)
-    if (tagStuff._2 != id) throw new RuntimeException("Expected id " + id + " but found " + tagStuff._2)
-    if (tagStuff._3 != ref) throw new RuntimeException("Expected ref " + ref + " but found " + tagStuff._3)
+  override def assertOpenClassTag(expectedTag:ClassTag):Unit = {
+    val observedTag = getOpenClassTag(consume=true)
+    if (observedTag != expectedTag) {
+      throw new RuntimeException("Expected tag " + expectedTag + " but found " + observedTag)
+    }
   }
 
   override def getCloseTag() = {
-    getNextEvent() match {
+    getNextEvent(consume=true) match {
       case end:EvElemEnd => {}
       case wrong:Any => throw new RuntimeException("Next tag is not a close tag, it is " + wrong)
     }
   }
   override def peekCloseTag():Boolean = {
-    peekNextEvent() match {
+    getNextEvent(consume=false) match {
       case end:EvElemEnd => true
       case _ => false
     }
@@ -174,29 +162,31 @@ class XMLDataSource(s:Source, aliases:XMLAliases) extends DataSource {
 
 class XMLDataTarget(aliases:XMLAliases, writer:Writer) extends DataTarget {
 
+  //Stack of info for open tags. String is the tag label, Boolean is whether
+  //formatting should be skipped when closing the tag.
   private val tagStack = mutable.ListBuffer[(String, Boolean)]()
 
-  private def printWithTabs(s:String, newline:Boolean = true, tabs:Boolean = true) = {
+  private def printWithFormatting(s:String, newline:Boolean = true, tabs:Boolean = true) = {
     if (tabs) tagStack.foreach(_ => writer.write("  "))
     writer.write(s)
     if (newline) writer.write("\n")
   }
 
-  def putBoolean(b:Boolean) = printWithTabs(""+b)
-  def putByte(i:Byte) = printWithTabs(""+i)
-  def putShort(i:Short) = printWithTabs(""+i)
-  def putChar(i:Char) = printWithTabs(""+i)
-  def putInt(i:Int) = printWithTabs(""+i)
-  def putLong(l:Long) = printWithTabs(""+l)
-  def putFloat(f:Float) = printWithTabs(""+f)
-  def putDouble(d:Double) = printWithTabs(""+d)
+  def putBoolean(b:Boolean) = printWithFormatting(""+b)
+  def putByte(i:Byte) = printWithFormatting(""+i)
+  def putShort(i:Short) = printWithFormatting(""+i)
+  def putChar(i:Char) = printWithFormatting(""+i)
+  def putInt(i:Int) = printWithFormatting(""+i)
+  def putLong(l:Long) = printWithFormatting(""+l)
+  def putFloat(f:Float) = printWithFormatting(""+f)
+  def putDouble(d:Double) = printWithFormatting(""+d)
 
   //No tab or newline for strings, we want the tags around the string value
   //to contain only the string value
-  def putUTF(s:String) = printWithTabs(s, false, false)
+  def putUTF(s:String) = printWithFormatting(s, false, false)
 
   def openTag(s:String) = {
-    printWithTabs("<" + s + ">")
+    printWithFormatting("<" + s + ">")
     tagStack.append((s, false))
   }
 
@@ -209,10 +199,10 @@ class XMLDataTarget(aliases:XMLAliases, writer:Writer) extends DataTarget {
     //When opening a string class tag, the contents
     //need to have no whitespace, so don't print a newline
     if (c == classOf[java.lang.String]) {
-      printWithTabs("<" + s + ">", false)
+      printWithFormatting("<" + s + ">", false)
       tagStack.append((s, true))
     } else {
-      printWithTabs("<" + s + ">")
+      printWithFormatting("<" + s + ">")
       tagStack.append((s, false))
     }
   }
@@ -223,15 +213,18 @@ class XMLDataTarget(aliases:XMLAliases, writer:Writer) extends DataTarget {
     val skipTabs = tag._2
 
     if (skipTabs) {
-      printWithTabs("</" + name +">", true, false)
+      printWithFormatting("</" + name +">", true, false)
     } else {
-      printWithTabs("</" + name +">")
+      printWithFormatting("</" + name +">")
     }
   }
 
-  def flush() = {}
+  def flush() = {
+    writer.flush
+  }
 
   def close() = {
+    writer.close
     if (!tagStack.isEmpty) throw new RuntimeException("Closed XMLDataTarget with tags still open")
   }
 }
