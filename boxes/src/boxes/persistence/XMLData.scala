@@ -44,12 +44,8 @@ class XMLAliases {
 
   def forClass(c:Class[_]) = aliases.getOrElse(c, c.getCanonicalName)
 
-  def forAlias(s:String) = {
-    aliasesReverse.get(s) match {
-      case None => Class.forName(s)
-      case Some(c) => c
-    }
-  }
+  def forAlias(s:String) = aliasesReverse.getOrElse(s, Class.forName(s))
+
 }
 
 class XMLDataSource(s:Source, aliases:XMLAliases) extends DataSource {

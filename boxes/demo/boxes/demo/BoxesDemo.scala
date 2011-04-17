@@ -520,7 +520,7 @@ object BoxesDemo {
 
 //    swingViews
 //    responder
-//    textViews
+    textViews
 //    optionPath
 //    textViews
 //    sequences
