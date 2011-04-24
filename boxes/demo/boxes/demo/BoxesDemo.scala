@@ -457,7 +457,7 @@ object BoxesDemo {
   def data() {
     val s = new StringWriter()
     val a = new XMLAliases
-    val d = new XMLDataTarget(a, s)
+    val d = new XMLDataTarget(s, a)
     d.openTag("Person")
     d.openTag("Name")
     d.putUTF("Bob")
@@ -476,7 +476,7 @@ object BoxesDemo {
     val codec = new CodecByClass()
     val a = new XMLAliases
     val s = new StringWriter()
-    val target = new XMLDataTarget(a, s)
+    val target = new XMLDataTarget(s, a)
     a.alias(classOf[OptionPerson], "Person")
     val p = new OptionPerson()
     p.accounts() = Map("current" -> 10, "savings" -> 100, "secretswiss" -> 10000000)

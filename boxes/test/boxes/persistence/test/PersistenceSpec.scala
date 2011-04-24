@@ -44,7 +44,7 @@ class PersistenceSpec extends WordSpec {
       encodeAliases.alias(classOf[Person], "Person")
 
       val s = new StringWriter()
-      val target = new XMLDataTarget(encodeAliases, s)
+      val target = new XMLDataTarget(s, encodeAliases)
 
       val p = new Person()
       p.accounts() = Map("current" -> 10.0, "savings" -> 100.0, "secretswiss" -> 10000000.0)
@@ -104,7 +104,7 @@ class PersistenceSpec extends WordSpec {
   "XMLDataSource and XMLDataTarget" should {
     "encode and decode an empty String" in {
       val s = new StringWriter()
-      val target = new XMLDataTarget(new XMLAliases, s)
+      val target = new XMLDataTarget(s, new XMLAliases)
       target.openClassTag(classOf[String])
       target.putUTF("")
       target.closeTag

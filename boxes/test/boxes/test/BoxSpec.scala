@@ -3,6 +3,7 @@ package boxes.test
 import org.scalatest.WordSpec
 import scala.collection._
 import boxes._
+import immutable.Queue
 
 class BoxSpec extends WordSpec {
 
@@ -211,5 +212,79 @@ class BoxSpec extends WordSpec {
     }
   }
 
+  "ListUtils" should {
+
+    "insert a single element" in {
+      val l = List(1, 2, 3, 4)
+      assert(ListUtils.insert(l, 0, 42).sameElements(List(42, 1, 2, 3, 4)))
+      assert(ListUtils.insert(l, 1, 42).sameElements(List(1, 42, 2, 3, 4)))
+      assert(ListUtils.insert(l, 2, 42).sameElements(List(1, 2, 42, 3, 4)))
+      assert(ListUtils.insert(l, 3, 42).sameElements(List(1, 2, 3, 42, 4)))
+      assert(ListUtils.insert(l, 4, 42).sameElements(List(1, 2, 3, 4, 42)))
+    }
+
+    "insert multiple elements" in {
+      val l = List(1, 2, 3, 4)
+      assert(ListUtils.insert(l, 0, 42, 43).sameElements(List(42, 43, 1, 2, 3, 4)))
+      assert(ListUtils.insert(l, 1, 42, 43).sameElements(List(1, 42, 43, 2, 3, 4)))
+      assert(ListUtils.insert(l, 2, 42, 43).sameElements(List(1, 2, 42, 43, 3, 4)))
+      assert(ListUtils.insert(l, 3, 42, 43).sameElements(List(1, 2, 3, 42, 43, 4)))
+      assert(ListUtils.insert(l, 4, 42, 43).sameElements(List(1, 2, 3, 4, 42, 43)))
+    }
+
+    "remove a single element" in {
+      val l = List(1, 2, 3, 4)
+      assert(ListUtils.remove(l, 0, 1).sameElements(List(2, 3, 4)))
+      assert(ListUtils.remove(l, 1, 1).sameElements(List(1, 3, 4)))
+      assert(ListUtils.remove(l, 2, 1).sameElements(List(1, 2, 4)))
+      assert(ListUtils.remove(l, 3, 1).sameElements(List(1, 2, 3)))
+    }
+
+    "remove multiple elements" in {
+      val l = List(1, 2, 3, 4)
+      assert(ListUtils.remove(l, 0, 2).sameElements(List(3, 4)))
+      assert(ListUtils.remove(l, 1, 2).sameElements(List(1, 4)))
+      assert(ListUtils.remove(l, 2, 2).sameElements(List(1, 2)))
+    }
+
+  }
+
+  "ListCal" should {
+    "calculate list of indices" in {
+      val i = Var(0)
+      val l = ListCal(Range(0, i()).toList)
+
+      assert(l().sameElements(Range(0, 0).toList))
+
+      i() = 10
+      assert(l().sameElements(Range(0, 10).toList))
+    }
+  }
+
+  "ListVar" should {
+    "allow replacement, insertion and removal" in {
+      val l = ListVar(0, 1, 2, 3)
+      l(1) = 42
+      assert(l().sameElements(List(0, 42, 2, 3)))
+      l.remove(1, 1)
+      assert(l().sameElements(List(0, 2, 3)))
+      l.insert(1, 24, 25)
+      assert(l().sameElements(List(0, 24, 25, 2, 3)))
+    }
+
+    "notify replacement, insertion and removal" in {
+      val l = ListVar(0, 1, 2, 3)
+      var changes:Option[Queue[ListChange]] = None
+      val v = View(changes = l.changes)
+      assert(changes == None)
+      l(1) = 42
+      assert(changes == Some(Queue(ReplacementListChange(1, 1))))
+      l.remove(2, 1)
+      assert(changes == Some(Queue(RemovalListChange(2, 1))))
+      l.insert(3, 24, 25)
+      assert(changes == Some(Queue(InsertionListChange(3, 2))))
+    }
+
+  }
 
 }

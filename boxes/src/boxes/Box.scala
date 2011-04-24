@@ -35,7 +35,7 @@ object Box {
   private var cycling = false
   private var applyingReaction = false
 
-  private val lock:ReentrantLock = new ReentrantLock()
+  private val lock = new ReentrantLock()
 
   def beforeRead[C](b:Box[C]) = {
     lock.lock

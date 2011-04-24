@@ -170,7 +170,7 @@ class XMLDataSource(s:Source, aliases:XMLAliases) extends DataSource {
 
 }
 
-class XMLDataTarget(aliases:XMLAliases, writer:Writer) extends DataTarget {
+class XMLDataTarget(writer:Writer, aliases:XMLAliases) extends DataTarget {
 
   //Stack of info for open tags. String is the tag label, Boolean is whether
   //formatting should be skipped when closing the tag.
