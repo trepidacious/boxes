@@ -11,6 +11,7 @@ import javax.swing._
 import java.awt.event.ActionEvent
 import boxes.util.{LogStep, Step, CoalescingResponder, NumericClass}
 import boxes._
+import list.ListIndex
 import persistence._
 import io.Source
 import java.io.StringWriter
@@ -520,15 +521,40 @@ object BoxesDemo {
 
 //    swingViews
 //    responder
-    textViews
+//    textViews
 //    optionPath
 //    textViews
 //    sequences
 //    numericClass
 //    codecAccessors
 //    data
-    val xml = code
-    decode(xml)
+
+//    val xml = code
+//    decode(xml)
+
+    val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7)
+    val i = ListIndex(l)
+
+    println("About to set -1")
+    i() = -1
+    println("Set -1")
+
+//
+//    //Can't select past end of list - just selects last index
+//    i() = 10
+//
+//    i() = 4
+//
+//    l(0) = 42
+//
+//    l(0) = 0
+//
+    println("About to remove")
+    l.remove(0, 2)
+    println("Removed")
+    println(l())
+    println(i())
+
   }
 
 }

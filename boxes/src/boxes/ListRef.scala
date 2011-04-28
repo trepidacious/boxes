@@ -1,13 +1,5 @@
 package boxes
 
-/**
- * Created by IntelliJ IDEA.
- * User: trepidacious
- * Date: 23/04/2011
- * Time: 10:45
- * To change this template use File | Settings | File Templates.
- */
-
 import collection._
 
 trait ListChange
@@ -37,10 +29,11 @@ case class RemovalListChange(index:Int, count:Int) extends ListChange
 
 trait ListRef[T] extends Box[ListChange] {
   def apply():List[T]
+  def apply(i:Int):T
 }
 
 /**
- * ListRef which is known to be mutable, and exposes mutator
+ * ListRef which is known to be mutable, and exposes mutator methods
  */
 trait ListVar[T] extends ListRef[T] {
   def update(newT:List[T])
@@ -84,7 +77,14 @@ private class ListValDefault[T] (private val t:List[T]) extends ListVal[T] {
       Box.afterRead(this)
     }
   }
-
+  def apply(i:Int):T = {
+    try {
+      Box.beforeRead(this)
+      return t(i)
+    } finally {
+      Box.afterRead(this)
+    }
+  }
   override def toString = "ListVal(" + t + ")"
 }
 
@@ -138,6 +138,15 @@ private class ListVarDefault[T] (private var t:List[T]) extends ListVar[T] {
     try {
       Box.beforeRead(this)
       return t
+    } finally {
+      Box.afterRead(this)
+    }
+  }
+
+  def apply(i:Int):T = {
+    try {
+      Box.beforeRead(this)
+      return t(i)
     } finally {
       Box.afterRead(this)
     }

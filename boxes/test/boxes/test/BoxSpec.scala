@@ -4,6 +4,7 @@ import org.scalatest.WordSpec
 import scala.collection._
 import boxes._
 import immutable.Queue
+import list.ListIndex
 
 class BoxSpec extends WordSpec {
 
@@ -285,6 +286,44 @@ class BoxSpec extends WordSpec {
       assert(changes == Some(Queue(InsertionListChange(3, 2))))
     }
 
+  }
+
+  "ListIndices" should {
+    "track single index" in {
+      val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7)
+      val i = ListIndex(l)
+
+      assert(i() === 0)
+
+      //Can't select -1 when list is not empty
+      i() = -1
+      assert(i() === 0)
+
+      //Can't select past end of list - just selects last index
+      i() = 10
+      assert(i() === 7)
+
+      i() = 4
+      assert(i() === 4)
+
+      l(0) = 42
+      assert(i() === 4)
+
+      l(0) = 0
+      assert(i() === 4)
+
+      println("About to remove")
+      l.remove(0, 2)
+      println("Removed")
+      println(l())
+      println(i())
+      assert(i() === 2)
+      assert(l(i()) === 4)
+
+      l.insert(0, 0, 1)
+      assert(i() === 4)
+      assert(l(i()) === 4)
+    }
   }
 
 }
