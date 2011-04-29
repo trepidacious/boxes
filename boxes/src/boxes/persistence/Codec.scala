@@ -218,7 +218,7 @@ class NodeCodec(delegate:Codec[Any]) extends Codec[Node] {
         }
 
         //Fill out the node's Vars
-        val accMap = NodeAccessors.accessorsOfClass(c)
+        val accMap = Node.accessorsOfClass(c)
         while (!source.peekCloseTag) {
           val accessorName = source.getOpenTag(consume=true).text
           val accessorValue = delegate.decode(source)
@@ -255,7 +255,7 @@ class NodeCodec(delegate:Codec[Any]) extends Codec[Node] {
       //We are new, write out as normal, and include the id
       case New(id) => {
         target.openClassTag(n.getClass, Some(id), None)
-        NodeAccessors.accessors(n).foreach(entry => {
+        Node.accessors(n).foreach(entry => {
           target.openTag(entry._1)
           delegate.code(entry._2.invoke(n).asInstanceOf[VarGeneral[_,_]].apply, target)
           target.closeTag

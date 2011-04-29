@@ -450,8 +450,8 @@ object BoxesDemo {
   }
 
   def codecAccessors() {
-    println("From class of person: " + NodeAccessors.accessorsOfClass(classOf[Person]))
-    println("From Person: " + NodeAccessors.accessors(new Person()))
+    println("From class of person: " + Node.accessorsOfClass(classOf[Person]))
+    println("From Person: " + Node.accessors(new Person()))
   }
 
   def data() {
