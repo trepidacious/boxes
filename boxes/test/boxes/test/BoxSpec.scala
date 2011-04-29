@@ -368,9 +368,7 @@ class BoxSpec extends WordSpec {
       i() = 10
       assert(l().sameElements(Range(0, 10).toList))
     }
-  }
 
-  "ListCal" should {
     "work with Path" in {
       val i = Var(0)
       val l = ListCal(Range(0, i()).toList)
@@ -385,7 +383,6 @@ class BoxSpec extends WordSpec {
 
       assert(v()().sameElements(Range(0, 10).toList))
       assert(p()().sameElements(Range(0, 10).toList))
-
     }
   }
 

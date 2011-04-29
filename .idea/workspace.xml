@@ -76,7 +76,16 @@
       <file leaf-file-name="BoxSpec.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/boxes/test/boxes/test/BoxSpec.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="252" column="24" selection-start="6346" selection-end="6346" vertical-scroll-proportion="1.8892261">
+            <state line="385" column="0" selection-start="10513" selection-end="10513" vertical-scroll-proportion="0.72382396">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ListRef.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/boxes/src/boxes/ListRef.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="144" column="96" selection-start="3429" selection-end="3429" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -86,6 +95,15 @@
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Path.scala">
           <provider selected="true" editor-type-id="text-editor">
             <state line="105" column="29" selection-start="2841" selection-end="2841" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Reaction.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Reaction.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="22" column="27" selection-start="486" selection-end="486" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -108,7 +126,6 @@
         <option value="$PROJECT_DIR$/boxes/src/boxes/Cal.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Val.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Var.scala" />
-        <option value="$PROJECT_DIR$/boxes/src/boxes/ListRef.scala" />
         <option value="$PROJECT_DIR$/boxes/test/boxes/persistence/test/PersistenceSpec.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/list/ListIndices.scala" />
         <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
@@ -118,8 +135,9 @@
         <option value="$PROJECT_DIR$/boxes/src/boxes/Reaction.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/NodeAccessors.scala" />
-        <option value="$PROJECT_DIR$/boxes/test/boxes/test/BoxSpec.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Path.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/ListRef.scala" />
+        <option value="$PROJECT_DIR$/boxes/test/boxes/test/BoxSpec.scala" />
       </list>
     </option>
   </component>
@@ -266,7 +284,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="RefGeneral.scala" />
+              <option name="myItemId" value="Reaction.scala" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -663,13 +681,6 @@
         <state line="26" column="0" selection-start="2100" selection-end="2100" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/ListRef.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="164" column="34" selection-start="3853" selection-end="3853" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/boxes/test/boxes/persistence/test/PersistenceSpec.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="16" column="0" selection-start="422" selection-end="422" vertical-scroll-proportion="0.0">
@@ -707,16 +718,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/RefGeneral.scala">
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Ref.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="8" column="6" selection-start="129" selection-end="129" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Reaction.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="22" column="27" selection-start="486" selection-end="486" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -735,9 +739,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Reaction.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="22" column="27" selection-start="486" selection-end="486" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/ListRef.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="144" column="96" selection-start="3429" selection-end="3429" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/boxes/test/boxes/test/BoxSpec.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="252" column="24" selection-start="6346" selection-end="6346" vertical-scroll-proportion="1.8892261">
+        <state line="385" column="0" selection-start="10513" selection-end="10513" vertical-scroll-proportion="0.72382396">
           <folding />
         </state>
       </provider>

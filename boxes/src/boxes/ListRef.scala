@@ -27,25 +27,17 @@ case class InsertionListChange(index:Int, count:Int) extends ListChange
  */
 case class RemovalListChange(index:Int, count:Int) extends ListChange
 
-trait ListRef[T] extends Box[ListChange] {
-  def apply():List[T]
+trait ListRef[T] extends RefGeneral[List[T], ListChange] {
   def apply(i:Int):T
 }
 
-/**
- * ListRef which is known to be mutable, and exposes mutator methods
- */
-trait ListVar[T] extends ListRef[T] {
-  def update(newT:List[T])
+trait ListVar[T] extends ListRef[T] with VarGeneral[List[T], ListChange] {
   def update(i:Int, e:T)
   def insert(i:Int, e:T*)
   def remove(i:Int, c:Int)
 }
 
-/**
- * ListRef which is guaranteed immutable
- */
-trait ListVal[T] extends ListRef[T]
+trait ListVal[T] extends ListRef[T] with ValGeneral[List[T], ListChange]
 
 object ListUtils {
   def insert[T](l:List[T], i:Int, t:T*):List[T] = {
@@ -153,37 +145,10 @@ private class ListVarDefault[T] (private var t:List[T]) extends ListVar[T] {
   override def toString = "ListVar(" + t + ")"
 }
 
-object ListReaction {
-
-  class ListTargetReaction[T](v:ListVar[T], result: =>List[T], name:String = "Unnamed List Reaction") extends Reaction {
-
-    def respond : (()=>Unit) = {
-      //First apply the function, so that any reads are performed now
-      val r = result
-
-      //The write will be performed later
-      {() => (v() = r)}
-    }
-
-    def isView = false
-
-    override def toString = "LTR: " + name
-
-  }
-
-  def apply[T](v:ListVar[T], result: =>List[T], name:String = "Unnamed Reaction") = {
-    val r = new ListTargetReaction(v, result, name)
-    Box.registerReaction(r)
-    v.retainReaction(r)
-    r
-  }
-
-}
-
 object ListCal {
   def apply[T](c: =>List[T]) = {
     val v = ListVar(c)
-    ListReaction(v, c)
+    Reaction(v, c)
     v.asInstanceOf[ListRef[T]]
   }
 }
