@@ -1,11 +1,10 @@
 package boxes.list
 
 import boxes._
-import util.WeakHashSet
 
 class ListIndexReaction[T, LR<:ListRef[T]](listRef:RefGeneral[LR,_], i:Var[Int]) extends Reaction {
 
-  private val processedChanges = new WeakHashSet[ListChange]()
+  private var lastProcessedChangeIndex = -1L
 
   private def updateIndex(i:Int, size:Int, change:ListChange) = change match {
 
@@ -33,18 +32,20 @@ class ListIndexReaction[T, LR<:ListRef[T]](listRef:RefGeneral[LR,_], i:Var[Int])
   }
 
   def respond : (()=>Unit) = {
-    println("ListReaction responding")
     var newI = i()
     val list = listRef()
     val size = list().size
 
     for {
       queue <- list.changes
-      change <- queue
+      indexAndChange <- queue
     } {
-      if (!processedChanges.contains(change)) {
-        processedChanges.add(change)
-        newI = updateIndex(newI, size, change)
+      //Only process changes newer than the last one we've already processed.
+      //Note that we know we will get changes to the list in the order they are made, with
+      //increasing indices.
+      if (indexAndChange._1 > lastProcessedChangeIndex) {
+        lastProcessedChangeIndex = indexAndChange._1
+        newI = updateIndex(newI, size, indexAndChange._2)
       }
     }
 

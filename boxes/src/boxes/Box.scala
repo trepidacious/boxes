@@ -19,14 +19,14 @@ object Box {
   //Track reactions that are newly added to the system (added AFTER the most recent full cycle), and so may need extra checks.
   private val newReactions = new mutable.HashSet[Reaction]()
 
-  //During a cycle, maps each written box to the write index when it was FIRST written in the current cycle
-  private val boxToWriteIndex = new mutable.HashMap[Box[_], Int]()
-
   //During a cycle, maps each written box to a list of changes applied to that list in the current cycle
+  //Actually the values are a pair of change index and change
+  //Note that we don't bother with type for the values -
+  //they are Queues of (Long, C) where C matches the Box[C] used as a key
   private val boxToChanges = new mutable.HashMap[Box[_], Object]
 
-  //The next write index to assign during cycling
-  private var writeIndex = 0
+  //The next change index to assign
+  private var changeIndex = 0L
 
   private var canRead = true
   private var canWrite = true
@@ -79,19 +79,13 @@ object Box {
       }
     }
 
-    boxToWriteIndex.getOrElseUpdate(b, writeIndex)
-    writeIndex = writeIndex + 1
+    var q = boxToChanges.get(b).getOrElse(immutable.Queue[(Long,C)]()).asInstanceOf[immutable.Queue[(Long,C)]]
+    changes.foreach(newChange => {
+      q = q:+(changeIndex, newChange)
+      changeIndex += 1
+    })
+    boxToChanges.put(b, q)
 
-    boxToChanges.get(b) match {
-      case None => {
-        boxToChanges.put(b, immutable.Queue(changes:_*))
-      }
-      case Some(existingChanges) => {
-        var q = existingChanges.asInstanceOf[immutable.Queue[C]]
-        changes.foreach(newChange => q = q:+newChange)
-        boxToChanges.put(b, q)
-      }
-    }
 
     //Any reactions on this box are now pending
     for {
@@ -130,18 +124,21 @@ object Box {
     }
   }
 
-  def boxWriteIndex(b:Box[_]) : Option[Int] = {
+  def boxFirstChangeIndex[C](b:Box[C]) : Option[Long] = {
     //Reading a box's write index counts as reading it, and
     //so for example makes a reaction have the box as a source
     try {
       beforeRead(b)
-      return boxToWriteIndex.get(b)
+      boxToChanges.get(b) match {
+        case None => return None
+        case Some(o) => return Some(o.asInstanceOf[immutable.Queue[(Long,C)]].head._1)
+      }
     } finally {
       afterRead(b)
     }
   }
 
-  def boxChanges[C](b:Box[C]):Option[immutable.Queue[C]] = {
+  def boxChanges[C](b:Box[C]):Option[immutable.Queue[(Long,C)]] = {
     //Reading a box's changes counts as reading it, and
     //so for example makes a reaction have the box as a source
     try {
@@ -150,7 +147,7 @@ object Box {
         case None => None
         //Note this is safe because we only ever accept changes
         //from a Box[C] of type C, and add them to list
-        case Some(o) => Some(o.asInstanceOf[immutable.Queue[C]])
+        case Some(o) => Some(o.asInstanceOf[immutable.Queue[(Long,C)]])
       }
     } finally {
       afterRead(b)
@@ -283,9 +280,7 @@ object Box {
       }
       checkingConflicts = false
 
-      //Write order is only valid during cycling
-      boxToWriteIndex.clear
-      writeIndex = 0
+      //Only valid during cycling
       boxToChanges.clear
 
       //Done for this cycle
@@ -354,7 +349,7 @@ trait Box[C] {
   private[boxes] val retainedReactions = mutable.Set[Reaction]()
 
   def changes = Box.boxChanges(this)
-  def writeIndex = Box.boxWriteIndex(this)
+  def firstChangeIndex = Box.boxFirstChangeIndex(this)
 
   def retainReaction(r:Reaction) = retainedReactions.add(r)
   def releaseReaction(r:Reaction) = retainedReactions.remove(r)

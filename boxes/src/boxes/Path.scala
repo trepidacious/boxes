@@ -23,8 +23,8 @@ class PathBIDIReaction[T](v:VarGeneral[T,_], path : => Option[VarGeneral[T,_]], 
         } else {
 
           //Now find which of v and e has changed first (if either)
-          val vIndex = v.writeIndex
-          val eIndex = e.writeIndex
+          val vIndex = v.firstChangeIndex
+          val eIndex = e.firstChangeIndex
 
           val fromEtoV = vIndex match {
             //We have a write to v
@@ -79,8 +79,8 @@ class PathBIDIOptionReaction[T](v:VarGeneral[Option[T],_], path : => Option[VarG
         } else {
 
           //Now find which of v and e has changed first (if either)
-          val vIndex = v.writeIndex
-          val eIndex = e.writeIndex
+          val vIndex = v.firstChangeIndex
+          val eIndex = e.firstChangeIndex
 
           val fromEtoV = vIndex match {
             //We have a write to v
