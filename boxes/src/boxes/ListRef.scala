@@ -42,6 +42,11 @@ trait ListVar[T] extends ListRef[T] {
   def remove(i:Int, c:Int)
 }
 
+/**
+ * ListRef which is guaranteed immutable
+ */
+trait ListVal[T] extends ListRef[T]
+
 object ListUtils {
   def insert[T](l:List[T], i:Int, t:T*):List[T] = {
     val lb = mutable.ListBuffer(l:_*)
@@ -59,13 +64,6 @@ object ListVal {
   def apply[T](elems:T*) = new ListValDefault[T](elems.toList).asInstanceOf[ListVal[T]]
   def apply[T](l:List[T]) = new ListValDefault[T](l).asInstanceOf[ListVal[T]]
 }
-
-/**
- * ListRef which is guaranteed immutable
- * Useful e.g. for fixed values for names, etc. when
- * a Ref is expected.
- */
-trait ListVal[T] extends ListRef[T]
 
 private class ListValDefault[T] (private val t:List[T]) extends ListVal[T] {
 

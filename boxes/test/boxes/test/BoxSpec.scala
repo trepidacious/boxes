@@ -262,6 +262,25 @@ class BoxSpec extends WordSpec {
     }
   }
 
+  "ListCal" should {
+    "work with Path" in {
+      val i = Var(0)
+      val l = ListCal(Range(0, i()).toList)
+
+      assert(l().sameElements(Range(0, 0).toList))
+
+      i() = 10
+      assert(l().sameElements(Range(0, 10).toList))
+
+      val v = Var(l)
+      val p = Path(v)
+
+      assert(v()().sameElements(Range(0, 10).toList))
+      assert(p()().sameElements(Range(0, 10).toList))
+
+    }
+  }
+
   "ListVar" should {
     "allow replacement, insertion and removal" in {
       val l = ListVar(0, 1, 2, 3)
@@ -291,7 +310,8 @@ class BoxSpec extends WordSpec {
   "ListIndices" should {
     "track single index" in {
       val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7)
-      val i = ListIndex(l)
+      val r = Var(l)
+      val i = ListIndex[Int, ListVar[Int]](r)
 
       assert(i() === 0)
 
@@ -323,6 +343,11 @@ class BoxSpec extends WordSpec {
       l.insert(0, 0, 1)
       assert(i() === 4)
       assert(l(i()) === 4)
+
+      //Completely replace the ListVar with a new one, should reset selection
+      r() = ListVar(0, 1, 2, 3)
+      assert(i() === 0)
+
     }
   }
 
