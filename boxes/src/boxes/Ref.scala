@@ -1,33 +1,22 @@
 package boxes
 
-/**
- * A Box containing a single value that can be read using apply()
- */
-trait Ref[T] extends Box[T] {
+trait Ref[T, C] extends Box[C] {
   def apply():T
 }
 
-object Cal {
-  def apply[T](c: =>T) = {
-    val v = Var(c)
-    Reaction(v, c)
-    v.asInstanceOf[Ref[T]]
-  }
+trait Val[T, C] extends Ref[T, C]
+
+trait Var[T, C] extends Ref[T, C]{
+  def update(newT:T)
 }
 
-object Val {
-  def apply[T](t:T) = new ValDefault(t).asInstanceOf[Val[T]]
-}
+trait RefSingle[T] extends Ref[T, ChangeSingle[T]]
+trait VarSingle[T] extends Var[T, ChangeSingle[T]] with RefSingle[T]
+trait ValSingle[T] extends Val[T, ChangeSingle[T]] with RefSingle[T]
 
-/**
- * Ref which is guaranteed immutable
- * Useful e.g. for fixed values for names, etc. when
- * a Ref is expected.
- */
-trait Val[T] extends Ref[T]
+case class ChangeSingle[T] (newValue:T)
 
-private class ValDefault[T] (private val t:T) extends Val[T] {
-
+private class ValSingleDefault[T] (private val t:T) extends ValSingle[T] {
   def apply():T = {
     try {
       Box.beforeRead(this)
@@ -36,29 +25,20 @@ private class ValDefault[T] (private val t:T) extends Val[T] {
       Box.afterRead(this)
     }
   }
-
   override def toString = "Val(" + t + ")"
 }
-
-object Var {
-  def apply[T](t:T) = new VarDefault(t).asInstanceOf[Var[T]]
+object Val {
+  def apply[T](t:T) = new ValSingleDefault(t).asInstanceOf[ValSingle[T]]
 }
 
-/**
- * Ref which is known to be mutable, and exposes mutator
- */
-trait Var[T] extends Ref[T]{
-  def update(newT:T)
-}
-
-private class VarDefault[T] (private var t:T) extends Var[T] {
+private class VarSingleDefault[T] (private var t:T) extends VarSingle[T] {
 
   def update(newT:T) = {
     try {
       Box.beforeWrite(this)
       if (newT != t) {
         t = newT
-        Box.commitWrite(this, newT)
+        Box.commitWrite(this, ChangeSingle(newT))
       }
     } finally {
       Box.afterWrite(this)
@@ -76,3 +56,17 @@ private class VarDefault[T] (private var t:T) extends Var[T] {
 
   override def toString = "Var(" + t + ")"
 }
+object Var {
+  def apply[T](t:T) = new VarSingleDefault(t).asInstanceOf[VarSingle[T]]
+}
+
+object Cal {
+  def apply[T](c: =>T) = {
+    val v = Var(c)
+    Reaction(v, c)
+    v.asInstanceOf[RefSingle[T]]
+  }
+}
+
+
+

@@ -4,7 +4,7 @@ import scala.collection.mutable._
 
 object Reaction {
 
-  class SingleTargetReaction[T](v:Var[T], result: =>T, name:String = "Unnamed Reaction") extends Reaction {
+  class SingleTargetReaction[T](v:Var[T, _], result: =>T, name:String = "Unnamed Reaction") extends Reaction {
 
     def respond : (()=>Unit) = {
       //First apply the function, so that any reads are performed now
@@ -20,7 +20,7 @@ object Reaction {
 
   }
 
-  def apply[T](v:Var[T], result: =>T, name:String = "Unnamed Reaction") = {
+  def apply[T](v:Var[T, _], result: =>T, name:String = "Unnamed Reaction") = {
     val r = new SingleTargetReaction(v, result, name)
     Box.registerReaction(r)
     v.retainReaction(r)

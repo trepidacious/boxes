@@ -67,54 +67,16 @@
       <file leaf-file-name="Ref.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Ref.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="23" column="134" selection-start="420" selection-end="420" vertical-scroll-proportion="0.4188164">
+            <state line="2" column="9" selection-start="24" selection-end="24" vertical-scroll-proportion="0.036418818">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ListRef.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/boxes/src/boxes/ListRef.scala">
+      <file leaf-file-name="NodeAccessors.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/NodeAccessors.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="164" column="34" selection-start="3853" selection-end="3853" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BoxesDemo.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="534" column="0" selection-start="12537" selection-end="12537" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BoxSpec.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/boxes/test/boxes/test/BoxSpec.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="313" column="42" selection-start="7948" selection-end="7948" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ListIndices.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/boxes/src/boxes/list/ListIndices.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="72" column="0" selection-start="2044" selection-end="2044" vertical-scroll-proportion="0.0">
-              <folding>
-                <marker date="1304069720000" expanded="true" signature="1862:2047" placeholder="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Path.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Path.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="44" column="31" selection-start="1274" selection-end="1274" vertical-scroll-proportion="0.0">
+            <state line="29" column="36" selection-start="783" selection-end="783" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -123,25 +85,63 @@
       <file leaf-file-name="SwingView.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/SwingView.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="162" column="30" selection-start="4888" selection-end="4888" vertical-scroll-proportion="0.0">
+            <state line="301" column="17" selection-start="8974" selection-end="8974" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="WordSpec.class" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar://$PROJECT_DIR$/boxes/lib/scalatest-1.3.jar!/org/scalatest/WordSpec.class">
+      <file leaf-file-name="BoxesDemo.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="36" column="0" selection-start="3927" selection-end="3927" vertical-scroll-proportion="0.0">
+            <state line="13" column="0" selection-start="278" selection-end="278" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Assertions.class" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar://$PROJECT_DIR$/boxes/lib/scalatest-1.3.jar!/org/scalatest/Assertions.class">
+      <file leaf-file-name="PersistenceSpec.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/boxes/test/boxes/persistence/test/PersistenceSpec.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="26" column="0" selection-start="2100" selection-end="2100" vertical-scroll-proportion="0.0">
+            <state line="16" column="24" selection-start="434" selection-end="434" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BoxSpec.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/boxes/test/boxes/test/BoxSpec.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="210" column="73" selection-start="4766" selection-end="4766" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Codec.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="260" column="63" selection-start="8156" selection-end="8156" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ListIndices.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/boxes/src/boxes/list/ListIndices.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="73" column="3" selection-start="61" selection-end="2189" vertical-scroll-proportion="0.0">
+              <folding>
+                <marker date="1304074520000" expanded="true" signature="1988:2185" placeholder="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Path.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Path.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="177" column="19" selection-start="4983" selection-end="4983" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -150,7 +150,7 @@
       <file leaf-file-name="Reaction.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Reaction.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="24" column="21" selection-start="579" selection-end="607" vertical-scroll-proportion="0.0">
+            <state line="41" column="25" selection-start="970" selection-end="970" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -169,21 +169,21 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/Data.scala" />
-        <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala" />
-        <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/XMLData.scala" />
-        <option value="$PROJECT_DIR$/boxes/test/boxes/persistence/test/PersistenceSpec.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Box.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/list/ListRef.scala" />
-        <option value="$PROJECT_DIR$/boxes/src/boxes/Reaction.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Cal.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Val.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Var.scala" />
-        <option value="$PROJECT_DIR$/boxes/src/boxes/SwingView.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/ListRef.scala" />
-        <option value="$PROJECT_DIR$/boxes/test/boxes/test/BoxSpec.scala" />
-        <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/Reaction.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/NodeAccessors.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/SwingView.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/Path.scala" />
+        <option value="$PROJECT_DIR$/boxes/test/boxes/persistence/test/PersistenceSpec.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/list/ListIndices.scala" />
+        <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala" />
+        <option value="$PROJECT_DIR$/boxes/test/boxes/test/BoxSpec.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Ref.scala" />
       </list>
     </option>
@@ -703,21 +703,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="143" column="12" selection-start="4311" selection-end="4311" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/View.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="3" column="6" selection-start="35" selection-end="35" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/util/WeakHashSet.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="4" column="6" selection-start="71" selection-end="71" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/IterableLike.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="77" column="6" selection-start="3283" selection-end="3283" vertical-scroll-proportion="0.0" />
@@ -733,11 +718,6 @@
         <state line="128" column="143" selection-start="3762" selection-end="3762" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/SwingView.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="162" column="30" selection-start="4888" selection-end="4888" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="jar://$PROJECT_DIR$/boxes/lib/scalatest-1.3.jar!/org/scalatest/WordSpec.class">
       <provider selected="true" editor-type-id="text-editor">
         <state line="36" column="0" selection-start="3927" selection-end="3927" vertical-scroll-proportion="0.0" />
@@ -748,11 +728,6 @@
         <state line="26" column="0" selection-start="2100" selection-end="2100" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Reaction.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="24" column="21" selection-start="579" selection-end="607" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/ListRef.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="164" column="34" selection-start="3853" selection-end="3853" vertical-scroll-proportion="0.0">
@@ -760,37 +735,74 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Reaction.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="534" column="0" selection-start="12537" selection-end="12537" vertical-scroll-proportion="0.0">
+        <state line="41" column="25" selection-start="970" selection-end="970" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/test/boxes/test/BoxSpec.scala">
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/NodeAccessors.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="313" column="42" selection-start="7948" selection-end="7948" vertical-scroll-proportion="0.0">
+        <state line="29" column="36" selection-start="783" selection-end="783" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/SwingView.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="301" column="17" selection-start="8974" selection-end="8974" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Path.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="177" column="19" selection-start="4983" selection-end="4983" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/test/boxes/persistence/test/PersistenceSpec.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="16" column="24" selection-start="434" selection-end="434" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/list/ListIndices.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="72" column="0" selection-start="2044" selection-end="2044" vertical-scroll-proportion="0.0">
+        <state line="73" column="3" selection-start="61" selection-end="2189" vertical-scroll-proportion="0.0">
           <folding>
-            <marker date="1304069720000" expanded="true" signature="1862:2047" placeholder="..." />
+            <marker date="1304074520000" expanded="true" signature="1988:2185" placeholder="..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Path.scala">
+    <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="44" column="31" selection-start="1274" selection-end="1274" vertical-scroll-proportion="0.0" />
+        <state line="13" column="0" selection-start="278" selection-end="278" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="260" column="63" selection-start="8156" selection-end="8156" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/test/boxes/test/BoxSpec.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="210" column="73" selection-start="4766" selection-end="4766" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Ref.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="134" selection-start="420" selection-end="420" vertical-scroll-proportion="0.4188164">
+        <state line="2" column="9" selection-start="24" selection-end="24" vertical-scroll-proportion="0.036418818">
           <folding />
         </state>
       </provider>

@@ -10,8 +10,8 @@ import persistence._
 class Person extends Node {
     val name = Var("name")
     val age = Var(32)
-    val friend:Var[Option[Person]] = Var(None)
-    val spouse:Var[Option[Person]] = Var(None)
+    val friend:VarSingle[Option[Person]] = Var(None)
+    val spouse:VarSingle[Option[Person]] = Var(None)
     val numbers = Var(List[Int]())
     val accounts = Var(Map[String, Double]())
 

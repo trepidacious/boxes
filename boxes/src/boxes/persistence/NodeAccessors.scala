@@ -27,7 +27,7 @@ object NodeAccessors {
     //We want methods that take no parameters and return a Var, and are not
     //static, nor private, nor abstract
     val methods = c.getDeclaredMethods.toList.filter(m =>
-                      classOf[Var[_]].isAssignableFrom(m.getReturnType)
+                      classOf[Var[_,_]].isAssignableFrom(m.getReturnType)
                       && m.getParameterTypes.length == 0
                       && !Modifier.isStatic(m.getModifiers)
                       && !Modifier.isPrivate(m.getModifiers)
