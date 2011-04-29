@@ -91,10 +91,37 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ListIndices.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="ListIndices.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/list/ListIndices.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="29" column="0" selection-start="858" selection-end="858" vertical-scroll-proportion="0.52807283">
+            <state line="35" column="94" selection-start="974" selection-end="974" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Box.scala" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Box.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="25" column="57" selection-start="1053" selection-end="1053" vertical-scroll-proportion="0.4552352">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SeqLike.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/SeqLike.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="716" column="6" selection-start="26934" selection-end="26934" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Queue.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/immutable/Queue.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="149" column="15" selection-start="5101" selection-end="5101" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -140,7 +167,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/boxes/src/boxes/Val.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Var.scala" />
         <option value="$PROJECT_DIR$/boxes/test/boxes/persistence/test/PersistenceSpec.scala" />
         <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
@@ -156,6 +182,7 @@
         <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/Node.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Node.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/list/ListIndices.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/Box.scala" />
       </list>
     </option>
   </component>
@@ -282,6 +309,28 @@
             <PATH_ELEMENT>
               <option name="myItemId" value="boxes" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="BoxesProject" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="boxes" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="boxes" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Box.scala" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
             </PATH_ELEMENT>
           </PATH>
           <PATH>
@@ -652,11 +701,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Box.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="128" column="143" selection-start="3762" selection-end="3762" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="jar://$PROJECT_DIR$/boxes/lib/scalatest-1.3.jar!/org/scalatest/WordSpec.class">
       <provider selected="true" editor-type-id="text-editor">
         <state line="36" column="0" selection-start="3927" selection-end="3927" vertical-scroll-proportion="0.0" />
@@ -739,7 +783,28 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/list/ListIndices.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="29" column="0" selection-start="858" selection-end="858" vertical-scroll-proportion="0.52807283">
+        <state line="35" column="94" selection-start="974" selection-end="974" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/SeqLike.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="716" column="6" selection-start="26934" selection-end="26934" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/immutable/Queue.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="149" column="15" selection-start="5101" selection-end="5101" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Box.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="25" column="57" selection-start="1053" selection-end="1053" vertical-scroll-proportion="0.4552352">
           <folding />
         </state>
       </provider>

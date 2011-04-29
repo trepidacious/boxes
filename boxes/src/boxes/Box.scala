@@ -62,7 +62,13 @@ object Box {
     applyingReaction
   }
 
-  def commitWrite[C](b:Box[C], change:C) = {
+  /**
+   * Call after an actual write has been carried out on a box,
+   * with a list of one or more changes that have been made, in
+   * order. Note that there MUST be at least one change, to allow
+   * for reactions to find the order of changes, etc.
+   */
+  def commitWrite[C](b:Box[C], changes:C*) = {
 
     if (checkingConflicts) {
       activeReaction match {
@@ -77,8 +83,14 @@ object Box {
     writeIndex = writeIndex + 1
 
     boxToChanges.get(b) match {
-      case None => boxToChanges.put(b, immutable.Queue(change))
-      case Some(existingChanges) => boxToChanges.put(b, existingChanges.asInstanceOf[immutable.Queue[C]] :+ change)
+      case None => {
+        boxToChanges.put(b, immutable.Queue(changes:_*))
+      }
+      case Some(existingChanges) => {
+        var q = existingChanges.asInstanceOf[immutable.Queue[C]]
+        changes.foreach(newChange => q = q:+newChange)
+        boxToChanges.put(b, q)
+      }
     }
 
     //Any reactions on this box are now pending
