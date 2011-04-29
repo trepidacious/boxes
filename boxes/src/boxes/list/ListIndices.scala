@@ -7,38 +7,44 @@ class ListIndexReaction[T, LR<:ListRef[T]](listRef:RefGeneral[LR,_], i:Var[Int])
 
   private val processedChanges = new WeakHashSet[ListChange]()
 
+  private def updateIndex(i:Int, size:Int, change:ListChange) = change match {
+
+    case ReplacementListChange(_,_) => i
+
+    case InsertionListChange(insertion, count) => if (insertion <= i) i+count else i
+
+    case RemovalListChange(removal, count) => {
+      //Deletion after selected index, no effect
+      if (removal > i) {
+        i
+
+      //Deletion entirely before selected index
+      } else if (removal + count <= i) {
+        i-count
+
+      //Deletion including the selected index, select first index
+      //after deletion, but still within list
+      } else {
+        if (removal >= size) size - 1 else removal
+      }
+    }
+
+    case CompleteListChange() => 0
+  }
+
   def respond : (()=>Unit) = {
     println("ListReaction responding")
     var newI = i()
     val list = listRef()
     val size = list().size
-    list.changes match {
-      case None => {}
-      case Some(queue) => {
-        queue.foreach(listChange => {
-          if (!processedChanges.contains(listChange)) {
-            processedChanges.add(listChange)
-            listChange match {
-              case ReplacementListChange(f, l) => {}
-              case InsertionListChange(ii, c) => if (ii <= newI) newI+=c
-              case RemovalListChange(ii, c) => {
-                //Deletion after selected index, no effect
-                if (ii > newI) {
-                  //Deletion entirely before selected index
-                } else if (ii + c <= newI) {
-                  newI -= c
 
-                  //Deletion including the selected index, select first index
-                  //after deletion, but still within list
-                } else {
-                  newI = ii
-                  if (newI >= size) newI = size - 1
-                }
-              }
-              case CompleteListChange() => newI = 0
-            }
-          }
-        })
+    for {
+      queue <- list.changes
+      change <- queue
+    } {
+      if (!processedChanges.contains(change)) {
+        processedChanges.add(change)
+        newI = updateIndex(newI, size, change)
       }
     }
 
