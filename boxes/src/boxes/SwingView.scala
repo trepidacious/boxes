@@ -78,7 +78,7 @@ trait SwingView {
   private[boxes] def replaceUpdate(update: => Unit) = SwingView.replaceUpdate(this, update)
 }
 
-//TODO Consider using Either[Ref[T], Ref[Option[T]] for the model type, then cases instead of converter
+//TODO Consider using Either[RefGeneral[T], RefGeneral[Option[T]] for the model type, then cases instead of converter
 
 //Type G may be Option[T] or the bare type T.
 //toOption gets us from G to DEFINITELY an Option[T]
@@ -104,14 +104,14 @@ class OptionTConverter[T] extends GConverter[Option[T], T] {
 }
 
 object StringView {
-  def apply(v:Var[String,_], multiline:Boolean = false) = new StringOptionView(v, new TConverter[String], multiline).asInstanceOf[SwingView]
+  def apply(v:VarGeneral[String,_], multiline:Boolean = false) = new StringOptionView(v, new TConverter[String], multiline).asInstanceOf[SwingView]
 }
 
 object StringOptionView {
-  def apply(v:Var[Option[String],_], multiline:Boolean = false) = new StringOptionView(v, new OptionTConverter[String], multiline).asInstanceOf[SwingView]
+  def apply(v:VarGeneral[Option[String],_], multiline:Boolean = false) = new StringOptionView(v, new OptionTConverter[String], multiline).asInstanceOf[SwingView]
 }
 
-private class StringOptionView[G](v:Var[G,_], c:GConverter[G, String], multiline:Boolean) extends SwingView {
+private class StringOptionView[G](v:VarGeneral[G,_], c:GConverter[G, String], multiline:Boolean) extends SwingView {
 
   val text = if (multiline) new JTextArea(10, 20) else new LinkingJTextField(this)
   val component = if (multiline) new LinkingJScrollPane(this, text) else text
@@ -160,14 +160,14 @@ class LinkingJTextField(sv:SwingView) extends JTextField {}
 
 
 object BooleanView {
-  def apply(v:Var[Boolean,_], n:Ref[String,_], button:Boolean = false) = new BooleanOptionView(v, n, new TConverter[Boolean], button).asInstanceOf[SwingView]
+  def apply(v:VarGeneral[Boolean,_], n:RefGeneral[String,_], button:Boolean = false) = new BooleanOptionView(v, n, new TConverter[Boolean], button).asInstanceOf[SwingView]
 }
 
 object BooleanOptionView {
-  def apply(v:Var[Option[Boolean],_], n:Ref[String,_], button:Boolean = false) = new BooleanOptionView(v, n, new OptionTConverter[Boolean], button).asInstanceOf[SwingView]
+  def apply(v:VarGeneral[Option[Boolean],_], n:RefGeneral[String,_], button:Boolean = false) = new BooleanOptionView(v, n, new OptionTConverter[Boolean], button).asInstanceOf[SwingView]
 }
 
-private class BooleanOptionView[G](v:Var[G,_], n:Ref[String,_], c:GConverter[G, Boolean], button:Boolean) extends SwingView {
+private class BooleanOptionView[G](v:VarGeneral[G,_], n:RefGeneral[String,_], c:GConverter[G, Boolean], button:Boolean) extends SwingView {
 
   val component = if (!button) new LinkingJCheckBox(this) else new LinkingJToggleButton(this)
   private val model = new AutoButtonModel()
@@ -227,14 +227,14 @@ class LinkingJToggleButton(sv:SwingView) extends JToggleButton {}
 
 
 object RangeView {
-  def apply(v:Var[Int,_], min:Int, max:Int, progress:Boolean = false) = new RangeOptionView(v, min, max, new TConverter[Int], progress).asInstanceOf[SwingView]
+  def apply(v:VarGeneral[Int,_], min:Int, max:Int, progress:Boolean = false) = new RangeOptionView(v, min, max, new TConverter[Int], progress).asInstanceOf[SwingView]
 }
 
 object RangeOptionView {
-  def apply(v:Var[Option[Int],_], min:Int, max:Int, progress:Boolean = false) = new RangeOptionView(v, min, max, new OptionTConverter[Int], progress).asInstanceOf[SwingView]
+  def apply(v:VarGeneral[Option[Int],_], min:Int, max:Int, progress:Boolean = false) = new RangeOptionView(v, min, max, new OptionTConverter[Int], progress).asInstanceOf[SwingView]
 }
 
-private class RangeOptionView[G](v:Var[G,_], min:Int, max:Int, c:GConverter[G, Int], progress:Boolean) extends SwingView {
+private class RangeOptionView[G](v:VarGeneral[G,_], min:Int, max:Int, c:GConverter[G, Int], progress:Boolean) extends SwingView {
 
   private val model = new AutoBoundedRangeModel(min, max)
   val component = if (!progress) new LinkingJSlider(this, model) else new LinkingJProgressBar(this, model)
@@ -295,14 +295,14 @@ class LinkingJProgressBar(sv:SwingView, brm:BoundedRangeModel) extends JProgress
 
 
 object NumberView {
-  def apply[N](v:Var[N,_], s:Sequence[N] = LogStep(10))(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionView(v, s, new TConverter[N], n, nc).asInstanceOf[SwingView]
+  def apply[N](v:VarGeneral[N,_], s:Sequence[N] = LogStep(10))(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionView(v, s, new TConverter[N], n, nc).asInstanceOf[SwingView]
 }
 
 object NumberOptionView {
-  def apply[N](v:Var[Option[N],_], s:Sequence[N] = LogStep(10))(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionView(v, s, new OptionTConverter[N], n, nc).asInstanceOf[SwingView]
+  def apply[N](v:VarGeneral[Option[N],_], s:Sequence[N] = LogStep(10))(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionView(v, s, new OptionTConverter[N], n, nc).asInstanceOf[SwingView]
 }
 
-private class NumberOptionView[G, N](v:Var[G,_], s:Sequence[N], c:GConverter[G, N], n:Numeric[N], nc:NumericClass[N]) extends SwingView {
+private class NumberOptionView[G, N](v:VarGeneral[G,_], s:Sequence[N], c:GConverter[G, N], n:Numeric[N], nc:NumericClass[N]) extends SwingView {
 
   private val model = new AutoSpinnerModel()
   val component = new LinkingJSpinner(this, model)

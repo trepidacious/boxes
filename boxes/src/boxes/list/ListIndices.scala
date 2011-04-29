@@ -3,7 +3,7 @@ package boxes.list
 import boxes._
 import util.WeakHashSet
 //
-//class ListIndexReaction[T, LR<:ListRef[T]](listRef:Ref[LR], i:Var[Int]) extends Reaction {
+//class ListIndexReaction[T, LR<:ListRef[T]](listRef:RefGeneral[LR], i:Var[Int]) extends Reaction {
 //
 //  private val processedChanges = new WeakHashSet[ListChange]()
 //
@@ -64,7 +64,7 @@ import util.WeakHashSet
 //
 //
 //object ListIndex {
-//  def apply[T, LR<:ListRef[T]](listRef:Ref[LR]) = {
+//  def apply[T, LR<:ListRef[T]](listRef:RefGeneral[LR]) = {
 //    val i = Var(0)
 //    val r = new ListIndexReaction[T, LR](listRef, i)
 //    i.retainReaction(r)

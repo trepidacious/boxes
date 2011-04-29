@@ -2,7 +2,7 @@ package boxes.persistence
 
 import collection._
 import java.lang.reflect.{Method, Modifier}
-import boxes.Var
+import boxes.{VarGeneral, Var}
 
 object NodeAccessors {
 
@@ -24,10 +24,10 @@ object NodeAccessors {
   }
 
   private def accessorMap(c:Class[_]) = {
-    //We want methods that take no parameters and return a Var, and are not
+    //We want methods that take no parameters and return a VarGeneral, and are not
     //static, nor private, nor abstract
     val methods = c.getDeclaredMethods.toList.filter(m =>
-                      classOf[Var[_,_]].isAssignableFrom(m.getReturnType)
+                      classOf[VarGeneral[_,_]].isAssignableFrom(m.getReturnType)
                       && m.getParameterTypes.length == 0
                       && !Modifier.isStatic(m.getModifiers)
                       && !Modifier.isPrivate(m.getModifiers)

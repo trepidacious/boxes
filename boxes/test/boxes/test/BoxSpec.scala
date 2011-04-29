@@ -13,7 +13,18 @@ class BoxSpec extends WordSpec {
   class Person {
     val name = Var("name")
     val age = Var(32)
-    val friend:VarSingle[Person] = Var(null)
+    val friend:Var[Person] = Var(null)
+  }
+
+  class OptionPerson extends Node {
+    val name = Var("name")
+    val age = Var(32)
+    val friend:Var[Option[OptionPerson]] = Var(None)
+    val spouse:Var[Option[OptionPerson]] = Var(None)
+    val numbers = Var(List[Int]())
+    val accounts = Var(Map[String, Int]())
+
+    override def toString = name() + ", " + age() + ", friend: " + friend() + ", spouse " + spouse() + ", numbers " + numbers() + ", accounts " + accounts()
   }
 
   "Cal" should {
@@ -185,6 +196,104 @@ class BoxSpec extends WordSpec {
       assert(alice.name() === "Alucard")
 
     }
+
+    "support paths via Options" in {
+
+      val cate = new OptionPerson()
+      cate.name() = "Cate"
+      val alice = new OptionPerson()
+      alice.name() = "Alice"
+      val bob = new OptionPerson()
+      bob.name() = "Bob"
+
+      //Bob may not have a friend - but we can create a path
+      //through this to make a Var[Option[String]] that will
+      //contain bob's friend's name when bob has a friend,
+      //or None otherwise.
+      val bobsFriendsName = PathViaOption(
+        for {
+          friend <- bob.friend()
+        } yield friend.name
+      )
+
+      //No friend yet
+      assert(bobsFriendsName() === None)
+
+      //Now we have a friend, and so a name
+      bob.friend() = Some(alice)
+      assert(bobsFriendsName() === Some("Alice"))
+
+      //We can edit the name of Alice using either her own
+      //name Var, or the path Var
+      alice.name() = "Alicia"
+      assert(alice.name() == "Alicia")
+      assert(bobsFriendsName() === Some("Alicia"))
+
+      bobsFriendsName() = Some("Aliss")
+      assert(alice.name() == "Aliss")
+      assert(bobsFriendsName() === Some("Aliss"))
+
+      //We can reassign bob's friends, and do it all again
+      bob.friend() = Some(cate)
+      assert(bobsFriendsName() === Some("Cate"))
+
+      cate.name() = "Kate"
+      assert(cate.name() == "Kate")
+      assert(bobsFriendsName() === Some("Kate"))
+      assert(alice.name() == "Aliss")
+
+      bobsFriendsName() = Some("Katherine")
+      assert(cate.name() == "Katherine")
+      assert(bobsFriendsName() === Some("Katherine"))
+      assert(alice.name() == "Aliss")
+
+      //Setting bobs friends name to None is meaningless, since
+      //this is only the case when the path is broken (which it is
+      //not) or cate's name is None (which it cannot be). Therefore
+      //this is ignored.
+      bobsFriendsName() = None
+      assert(cate.name() == "Katherine")
+      assert(bobsFriendsName() === Some("Katherine"))
+
+    }
+
+    "support paths to (and via) Options" in {
+
+      val cate = new OptionPerson()
+      cate.name() = "Cate"
+      val alice = new OptionPerson()
+      alice.name() = "Alice"
+      val bob = new OptionPerson()
+      bob.name() = "Bob"
+
+      bob.friend() = Some(alice)
+
+      //We can also have a path that goes TO
+      //a Ref[Option[Something]]. In this case
+      //it makes no difference whether or not the
+      //path also goes via an optional element -
+      //the resulting Path Var will contain None
+      //whenever the Path fails OR the path succeeds
+      //but leads to an end Ref that contains None.
+      val bobsFriendsFriend = PathToOption(
+        for {
+          friend <- bob.friend()
+        } yield friend.friend
+      )
+
+      //Bob has a friend, alice, but she has no friend, so
+      //there is no "Bob's friend's friend"
+      assert(bobsFriendsFriend() === None)
+
+      //Now we give alice a friend, and complete the path
+      alice.friend() = Some(cate)
+      assert(bobsFriendsFriend() === Some(cate))
+
+      //But if we break the path early, then we go back to None
+      bob.friend() = None
+      assert(bobsFriendsFriend() === None)
+
+    }
   }
 
   "View" should {
@@ -193,7 +302,7 @@ class BoxSpec extends WordSpec {
       val alice = new Person()
       alice.name() = "Alice"
 
-      var lastChanges:Option[immutable.Queue[ChangeSingle[String]]] = Some(immutable.Queue(ChangeSingle("MustChange")))
+      var lastChanges:Option[immutable.Queue[SingleChange[String]]] = Some(immutable.Queue(SingleChange("MustChange")))
 
       val v = View{
         lastChanges = alice.name.changes
@@ -204,11 +313,11 @@ class BoxSpec extends WordSpec {
 
       alice.name() = "Alicia"
 
-      assert(lastChanges === Some(immutable.Queue(ChangeSingle("Alicia"))))
+      assert(lastChanges === Some(immutable.Queue(SingleChange("Alicia"))))
 
       alice.name() = "Alucard"
 
-      assert(lastChanges === Some(immutable.Queue(ChangeSingle("Alucard"))))
+      assert(lastChanges === Some(immutable.Queue(SingleChange("Alucard"))))
     }
   }
 

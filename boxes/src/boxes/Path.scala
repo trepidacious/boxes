@@ -1,6 +1,6 @@
 package boxes
 
-class PathBIDIReaction[T](v:Var[T,_], path : => Option[Var[T,_]], defaultValue:T) extends Reaction {
+class PathBIDIReaction[T](v:VarGeneral[T,_], path : => Option[VarGeneral[T,_]], defaultValue:T) extends Reaction {
   def respond : (()=>Unit) = {
 
     //First work out the end of the path
@@ -57,7 +57,7 @@ class PathBIDIReaction[T](v:Var[T,_], path : => Option[Var[T,_]], defaultValue:T
 
 }
 
-class PathBIDIOptionReaction[T](v:Var[Option[T],_], path : => Option[Var[T,_]]) extends Reaction {
+class PathBIDIOptionReaction[T](v:VarGeneral[Option[T],_], path : => Option[VarGeneral[T,_]]) extends Reaction {
   def respond : (()=>Unit) = {
 
     //First work out the end of the path
@@ -102,7 +102,7 @@ class PathBIDIOptionReaction[T](v:Var[Option[T],_], path : => Option[Var[T,_]]) 
             {() => (v() = Some(eContents))}
 
           //If v is None, we can't copy to e, so we
-          //always go from to v instead
+          //always go from e to v instead
           } else {
             vContents match {
               case None => {() => (v() = Some(eContents))}
@@ -122,7 +122,7 @@ class PathBIDIOptionReaction[T](v:Var[Option[T],_], path : => Option[Var[T,_]]) 
 
 object Path {
 
-  def apply[T](path : =>Var[T,_]) = {
+  def apply[T](path : =>VarGeneral[T,_]) = {
     //Find endpoint of path, and create new Var with same contained value
     val e = path
     val eVal = e()
@@ -150,13 +150,13 @@ object Path {
  * that leads to a Var[Option[T]].
  */
 object PathToOption {
-  def apply[T](path : => Option[Var[Option[T],_]]) = {
+  def apply[T](path : => Option[VarGeneral[Option[T],_]]) = {
     PathWithDefault(path)
   }
 }
 
 private object PathWithDefault {
-  def apply[T](path : => Option[Var[T,_]], defaultValue:T = None) = {
+  def apply[T](path : => Option[VarGeneral[T,_]], defaultValue:T = None) = {
     val v = Var(defaultValue)
     val r = new PathBIDIReaction[T](v, path, defaultValue)
     Box.registerReaction(r)
@@ -174,8 +174,8 @@ private object PathWithDefault {
  * path yields None.
  */
 object PathViaOption {
-  def apply[T](path : => Option[Var[T,_]]) = {
-    val v:VarSingle[Option[T]] = Var(None)
+  def apply[T](path : => Option[VarGeneral[T,_]]) = {
+    val v:Var[Option[T]] = Var(None)
     val r = new PathBIDIOptionReaction[T](v, path)
     Box.registerReaction(r)
     v.retainReaction(r)

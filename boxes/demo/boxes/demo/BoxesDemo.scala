@@ -20,7 +20,7 @@ object BoxesDemo {
   class Person extends Node {
     val name = Var("name")
     val age = Var(32)
-    val friend:VarSingle[Person] = Var(null)
+    val friend:Var[Person] = Var(null)
 
     //override def toString = name() + ", " + age() + ", friend: " + friend()
   }
@@ -28,8 +28,8 @@ object BoxesDemo {
   class OptionPerson extends Node {
     val name = Var("name")
     val age = Var(32)
-    val friend:VarSingle[Option[OptionPerson]] = Var(None)
-    val spouse:VarSingle[Option[OptionPerson]] = Var(None)
+    val friend:Var[Option[OptionPerson]] = Var(None)
+    val spouse:Var[Option[OptionPerson]] = Var(None)
     val numbers = Var(List[Int]())
     val accounts = Var(Map[String, Int]())
 
@@ -354,7 +354,7 @@ object BoxesDemo {
         val tView = StringView(t)
 
         val x = Var(true)
-        val y:VarSingle[Option[Boolean]] = Var(Some(false))
+        val y:Var[Option[Boolean]] = Var(Some(false))
         Reaction(x, {
           y() match {
             case None => {
