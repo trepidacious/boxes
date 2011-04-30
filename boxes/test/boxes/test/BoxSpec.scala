@@ -4,7 +4,7 @@ import org.scalatest.WordSpec
 import scala.collection._
 import boxes._
 import immutable.Queue
-import list.ListIndex
+import list.{ListSelection, ListIndex}
 
 class BoxSpec extends WordSpec {
 
@@ -468,11 +468,10 @@ class BoxSpec extends WordSpec {
       assert(i() === Some(0))
     }
 
-    "allow simple Cal lookup of selected value" in {
+    "work with ListSelection" in {
       val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7)
       val i = ListIndex(l)
-
-      val s = Cal(for (index <- i() if index < l().size) yield l(index))
+      val s = ListSelection(l, i)
 
       assert(i() === Some(0))
       assert(s() === Some(0))

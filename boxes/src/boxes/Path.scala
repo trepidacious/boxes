@@ -1,6 +1,25 @@
 package boxes
 
-class PathBIDIReaction[T](v:VarGeneral[T,_], path : => Option[VarGeneral[T,_]], defaultValue:T) extends Reaction {
+private object PathUtils {
+  def eToV(e:Box[_], v:Box[_]) = {
+    val vIndex = v.firstChangeIndex
+    val eIndex = e.firstChangeIndex
+
+    vIndex match {
+      //We have a write to v
+      case Some(vIndexValue) => eIndex match {
+        //We also have a write to e - if it came first, go from e to v
+        case Some(eIndexValue) => eIndexValue < vIndexValue
+        //We have a write to v, but not to e, so go from v to e
+        case None => false
+      }
+      //No write to v, so go from e to v
+      case None => true
+    }
+  }
+}
+
+class PathReaction[T](v:VarGeneral[T,_], path : => Option[VarGeneral[T,_]], defaultValue:T) extends Reaction {
   def respond : (()=>Unit) = {
 
     //First work out the end of the path
@@ -19,29 +38,8 @@ class PathBIDIReaction[T](v:VarGeneral[T,_], path : => Option[VarGeneral[T,_]], 
         if (eContents == vContents) {
           {()=>()}
 
-        //Something changed
         } else {
-
-          //Now find which of v and e has changed first (if either)
-          val vIndex = v.firstChangeIndex
-          val eIndex = e.firstChangeIndex
-
-          val fromEtoV = vIndex match {
-            //We have a write to v
-            case Some(vIndexValue) => eIndex match {
-
-              //We also have a write to e - if it came first, go from e to v
-              case Some(eIndexValue) => eIndexValue < vIndexValue
-
-              //We have a write to v, but not to e, so go from v to e
-              case None => false
-            }
-
-            //No write to v, so go from e to v
-            case None => true
-          }
-
-          if (fromEtoV) {
+          if (PathUtils.eToV(e, v)) {
             {() => (v() = eContents)}
           } else {
             {() => (e() = vContents)}
@@ -50,14 +48,10 @@ class PathBIDIReaction[T](v:VarGeneral[T,_], path : => Option[VarGeneral[T,_]], 
       }
     }
   }
-
   def isView = false
-
-  override def toString = "PathBIDI"
-
 }
 
-class PathBIDIOptionReaction[T](v:VarGeneral[Option[T],_], path : => Option[VarGeneral[T,_]]) extends Reaction {
+class PathOptionReaction[T](v:VarGeneral[Option[T],_], path : => Option[VarGeneral[T,_]]) extends Reaction {
   def respond : (()=>Unit) = {
 
     //First work out the end of the path
@@ -75,30 +69,8 @@ class PathBIDIOptionReaction[T](v:VarGeneral[Option[T],_], path : => Option[VarG
         if (eContents == vContents) {
           {()=>()}
 
-        //Something changed
         } else {
-
-          //Now find which of v and e has changed first (if either)
-          val vIndex = v.firstChangeIndex
-          val eIndex = e.firstChangeIndex
-
-          val fromEtoV = vIndex match {
-            //We have a write to v
-            case Some(vIndexValue) => eIndex match {
-
-              //We also have a write to e - if it came first, go from e to v
-              case Some(eIndexValue) => eIndexValue < vIndexValue
-
-              //We have a write to v, but not to e, so go from v to e
-              case None => false
-            }
-
-            //No write to v, so go from e to v
-            case None => true
-          }
-
-          //We can always copy from e to v
-          if (fromEtoV) {
+          if (PathUtils.eToV(e, v)) {
             {() => (v() = Some(eContents))}
 
           //If v is None, we can't copy to e, so we
@@ -113,11 +85,7 @@ class PathBIDIOptionReaction[T](v:VarGeneral[Option[T],_], path : => Option[VarG
       }
     }
   }
-
   def isView = false
-
-  override def toString = "PathBIDI"
-
 }
 
 object Path {
@@ -127,7 +95,7 @@ object Path {
     val e = path
     val eVal = e()
     val v = Var(eVal)
-    val r = new PathBIDIReaction[T](v, Some(path), eVal)  //Note that in this case, default doesn't matter
+    val r = new PathReaction[T](v, Some(path), eVal)  //Note that in this case, default doesn't matter
                                                           //since Option is always Some
     Box.registerReaction(r)
     v.retainReaction(r)
@@ -151,14 +119,8 @@ object Path {
  */
 object PathToOption {
   def apply[T](path : => Option[VarGeneral[Option[T],_]]) = {
-    PathWithDefault(path)
-  }
-}
-
-private object PathWithDefault {
-  def apply[T](path : => Option[VarGeneral[T,_]], defaultValue:T = None) = {
-    val v = Var(defaultValue)
-    val r = new PathBIDIReaction[T](v, path, defaultValue)
+    val v:Var[Option[T]] = Var(None)
+    val r = new PathReaction[Option[T]](v, path, None)
     Box.registerReaction(r)
     v.retainReaction(r)
     v
@@ -176,7 +138,7 @@ private object PathWithDefault {
 object PathViaOption {
   def apply[T](path : => Option[VarGeneral[T,_]]) = {
     val v:Var[Option[T]] = Var(None)
-    val r = new PathBIDIOptionReaction[T](v, path)
+    val r = new PathOptionReaction[T](v, path)
     Box.registerReaction(r)
     v.retainReaction(r)
     v

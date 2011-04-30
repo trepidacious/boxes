@@ -32,6 +32,7 @@ trait ListRef[T] extends RefGeneral[List[T], ListChange] {
 }
 
 trait ListVar[T] extends ListRef[T] with VarGeneral[List[T], ListChange] {
+  def update(update : (List[T] => Option[(List[T], ListChange)]))
   def update(i:Int, e:T)
   def insert(i:Int, e:T*)
   def remove(i:Int, c:Int)
@@ -85,7 +86,7 @@ object ListVar {
 
 private class ListVarDefault[T] (private var t:List[T]) extends ListVar[T] {
 
-  private def update(u : (List[T] => Option[(List[T], ListChange)])) = {
+  def update(u : (List[T] => Option[(List[T], ListChange)])) = {
     try {
       Box.beforeWrite(this)
       u.apply(t) match {

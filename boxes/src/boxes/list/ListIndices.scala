@@ -109,3 +109,7 @@ object ListIndex {
     i
   }
 }
+
+object ListSelection {
+  def apply[T](l:ListRef[T], i:Var[Option[Int]]) = Cal(for (index <- i() if index < l().size) yield l(index))
+}
