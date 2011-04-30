@@ -468,27 +468,191 @@ class BoxSpec extends WordSpec {
       assert(i() === Some(0))
     }
 
-    "allow simple Cal lookup of selected value" in pending
+    "allow simple Cal lookup of selected value" in {
+      val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7)
+      val i = ListIndex(l)
+
+      val s = Cal(for (index <- i() if index < l().size) yield l(index))
+
+      assert(i() === Some(0))
+      assert(s() === Some(0))
+
+      i() = Some(10)
+      assert(i() === Some(7))
+      assert(s() === Some(7))
+
+      i() = Some(4)
+      assert(i() === Some(4))
+      assert(s() === Some(4))
+
+      l(4) = 42
+      assert(i() === Some(4))
+      assert(s() === Some(42))
+
+
+      l(4) = 4
+      assert(i() === Some(4))
+      assert(s() === Some(4))
+
+      l.remove(0, 2)
+      assert(i() === Some(2))
+      assert(l(i().getOrElse(-1)) === 4)
+      assert(s() === Some(4))
+
+      l.insert(0, 0, 1)
+      assert(i() === Some(4))
+      assert(l(i().getOrElse(-1)) === 4)
+      assert(s() === Some(4))
+
+      //Completely replace the List with a new one, should reset selection
+      l() = List(0, 1, 2, 3)
+      assert(i() === Some(0))
+      assert(s() === Some(0))
+
+      l() = List()
+      assert(s() === None)
+
+    }
   }
 
   "ListIndex with loseIndexOnDeletion false" should {
-    "leave selection alone on deletion after selection" in pending
-    "move selection on deletion before selection" in pending
-    "select last index after deletion from selection to end" in pending
-    "select next undeleted index after deletion from selection to before end"
-    "change invalid initial selection to valid one" in pending
-    "clear selection on list change, if selectFirstRatherThanNone is false" in pending
-    "clear selection then prefer 0 on list change for non-empty list, if selectFirstRatherThanNone is true" in pending
+    "leave selection alone on deletion after selection" in {
+      val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7, 8)
+      val i = ListIndex(l, loseIndexOnDeletion=false)
+
+      i() = Some(4)
+      l.remove(5, 4)
+      assert(i() === Some(4))
+    }
+
+    "move selection on deletion before selection" in {
+      val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7, 8)
+      val i = ListIndex(l, loseIndexOnDeletion=false)
+
+      i() = Some(4)
+      l.remove(0, 3)
+      assert(i() === Some(1))
+    }
+
+    "select last index after deletion from selection to end" in {
+      val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7, 8)
+      val i = ListIndex(l, loseIndexOnDeletion=false)
+
+      i() = Some(4)
+      l.remove(4, 5)
+      assert(i() === Some(3))
+    }
+
+    "select next undeleted index after deletion from selection to before end" in {
+      val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7, 8)
+      val i = ListIndex(l, loseIndexOnDeletion=false)
+
+      i() = Some(4)
+      l.remove(4, 2)
+      assert(i() === Some(4))
+    }
+
+    "change invalid initial selection to valid one" in {
+      val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7, 8)
+      val i = ListIndex(l, Some(100), loseIndexOnDeletion=false)
+
+      assert(i() === Some(8))
+    }
+
+    "clear selection on list change, if selectFirstRatherThanNone is false" in {
+      val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7, 8)
+      val i = ListIndex(l, loseIndexOnDeletion=false, selectFirstRatherThanNone = false)
+
+      i() = Some(4)
+      assert(i() === Some(4))
+
+      l() = List(42)
+      assert(i() === None)
+    }
+
+    "clear selection then prefer 0 on list change for non-empty list, if selectFirstRatherThanNone is true" in {
+      val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7, 8)
+      val i = ListIndex(l, loseIndexOnDeletion=false, selectFirstRatherThanNone = true)
+
+      i() = Some(4)
+      assert(i() === Some(4))
+
+      l() = List(42)
+      assert(i() === Some(0))
+
+      l() = List()
+      assert(i() === None)
+    }
   }
 
   "ListIndex with loseIndexOnDeletion true" should {
-    "leave selection alone on deletion after selection" in pending
-    "move selection on deletion before selection" in pending
-    "clear selection on delete, if selectFirstRatherThanNone is false" in pending
-    "clear selection then prefer 0, if selectFirstRatherThanNone is true" in pending
-    "change invalid initial selection to valid one" in pending
-    "clear selection on list change, if selectFirstRatherThanNone is false" in pending
-    "clear selection then prefer 0 on list change for non-empty list, if selectFirstRatherThanNone is true" in pending
+    "leave selection alone on deletion after selection" in {
+      val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7, 8)
+      val i = ListIndex(l, loseIndexOnDeletion=true)
+
+      i() = Some(4)
+      l.remove(5, 4)
+      assert(i() === Some(4))
+    }
+
+    "move selection on deletion before selection" in {
+      val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7, 8)
+      val i = ListIndex(l, loseIndexOnDeletion=true)
+
+      i() = Some(4)
+      l.remove(0, 3)
+      assert(i() === Some(1))
+    }
+
+    "clear selection on delete, if selectFirstRatherThanNone is false" in {
+      val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7, 8)
+      val i = ListIndex(l, loseIndexOnDeletion=true, selectFirstRatherThanNone=false)
+
+      i() = Some(4)
+      l.remove(4, 2)
+      assert(i() === None)
+    }
+
+    "clear selection then prefer 0, if selectFirstRatherThanNone is true" in {
+      val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7, 8)
+      val i = ListIndex(l, loseIndexOnDeletion=true, selectFirstRatherThanNone=true)
+
+      i() = Some(4)
+      l.remove(4, 2)
+      assert(i() === Some(0))
+    }
+
+    "change invalid initial selection to valid one" in {
+      val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7, 8)
+      val i = ListIndex(l, Some(100), loseIndexOnDeletion=true)
+
+      assert(i() === Some(8))
+    }
+
+    "clear selection on list change, if selectFirstRatherThanNone is false" in {
+      val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7, 8)
+      val i = ListIndex(l, loseIndexOnDeletion=true, selectFirstRatherThanNone = false)
+
+      i() = Some(4)
+      assert(i() === Some(4))
+
+      l() = List(42)
+      assert(i() === None)
+    }
+
+    "clear selection then prefer 0 on list change for non-empty list, still None for empty list, if selectFirstRatherThanNone is true" in {
+      val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7, 8)
+      val i = ListIndex(l, loseIndexOnDeletion=true, selectFirstRatherThanNone = true)
+
+      i() = Some(4)
+      assert(i() === Some(4))
+
+      l() = List(42)
+      assert(i() === Some(0))
+
+      l() = List()
+      assert(i() === None)
+    }
   }
 
 }
