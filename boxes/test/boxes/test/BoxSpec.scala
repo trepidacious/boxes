@@ -435,44 +435,60 @@ class BoxSpec extends WordSpec {
 
   }
 
-  "ListIndices" should {
-    "track single index" in {
+  "ListIndex" should {
+    "track correctly" in {
       val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7)
-      val r = Var(l)
-      val i = ListIndex[Int, ListVar[Int]](r)
+      val i = ListIndex(l)
 
-      assert(i() === 0)
-
-      //Can't select -1 when list is not empty
-      i() = -1
-      assert(i() === 0)
+      assert(i() === Some(0))
 
       //Can't select past end of list - just selects last index
-      i() = 10
-      assert(i() === 7)
+      i() = Some(10)
+      assert(i() === Some(7))
 
-      i() = 4
-      assert(i() === 4)
+      i() = Some(4)
+      assert(i() === Some(4))
 
       l(0) = 42
-      assert(i() === 4)
+      assert(i() === Some(4))
 
       l(0) = 0
-      assert(i() === 4)
+      assert(i() === Some(4))
 
       l.remove(0, 2)
-      assert(i() === 2)
-      assert(l(i()) === 4)
+      assert(i() === Some(2))
+      assert(l(i().getOrElse(-1)) === 4)
 
       l.insert(0, 0, 1)
-      assert(i() === 4)
-      assert(l(i()) === 4)
+      assert(i() === Some(4))
+      assert(l(i().getOrElse(-1)) === 4)
 
-      //Completely replace the ListVar with a new one, should reset selection
-      r() = ListVar(0, 1, 2, 3)
-      assert(i() === 0)
-
+      //Completely replace the List with a new one, should reset selection
+      l() = List(0, 1, 2, 3)
+      assert(i() === Some(0))
     }
+
+    "allow simple Cal lookup of selected value" in pending
+  }
+
+  "ListIndex with loseIndexOnDeletion false" should {
+    "leave selection alone on deletion after selection" in pending
+    "move selection on deletion before selection" in pending
+    "select last index after deletion from selection to end" in pending
+    "select next undeleted index after deletion from selection to before end"
+    "change invalid initial selection to valid one" in pending
+    "clear selection on list change, if selectFirstRatherThanNone is false" in pending
+    "clear selection then prefer 0 on list change for non-empty list, if selectFirstRatherThanNone is true" in pending
+  }
+
+  "ListIndex with loseIndexOnDeletion true" should {
+    "leave selection alone on deletion after selection" in pending
+    "move selection on deletion before selection" in pending
+    "clear selection on delete, if selectFirstRatherThanNone is false" in pending
+    "clear selection then prefer 0, if selectFirstRatherThanNone is true" in pending
+    "change invalid initial selection to valid one" in pending
+    "clear selection on list change, if selectFirstRatherThanNone is false" in pending
+    "clear selection then prefer 0 on list change for non-empty list, if selectFirstRatherThanNone is true" in pending
   }
 
 }
