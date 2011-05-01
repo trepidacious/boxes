@@ -512,6 +512,83 @@ class BoxSpec extends WordSpec {
       assert(s() === None)
 
     }
+
+    "work with ListPath when modifying ListPath" in {
+
+      class ListNode {
+        val list = ListVar(0, 1, 2, 3, 4, 5, 6, 7)
+      }
+      val ln = new ListNode()
+
+      val l = ListPath(ln.list)
+      val i = ListIndex(l)
+
+      assert(i() === Some(0))
+
+      //Can't select past end of list - just selects last index
+      i() = Some(10)
+      assert(i() === Some(7))
+
+      i() = Some(4)
+      assert(i() === Some(4))
+
+      l(0) = 42
+      assert(i() === Some(4))
+
+      l(0) = 0
+      assert(i() === Some(4))
+
+      l.remove(0, 2)
+      assert(i() === Some(2))
+      assert(l(i().getOrElse(-1)) === 4)
+
+      l.insert(0, 0, 1)
+      assert(i() === Some(4))
+      assert(l(i().getOrElse(-1)) === 4)
+
+      //Completely replace the List with a new one, should reset selection
+      l() = List(0, 1, 2, 3)
+      assert(i() === Some(0))
+    }
+
+    "work with ListPath when modifying ListPath endpoint" in {
+
+      class ListNode {
+        val list = ListVar(0, 1, 2, 3, 4, 5, 6, 7)
+      }
+      val ln = new ListNode()
+
+      val l = ListPath(ln.list)
+      val i = ListIndex(l)
+
+      assert(i() === Some(0))
+
+      //Can't select past end of list - just selects last index
+      i() = Some(10)
+      assert(i() === Some(7))
+
+      i() = Some(4)
+      assert(i() === Some(4))
+
+      ln.list(0) = 42
+      assert(i() === Some(4))
+
+      ln.list(0) = 0
+      assert(i() === Some(4))
+
+      ln.list.remove(0, 2)
+      assert(i() === Some(2))
+      assert(l(i().getOrElse(-1)) === 4)
+
+      ln.list.insert(0, 0, 1)
+      assert(i() === Some(4))
+      assert(l(i().getOrElse(-1)) === 4)
+
+      //Completely replace the List with a new one, should reset selection
+      ln.list() = List(0, 1, 2, 3)
+      assert(i() === Some(0))
+    }
+
   }
 
   "ListIndex with loseIndexOnDeletion false" should {

@@ -1,6 +1,7 @@
 package boxes
 
 import util._
+import collection._
 
 private object PathUtils {
   def eToV(e:Box[_], v:Box[_]) = {
@@ -21,9 +22,7 @@ private object PathUtils {
   }
 }
 
-//When called with c as a TConverter, this is equivalent to PathReaction. With an OptionTConverter it
-//is equivalent to PathOptionReaction
-class PathReaction[T, G](v:VarGeneral[G,_], path : => Option[VarGeneral[T,_]], defaultValue:G, c:GConverter[G, T]) extends Reaction {
+class PathReaction[T, G, CT, CG](v:VarGeneral[G, CG], path : => Option[VarGeneral[T, CT]], defaultValue:G, c:GConverter[G, T]) extends Reaction {
   def respond : (()=>Unit) = {
     path match {
       //If the path is disconnected, revert to default
@@ -60,7 +59,7 @@ class PathReaction[T, G](v:VarGeneral[G,_], path : => Option[VarGeneral[T,_]], d
 
 object Path {
 
-  def apply[T](path : =>VarGeneral[T,_]) = {
+  def apply[T](path : =>Var[T]) = {
     //Find endpoint of path, and create new Var with same contained value
     val e = path
     val eVal = e()
@@ -71,7 +70,7 @@ object Path {
     //since it always works we just use Some(path). Default value doesn't matter since
     //it is never used. Apologies for the null, but it really is NEVER used. Could
     //use eVal instead, but this potentially creates a memory leak.
-    val r = new PathReaction[T, T](v, Some(path), null.asInstanceOf[T], new TConverter[T])
+    val r = new PathReaction[T, T, SingleChange[T], SingleChange[T]](v, Some(path), null.asInstanceOf[T], new TConverter[T])
     Box.registerReaction(r)
     v.retainReaction(r)
     v
@@ -93,14 +92,14 @@ object Path {
  * that leads to a Var[Option[T]].
  */
 object PathToOption {
-  def apply[T](path : => Option[VarGeneral[Option[T],_]]) = {
+  def apply[T](path : => Option[Var[Option[T]]]) = {
     val v:Var[Option[T]] = Var(None)
     //Not going to pretent this isn't confusing... here we use a TConverter
     //because we are producing v with parametric type Option[T], and using
     //a path to an endpoint with parametric type Option[T]. There is hence no
     //mismatch in levels of Option, and we don't need to convert anything. So
     //the "T" in "TConverter" is actually "Option[T]" in this case.
-    val r = new PathReaction[Option[T], Option[T]](v, path, None, new TConverter[Option[T]])
+    val r = new PathReaction[Option[T], Option[T], SingleChange[Option[T]], SingleChange[Option[T]]](v, path, None, new TConverter[Option[T]])
     Box.registerReaction(r)
     v.retainReaction(r)
     v
@@ -116,13 +115,109 @@ object PathToOption {
  * path yields None.
  */
 object PathViaOption {
-  def apply[T](path : => Option[VarGeneral[T,_]]) = {
+  def apply[T](path : => Option[Var[T]]) = {
     val v:Var[Option[T]] = Var(None)
     //Here we have to raise values in our endpoint Var (of parametric type T)
     //up to Option[T], so we use an OptionTConverter.
-    val r = new PathReaction[T, Option[T]](v, path, None, new OptionTConverter[T])
+    val r = new PathReaction[T, Option[T], SingleChange[T], SingleChange[Option[T]]](v, path, None, new OptionTConverter[T])
     Box.registerReaction(r)
     v.retainReaction(r)
     v
   }
 }
+
+class ListPathReaction[T](v:ListVar[T], path : => Option[ListVar[T]]) extends Reaction {
+
+  private var lastE:Option[ListVar[T]] = None
+  private var lastProcessedChangeIndex = -1L
+
+  private def unprocessedChanges(b:Box[ListChange]) = {
+    b.changes match {
+      case None => immutable.Queue[ListChange]()
+      case Some(q) => q.filter(indexAndChange => {
+        if (indexAndChange._1 > lastProcessedChangeIndex) {
+          lastProcessedChangeIndex = indexAndChange._1
+          true
+        } else {
+          false
+        }
+      }).map(indexAndChange => indexAndChange._2)
+    }
+  }
+
+  def respond : (()=>Unit) = {
+
+    path match {
+      //If the path is disconnected, revert to default
+      case None => {
+        lastE = None;
+        {()=>(v() = List[T]())}
+      }
+
+      //Otherwise do the mirroring
+      case Some(e) => {
+        //See whether we have changed endpoint ListVar since last time
+        val eChanged = lastE match {
+          case None => true
+          case Some(lastEVal) => lastEVal ne e
+        }
+        lastE = Some(e)
+
+        val eContents = e()
+        val vContents = v()
+
+        //If there is no change, nothing to do
+        if (eContents.sameElements(vContents)) {
+          {()=>()}
+
+
+        //TODO remove all the duplication in following section
+        } else {
+          //If we have a new endpoint, just copy directly
+          //and lose incremental changes - we are dealing with unsynced lists
+          //so we cannot use incremental changes to get them up to date
+          if (eChanged) {
+            if (PathUtils.eToV(e, v)) {
+              {() => (v() = eContents)}
+            } else {
+              {() => (e() = vContents)}
+            }
+          //Otherwise we just need to use any new incremental changes
+          //to update from one list to the other
+          } else {
+            if (PathUtils.eToV(e, v)) {
+              val changes = unprocessedChanges(e);
+              {() => v.updateWithChanges(eContents, changes:_*)}
+            } else {
+              val changes = unprocessedChanges(v);
+              {() => e.updateWithChanges(vContents, changes:_*)}
+            }
+          }
+        }
+      }
+    }
+  }
+  def isView = false
+}
+
+/**
+ * As for Path, but with a ListVar
+ */
+object ListPath {
+  def apply[T](path : =>ListVar[T]) = ListPathViaOption(Some(path))
+}
+
+/**
+ * As for PathViaOption, but with a ListVar
+ */
+object ListPathViaOption {
+  def apply[T](path : => Option[ListVar[T]]) = {
+    val e = path
+    val v = ListVar[T](List())
+    val r = new ListPathReaction[T](v, path)
+    Box.registerReaction(r)
+    v.retainReaction(r)
+    v
+  }
+}
+

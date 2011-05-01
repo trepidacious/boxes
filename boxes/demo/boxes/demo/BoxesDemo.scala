@@ -11,6 +11,7 @@ import javax.swing._
 import java.awt.event.ActionEvent
 import boxes.util.{LogStep, Step, CoalescingResponder, NumericClass}
 import boxes._
+import list.ListIndex
 import persistence._
 import io.Source
 import java.io.StringWriter
@@ -507,6 +508,24 @@ object BoxesDemo {
 
   }
 
+  def listPath() {
+    class ListNode {
+      val list = ListVar(0, 1, 2, 3, 4, 5, 6, 7)
+    }
+    val ln = new ListNode()
+
+    val l = ListPath(ln.list)
+//    val i = ListIndex(l)
+
+    println("l() = " + l())
+//    l(0) = 42
+//    println("l(0) = 42")
+    ln.list(0) = 42
+    println("ln.list(0) = 42")
+    println("l() = " + l())
+    println("ln.list() = " + ln.list())
+  }
+
 
   def main(args: Array[String]) {
 //    simpleCalc
@@ -531,7 +550,7 @@ object BoxesDemo {
 //    val xml = code
 //    decode(xml)
 
-
+    listPath
   }
 
 }

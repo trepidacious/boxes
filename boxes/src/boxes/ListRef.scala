@@ -32,7 +32,7 @@ trait ListRef[T] extends RefGeneral[List[T], ListChange] {
 }
 
 trait ListVar[T] extends ListRef[T] with VarGeneral[List[T], ListChange] {
-  def update(update : (List[T] => Option[(List[T], ListChange)]))
+  def updateWithChanges(newT:List[T], c:ListChange*)
   def update(i:Int, e:T)
   def insert(i:Int, e:T*)
   def remove(i:Int, c:Int)
@@ -86,7 +86,7 @@ object ListVar {
 
 private class ListVarDefault[T] (private var t:List[T]) extends ListVar[T] {
 
-  def update(u : (List[T] => Option[(List[T], ListChange)])) = {
+  private def update(u : (List[T] => Option[(List[T], ListChange)])) = {
     try {
       Box.beforeWrite(this)
       u.apply(t) match {
@@ -101,6 +101,23 @@ private class ListVarDefault[T] (private var t:List[T]) extends ListVar[T] {
     }
   }
 
+  def updateWithChanges(newT:List[T], c:ListChange*) = {
+    try {
+      Box.beforeWrite(this)
+      if (newT != t) {
+        t = newT
+        if (c.isEmpty) {
+          Box.commitWrite(this, CompleteListChange())
+        } else {
+          Box.commitWrite(this, c:_*)
+        }
+      }
+    } finally {
+      Box.afterWrite(this)
+    }
+  }
+
+
   def insert(i:Int, e:T*) = update(list => Some((ListUtils.insert(list, i, e:_*), InsertionListChange(i, e.size))))
 
   def remove(i:Int, c:Int) = update(list => Some((ListUtils.remove(list, i, c), RemovalListChange(i, c))))
@@ -108,7 +125,7 @@ private class ListVarDefault[T] (private var t:List[T]) extends ListVar[T] {
   def update(i:Int, e:T) {
     update(list => {
       if (e != list(i)) {
-        Some(t.updated(i, e), ReplacementListChange(i, i))
+        Some((t.updated(i, e), ReplacementListChange(i, i)))
       } else {
         None
       }
@@ -118,7 +135,7 @@ private class ListVarDefault[T] (private var t:List[T]) extends ListVar[T] {
   def update(newT:List[T]) {
     update(list => {
       if (newT != list) {
-        Some(newT, CompleteListChange())
+        Some((newT, CompleteListChange()))
       } else {
         None
       }

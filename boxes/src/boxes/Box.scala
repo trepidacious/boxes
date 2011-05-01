@@ -287,8 +287,9 @@ object Box {
       cycling = false
 
       if (!failedReactions.isEmpty) {
+        println("Failed Reactions: " + failedReactions)
         //TODO make immutable copy of failed reactions for exception
-        throw new FailedReactionsException()//scala.collection.immutable.Set(failedReactions))
+        throw new FailedReactionsException()//Set(failedReactions))
       }
     }
   }
