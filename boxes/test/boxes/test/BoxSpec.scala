@@ -589,7 +589,69 @@ class BoxSpec extends WordSpec {
       assert(i() === Some(0))
     }
 
+    "work with ListPath when modifying path" in {
+      class ListNode(l:Int*) {
+        val list = ListVar(l:_*)
+      }
+
+      val ln = new ListNode(0, 1, 2, 3, 4, 5, 6, 7)
+      val ln2 = new ListNode(0, 1, 2, 3, 4, 5)
+      val s = Var(true)
+
+
+      val l = ListPath(if (s()) ln.list else ln2.list)
+      val i = ListIndex(l)
+
+      assert(i() === Some(0))
+      assert(l().sameElements(List(0, 1, 2, 3, 4, 5, 6, 7)))
+
+
+      //Can't select past end of list - just selects last index
+      i() = Some(10)
+      assert(i() === Some(7))
+
+      i() = Some(4)
+      assert(i() === Some(4))
+
+      ln.list(0) = 42
+      assert(i() === Some(4))
+
+      ln.list(0) = 0
+      assert(i() === Some(4))
+
+      ln.list.remove(0, 2)
+      assert(i() === Some(2))
+      assert(l(i().getOrElse(-1)) === 4)
+
+      ln.list.insert(0, 0, 1)
+      assert(i() === Some(4))
+      assert(l(i().getOrElse(-1)) === 4)
+
+      //Completely replace the List with a new one, should reset selection
+      ln.list() = List(0, 1, 2, 3)
+      assert(i() === Some(0))
+
+      i() = Some(2)
+      assert(i() === Some(2))
+
+      //Change the path, should reset selection
+      s() = false
+      assert(i() === Some(0))
+      assert(l().sameElements(List(0, 1, 2, 3, 4, 5)))
+
+      //Check selection still works on new path
+      i() = Some(4)
+      assert(i() === Some(4))
+
+      ln2.list.remove(0, 2)
+      assert(i() === Some(2))
+      assert(l(i().getOrElse(-1)) === 4)
+
+
+    }
   }
+
+
 
   "ListIndex with loseIndexOnDeletion false" should {
     "leave selection alone on deletion after selection" in {
