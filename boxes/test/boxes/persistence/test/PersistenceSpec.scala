@@ -8,15 +8,17 @@ import io.Source
 import persistence._
 
 class Person extends Node {
-    val name = Var("name")
-    val age = Var(32)
-    val friend:Var[Option[Person]] = Var(None)
-    val spouse:Var[Option[Person]] = Var(None)
-    val numbers = Var(List[Int]())
-    val accounts = Var(Map[String, Double]())
+  val name = Var("name")
+  val age = Var(32)
+  val friend:Var[Option[Person]] = Var(None)
+  val spouse:Var[Option[Person]] = Var(None)
+  val numbers = Var(List[Int]())
+  val accounts = Var(Map[String, Double]())
+  val nicknames = ListVar[String]()
 
-    override def toString = name() + ", " + age() + ", friend: " + friend() + ", spouse " + spouse() + ", numbers " + numbers() + ", accounts " + accounts()
-  }
+  override def toString = name() + ", " + age() + ", friend: " + friend() + ", spouse " + spouse() + ", numbers " + numbers() + ", accounts " + accounts() + ", nicknames " + nicknames()
+}
+
 
 class PersistenceSpec extends WordSpec {
 
@@ -31,6 +33,9 @@ class PersistenceSpec extends WordSpec {
 
     assert(p.accounts() === dp.accounts())
     assert(p.accounts() ne dp.accounts())
+
+    assert(p.nicknames() === dp.nicknames())
+    assert(p.nicknames() ne dp.nicknames())
   }
 
   "CodecByClass and XML" should {
@@ -50,11 +55,13 @@ class PersistenceSpec extends WordSpec {
       p.accounts() = Map("current" -> 10.0, "savings" -> 100.0, "secretswiss" -> 10000000.0)
       p.numbers() = List(10,20,30)
       p.age() = 100
+      p.nicknames() = List("Pico", "Pi")
 
       val q = new Person()
       q.accounts() = Map("current" -> 0.0)
       q.numbers() = List(1, 4, 9)
       q.name() = "q"
+      q.nicknames() = List("Queue", "Cue", "QED")
 
       p.friend() = Some(q)
       p.spouse() = Some(q)
@@ -62,6 +69,7 @@ class PersistenceSpec extends WordSpec {
       encode.code(p, target)
 
       val xml = s.toString
+      println(xml)
 
       //Decode
       val src = Source.fromString(xml)

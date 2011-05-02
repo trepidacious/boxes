@@ -179,6 +179,17 @@ class XMLDataTarget(writer:Writer, aliases:XMLAliases) extends DataTarget {
   private val cache = mutable.Map[Any, Int]()
   private var nextId = 0
 
+  private val condensedClasses = Set[Class[_]](
+    classOf[java.lang.Long],
+    classOf[java.lang.Integer],
+    classOf[java.lang.Short],
+    classOf[java.lang.Byte],
+    classOf[java.lang.Boolean],
+    classOf[java.lang.Double],
+    classOf[java.lang.Float],
+    classOf[java.lang.String]
+  )
+
   override def cache(thing:Any) = {
     cache.get(thing) match {
       case None => {
@@ -196,19 +207,22 @@ class XMLDataTarget(writer:Writer, aliases:XMLAliases) extends DataTarget {
     writer.write(s)
     if (newline) writer.write("\n")
   }
+  private def print(s:String) = {
+    writer.write(s)
+  }
 
-  def putBoolean(b:Boolean) = printWithFormatting(""+b)
-  def putByte(i:Byte) = printWithFormatting(""+i)
-  def putShort(i:Short) = printWithFormatting(""+i)
-  def putChar(i:Char) = printWithFormatting(""+i)
-  def putInt(i:Int) = printWithFormatting(""+i)
-  def putLong(l:Long) = printWithFormatting(""+l)
-  def putFloat(f:Float) = printWithFormatting(""+f)
-  def putDouble(d:Double) = printWithFormatting(""+d)
-
-  //No tab or newline for strings, we want the tags around the string value
-  //to contain only the string value
-  def putUTF(s:String) = printWithFormatting(s, false, false)
+  //No tab or newline for primitives. This is particularly important
+  //for strings, we want the tags around the string value
+  //to contain only the string value itself, no extra whitespace.
+  def putBoolean(b:Boolean) =   print(""+b)
+  def putByte(i:Byte) =         print(""+i)
+  def putShort(i:Short) =       print(""+i)
+  def putChar(i:Char) =         print(""+i)
+  def putInt(i:Int) =           print(""+i)
+  def putLong(l:Long) =         print(""+l)
+  def putFloat(f:Float) =       print(""+f)
+  def putDouble(d:Double) =     print(""+d)
+  def putUTF(s:String) =        print(s)
 
   def openTag(s:String) = {
     printWithFormatting("<" + s + ">")
@@ -222,9 +236,8 @@ class XMLDataTarget(writer:Writer, aliases:XMLAliases) extends DataTarget {
     id.foreach(id => s = s + " id='" + id + "'")
     ref.foreach(ref => s = s + " ref='" + ref + "'")
 
-    //When opening a string class tag, the contents
-    //need to have no whitespace, so don't print a newline
-    if (c == classOf[java.lang.String]) {
+    //When opening a condensed class tag, don't print a newline
+    if (condensedClasses.contains(c)) {
       printWithFormatting("<" + s + ">", false)
       tagStack.append((label, true))
     } else {
