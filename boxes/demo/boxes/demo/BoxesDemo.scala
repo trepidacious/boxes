@@ -539,7 +539,7 @@ object BoxesDemo {
 
 //    swingViews
 //    responder
-//    textViews
+    textViews
 //    optionPath
 //    textViews
 //    sequences
@@ -550,7 +550,7 @@ object BoxesDemo {
 //    val xml = code
 //    decode(xml)
 
-    listPath
+//    listPath
   }
 
 }

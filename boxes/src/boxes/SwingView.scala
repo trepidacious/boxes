@@ -267,9 +267,6 @@ private class RangeOptionView[G](v:VarGeneral[G,_], min:Int, max:Int, c:GConvert
 class LinkingJSlider(sv:SwingView, brm:BoundedRangeModel) extends JSlider(brm) {}
 class LinkingJProgressBar(sv:SwingView, brm:BoundedRangeModel) extends JProgressBar(brm) {}
 
-
-
-
 object NumberView {
   def apply[N](v:VarGeneral[N,_], s:Sequence[N] = LogStep(10))(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionView(v, s, new TConverter[N], n, nc).asInstanceOf[SwingView]
 }
