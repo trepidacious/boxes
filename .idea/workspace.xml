@@ -73,10 +73,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BoxesDemo.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="BoxesDemo.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="537" column="29" selection-start="12754" selection-end="12754" vertical-scroll-proportion="0.3638344">
+            <state line="537" column="29" selection-start="12754" selection-end="12754" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -100,10 +100,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Ledger.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="Ledger.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Ledger.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="89" column="28" selection-start="2870" selection-end="2870" vertical-scroll-proportion="0.0">
+            <state line="22" column="50" selection-start="858" selection-end="858" vertical-scroll-proportion="0.55932206">
               <folding />
             </state>
           </provider>
@@ -172,8 +172,8 @@
         <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/XMLData.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/SwingView.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/MLensDefault.scala" />
-        <option value="$PROJECT_DIR$/boxes/src/boxes/Ledger.scala" />
         <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/Ledger.scala" />
       </list>
     </option>
   </component>
@@ -676,16 +676,16 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Ledger.scala">
+    <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="89" column="28" selection-start="2870" selection-end="2870" vertical-scroll-proportion="0.0">
+        <state line="537" column="29" selection-start="12754" selection-end="12754" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Ledger.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="537" column="29" selection-start="12754" selection-end="12754" vertical-scroll-proportion="0.3638344">
+        <state line="22" column="50" selection-start="858" selection-end="858" vertical-scroll-proportion="0.55932206">
           <folding />
         </state>
       </provider>

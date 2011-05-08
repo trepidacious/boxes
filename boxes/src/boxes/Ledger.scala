@@ -51,7 +51,7 @@ trait Lens[T, V<:AnyRef] {
  * Lens that also allows changing of the value of a property (mutation)
  */
 trait MLens[T, V<:AnyRef] extends Lens[T, V] {
-  def update(t:T, v:V)
+  def update(t:T, v:V):T
 }
 
 object Lens {
@@ -98,7 +98,10 @@ class LensDefault[T, V<:AnyRef](val name:String, val read:(T=>V))(implicit val v
 
 class MLensDefault[T, V<:AnyRef](val name:String, val read:(T=>V), val write:((T,V)=>Unit))(implicit val valueManifest:Manifest[V]) extends Lens[T, V] {
   def apply(t:T) = read(t)
-  def update(t:T, v:V) = write(t, v)
+  def update(t:T, v:V) = {
+    write(t, v)
+    t
+  }
 }
 
 object LensRecordView {
