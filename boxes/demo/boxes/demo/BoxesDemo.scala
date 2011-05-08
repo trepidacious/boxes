@@ -526,6 +526,30 @@ object BoxesDemo {
     println("ln.list() = " + ln.list())
   }
 
+  def ledger() {
+    val p = new OptionPerson()
+    p.name() = "p"
+    val q = new OptionPerson()
+    q.name() = "q"
+
+    val list = ListVar(p, q)
+
+    val view = new LensRecordView[OptionPerson](
+      Lens("name", _.name()),
+      Lens("age", _.age().asInstanceOf[AnyRef])
+    )
+
+    val ledger = new ListLedger(list, view)
+
+    for (r <- 0 until ledger.recordCount) {
+      for (f <- 0 until ledger.fieldCount) {
+        print(ledger(r, f) + "\t")
+      }
+      println()
+    }
+
+  }
+
 
   def main(args: Array[String]) {
 //    simpleCalc
@@ -539,7 +563,7 @@ object BoxesDemo {
 
 //    swingViews
 //    responder
-    textViews
+//    textViews
 //    optionPath
 //    textViews
 //    sequences
@@ -551,6 +575,7 @@ object BoxesDemo {
 //    decode(xml)
 
 //    listPath
+    ledger
   }
 
 }
