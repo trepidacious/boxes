@@ -534,9 +534,8 @@ object BoxesDemo {
 
     val list = ListVar(p, q)
 
-    val view = new LensRecordView[OptionPerson](
-      Lens("name", _.name()),
-      Lens("age", _.age().asInstanceOf[AnyRef])
+    val view = LensRecordView[OptionPerson](
+      VarLens("name", _.name)
     )
 
     val ledger = new ListLedger(list, view)

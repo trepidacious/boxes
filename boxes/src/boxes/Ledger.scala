@@ -37,12 +37,20 @@ class ListLedger[T](list:ListRef[T], rView:RecordView[T]) extends Ledger {
   def fieldCount() = rView.fieldCount
 }
 
+/**
+ * Lens allowing reading of a "property" of a particular
+ * data item. Also associates a name and a class via a Manifest
+ */
 trait Lens[T, V<:AnyRef] {
   def apply(t:T):V
   def name():String
   def valueManifest():Manifest[V]
 }
-trait VarLens[T, V<:AnyRef] extends Lens[T, V] {
+
+/**
+ * Lens that also allows changing of the value of a property (mutation)
+ */
+trait MLens[T, V<:AnyRef] extends Lens[T, V] {
   def update(t:T, v:V)
 }
 
@@ -52,13 +60,49 @@ object Lens {
   }
 }
 
+object MLens {
+  def apply[T, V<:AnyRef](name:String, read:(T=>V), write:((T,V)=>Unit))(implicit valueManifest:Manifest[V]) = {
+    new MLensDefault[T, V](name, read, write)(manifest)
+  }
+}
+
+/**
+ * MLens based on a VarGeneral and an access closure
+ */
+object VarLens {
+  def apply[T, V<:AnyRef](name:String, access:(T=>VarGeneral[V,_]))(implicit valueManifest:Manifest[V]) = {
+    new MLensDefault[T, V](
+      name,
+      (t) => access(t).apply,
+      (t, v) => access(t).update(v)
+    )(valueManifest)
+  }
+}
+
+/**
+ * MLens based on a RefGeneral and an access closure
+ */
+object RefLens {
+  def apply[T, V<:AnyRef](name:String, access:(T=>RefGeneral[V,_]))(implicit valueManifest:Manifest[V]) = {
+    new LensDefault[T, V](
+      name,
+      (t) => access(t).apply
+    )(valueManifest)
+  }
+}
+
+
 class LensDefault[T, V<:AnyRef](val name:String, val read:(T=>V))(implicit val valueManifest:Manifest[V]) extends Lens[T, V] {
   def apply(t:T) = read(t)
 }
 
-class VarLensDefault[T, V<:AnyRef](val name:String, val read:(T=>V), val write:((T,V)=>Unit))(implicit val valueManifest:Manifest[V]) extends Lens[T, V] {
+class MLensDefault[T, V<:AnyRef](val name:String, val read:(T=>V), val write:((T,V)=>Unit))(implicit val valueManifest:Manifest[V]) extends Lens[T, V] {
   def apply(t:T) = read(t)
   def update(t:T, v:V) = write(t, v)
+}
+
+object LensRecordView {
+  def apply [T<:AnyRef](lenses:Lens[T,_<:AnyRef]*) = new LensRecordView[T](lenses:_*)
 }
 
 class LensRecordView[T<:AnyRef](lenses:Lens[T,_<:AnyRef]*) extends RecordView[T] {
@@ -67,21 +111,21 @@ class LensRecordView[T<:AnyRef](lenses:Lens[T,_<:AnyRef]*) extends RecordView[T]
   //but this view itself is immutable - the records may be mutable, but this is
   //irrelevant
 
-  override def editable(record:Int, field:Int, recordValue:T) = lenses(field).isInstanceOf[VarLens[_,_]]
+  override def editable(record:Int, field:Int, recordValue:T) = lenses(field).isInstanceOf[MLens[_,_]]
   override def apply(record:Int, field:Int, recordValue:T) = lenses(field).apply(recordValue)
 
   override def update(record:Int, field:Int, recordValue:T, fieldValue:AnyRef) = {
     lenses(field) match {
-      case varLens:VarLens[_,_] => {
+      case varLens:MLens[_,_] => {
         if(!varLens.valueManifest.typeArguments.isEmpty) {
-          throw new RuntimeException("Can only use VarLens in LensRecordView for non-generic types")
+          throw new RuntimeException("Can only use MLens in LensRecordView for non-generic types")
         } else if (!varLens.valueManifest.erasure.isAssignableFrom(fieldValue.getClass)) {
           throw new RuntimeException("Invalid value, expected a " + varLens.valueManifest.erasure + " but got a " + fieldValue.getClass)
         } else {
-          varLens.asInstanceOf[VarLens[AnyRef, AnyRef]].update(recordValue, fieldValue)
+          varLens.asInstanceOf[MLens[AnyRef, AnyRef]].update(recordValue, fieldValue)
         }
       }
-      case _ => throw new RuntimeException("Code error - not a VarLens for field " + field + ", but tried to update anyway")
+      case _ => throw new RuntimeException("Code error - not a MLens for field " + field + ", but tried to update anyway")
     }
   }
 

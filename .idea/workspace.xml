@@ -76,7 +76,7 @@
       <file leaf-file-name="BoxesDemo.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="536" column="47" selection-start="12727" selection-end="12727" vertical-scroll-proportion="0.30287647">
+            <state line="537" column="29" selection-start="12754" selection-end="12754" vertical-scroll-proportion="0.3638344">
               <folding />
             </state>
           </provider>
@@ -103,7 +103,7 @@
       <file leaf-file-name="Ledger.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Ledger.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="63" column="31" selection-start="2287" selection-end="2287" vertical-scroll-proportion="0.0">
+            <state line="89" column="28" selection-start="2870" selection-end="2870" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -158,7 +158,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/boxes/src/boxes/Reaction.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/Codec.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/NodeAccessors.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/Node.scala" />
@@ -172,6 +171,7 @@
         <option value="$PROJECT_DIR$/boxes/test/boxes/persistence/test/PersistenceSpec.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/XMLData.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/SwingView.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/MLensDefault.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Ledger.scala" />
         <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
       </list>
@@ -550,6 +550,7 @@
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3275862" sideWeight="0.23890968" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24959914" sideWeight="0.7782516" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3993576" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
@@ -558,12 +559,11 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.15606627" sideWeight="0.6663113" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32977018" sideWeight="0.7782516" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3997862" sideWeight="0.7782516" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.1790079" sideWeight="0.86604774" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.1790079" sideWeight="0.69098145" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.13395226" sideWeight="0.75681454" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.30901858" sideWeight="0.75681454" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32869378" sideWeight="0.23890968" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
     </layout>
@@ -605,11 +605,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/list/ListIndices.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="0" selection-start="184" selection-end="229" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Path.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="172" column="7" selection-start="5856" selection-end="5856" vertical-scroll-proportion="0.0" />
@@ -683,14 +678,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Ledger.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="63" column="31" selection-start="2287" selection-end="2287" vertical-scroll-proportion="0.0">
+        <state line="89" column="28" selection-start="2870" selection-end="2870" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="536" column="47" selection-start="12727" selection-end="12727" vertical-scroll-proportion="0.30287647">
+        <state line="537" column="29" selection-start="12754" selection-end="12754" vertical-scroll-proportion="0.3638344">
           <folding />
         </state>
       </provider>
