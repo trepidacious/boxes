@@ -6,8 +6,14 @@ import java.awt.Component
 import javax.swing._
 import javax.swing.JToggleButton.ToggleButtonModel
 import math.Numeric
+import table.{TableModel, AbstractTableModel}
 import util._
 
+//TODO implement rate-limiting of updates? But then we need to know that views don't rely on all updates being called, just the most recent
+//Should be easy enough to do, just make the views store some Atomic style stuff they need to use to update, and fiddle
+//with this from View methods, so that when update DOES get called, it clears out any updates that are needed. Only really
+//fiddly for tables, which need to remember the size of the change (columns and/or row count) and make sure that this
+//is synchronized between View handling and swing updates - a simple lock should do it.
 object SwingView {
 
   val viewToUpdates = new mutable.WeakHashMap[SwingView, mutable.ListBuffer[() => Unit]]()
@@ -131,8 +137,8 @@ private class StringOptionView[G](v:VarGeneral[G,_], c:GConverter[G, String], mu
 
 //Special versions of components that link back to the SwingView using them,
 //so that if users only retain the component, they still also retain the SwingView.
-class LinkingJScrollPane(sv:SwingView, contents:Component) extends JScrollPane(contents) {}
-class LinkingJTextField(sv:SwingView) extends JTextField {}
+class LinkingJScrollPane(val sv:SwingView, contents:Component) extends JScrollPane(contents) {}
+class LinkingJTextField(val sv:SwingView) extends JTextField {}
 
 
 object BooleanView {
@@ -197,8 +203,8 @@ private class BooleanOptionView[G](v:VarGeneral[G,_], n:RefGeneral[String,_], c:
 
 }
 
-class LinkingJCheckBox(sv:SwingView) extends JCheckBox {}
-class LinkingJToggleButton(sv:SwingView) extends JToggleButton {}
+class LinkingJCheckBox(val sv:SwingView) extends JCheckBox {}
+class LinkingJToggleButton(val sv:SwingView) extends JToggleButton {}
 
 
 
@@ -264,8 +270,8 @@ private class RangeOptionView[G](v:VarGeneral[G,_], min:Int, max:Int, c:GConvert
 
 }
 
-class LinkingJSlider(sv:SwingView, brm:BoundedRangeModel) extends JSlider(brm) {}
-class LinkingJProgressBar(sv:SwingView, brm:BoundedRangeModel) extends JProgressBar(brm) {}
+class LinkingJSlider(val sv:SwingView, brm:BoundedRangeModel) extends JSlider(brm) {}
+class LinkingJProgressBar(val sv:SwingView, brm:BoundedRangeModel) extends JProgressBar(brm) {}
 
 object NumberView {
   def apply[N](v:VarGeneral[N,_], s:Sequence[N] = LogStep(10))(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionView(v, s, new TConverter[N], n, nc).asInstanceOf[SwingView]
@@ -328,4 +334,74 @@ private class NumberOptionView[G, N](v:VarGeneral[G,_], s:Sequence[N], c:GConver
 
 }
 
-class LinkingJSpinner(sv:SwingView, m:SpinnerModel) extends JSpinner(m) {}
+class LinkingJSpinner(val sv:SwingView, m:SpinnerModel) extends JSpinner(m) {}
+
+object LedgerView {
+  def apply(v:RefGeneral[_<:Ledger,_]) = new LedgerView(v)
+}
+
+class LedgerView(v:RefGeneral[_<:Ledger,_]) extends SwingView{
+
+  class LedgerTableModel extends AbstractTableModel {
+    override def getColumnClass(columnIndex:Int) = v().fieldClass(columnIndex)
+    override def getColumnName(columnIndex:Int) = v().fieldName(columnIndex)
+    override def getColumnCount() = v().fieldCount
+    override def getRowCount() = v().recordCount
+    override def getValueAt(rowIndex:Int, columnIndex:Int) = v().apply(rowIndex, columnIndex).asInstanceOf[AnyRef]
+    override def isCellEditable(rowIndex:Int, columnIndex:Int) = v().editable(rowIndex, columnIndex)
+    override def setValueAt(aValue:Object, rowIndex:Int, columnIndex:Int) = v().update(rowIndex, columnIndex, aValue)
+  }
+
+  val model = new LedgerTableModel()
+
+  val component = new LinkingJTable(this, model)
+
+  val view = View {
+    //Read the entire ledger - not neat, but means we receive updates. Might be best just to cache it all
+    //but probably doesn't make much difference
+    val ledger = v()
+    for (f <- 0 until ledger.fieldCount) {
+      ledger.fieldName(f)
+      ledger.fieldClass(f)
+    }
+    for (r <- 0 until ledger.recordCount) {
+      for (f <- 0 until ledger.fieldCount) {
+        ledger(r, f)
+        ledger.editable(r, f)
+      }
+    }
+
+    //First look for changes in current ledger
+    var rowCountChanged = false;
+    var columnsChanged = false;
+    for {
+      queue <- ledger.changes
+      (index, change) <- queue
+    } {
+      rowCountChanged &= change.rowCountChanged
+      columnsChanged &= change.columnsChanged
+    }
+
+    //Completely new ledger means row count may have changed
+    if (!v.changes.isEmpty) {
+      rowCountChanged = true
+    }
+
+    val rowCount = ledger.recordCount()
+
+    //This will be called from Swing Thread
+    replaceUpdate {
+      if (columnsChanged) {
+        model.fireTableStructureChanged()
+      } else if (rowCountChanged) {
+        model.fireTableDataChanged()
+      } else {
+        model.fireTableRowsUpdated(0, rowCount-1)
+      }
+    }
+  }
+
+
+}
+
+class LinkingJTable(val sv:SwingView, m:TableModel) extends JTable(m) {}

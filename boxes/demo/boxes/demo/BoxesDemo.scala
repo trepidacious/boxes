@@ -535,17 +535,35 @@ object BoxesDemo {
     val list = ListVar(p, q)
 
     val view = LensRecordView[OptionPerson](
-      VarLens("name", _.name)
+      VarLens("name", _.name),
+      VarLens("age", _.age)
     )
 
     val ledger = new ListLedger(list, view)
 
+    for (f <- 0 until ledger.fieldCount) {
+      print(ledger.fieldName(f) + "\t")
+    }
+    println()
     for (r <- 0 until ledger.recordCount) {
       for (f <- 0 until ledger.fieldCount) {
         print(ledger(r, f) + "\t")
       }
       println()
     }
+
+    val ledgerRef = Var(ledger)
+
+    val ledgerView = LedgerView(ledgerRef)
+
+    val frame = new JFrame()
+    val panel = new JPanel()
+    panel.add(new JScrollPane(ledgerView.component))
+    frame.add(panel)
+    frame.pack
+    frame.setMinimumSize(new Dimension(300, 50))
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+    frame.setVisible(true)
 
   }
 
