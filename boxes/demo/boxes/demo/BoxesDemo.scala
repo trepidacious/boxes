@@ -6,15 +6,14 @@
  */
 package boxes.demo
 
-import java.awt.Dimension
 import javax.swing._
 import java.awt.event.ActionEvent
 import boxes.util.{LogStep, Step, CoalescingResponder, NumericClass}
 import boxes._
-import list.ListIndex
 import persistence._
 import io.Source
 import java.io.StringWriter
+import java.awt.{BorderLayout, Dimension}
 
 object BoxesDemo {
 
@@ -541,8 +540,14 @@ object BoxesDemo {
 
     val ledger = new ListLedger(list, view)
 
+    ledger.update(0, 1, 42)
+
     for (f <- 0 until ledger.fieldCount) {
       print(ledger.fieldName(f) + "\t")
+    }
+    println()
+    for (f <- 0 until ledger.fieldCount) {
+      print(ledger.fieldClass(f) + "\t")
     }
     println()
     for (r <- 0 until ledger.recordCount) {
@@ -556,10 +561,26 @@ object BoxesDemo {
 
     val ledgerView = LedgerView(ledgerRef)
 
+    val add = new JButton(new AbstractAction("Add") {
+      override def actionPerformed(e:ActionEvent) = {
+        val person = new OptionPerson()
+        person.name() = ""+Math.random
+        list.insert(list().size - 1, person)
+      }
+    })
+
+    val delete = new JButton(new AbstractAction("Delete") {
+      override def actionPerformed(e:ActionEvent) = {
+        if (!list().isEmpty) list.remove(0, 1)
+      }
+    })
+
     val frame = new JFrame()
     val panel = new JPanel()
-    panel.add(new JScrollPane(ledgerView.component))
-    frame.add(panel)
+    panel.add(add)
+    panel.add(delete)
+    frame.add(new JScrollPane(ledgerView.component), BorderLayout.CENTER)
+    frame.add(panel, BorderLayout.SOUTH)
     frame.pack
     frame.setMinimumSize(new Dimension(300, 50))
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)

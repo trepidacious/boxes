@@ -6,7 +6,7 @@ import java.awt.Component
 import javax.swing._
 import javax.swing.JToggleButton.ToggleButtonModel
 import math.Numeric
-import table.{TableModel, AbstractTableModel}
+import table._
 import util._
 
 //TODO implement rate-limiting of updates? But then we need to know that views don't rely on all updates being called, just the most recent
@@ -401,7 +401,32 @@ class LedgerView(v:RefGeneral[_<:Ledger,_]) extends SwingView{
     }
   }
 
+  def defaultEditor(columnClass:Class[_]) = component.getDefaultEditor(columnClass)
+  def defaultRenderer(columnClass:Class[_]) = component.getDefaultRenderer(columnClass)
+
+  def defaultEditor(columnClass:Class[_], editor:TableCellEditor) {
+    component.setDefaultEditor(columnClass, editor);
+  }
+
+  def defaultRenderer(columnClass:Class[_], renderer:TableCellRenderer) {
+    component.setDefaultRenderer(columnClass, renderer);
+  }
+
+  def rowHeight = component.getRowHeight
+  def rowHeight_=(rowHeight:Int) = component.setRowHeight(rowHeight)
+
+  def removeHeader = component.setTableHeader(null)
 
 }
 
-class LinkingJTable(val sv:SwingView, m:TableModel) extends JTable(m) {}
+class LinkingJTable(val sv:SwingView, m:TableModel) extends JTable(m) {
+  val defaultRenderer = new DefaultTableCellRenderer()
+  setDefaultRenderer(classOf[Boolean], defaultRenderer)
+  setDefaultRenderer(classOf[Byte], defaultRenderer)
+  setDefaultRenderer(classOf[Char], defaultRenderer)
+  setDefaultRenderer(classOf[Double], defaultRenderer)
+  setDefaultRenderer(classOf[Long], defaultRenderer)
+  setDefaultRenderer(classOf[Float], defaultRenderer)
+  setDefaultRenderer(classOf[Int], defaultRenderer)
+  setDefaultRenderer(classOf[Short], defaultRenderer)
+}

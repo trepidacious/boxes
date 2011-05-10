@@ -43,16 +43,9 @@ class ListLedger[T](list:ListRef[T], rView:RecordView[T]) extends Ledger {
         if (index > lastProcessedChangeIndex) {
           lastProcessedChangeIndex = index
           change match {
-            case CompleteListChange()         => {
-              changed = true
-              rowCountChanged = true
-            }
             case ReplacementListChange(f, i)  => changed = true
-            case InsertionListChange(i, c)    => {
-              changed = true
-              rowCountChanged = true
-            }
-            case RemovalListChange(i, c)      => {
+            //All changes except replacement may change size
+            case _ => {
               changed = true
               rowCountChanged = true
             }
@@ -92,23 +85,6 @@ class ListLedger[T](list:ListRef[T], rView:RecordView[T]) extends Ledger {
       Box.afterWrite(this)
     }
   }
-
-  def editable(record:Int, field:Int) : Boolean = {
-    try {
-      Box.beforeRead(this)
-      return rView.editable(record, field, list(record))
-    } finally {
-      Box.afterRead(this)
-    }
-  }
-  def apply(record:Int, field:Int):Any = {
-    try {
-      Box.beforeRead(this)
-      return rView(record, field, list(record))
-    } finally {
-      Box.afterRead(this)
-    }
-  }
   def update(record:Int, field:Int, value:Any) = {
     try {
       Box.beforeWrite(this)
@@ -118,34 +94,18 @@ class ListLedger[T](list:ListRef[T], rView:RecordView[T]) extends Ledger {
       Box.afterWrite(this)
     }
   }
-  def fieldName(field:Int):String = {
+
+  def editable(record:Int, field:Int) = boxRead{rView.editable(record, field, list(record))}
+  def apply(record:Int, field:Int) = boxRead{rView(record, field, list(record))}
+  def fieldName(field:Int):String = boxRead{rView.fieldName(field)}
+  def fieldClass(field:Int) = boxRead[Class[_]]{rView.fieldClass(field)}  //TODO work out why the explicit parametric type is needed
+  def recordCount() = boxRead{list().size}
+  def fieldCount() = boxRead{rView.fieldCount}
+
+  private def boxRead[T](read: =>T):T = {
     try {
       Box.beforeRead(this)
-      rView.fieldName(field)
-    } finally {
-      Box.afterRead(this)
-    }
-  }
-  def fieldClass(field:Int):Class[_] = {
-    try {
-      Box.beforeRead(this)
-      return rView.fieldClass(field)
-    } finally {
-      Box.afterRead(this)
-    }
-  }
-  def recordCount():Int = {
-    try {
-      Box.beforeRead(this)
-      return list().size
-    } finally {
-      Box.afterRead(this)
-    }
-  }
-  def fieldCount():Int = {
-    try {
-      Box.beforeRead(this)
-      return rView.fieldCount
+      return read
     } finally {
       Box.afterRead(this)
     }
@@ -211,7 +171,7 @@ class LensDefault[T, V](val name:String, val read:(T=>V))(implicit val valueMani
   def apply(t:T) = read(t)
 }
 
-class MLensDefault[T, V](val name:String, val read:(T=>V), val write:((T,V)=>Unit))(implicit val valueManifest:Manifest[V]) extends Lens[T, V] {
+class MLensDefault[T, V](val name:String, val read:(T=>V), val write:((T,V)=>Unit))(implicit val valueManifest:Manifest[V]) extends MLens[T, V] {
   def apply(t:T) = read(t)
   def update(t:T, v:V) = {
     write(t, v)
@@ -233,18 +193,44 @@ class LensRecordView[T](lenses:Lens[T,_]*) extends RecordView[T] {
   override def apply(record:Int, field:Int, recordValue:T) = lenses(field).apply(recordValue)
 
   override def update(record:Int, field:Int, recordValue:T, fieldValue:Any) = {
-    val fieldValueRef = fieldValue.asInstanceOf[AnyRef]
     lenses(field) match {
-      case varLens:MLens[_,_] => {
-        if(!varLens.valueManifest.typeArguments.isEmpty) {
-          throw new RuntimeException("Can only use MLens in LensRecordView for non-generic types")
-        } else if (!varLens.valueManifest.erasure.isAssignableFrom(fieldValueRef.getClass)) {
-          throw new RuntimeException("Invalid value, expected a " + varLens.valueManifest.erasure + " but got a " + fieldValueRef.getClass)
-        } else {
-          varLens.asInstanceOf[MLens[Any, Any]].update(recordValue, fieldValue)
+      case mLens:MLens[_,_] => {
+        fieldValue match {
+
+          //TODO there HAS to be a better way to do this. The problem is that the AnyVals don't have getClass, so
+          //we need to match to get the class, then pass it through. At least there is a known, fixed set of classes
+          //here, and we know they must match the manifest exactly
+          case v:Boolean => tryUpdate(mLens, recordValue, fieldValue, classOf[Boolean])
+          case v:Byte => tryUpdate(mLens, recordValue, fieldValue, classOf[Byte])
+          case v:Char => tryUpdate(mLens, recordValue, fieldValue, classOf[Char])
+          case v:Double => tryUpdate(mLens, recordValue, fieldValue, classOf[Double])
+          case v:Long => tryUpdate(mLens, recordValue, fieldValue, classOf[Long])
+          case v:Int => tryUpdate(mLens, recordValue, fieldValue, classOf[Int])
+          case v:Short => tryUpdate(mLens, recordValue, fieldValue, classOf[Short])
+
+          //Now we have an AnyRef, it is much easier
+          case fieldValueRef:AnyRef => {
+            if(!mLens.valueManifest.typeArguments.isEmpty) {
+              throw new RuntimeException("Can only use MLens in LensRecordView for non-generic types")
+            } else if (!mLens.valueManifest.erasure.isAssignableFrom(fieldValueRef.getClass)) {
+              throw new RuntimeException("Invalid value, expected a " + mLens.valueManifest.erasure + " but got a " + fieldValueRef.getClass)
+            } else {
+              mLens.asInstanceOf[MLens[Any, Any]].update(recordValue, fieldValueRef)
+            }
+          }
+
+          case _ => throw new RuntimeException("Can't handle fieldValue " + fieldValue)
         }
       }
       case _ => throw new RuntimeException("Code error - not a MLens for field " + field + ", but tried to update anyway")
+    }
+  }
+
+  private def tryUpdate(mLens:MLens[_,_], recordValue:T, fieldValue:Any, c:Class[_]) = {
+    if (mLens.valueManifest.erasure == c) {
+      mLens.asInstanceOf[MLens[Any, Any]].update(recordValue, fieldValue)
+    } else {
+      throw new RuntimeException("Invalid value, expected a " + mLens.valueManifest.erasure + " but got a " + c)
     }
   }
 
