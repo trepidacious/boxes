@@ -564,8 +564,8 @@ object BoxesDemo {
     val add = new JButton(new AbstractAction("Add") {
       override def actionPerformed(e:ActionEvent) = {
         val person = new OptionPerson()
-        person.name() = ""+Math.random
-        list.insert(list().size - 1, person)
+        person.name() = "New item at " + list().size
+        list.insert(list().size, person)
       }
     })
 

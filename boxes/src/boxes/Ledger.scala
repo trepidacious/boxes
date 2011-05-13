@@ -53,12 +53,12 @@ class ListLedger[T](list:ListRef[T], rView:RecordView[T]) extends Ledger {
         }
       }
       if (changed) {
-        {()=>commitChange(LedgerChange(false, rowCountChanged))}
+        {()=> commitChange(LedgerChange(false, rowCountChanged))}
       } else {
         {()=>()}
       }
     }
-    override def isView = true
+    override def isView = false
   }
   Box.registerReaction(listChangeReaction)
 
@@ -73,7 +73,7 @@ class ListLedger[T](list:ListRef[T], rView:RecordView[T]) extends Ledger {
         {()=>()}
       }
     }
-    override def isView = true
+    override def isView = false
   }
   Box.registerReaction(recordViewChangeReaction)
 

@@ -4,6 +4,7 @@ import scala.collection._
 import java.awt.event.{FocusEvent, FocusListener, ActionEvent, ActionListener}
 import java.awt.Component
 import javax.swing._
+import event.{ChangeEvent, TableColumnModelEvent}
 import javax.swing.JToggleButton.ToggleButtonModel
 import math.Numeric
 import table._
@@ -311,7 +312,7 @@ private class NumberOptionView[G, N](v:VarGeneral[G,_], s:Sequence[N], c:GConver
 		def fireNewValue(newValue:N) = {
       currentValue = newValue
 
-      //FIXME - why DOES fireStateChanged end up calling setValue? can we stop it
+      //TODO - why DOES fireStateChanged end up calling setValue? can we stop it
       //and avoid the need for firing variable?
 			firing = true
 			fireStateChanged
@@ -372,14 +373,14 @@ class LedgerView(v:RefGeneral[_<:Ledger,_]) extends SwingView{
     }
 
     //First look for changes in current ledger
-    var rowCountChanged = false;
-    var columnsChanged = false;
+    var rowCountChanged = false
+    var columnsChanged = false
     for {
       queue <- ledger.changes
-      (index, change) <- queue
+      (_, change) <- queue
     } {
-      rowCountChanged &= change.rowCountChanged
-      columnsChanged &= change.columnsChanged
+      rowCountChanged |= change.rowCountChanged
+      columnsChanged |= change.columnsChanged
     }
 
     //Completely new ledger means row count may have changed
@@ -390,7 +391,7 @@ class LedgerView(v:RefGeneral[_<:Ledger,_]) extends SwingView{
     val rowCount = ledger.recordCount()
 
     //This will be called from Swing Thread
-    replaceUpdate {
+    addUpdate {
       if (columnsChanged) {
         model.fireTableStructureChanged()
       } else if (rowCountChanged) {
@@ -421,12 +422,31 @@ class LedgerView(v:RefGeneral[_<:Ledger,_]) extends SwingView{
 
 class LinkingJTable(val sv:SwingView, m:TableModel) extends JTable(m) {
   val defaultRenderer = new DefaultTableCellRenderer()
-  setDefaultRenderer(classOf[Boolean], defaultRenderer)
-  setDefaultRenderer(classOf[Byte], defaultRenderer)
-  setDefaultRenderer(classOf[Char], defaultRenderer)
-  setDefaultRenderer(classOf[Double], defaultRenderer)
-  setDefaultRenderer(classOf[Long], defaultRenderer)
-  setDefaultRenderer(classOf[Float], defaultRenderer)
-  setDefaultRenderer(classOf[Int], defaultRenderer)
-  setDefaultRenderer(classOf[Short], defaultRenderer)
+
+  setDefaultRenderer(classOf[Boolean],  defaultRenderer)
+  setDefaultRenderer(classOf[Byte],     defaultRenderer)
+  setDefaultRenderer(classOf[Char],     defaultRenderer)
+  setDefaultRenderer(classOf[Double],   defaultRenderer)
+  setDefaultRenderer(classOf[Long],     defaultRenderer)
+  setDefaultRenderer(classOf[Float],    defaultRenderer)
+  setDefaultRenderer(classOf[Int],      defaultRenderer)
+  setDefaultRenderer(classOf[Short],    defaultRenderer)
+
+  //TODO add default editors
+
+  //See Java bug 4709394
+  putClientProperty("terminateEditOnFocusLost", true);
+
+  //Workaround for bug 4330950, stops editing before starting to move column
+  override def columnMoved(e:TableColumnModelEvent) {
+      if (isEditing()) cellEditor.stopCellEditing()
+      super.columnMoved(e);
+  }
+
+	//Workaround for bug 4330950, stops editing before starting to change column
+  override def columnMarginChanged(e:ChangeEvent) {
+      if (isEditing()) cellEditor.stopCellEditing()
+      super.columnMarginChanged(e);
+  }
+
 }
