@@ -32,8 +32,9 @@ object BoxesDemo {
     val spouse:Var[Option[OptionPerson]] = Var(None)
     val numbers = Var(List[Int]())
     val accounts = Var(Map[String, Int]())
+    val zombie = Var(false)
 
-    override def toString = name() + ", " + age() + ", friend: " + friend() + ", spouse " + spouse() + ", numbers " + numbers() + ", accounts " + accounts()
+    override def toString = name() + ", " + age() + ", friend: " + friend() + ", spouse " + spouse() + ", numbers " + numbers() + ", accounts " + accounts() + ", zombie? " + zombie()
   }
 
   def optionPath() = {
@@ -526,16 +527,20 @@ object BoxesDemo {
   }
 
   def ledger() {
+
+    SwingView.nimbus
+
     val p = new OptionPerson()
     p.name() = "p"
     val q = new OptionPerson()
     q.name() = "q"
 
-    val list = ListVar(p, q)
+    val list = ListVar(p, q, q, p)
 
     val view = LensRecordView[OptionPerson](
-      VarLens("name", _.name),
-      VarLens("age", _.age)
+      VarLens("Name", _.name),
+      VarLens("Age", _.age),
+      VarLens("Zombie?", _.zombie)
     )
 
     val ledger = new ListLedger(list, view)

@@ -7,6 +7,7 @@ import javax.swing._
 import event.{ChangeEvent, TableColumnModelEvent}
 import javax.swing.JToggleButton.ToggleButtonModel
 import math.Numeric
+import swing._
 import table._
 import util._
 
@@ -76,6 +77,20 @@ object SwingView {
     }
   }
 
+  def nimbus() {
+    try {
+      for (info <- UIManager.getInstalledLookAndFeels()) {
+          if ("Nimbus".equals(info.getName())) {
+              UIManager.setLookAndFeel(info.getClassName())
+          }
+      }
+    } catch {
+      case _ => {}
+    }
+  }
+
+  //TODO add this
+//  val iconFactory = new ResourceIconFactory()
 }
 
 trait SwingView {
@@ -423,16 +438,38 @@ class LedgerView(v:RefGeneral[_<:Ledger,_]) extends SwingView{
 class LinkingJTable(val sv:SwingView, m:TableModel) extends JTable(m) {
   val defaultRenderer = new DefaultTableCellRenderer()
 
-  setDefaultRenderer(classOf[Boolean],  defaultRenderer)
-  setDefaultRenderer(classOf[Byte],     defaultRenderer)
-  setDefaultRenderer(classOf[Char],     defaultRenderer)
-  setDefaultRenderer(classOf[Double],   defaultRenderer)
-  setDefaultRenderer(classOf[Long],     defaultRenderer)
-  setDefaultRenderer(classOf[Float],    defaultRenderer)
-  setDefaultRenderer(classOf[Int],      defaultRenderer)
-  setDefaultRenderer(classOf[Short],    defaultRenderer)
+  val numberRenderer = new DefaultTableCellRenderer()
+  numberRenderer.setHorizontalAlignment(SwingConstants.RIGHT)
 
-  //TODO add default editors
+  setDefaultRenderer(classOf[Boolean],  BooleanCellRenderer.opaque)
+  setDefaultRenderer(classOf[Char],     defaultRenderer)
+
+  //We want to use implicits, so we can't use a list of classes, unfortunately
+  setDefaultEditor(classOf[Byte],       NumberCellEditor(classOf[Byte]))
+  setDefaultEditor(classOf[Double],     NumberCellEditor(classOf[Double]))
+  setDefaultEditor(classOf[Long],       NumberCellEditor(classOf[Long]))
+  setDefaultEditor(classOf[Float],      NumberCellEditor(classOf[Float]))
+  setDefaultEditor(classOf[Int],        NumberCellEditor(classOf[Int]))
+  setDefaultEditor(classOf[Short],      NumberCellEditor(classOf[Short]))
+  setDefaultEditor(classOf[BigInt],     NumberCellEditor(classOf[BigInt]))
+  setDefaultEditor(classOf[BigDecimal], NumberCellEditor(classOf[BigDecimal]))
+
+  setDefaultRenderer(classOf[Byte],       NumberCellRenderer(classOf[Byte]))
+  setDefaultRenderer(classOf[Double],     NumberCellRenderer(classOf[Double]))
+  setDefaultRenderer(classOf[Long],       NumberCellRenderer(classOf[Long]))
+  setDefaultRenderer(classOf[Float],      NumberCellRenderer(classOf[Float]))
+  setDefaultRenderer(classOf[Int],        NumberCellRenderer(classOf[Int]))
+  setDefaultRenderer(classOf[Short],      NumberCellRenderer(classOf[Short]))
+  setDefaultRenderer(classOf[BigInt],     NumberCellRenderer(classOf[BigInt]))
+  setDefaultRenderer(classOf[BigDecimal], NumberCellRenderer(classOf[BigDecimal]))
+
+
+  setDefaultEditor(classOf[String],     SelectingTextCellEditor())
+  setDefaultEditor(classOf[Boolean],    boxes.swing.BooleanCellEditor())
+
+  //TODO add default editor/renderer for Color
+
+  setRowHeight(26)
 
   //See Java bug 4709394
   putClientProperty("terminateEditOnFocusLost", true);
