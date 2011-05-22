@@ -33,7 +33,6 @@ class SpecificStateReaction(aI:Boolean, bI:Boolean) extends Node {
   override def toString = "a() = " + a() + ", b() = " + b()
 }
 
-
 class PersistenceSpec extends WordSpec {
 
   def assertPersonsEqualButNotSame(p:Person, dp:Person) {
@@ -179,10 +178,7 @@ class PersistenceSpec extends WordSpec {
       s4.a() = false
       assert(s3.a() === false)
       assert(s3.b() === false)
-
-
     }
-
   }
 
   "XMLDataSource and XMLDataTarget" should {

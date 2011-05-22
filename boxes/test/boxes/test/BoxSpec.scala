@@ -1,10 +1,9 @@
 package boxes.test
 
 import org.scalatest.WordSpec
-import scala.collection._
 import boxes._
-import immutable.Queue
-import list.{ListSelection, ListIndex}
+import scala.collection.immutable.Queue
+import list.{ListIndices, ListSelection, ListIndex}
 
 class BoxSpec extends WordSpec {
 
@@ -303,7 +302,7 @@ class BoxSpec extends WordSpec {
       val alice = new Person()
       alice.name() = "Alice"
 
-      var lastChanges:Option[immutable.Queue[(Long, SingleChange[String])]] = Some(immutable.Queue((1, SingleChange("MustChange"))))
+      var lastChanges:Option[Queue[(Long, SingleChange[String])]] = Some(Queue((1, SingleChange("MustChange"))))
 
       val v = View{
         lastChanges = alice.name.changes
@@ -431,6 +430,63 @@ class BoxSpec extends WordSpec {
         assert(q.size === 1)
         assert(q.head._2 === InsertionListChange(3, 2))
       })
+    }
+
+  }
+
+  "ListIndices" should {
+    "track correctly" in {
+      val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7)
+      val i = ListIndices(l)
+
+      assert(i() === Set(0))
+
+      //Can't select past end of list - just selects 0
+      i() = Set(10)
+      assert(i() === Set(0))
+
+      i() = Set(4)
+      assert(i() === Set(4))
+
+      l(0) = 42
+      assert(i() === Set(4))
+
+      l(0) = 0
+      assert(i() === Set(4))
+
+      l.remove(0, 2)
+      assert(i() === Set(2))
+
+      l.insert(0, 0, 1)
+      assert(i() === Set(4))
+
+      //Completely replace the List with a new one, should reset selection
+      l() = List(0, 1, 2, 3)
+      assert(i() === Set(0))
+    }
+
+    "track correctly with multiple selections" in {
+      val l = ListVar(0, 1, 2, 3, 4, 5, 6, 7)
+      val i = ListIndices(l)
+
+      i() = Set(0, 1, 5, 6)
+      assert(i() === Set(0, 1, 5, 6))
+
+      l(0) = 42
+      assert(i() === Set(0, 1, 5, 6))
+
+      l(0) = 0
+      assert(i() === Set(0, 1, 5, 6))
+
+      l.remove(2, 2)
+      assert(i() === Set(0, 1, 3, 4))
+
+      l.insert(2, 2, 3)
+      assert(i() === Set(0, 1, 5, 6))
+
+      //Completely replace the List with a new one, should reset selection
+      l() = List(0, 1, 2, 3)
+      assert(i() === Set(0))
     }
 
   }
