@@ -3,9 +3,9 @@ package boxes.persistence.test
 import org.scalatest.WordSpec
 import scala.collection._
 import boxes._
-import java.io.StringWriter
 import io.Source
 import persistence._
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
 
 class Person extends Node {
   val name = Var("name")
@@ -17,6 +17,20 @@ class Person extends Node {
   val nicknames = ListVar[String]()
 
   override def toString = name() + ", " + age() + ", friend: " + friend() + ", spouse " + spouse() + ", numbers " + numbers() + ", accounts " + accounts() + ", nicknames " + nicknames()
+}
+
+class SpecificStateReaction(aI:Boolean, bI:Boolean) extends Node {
+
+  def this() = this(false, false)
+
+  val a = Var(aI)
+  val b = Var(bI)
+
+  //a and b can only become true simultaneously
+  Reaction(a, a() & b())
+  Reaction(b, a() & b())
+
+  override def toString = "a() = " + a() + ", b() = " + b()
 }
 
 
@@ -45,7 +59,7 @@ class PersistenceSpec extends WordSpec {
       //encode
       val encode = new CodecByClass()
 
-      val encodeAliases = new XMLAliases
+      val encodeAliases = new ClassAliases
       encodeAliases.alias(classOf[Person], "Person")
 
       val s = new StringWriter()
@@ -75,7 +89,7 @@ class PersistenceSpec extends WordSpec {
       val src = Source.fromString(xml)
 
       val decode = new CodecByClass()
-      val decodeAliases = new XMLAliases
+      val decodeAliases = new ClassAliases
       decodeAliases.alias(classOf[Person], "Person")
       val source = new XMLDataSource(src, decodeAliases)
 
@@ -107,18 +121,80 @@ class PersistenceSpec extends WordSpec {
       dp.friend().foreach(_.name() = "qe2")
       dp.spouse().foreach(spouse => assert(spouse.name() === "qe2"))
     }
+
+    "code and decode a class with reactions requiring a specific state" in {
+      //If we make a default instance, we can't ever get either var to be true
+      val s = new SpecificStateReaction
+
+      s.a() = true
+      assert(s.a() === false)
+      s.b() = true
+      assert(s.b() === false)
+
+      s.a() = true
+      s.b() = true
+      assert(s.a() === false)
+      assert(s.b() === false)
+
+      //But if we make one where both vars are true before reactions are applied, it works
+      val s2 = new SpecificStateReaction(true, true)
+      assert(s2.a() === true)
+      assert(s2.b() === true)
+
+      //Now encode and decode s2 without using Box.decode, to show that by using the default
+      //values in the constructor, the wrong result occurs, and the vars become false in the
+      //duplicate
+      val codec = new CodecByClass()
+
+      val aliases = new ClassAliases
+
+      val writer = new StringWriter()
+      val target = new XMLDataTarget(writer, aliases)
+
+      codec.code(s2, target)
+
+      val xml = writer.toString
+      println(xml)
+
+      //Decode
+      val src = Source.fromString(xml)
+
+      val source = new XMLDataSource(src, aliases)
+
+      val s3 = codec.decode(source).asInstanceOf[SpecificStateReaction]
+
+      assert(s3.a() === false)
+      assert(s3.b() === false)
+
+      //Now we encode and decode s2 with XMLIO, which uses Box.decode, and so decodes correctly
+      val io = XMLIO()
+      val baos = new ByteArrayOutputStream()
+      io.code(s2, baos)
+      val s4 = io.decode(new ByteArrayInputStream(baos.toByteArray)).asInstanceOf[SpecificStateReaction]
+
+      assert(s4.a() === true)
+      assert(s4.b() === true)
+
+      //And the reactions still work
+      s4.a() = false
+      assert(s3.a() === false)
+      assert(s3.b() === false)
+
+
+    }
+
   }
 
   "XMLDataSource and XMLDataTarget" should {
     "encode and decode an empty String" in {
       val s = new StringWriter()
-      val target = new XMLDataTarget(s, new XMLAliases)
+      val target = new XMLDataTarget(s, new ClassAliases)
       target.openClassTag(classOf[String])
       target.putUTF("")
       target.closeTag
 
       val xml = s.toString
-      val source = new XMLDataSource(Source.fromString(xml), new XMLAliases)
+      val source = new XMLDataSource(Source.fromString(xml), new ClassAliases)
 
       source.assertOpenClassTag(ClassTag(classOf[String]))
       val emptyString = source.getUTF
@@ -127,6 +203,7 @@ class PersistenceSpec extends WordSpec {
       assert(emptyString === "")
     }
   }
+
 
 
 }

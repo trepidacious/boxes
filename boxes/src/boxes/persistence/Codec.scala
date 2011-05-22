@@ -17,9 +17,6 @@ trait CodecWithClass[T] extends Codec[T]{
   def clazz():Class[_]
 }
 
-//FIXME use ids and refs to ensure we only code each mutable object once. Multiples of immutable
-//objects are not so important. Really we are only concerned about Nodes.
-
 class CodecByClass extends Codec[Any] {
 
   private val root = new CodecNode(AnyCodec, classOf[Any])

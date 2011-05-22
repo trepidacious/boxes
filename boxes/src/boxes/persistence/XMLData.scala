@@ -3,52 +3,10 @@ package boxes.persistence
 import scala.xml.pull._
 import scala.io.Source
 import collection._
-import java.io.Writer
 import xml.Node
+import java.io.{OutputStreamWriter, InputStream, Writer, OutputStream}
 
-class XMLAliases {
-  private val aliases = mutable.Map[Class[_], String]()
-  private val aliasesReverse = mutable.Map[String, Class[_]]()
-
-  //Common default aliases
-
-  {
-    alias(classOf[java.lang.Long],    "Long")
-    alias(classOf[java.lang.Integer], "Int")
-    alias(classOf[java.lang.Short],   "Short")
-    alias(classOf[java.lang.Byte],    "Byte")
-    alias(classOf[java.lang.Boolean], "Boolean")
-    alias(classOf[java.lang.Double],  "Double")
-    alias(classOf[java.lang.Float],   "Float")
-    alias(classOf[java.lang.String],  "String")
-
-    alias(classOf[List[_]],           "List")
-    alias(classOf[Map[_,_]],          "Map")
-    alias(classOf[Set[_]],            "Set")
-    alias(classOf[Option[_]],         "Option")
-
-  }
-
-  def alias(c:Class[_], s:String) = {
-    //Note that we enforce that each string is only used for at most one class,
-    //BUT we allow each class to map to multiple strings. The last-set alias
-    //is the one used for encoding, but any string is valid for decoding. This
-    //allows us to support legacy aliases for classes.
-    aliasesReverse.get(s) match {
-      case None => {}
-      case Some(previousClass) => throw new RuntimeException(s + " is already an alias for " + previousClass.getCanonicalName)
-    }
-    aliases.put(c, s)
-    aliasesReverse.put(s, c)
-  }
-
-  def forClass(c:Class[_]) = aliases.getOrElse(c, c.getCanonicalName)
-
-  def forAlias(s:String) = aliasesReverse.getOrElse(s, Class.forName(s))
-
-}
-
-class XMLDataSource(s:Source, aliases:XMLAliases) extends DataSource {
+class XMLDataSource(s:Source, aliases:ClassAliases) extends DataSource {
 
   val events = new XMLEventReader(s)
   var nextEvent:Option[XMLEvent] = None
@@ -170,7 +128,7 @@ class XMLDataSource(s:Source, aliases:XMLAliases) extends DataSource {
 
 }
 
-class XMLDataTarget(writer:Writer, aliases:XMLAliases) extends DataTarget {
+class XMLDataTarget(writer:Writer, aliases:ClassAliases) extends DataTarget {
 
   //Stack of info for open tags. String is the tag label, Boolean is whether
   //formatting should be skipped when closing the tag.
@@ -267,4 +225,13 @@ class XMLDataTarget(writer:Writer, aliases:XMLAliases) extends DataTarget {
     cache.clear
     if (!tagStack.isEmpty) throw new RuntimeException("Closed XMLDataTarget with tags still open")
   }
+}
+
+object XMLDataFactory extends DataFactory {
+  def source(input:InputStream, aliases:ClassAliases) = new XMLDataSource(Source.fromInputStream(input, "UTF-8"), aliases)
+  def target(output:OutputStream, aliases:ClassAliases) = new XMLDataTarget(new OutputStreamWriter(output, "UTF-8"), aliases)
+}
+
+object XMLIO {
+  def apply(aliases:ClassAliases = new ClassAliases) = new IO(XMLDataFactory, aliases)
 }

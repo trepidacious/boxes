@@ -37,6 +37,44 @@ object Box {
 
   private val lock = new ReentrantLock()
 
+  private var decoding = false
+
+  def decode[T](decode : =>T):T = {
+    beforeDecode
+    try {
+      return decode
+    } finally {
+      afterDecode
+    }
+  }
+
+  def transact[T](transaction : =>T):T = {
+    lock.lock
+    try {
+      return transaction
+    } finally {
+      lock.unlock
+    }
+  }
+
+  private def beforeDecode() ={
+    lock.lock
+    decoding = true
+  }
+
+  private def afterDecode() = {
+    if (!decoding) throw new RuntimeException("afterDecode called when not decoding")
+    decoding = false
+
+    //Any changes that have been made during deserialisation are considered
+    //to be irrelevant, since serialised state is known to be valid. We will
+    //still cycle though, so that all reactions can be treated as new, and
+    //so will be run to establish sources and targets, etc.
+    boxToChanges.clear
+    cycle
+    lock.unlock
+  }
+
   def beforeRead[C](b:Box[C]) = {
     lock.lock
     if (!canRead) throw new InvalidReadException(b)
@@ -175,8 +213,8 @@ object Box {
 
   private def cycle = {
 
-    //Only enter one cycle at a time
-    if (!cycling) {
+    //Only enter one cycle at a time, and we don't cycle while decoding
+    if (!cycling && !decoding) {
       cycling = true
 
       val failedReactions = new mutable.HashSet[Reaction]()

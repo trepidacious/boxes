@@ -12,8 +12,8 @@ import boxes.util.{LogStep, Step, CoalescingResponder, NumericClass}
 import boxes._
 import persistence._
 import io.Source
-import java.io.StringWriter
 import java.awt.{BorderLayout, Dimension}
+import java.io.{ByteArrayInputStream, OutputStreamWriter, ByteArrayOutputStream, StringWriter}
 
 object BoxesDemo {
 
@@ -457,7 +457,7 @@ object BoxesDemo {
 
   def data() {
     val s = new StringWriter()
-    val a = new XMLAliases
+    val a = new ClassAliases
     val d = new XMLDataTarget(s, a)
     d.openTag("Person")
     d.openTag("Name")
@@ -474,11 +474,10 @@ object BoxesDemo {
   }
 
   def code() = {
-    val codec = new CodecByClass()
-    val a = new XMLAliases
-    val s = new StringWriter()
-    val target = new XMLDataTarget(s, a)
-    a.alias(classOf[OptionPerson], "Person")
+
+    val io = XMLIO()
+    io.alias(classOf[OptionPerson], "Person")
+
     val p = new OptionPerson()
     p.accounts() = Map("current" -> 10, "savings" -> 100, "secretswiss" -> 10000000)
     p.numbers() = List(10,20,30)
@@ -488,19 +487,30 @@ object BoxesDemo {
     p.friend() = Some(q)
     p.spouse() = Some(q)
     q.name() = "q"
-    codec.code(p, target)
-    println(s.toString)
-    s.toString
+
+
+    val output = new ByteArrayOutputStream()
+
+    io.code(p, output)
+
+    val s = output.toString("UTF-8")
+
+    println("Start of output, " + output.size + " bytes")
+    println(s)
+    println("End of output")
+
+    s
   }
 
   def decode(xml:String) = {
-    val src = Source.fromString(xml)
-    val codec = new CodecByClass()
-    val a = new XMLAliases
-    a.alias(classOf[OptionPerson], "Person")
-    val source = new XMLDataSource(src, a)
 
-    val p = codec.decode(source).asInstanceOf[OptionPerson]
+    val input = new ByteArrayInputStream(xml.getBytes("UTF-8"))
+
+    val io = XMLIO()
+    io.alias(classOf[OptionPerson], "Person")
+
+    val p = io.decode(input).asInstanceOf[OptionPerson]
+
     println(p)
 
     p.friend().foreach(_.name() = "qe2")
@@ -536,6 +546,8 @@ object BoxesDemo {
     q.name() = "q"
 
     val list = ListVar(p, q, q, p)
+
+
 
     val view = LensRecordView[OptionPerson](
       VarLens("Name", _.name),
@@ -614,11 +626,11 @@ object BoxesDemo {
 //    codecAccessors
 //    data
 
-//    val xml = code
-//    decode(xml)
+    val xml = code
+    decode(xml)
 
 //    listPath
-    ledger
+//    ledger
   }
 
 }
