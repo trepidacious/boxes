@@ -292,6 +292,16 @@ class BooleanCellEditor extends AbstractCellEditor with TableCellEditor {
         mouseEvent.getClickCount() >= 1
       }
 
+      //Only space key presses edit
+      case keyEvent:KeyEvent => {
+        if (keyEvent.getKeyCode == KeyEvent.VK_SPACE) {
+          completeImmediately = true
+          true
+        } else {
+          false
+        }
+      }
+
       //Other events start editing, but complete immediately -
       //this will just toggle the contents
       case _ => {

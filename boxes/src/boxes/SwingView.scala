@@ -4,12 +4,13 @@ import scala.collection._
 import java.awt.event.{FocusEvent, FocusListener, ActionEvent, ActionListener}
 import java.awt.Component
 import javax.swing._
-import event.{ChangeEvent, TableColumnModelEvent}
+import event.{TableModelEvent, ChangeEvent, TableColumnModelEvent}
 import javax.swing.JToggleButton.ToggleButtonModel
 import math.Numeric
 import swing._
 import table._
 import util._
+import java.util.concurrent.atomic.AtomicBoolean
 
 //TODO implement rate-limiting of updates? But then we need to know that views don't rely on all updates being called, just the most recent
 //Should be easy enough to do, just make the views store some Atomic style stuff they need to use to update, and fiddle
@@ -18,11 +19,11 @@ import util._
 //is synchronized between View handling and swing updates - a simple lock should do it.
 object SwingView {
 
-  val viewToUpdates = new mutable.WeakHashMap[SwingView, mutable.ListBuffer[() => Unit]]()
+  val viewToUpdates = new mutable.WeakHashMap[Any, mutable.ListBuffer[() => Unit]]()
   val responder = new CoalescingResponder(respond)
   val lock = new Object()
 
-  def addUpdate(v:SwingView, update: => Unit) = {
+  def addUpdate(v:Any, update: => Unit) = {
     lock.synchronized{
       viewToUpdates.get(v) match {
         case None => viewToUpdates.put(v, mutable.ListBuffer(() => update))
@@ -32,7 +33,7 @@ object SwingView {
     }
   }
 
-  def replaceUpdate(v:SwingView, update: => Unit) = {
+  def replaceUpdate(v:Any, update: => Unit) = {
     lock.synchronized{
       viewToUpdates.put(v, mutable.ListBuffer(() => update))
       responder.request
@@ -59,7 +60,7 @@ object SwingView {
 
   /**
    * If there are any updates stored in map, get a list of updates
-   * for some SwingView, remove them from the map, and return them.
+   * for some key, remove them from the map, and return them.
    * If there are no updates left (no keys), then return None
    * This is synchronized, so updates can't be added as they are being
    * retrieved
@@ -100,6 +101,42 @@ trait SwingView {
   private[boxes] def replaceUpdate(update: => Unit) = SwingView.replaceUpdate(this, update)
 }
 
+
+object LabelView {
+  def apply(v:RefGeneral[String,_]) = new LabelOptionView(v, new TConverter[String]).asInstanceOf[SwingView]
+}
+
+object LabelOptionView {
+  def apply(v:RefGeneral[Option[String],_]) = new LabelOptionView(v, new OptionTConverter[String]).asInstanceOf[SwingView]
+}
+
+//TODO use a renderer to customise display
+private class LabelOptionView[G](v:RefGeneral[G,_], c:GConverter[G, String]) extends SwingView {
+
+  val component = new LinkingJLabel(this)
+
+  val view = View{
+    //Store the value for later use on Swing Thread
+    val newV = v()
+    //This will be called from Swing Thread
+    replaceUpdate {display(newV)}
+  }
+
+  //Update display if necessary
+  private def display(s:G) {
+    val text = c.toOption(s) match {
+      case None => ""
+      case Some(string) => string
+    }
+    if (!component.getText.equals(text)) {
+      component.setText(text)
+    }
+  }
+}
+
+//Special versions of components that link back to the SwingView using them,
+//so that if users only retain the component, they still also retain the SwingView.
+class LinkingJLabel(val sv:SwingView) extends JLabel {}
 
 object StringView {
   def apply(v:VarGeneral[String,_], multiline:Boolean = false) = new StringOptionView(v, new TConverter[String], multiline).asInstanceOf[SwingView]
@@ -352,8 +389,32 @@ private class NumberOptionView[G, N](v:VarGeneral[G,_], s:Sequence[N], c:GConver
 
 class LinkingJSpinner(val sv:SwingView, m:SpinnerModel) extends JSpinner(m) {}
 
+
+
 object LedgerView {
   def apply(v:RefGeneral[_<:Ledger,_]) = new LedgerView(v)
+  def apply(v:RefGeneral[_<:Ledger,_], i:VarGeneral[Option[Int], _]) = {
+    val lv = new LedgerView(v)
+    //Only allow the selection to be set when the table is NOT responding
+    //to a model change.
+    //This is somewhat messy, but is necessary to wrest control of updating the selection
+    //away from the JTable - we already update the selection ourself in a more intelligent
+    //way, so we only want the selection changes that are NOT in response to a table model
+    //change, but in response to a user selection action
+    lv.component.setSelectionModel(new ListSelectionIndexModel(i, !lv.component.isRespondingToChange, lv.component))
+    lv
+  }
+  def multiSelection(v:RefGeneral[_<:Ledger,_], i:VarGeneral[immutable.Set[Int], _]) = {
+    val lv = new LedgerView(v)
+    //Only allow the selection to be set when the table is NOT responding
+    //to a model change.
+    //This is somewhat messy, but is necessary to wrest control of updating the selection
+    //away from the JTable - we already update the selection ourself in a more intelligent
+    //way, so we only want the selection changes that are NOT in response to a table model
+    //change, but in response to a user selection action
+    lv.component.setSelectionModel(new ListSelectionIndicesModel(i, !lv.component.isRespondingToChange, lv.component))
+    lv
+  }
 }
 
 class LedgerView(v:RefGeneral[_<:Ledger,_]) extends SwingView{
@@ -441,6 +502,12 @@ class LinkingJTable(val sv:SwingView, m:TableModel) extends JTable(m) {
   val numberRenderer = new DefaultTableCellRenderer()
   numberRenderer.setHorizontalAlignment(SwingConstants.RIGHT)
 
+  //Apologies for null, super constructor calls lots of
+  //methods, leading to use of responding before it can be
+  //initialised. This is why I hate subclassing, but necessary
+  //to make a JTable.
+  private var responding:AtomicBoolean = null
+
   setDefaultRenderer(classOf[Boolean],  BooleanCellRenderer.opaque)
   setDefaultRenderer(classOf[Char],     defaultRenderer)
 
@@ -484,6 +551,24 @@ class LinkingJTable(val sv:SwingView, m:TableModel) extends JTable(m) {
   override def columnMarginChanged(e:ChangeEvent) {
       if (isEditing()) cellEditor.stopCellEditing()
       super.columnMarginChanged(e);
+  }
+
+  override def tableChanged(e:TableModelEvent) {
+    //See note on declaration of responding
+    if (responding == null) {
+       responding = new AtomicBoolean(false);
+    }
+    responding.set(true);
+    super.tableChanged(e);
+    responding.set(false);
+  }
+
+  def isRespondingToChange() = {
+    //See note on declaration of responding
+    if (responding == null) {
+       responding = new AtomicBoolean(false);
+    }
+    responding.get
   }
 
 }

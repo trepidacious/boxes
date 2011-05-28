@@ -27,6 +27,10 @@ trait RecordView[T] extends Box[RecordViewChange] {
   def fieldCount():Int
 }
 
+object ListLedger {
+  def apply[T](list:ListRef[T], rView:RecordView[T]) = new ListLedger(list, rView)
+}
+
 class ListLedger[T](list:ListRef[T], rView:RecordView[T]) extends Ledger {
 
   //This reaction allows us to change correctly when we see a change

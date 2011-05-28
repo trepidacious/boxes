@@ -10,6 +10,7 @@ import javax.swing._
 import java.awt.event.ActionEvent
 import boxes.util.{LogStep, Step, CoalescingResponder, NumericClass}
 import boxes._
+import list.{ListIndices, ListIndex}
 import persistence._
 import io.Source
 import java.awt.{BorderLayout, Dimension}
@@ -547,7 +548,7 @@ object BoxesDemo {
 
     val list = ListVar(p, q, q, p)
 
-
+    val index = ListIndex(list)
 
     val view = LensRecordView[OptionPerson](
       VarLens("Name", _.name),
@@ -576,7 +577,9 @@ object BoxesDemo {
 
     val ledgerRef = Var(ledger)
 
-    val ledgerView = LedgerView(ledgerRef)
+    val ledgerView = LedgerView(ledgerRef, index)
+
+    val indexView = NumberOptionView(index, Step(1))
 
     val add = new JButton(new AbstractAction("Add") {
       override def actionPerformed(e:ActionEvent) = {
@@ -596,6 +599,7 @@ object BoxesDemo {
     val panel = new JPanel()
     panel.add(add)
     panel.add(delete)
+    panel.add(indexView.component)
     frame.add(new JScrollPane(ledgerView.component), BorderLayout.CENTER)
     frame.add(panel, BorderLayout.SOUTH)
     frame.pack
@@ -605,6 +609,59 @@ object BoxesDemo {
 
   }
 
+
+  def ledgerMulti() {
+
+    SwingView.nimbus
+
+    val p = new OptionPerson()
+    p.name() = "p"
+    val q = new OptionPerson()
+    q.name() = "q"
+
+    val list = ListVar(p, q, q, p)
+
+    val indices = ListIndices(list)
+
+    val view = LensRecordView[OptionPerson](
+      VarLens("Name", _.name),
+      VarLens("Age", _.age),
+      VarLens("Zombie?", _.zombie)
+    )
+
+    val ledger = Var(ListLedger(list, view))
+
+    val ledgerView = LedgerView.multiSelection(ledger, indices)
+
+    val indicesView = LabelView(Cal{indices().toString})
+
+    val add = new JButton(new AbstractAction("Add") {
+      override def actionPerformed(e:ActionEvent) = {
+        val person = new OptionPerson()
+        person.name() = "New item at " + list().size
+        list.insert(list().size, person)
+      }
+    })
+
+    val delete = new JButton(new AbstractAction("Delete") {
+      override def actionPerformed(e:ActionEvent) = {
+        if (!list().isEmpty) list.remove(0, 1)
+      }
+    })
+
+    val frame = new JFrame()
+    val panel = new JPanel()
+    panel.add(add)
+    panel.add(delete)
+    panel.add(indicesView.component)
+    frame.add(new JScrollPane(ledgerView.component), BorderLayout.CENTER)
+    frame.add(panel, BorderLayout.SOUTH)
+    frame.pack
+    frame.setMinimumSize(new Dimension(300, 50))
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+    frame.setVisible(true)
+
+  }
 
   def main(args: Array[String]) {
 //    simpleCalc
@@ -626,11 +683,12 @@ object BoxesDemo {
 //    codecAccessors
 //    data
 
-    val xml = code
-    decode(xml)
+//    val xml = code
+//    decode(xml)
 
 //    listPath
 //    ledger
+    ledgerMulti
   }
 
 }
