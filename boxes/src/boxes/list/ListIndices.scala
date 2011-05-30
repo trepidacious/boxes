@@ -128,6 +128,7 @@ class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], selectFirst
         i => if (insertion <= i) i+count else i
       }
 
+      //TODO
       //TODO we should have a special case so that if the last selected index
       //is deleted, and we don't want to lose index on deletion, then we select after the
       //deletion range. Only do this when we run out of selections though, otherwise it could

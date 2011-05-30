@@ -433,7 +433,7 @@ object LedgerView {
 class LedgerScrollView(val ledgerView:LedgerView, val ledger:RefGeneral[_<:Ledger,_], val indices:VarGeneral[immutable.Set[Int], _]) extends SwingView {
   val component = new LinkingJScrollPane(this, ledgerView.component)
   val dotModel = new DotModel
-  BoxesScrollBarUI.applyTo(component, new DotModel, dotModel)
+  BoxesScrollBarUI.applyTo(component, new DotModel, dotModel, false, true)
   val table = ledgerView.component
 
   val view = View {

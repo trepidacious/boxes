@@ -67,52 +67,45 @@
       <file leaf-file-name="SwingView.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/SwingView.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="610" column="94" selection-start="20788" selection-end="20788" vertical-scroll-proportion="0.0">
+            <state line="435" column="73" selection-start="14419" selection-end="14419" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ITunesTableUI.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../macwidgets-read-only/source/com/explodingpixels/macwidgets/plaf/ITunesTableUI.java">
+      <file leaf-file-name="ListActions.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/boxes/src/boxes/swing/ListActions.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="68" column="65" selection-start="2700" selection-end="2700" vertical-scroll-proportion="0.0">
+            <state line="57" column="30" selection-start="1196" selection-end="1196" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ITunesTableHeaderRenderer.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../macwidgets-read-only/source/com/explodingpixels/macwidgets/ITunesTableHeaderRenderer.java">
+      <file leaf-file-name="BoxesDemo.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="92" column="0" selection-start="3214" selection-end="3582" vertical-scroll-proportion="-12.730769">
+            <state line="640" column="85" selection-start="15389" selection-end="15389" vertical-scroll-proportion="0.0">
+              <folding>
+                <marker date="1306790870000" expanded="true" signature="15502:15639" placeholder="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ListIndices.scala" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/boxes/src/boxes/list/ListIndices.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="132" column="12" selection-start="4249" selection-end="4249" vertical-scroll-proportion="0.2534992">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="MacWidgetFactory.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../macwidgets-read-only/source/com/explodingpixels/macwidgets/MacWidgetFactory.java">
+      <file leaf-file-name="ListRef.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/boxes/src/boxes/ListRef.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="75" column="0" selection-start="2830" selection-end="2919" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="EmphasizedLabelUI.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../macwidgets-read-only/source/com/explodingpixels/macwidgets/plaf/EmphasizedLabelUI.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="28" column="46" selection-start="1122" selection-end="1122" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BasicLabelUI.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar:///Library/Java/JavaVirtualMachines/1.6.0_24-b07-334.jdk/Contents/Home/src.jar!/src/javax/swing/plaf/basic/BasicLabelUI.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="39" column="13" selection-start="991" selection-end="991" vertical-scroll-proportion="0.0">
+            <state line="37" column="6" selection-start="1030" selection-end="1030" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -127,28 +120,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="MacColorUtils.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../macwidgets-read-only/source/com/explodingpixels/macwidgets/MacColorUtils.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="15" column="66" selection-start="409" selection-end="428" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ScrollBars.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="ScrollBars.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/swing/ScrollBars.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="64" column="63" selection-start="3121" selection-end="3121" vertical-scroll-proportion="0.505618">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="EPPanel.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../macwidgets-read-only/source/com/explodingpixels/swingx/EPPanel.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="11" column="11" selection-start="226" selection-end="226" vertical-scroll-proportion="0.0">
+            <state line="64" column="63" selection-start="3121" selection-end="3121" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -171,22 +146,22 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/ClassAliases.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Box.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/persistence/IO.scala" />
         <option value="$PROJECT_DIR$/boxes/test/boxes/persistence/test/PersistenceSpec.scala" />
-        <option value="$PROJECT_DIR$/boxes/src/boxes/list/ListIndices.scala" />
         <option value="$PROJECT_DIR$/boxes/test/boxes/test/BoxSpec.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/swing/ListSelectionIndeicesModel.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/swing/ListSelectionIndexModel.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/Ledger.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/swing/ListSelectionIndicesModel.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/swing/CellEditors.scala" />
-        <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
-        <option value="$PROJECT_DIR$/boxes/src/boxes/SwingView.scala" />
         <option value="$PROJECT_DIR$/../macwidgets-read-only/source/com/explodingpixels/macwidgets/ITunesTableHeaderRenderer.java" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/swing/BoxesTableCellHeaderRenderer.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/swing/ScrollBars.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/SwingView.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/swing/ListActions.scala" />
+        <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/list/ListIndices.scala" />
       </list>
     </option>
   </component>
@@ -325,32 +300,6 @@
             <PATH_ELEMENT>
               <option name="myItemId" value="swing" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="BoxesProject" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="boxes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="boxes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="swing" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="ScrollBars.scala" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
             </PATH_ELEMENT>
           </PATH>
           <PATH>
@@ -654,7 +603,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="22" width="1920" height="1054" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -668,7 +617,7 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3997862" sideWeight="0.7782516" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.17156601" sideWeight="0.71948606" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2805139" sideWeight="0.75681454" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2805139" sideWeight="0.75681454" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.16059957" sideWeight="0.23890968" order="1" side_tool="false" content_ui="tabs" />
@@ -713,41 +662,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar:///Library/Java/JavaVirtualMachines/1.6.0_24-b07-334.jdk/Contents/Home/src.jar!/src/java/awt/Insets.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="85" column="11" selection-start="2230" selection-end="2230" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///Library/Java/JavaVirtualMachines/1.6.0_24-b07-334.jdk/Contents/Home/src.jar!/src/java/awt/Graphics.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="1045" column="28" selection-start="49666" selection-end="49666" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///Library/Java/JavaVirtualMachines/1.6.0_24-b07-334.jdk/Contents/Home/src.jar!/src/javax/swing/border/Border.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="46" column="17" selection-start="1615" selection-end="1615" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///Library/Java/JavaVirtualMachines/1.6.0_24-b07-334.jdk/Contents/Home/src.jar!/src/javax/swing/table/DefaultTableCellRenderer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="68" column="48" selection-start="2644" selection-end="2644" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///Library/Java/JavaVirtualMachines/1.6.0_24-b07-334.jdk/Contents/Home/src.jar!/src/javax/swing/JLabel.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="88" column="13" selection-start="2962" selection-end="2962" vertical-scroll-proportion="-7.8846154">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar:///Library/Java/JavaVirtualMachines/1.6.0_24-b07-334.jdk/Contents/Home/src.jar!/src/javax/swing/JComponent.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="747" column="19" selection-start="28099" selection-end="28099" vertical-scroll-proportion="0.0">
@@ -790,13 +704,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/SwingView.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="610" column="94" selection-start="20788" selection-end="20788" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../macwidgets-read-only/source/com/explodingpixels/macwidgets/MacColorUtils.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="15" column="66" selection-start="409" selection-end="428" vertical-scroll-proportion="0.0">
@@ -820,7 +727,51 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/swing/ScrollBars.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="64" column="63" selection-start="3121" selection-end="3121" vertical-scroll-proportion="0.505618">
+        <state line="64" column="63" selection-start="3121" selection-end="3121" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/mutable/BufferLike.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="171" column="6" selection-start="5884" selection-end="5884" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/SwingView.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="435" column="73" selection-start="14419" selection-end="14419" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/ListRef.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="37" column="6" selection-start="1030" selection-end="1030" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/swing/ListActions.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="57" column="30" selection-start="1196" selection-end="1196" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="640" column="85" selection-start="15389" selection-end="15389" vertical-scroll-proportion="0.0">
+          <folding>
+            <marker date="1306790870000" expanded="true" signature="15502:15639" placeholder="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/list/ListIndices.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="132" column="12" selection-start="4249" selection-end="4249" vertical-scroll-proportion="0.2534992">
           <folding />
         </state>
       </provider>

@@ -16,7 +16,7 @@ import io.Source
 import java.awt.{BorderLayout, Dimension}
 import java.io.{ByteArrayInputStream, OutputStreamWriter, ByteArrayOutputStream, StringWriter}
 import com.explodingpixels.macwidgets.IAppWidgetFactory
-import swing.BoxesScrollBarUI
+import swing.{ListMultiDeleteAction, ListMultiAddAction, ListAddAction, BoxesScrollBarUI}
 
 object BoxesDemo {
 
@@ -637,17 +637,22 @@ object BoxesDemo {
 
     val indicesView = LabelView(Cal{indices().toString})
 
+    val addAction = new ListMultiAddAction(list, indices, Some(new OptionPerson()))
+    val deleteAction = new ListMultiDeleteAction[OptionPerson](list, indices, t=>Unit)
+
     val add = new JButton(new AbstractAction("Add") {
       override def actionPerformed(e:ActionEvent) = {
-        val person = new OptionPerson()
-        person.name() = "New item at " + list().size
-        list.insert(list().size, person)
+//        val person = new OptionPerson()
+//        person.name() = "New item at " + list().size
+//        list.insert(list().size, person)
+        addAction()
       }
     })
 
     val delete = new JButton(new AbstractAction("Delete") {
       override def actionPerformed(e:ActionEvent) = {
-        if (!list().isEmpty) list.remove(0, 1)
+//        if (!list().isEmpty) list.remove(0, 1)
+        deleteAction()
       }
     })
 
