@@ -15,6 +15,8 @@ import persistence._
 import io.Source
 import java.awt.{BorderLayout, Dimension}
 import java.io.{ByteArrayInputStream, OutputStreamWriter, ByteArrayOutputStream, StringWriter}
+import com.explodingpixels.macwidgets.IAppWidgetFactory
+import swing.BoxesScrollBarUI
 
 object BoxesDemo {
 
@@ -577,7 +579,7 @@ object BoxesDemo {
 
     val ledgerRef = Var(ledger)
 
-    val ledgerView = LedgerView(ledgerRef, index)
+    val ledgerView = LedgerView.singleSelection(ledgerRef, index)
 
     val indexView = NumberOptionView(index, Step(1))
 
@@ -619,7 +621,7 @@ object BoxesDemo {
     val q = new OptionPerson()
     q.name() = "q"
 
-    val list = ListVar(p, q, q, p)
+    val list = ListVar(p, q, q, p, p, q, p, q, p, q, p, q, p, q, p, q, p, q, p, q, p, q, p, q)
 
     val indices = ListIndices(list)
 
@@ -631,7 +633,7 @@ object BoxesDemo {
 
     val ledger = Var(ListLedger(list, view))
 
-    val ledgerView = LedgerView.multiSelection(ledger, indices)
+    val ledgerView = LedgerView.multiSelectionScroll(ledger, indices, sorting=true)
 
     val indicesView = LabelView(Cal{indices().toString})
 
@@ -654,10 +656,11 @@ object BoxesDemo {
     panel.add(add)
     panel.add(delete)
     panel.add(indicesView.component)
-    frame.add(new JScrollPane(ledgerView.component), BorderLayout.CENTER)
+
+    frame.add(ledgerView.component, BorderLayout.CENTER)
     frame.add(panel, BorderLayout.SOUTH)
     frame.pack
-    frame.setMinimumSize(new Dimension(300, 50))
+    frame.setMinimumSize(new Dimension(50, 50))
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
     frame.setVisible(true)
 

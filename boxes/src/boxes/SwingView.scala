@@ -11,6 +11,9 @@ import swing._
 import table._
 import util._
 import java.util.concurrent.atomic.AtomicBoolean
+import com.explodingpixels.macwidgets.plaf.ITunesTableUI
+import com.explodingpixels.macwidgets.ITunesTableHeaderRenderer
+import com.explodingpixels.widgets.TableHeaderUtils
 
 //TODO implement rate-limiting of updates? But then we need to know that views don't rely on all updates being called, just the most recent
 //Should be easy enough to do, just make the views store some Atomic style stuff they need to use to update, and fiddle
@@ -392,8 +395,13 @@ class LinkingJSpinner(val sv:SwingView, m:SpinnerModel) extends JSpinner(m) {}
 
 
 object LedgerView {
-  def apply(v:RefGeneral[_<:Ledger,_]) = new LedgerView(v)
-  def apply(v:RefGeneral[_<:Ledger,_], i:VarGeneral[Option[Int], _]) = {
+  def apply(v:RefGeneral[_<:Ledger,_], sorting:Boolean = false) = {
+    val lv = new LedgerView(v)
+    if (sorting) lv.component.setAutoCreateRowSorter(true)
+    lv
+  }
+
+  def singleSelection(v:RefGeneral[_<:Ledger,_], i:VarGeneral[Option[Int], _], sorting:Boolean = false) = {
     val lv = new LedgerView(v)
     //Only allow the selection to be set when the table is NOT responding
     //to a model change.
@@ -402,18 +410,89 @@ object LedgerView {
     //way, so we only want the selection changes that are NOT in response to a table model
     //change, but in response to a user selection action
     lv.component.setSelectionModel(new ListSelectionIndexModel(i, !lv.component.isRespondingToChange, lv.component))
+    if (sorting) lv.component.setAutoCreateRowSorter(true)
     lv
   }
-  def multiSelection(v:RefGeneral[_<:Ledger,_], i:VarGeneral[immutable.Set[Int], _]) = {
+  def multiSelection(v:RefGeneral[_<:Ledger,_], i:VarGeneral[immutable.Set[Int], _], sorting:Boolean = false) = {
     val lv = new LedgerView(v)
-    //Only allow the selection to be set when the table is NOT responding
-    //to a model change.
-    //This is somewhat messy, but is necessary to wrest control of updating the selection
-    //away from the JTable - we already update the selection ourself in a more intelligent
-    //way, so we only want the selection changes that are NOT in response to a table model
-    //change, but in response to a user selection action
     lv.component.setSelectionModel(new ListSelectionIndicesModel(i, !lv.component.isRespondingToChange, lv.component))
+    if (sorting) lv.component.setAutoCreateRowSorter(true)
     lv
+  }
+
+  def multiSelectionScroll(v:RefGeneral[_<:Ledger,_], i:VarGeneral[immutable.Set[Int], _], sorting:Boolean = false) = {
+    val lv = new LedgerView(v)
+    lv.component.setSelectionModel(new ListSelectionIndicesModel(i, !lv.component.isRespondingToChange, lv.component))
+    val lsv = new LedgerScrollView(lv, v, i)
+    if (sorting) lv.component.setAutoCreateRowSorter(true)
+    lsv
+  }
+
+}
+
+class LedgerScrollView(val ledgerView:LedgerView, val ledger:RefGeneral[_<:Ledger,_], val indices:VarGeneral[immutable.Set[Int], _]) extends SwingView {
+  val component = new LinkingJScrollPane(this, ledgerView.component)
+  val dotModel = new DotModel
+  BoxesScrollBarUI.applyTo(component, new DotModel, dotModel)
+  val table = ledgerView.component
+
+  val view = View {
+    val scale = (ledger().recordCount).asInstanceOf[Double]
+    val is = indices()
+
+    addUpdate{
+      val viewIndices = is.map(i => indexToView(i)).filter(i=>i>=0).toList.sorted
+      val viewRuns = encodeDirect(viewIndices)
+      val viewRunsScaled = viewRuns.map(run => (run._1/scale, (run._1 + run._2)/scale))
+
+      dotModel.positions = viewRunsScaled.toSet
+    }
+  }
+
+  //Convert a sorted list of ints to a list of starts and lengths of runs of ints
+  def encodeDirect(list:List[Int]) : List[(Int,Int)] = {
+
+    def encode(result:List[(Int,Int)], n:Int, rl:List[Int]) : List[(Int,Int)] = {
+      rl match {
+        //If the first two elements are a run, continue any current run
+        case head::next::tail if head == next-1 => encode(result,n+1,next::tail)
+        //Ending a run, with more to encode
+        case head::next::tail => encode(result:::List((head-n, n+1)),0,next::tail)
+        //Ending a run and no more to encode
+        case head::Nil => result:::List((head-n, n+1))
+        //Single stage of encoding an empty list
+        case Nil => result
+      }
+    }
+
+    encode(Nil,0,list)
+  }
+
+  def indexToView(i:Int):Int = {
+    try {
+      table.convertRowIndexToView(i)
+    } catch {
+      //If index is out of bounds, treat as no selection
+      case _ => -1
+    }
+  }
+}
+
+object BoxesScrollPane {
+  def apply(component:JComponent) = {
+    val scroll = new JScrollPane(component)
+    BoxesScrollBarUI.applyTo(scroll)
+    scroll
+  }
+  def horizontal(component:JComponent) = {
+    val scroll = new JScrollPane(component)
+    BoxesScrollBarUI.applyTo(scroll, new DotModel, new DotModel, true, false)
+    scroll
+  }
+  def vertical(component:JComponent) = {
+    val scroll = new JScrollPane(component)
+    BoxesScrollBarUI.applyTo(scroll, new DotModel, new DotModel, false, true)
+    scroll
   }
 }
 
@@ -493,10 +572,12 @@ class LedgerView(v:RefGeneral[_<:Ledger,_]) extends SwingView{
   def rowHeight_=(rowHeight:Int) = component.setRowHeight(rowHeight)
 
   def removeHeader = component.setTableHeader(null)
-
 }
 
 class LinkingJTable(val sv:SwingView, m:TableModel) extends JTable(m) {
+
+  getTableHeader().setDefaultRenderer(new BoxesTableCellHeaderRenderer())
+
   val defaultRenderer = new DefaultTableCellRenderer()
 
   val numberRenderer = new DefaultTableCellRenderer()
@@ -537,6 +618,7 @@ class LinkingJTable(val sv:SwingView, m:TableModel) extends JTable(m) {
   //TODO add default editor/renderer for Color
 
   setRowHeight(26)
+  getTableHeader.
 
   //See Java bug 4709394
   putClientProperty("terminateEditOnFocusLost", true);
