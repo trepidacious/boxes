@@ -114,7 +114,7 @@ object ListSelection {
   def apply[T](l:ListRef[T], i:Var[Option[Int]]) = Cal(for (index <- i() if index < l().size) yield l(index))
 }
 
-class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], selectFirstRatherThanNone:Boolean) extends Reaction {
+class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], loseIndexOnDeletion:Boolean, selectFirstRatherThanNone:Boolean) extends Reaction {
 
   private var lastProcessedChangeIndex = -1L
 
@@ -135,12 +135,23 @@ class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], selectFirst
       //be irritating
 
       //filter out any indices in the deleted range, then adjust those after the range to move them back
-      case RemovalListChange(removal, count) => is.collect{
-        //Before deletion, no effect
-        case i if removal > i => i
-        //After deletion, move index back
-        case i if (removal + count <= i) => i-count
-        //Throw stuff in deletion range away
+      case RemovalListChange(removal, count) => {
+        val newSet = is.collect {
+          //Before deletion, no effect
+          case i if removal > i => i
+          //After deletion, move index back
+          case i if (removal + count <= i) => i-count
+          //Throw stuff in deletion range away
+        }
+        //If we don't want to lose index on deletion, and we just have, then
+        //select the first index after selection (which is now at the first
+        //removed index)
+        if (newSet.isEmpty && !loseIndexOnDeletion) {
+          Set(removal)
+        //Otherwise just keep what we have
+        } else {
+          newSet
+        }
       }
 
       //For a complete change, we lose the selection
@@ -165,6 +176,14 @@ class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], selectFirst
       }
     }
 
+    //If we have selections after the end of the list, then
+    //what we actually want is to select the last element of the
+    //list. This can only happen when we are aiming to keep a
+    //selection even with deletions
+    if (newIndices. find(i => i >= size) != None) {
+      newIndices = newIndices.filter(i => i < size) + (size-1)
+    }
+
     //Empty list has no selection
     if (size == 0) {
       newIndices = Set[Int]()
@@ -173,7 +192,6 @@ class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], selectFirst
     } else if (newIndices.isEmpty && selectFirstRatherThanNone) {
       newIndices = Set[Int](0)
     }
-
 
     //Filter out invalid selections
     newIndices = newIndices.filter(i => i >= 0 && i < size)
@@ -188,9 +206,9 @@ class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], selectFirst
 }
 
 object ListIndices {
-  def apply[T](listRef:ListRef[T], initialIndices:Set[Int] = Set(0), selectFirstRatherThanNone:Boolean = true) = {
+  def apply[T](listRef:ListRef[T], initialIndices:Set[Int] = Set(0), loseIndexOnDeletion:Boolean = false, selectFirstRatherThanNone:Boolean = true) = {
     val i = Var(initialIndices)
-    val r = new ListIndicesReaction[T](listRef, i, selectFirstRatherThanNone)
+    val r = new ListIndicesReaction[T](listRef, i, loseIndexOnDeletion, selectFirstRatherThanNone)
     i.retainReaction(r)
     Box.registerReaction(r)
     i
