@@ -23,6 +23,44 @@
   <defs
      id="defs4">
     <linearGradient
+       id="linearGradient3834">
+      <stop
+         id="stop3836"
+         offset="0"
+         style="stop-color:#e9e9e9;stop-opacity:1;" />
+      <stop
+         style="stop-color:#cfcfcf;stop-opacity:1;"
+         offset="0.59615386"
+         id="stop3838" />
+      <stop
+         id="stop3840"
+         offset="0.61538464"
+         style="stop-color:#e5e5e5;stop-opacity:1;" />
+      <stop
+         id="stop3842"
+         offset="1"
+         style="stop-color:#f6f6f6;stop-opacity:1;" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3818">
+      <stop
+         style="stop-color:#f6f6f6;stop-opacity:1;"
+         offset="0"
+         id="stop3820" />
+      <stop
+         id="stop3822"
+         offset="0.42307693"
+         style="stop-color:#cfcfcf;stop-opacity:1;" />
+      <stop
+         style="stop-color:#e5e5e5;stop-opacity:1;"
+         offset="0.46153846"
+         id="stop3824" />
+      <stop
+         style="stop-color:#f6f6f6;stop-opacity:1;"
+         offset="1"
+         id="stop3826" />
+    </linearGradient>
+    <linearGradient
        id="linearGradient3817">
       <stop
          id="stop3819"
@@ -81,6 +119,46 @@
        y1="24"
        x2="7"
        y2="-2" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3818"
+       id="linearGradient3047"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(24,0)"
+       x1="7"
+       y1="24"
+       x2="7"
+       y2="-2" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3834"
+       id="linearGradient3832"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(1,0)"
+       x1="7"
+       y1="24"
+       x2="7"
+       y2="-2" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4166"
+       id="linearGradient3848"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(20,-9)"
+       x1="-1"
+       y1="16.5"
+       x2="1"
+       y2="16.5" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4166"
+       id="linearGradient3854"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(10,-24)"
+       x1="-1"
+       y1="16.5"
+       x2="1"
+       y2="16.5" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -89,15 +167,15 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="11.313709"
-     inkscape:cx="8.5232978"
-     inkscape:cy="8.1335454"
+     inkscape:zoom="16"
+     inkscape:cx="14.949295"
+     inkscape:cy="4.0956719"
      inkscape:document-units="px"
-     inkscape:current-layer="layer6"
+     inkscape:current-layer="layer10"
      showgrid="true"
      inkscape:snap-global="true"
-     inkscape:window-width="1920"
-     inkscape:window-height="1032"
+     inkscape:window-width="1239"
+     inkscape:window-height="996"
      inkscape:window-x="1440"
      inkscape:window-y="22"
      inkscape:window-maximized="0">
@@ -119,7 +197,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -229,7 +307,38 @@
      inkscape:groupmode="layer"
      id="layer6"
      inkscape:label="Horizontal Track"
+     style="display:none">
+    <rect
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/Users/trepidacious/Documents/boxes/boxes/src/boxes/swing/HorizontalTrack.png"
+       y="-15"
+       x="9"
+       height="15"
+       width="15"
+       id="rect3846"
+       style="fill:url(#linearGradient3854);fill-opacity:1;fill-rule:nonzero;stroke:none;display:inline"
+       transform="matrix(0,1,-1,0,0,0)" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer10"
+     inkscape:label="Button"
      style="display:inline">
+    <rect
+       ry="0"
+       style="fill:url(#linearGradient3832);fill-opacity:1;stroke:none;display:inline;filter:url(#filter4186)"
+       id="rect3045"
+       width="16"
+       height="26"
+       x="0"
+       y="-2" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer9"
+     inkscape:label="Header"
+     style="display:none">
     <rect
        y="-2"
        x="0"

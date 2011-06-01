@@ -1,8 +1,11 @@
 package boxes.swing
 
-import boxes.{Box, ListVar, VarGeneral}
+import boxes._
 
-class ListAddAction[T](l:ListVar[T], i:VarGeneral[Option[Int],_], source: => Option[T]) {
+class ListAddOp[T](l:ListVar[T], i:VarGeneral[Option[Int],_], source: => Option[T]) extends Op {
+
+  val canApply = Val(true)
+
   def apply() = {
     val t = source
 
@@ -20,7 +23,10 @@ class ListAddAction[T](l:ListVar[T], i:VarGeneral[Option[Int],_], source: => Opt
   }
 }
 
-class ListMultiAddAction[T](l:ListVar[T], i:VarGeneral[Set[Int],_], source: => Option[T]) {
+class ListMultiAddOp[T](l:ListVar[T], i:VarGeneral[Set[Int],_], source: => Option[T]) extends Op {
+
+  val canApply = Val(true)
+
   def apply() = {
     val t = source
 
@@ -39,7 +45,10 @@ class ListMultiAddAction[T](l:ListVar[T], i:VarGeneral[Set[Int],_], source: => O
   }
 }
 
-class ListDeleteAction[T](l:ListVar[T], i:VarGeneral[Option[Int],_], target:T => Unit) {
+class ListDeleteOp[T](l:ListVar[T], i:VarGeneral[Option[Int],_], target:T => Unit) extends Op {
+
+  val canApply = Cal{i() != None}
+
   def apply() = {
     val removed = Box.transact{
       i() match {
@@ -55,7 +64,10 @@ class ListDeleteAction[T](l:ListVar[T], i:VarGeneral[Option[Int],_], target:T =>
   }
 }
 
-class ListMultiDeleteAction[T](l:ListVar[T], i:VarGeneral[Set[Int],_], target:T => Unit) {
+class ListMultiDeleteOp[T](l:ListVar[T], i:VarGeneral[Set[Int],_], target:T => Unit) extends Op {
+
+  val canApply = Cal{!i().isEmpty}
+
   def apply() = {
     Box.transact{
       val indices = i()

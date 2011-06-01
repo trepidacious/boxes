@@ -114,7 +114,14 @@ object ListSelection {
   def apply[T](l:ListRef[T], i:Var[Option[Int]]) = Cal(for (index <- i() if index < l().size) yield l(index))
 }
 
-class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], loseIndexOnDeletion:Boolean, selectFirstRatherThanNone:Boolean) extends Reaction {
+object DefaultSelection extends Enumeration {
+   type DefaultSelection = Value
+   val FirstIndex, AllIndices, NoIndices = Value
+}
+import DefaultSelection._
+
+
+class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], loseIndexOnDeletion:Boolean, defaultSelection:DefaultSelection) extends Reaction {
 
   private var lastProcessedChangeIndex = -1L
 
@@ -189,8 +196,12 @@ class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], loseIndexOn
       newIndices = Set[Int]()
 
     //If empty, select if requested
-    } else if (newIndices.isEmpty && selectFirstRatherThanNone) {
-      newIndices = Set[Int](0)
+    } else if (newIndices.isEmpty) {
+      defaultSelection match {
+        case FirstIndex => newIndices = Set(0)
+        case AllIndices => newIndices = Range(0, size).toSet
+        case NoIndices => {}
+      }
     }
 
     //Filter out invalid selections
@@ -206,9 +217,9 @@ class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], loseIndexOn
 }
 
 object ListIndices {
-  def apply[T](listRef:ListRef[T], initialIndices:Set[Int] = Set(0), loseIndexOnDeletion:Boolean = false, selectFirstRatherThanNone:Boolean = true) = {
+  def apply[T](listRef:ListRef[T], initialIndices:Set[Int] = Set(0), loseIndexOnDeletion:Boolean = false, defaultSelection:DefaultSelection = FirstIndex) = {
     val i = Var(initialIndices)
-    val r = new ListIndicesReaction[T](listRef, i, loseIndexOnDeletion, selectFirstRatherThanNone)
+    val r = new ListIndicesReaction[T](listRef, i, loseIndexOnDeletion, defaultSelection)
     i.retainReaction(r)
     Box.registerReaction(r)
     i

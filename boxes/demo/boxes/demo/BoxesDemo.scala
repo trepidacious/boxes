@@ -10,13 +10,11 @@ import javax.swing._
 import java.awt.event.ActionEvent
 import boxes.util.{LogStep, Step, CoalescingResponder, NumericClass}
 import boxes._
-import list.{ListIndices, ListIndex}
+import list.{DefaultSelection, ListIndices, ListIndex}
 import persistence._
-import io.Source
 import java.awt.{BorderLayout, Dimension}
-import java.io.{ByteArrayInputStream, OutputStreamWriter, ByteArrayOutputStream, StringWriter}
-import com.explodingpixels.macwidgets.IAppWidgetFactory
-import swing.{ListMultiDeleteAction, ListMultiAddAction, ListAddAction, BoxesScrollBarUI}
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
+import swing.{SwingOps, ListMultiDeleteOp, ListMultiAddOp}
 
 object BoxesDemo {
 
@@ -52,25 +50,6 @@ object BoxesDemo {
     val bob = new OptionPerson()
     bob.name() = "Bob"
 
-//    println (for {
-//      friend <- bob.friend()
-//    } yield friend.name)
-//
-//    bob.friend() = Some(alice)
-//
-//    println("bob.friend() = " + bob.friend())
-//
-//    println (for {
-//      friend <- bob.friend()
-//    } yield friend.name)
-
-//    val bobsFriendsName = PathWithDefault(
-//      for {
-//        friend <- bob.friend()
-//      } yield friend.name,
-//      "NONAME"
-//    )
-
     val bobsFriendsName = PathViaOption(
       for {
         friend <- bob.friend()
@@ -94,23 +73,6 @@ object BoxesDemo {
     alice.friend() = Some(cate)
 
     println("After alice has a friend: " + bobsFriendsFriend)
-
-
-//    println("About to change cate's name")
-//    cate.name() = "Katey"
-//
-//    println("After changing cate's name")
-//
-//    println("About to change alice's name")
-//    alice.name() = "Alicia"
-//
-//    println("After changing alice's name: " + bobsFriendsName())
-//
-//    println("About to change bobsFriendsName")
-//    bobsFriendsName() = "Alucard"
-//
-//    println("After changing bobsFriendsName: " + bobsFriendsName() + ", and alice's name is " + alice.name())
-
 
   }
 
@@ -623,7 +585,7 @@ object BoxesDemo {
 
     val list = ListVar(p, q, q, p, p, q, p, q, p, q, p, q, p, q, p, q, p, q, p, q, p, q, p, q)
 
-    val indices = ListIndices(list)
+    val indices = ListIndices(list, defaultSelection = DefaultSelection.AllIndices)
 
     val view = LensRecordView[OptionPerson](
       VarLens("Name", _.name),
@@ -637,24 +599,12 @@ object BoxesDemo {
 
     val indicesView = LabelView(Cal{indices().toString})
 
-    val addAction = new ListMultiAddAction(list, indices, Some(new OptionPerson()))
-    val deleteAction = new ListMultiDeleteAction[OptionPerson](list, indices, t=>Unit)
+    val addAction = new ListMultiAddOp(list, indices, Some(new OptionPerson()))
+    val deleteAction = new ListMultiDeleteOp[OptionPerson](list, indices, t=>Unit)
 
-    val add = new JButton(new AbstractAction("Add") {
-      override def actionPerformed(e:ActionEvent) = {
-//        val person = new OptionPerson()
-//        person.name() = "New item at " + list().size
-//        list.insert(list().size, person)
-        addAction()
-      }
-    })
+    val add = new JButton(SwingOps(addAction))
 
-    val delete = new JButton(new AbstractAction("Delete") {
-      override def actionPerformed(e:ActionEvent) = {
-//        if (!list().isEmpty) list.remove(0, 1)
-        deleteAction()
-      }
-    })
+    val delete = new JButton(SwingOps(deleteAction))
 
     val frame = new JFrame()
     val panel = new JPanel()
