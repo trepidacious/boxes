@@ -14,7 +14,7 @@ import list.{DefaultSelection, ListIndices, ListIndex}
 import persistence._
 import java.awt.{BorderLayout, Dimension}
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
-import swing.{SwingOps, ListMultiDeleteOp, ListMultiAddOp}
+import swing.{SwingOp, SwingButton, ListMultiDeleteOp, ListMultiAddOp}
 
 object BoxesDemo {
 
@@ -602,18 +602,29 @@ object BoxesDemo {
     val addAction = new ListMultiAddOp(list, indices, Some(new OptionPerson()))
     val deleteAction = new ListMultiDeleteOp[OptionPerson](list, indices, t=>Unit)
 
-    val add = new JButton(SwingOps(addAction))
+    val add = SwingButton(addAction)
 
-    val delete = new JButton(SwingOps(deleteAction))
+    val delete = SwingButton(deleteAction)
 
     val frame = new JFrame()
+
+    val bottom = new JPanel(new BorderLayout())
+
     val panel = new JPanel()
+    panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS))
     panel.add(add)
     panel.add(delete)
-    panel.add(indicesView.component)
+
+    bottom.add(panel, BorderLayout.WEST)
+    val padding = SwingButton.buttonPadding
+    padding.setLayout(new BorderLayout)
+    padding.add(indicesView.component)
+    indicesView.component.setOpaque(false)
+
+    bottom.add(padding, BorderLayout.CENTER)
 
     frame.add(ledgerView.component, BorderLayout.CENTER)
-    frame.add(panel, BorderLayout.SOUTH)
+    frame.add(bottom, BorderLayout.SOUTH)
     frame.pack
     frame.setMinimumSize(new Dimension(50, 50))
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
