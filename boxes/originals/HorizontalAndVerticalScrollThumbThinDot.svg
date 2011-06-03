@@ -168,16 +168,16 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="8"
-     inkscape:cx="8.3654112"
+     inkscape:cx="-13.884589"
      inkscape:cy="30.947766"
      inkscape:document-units="px"
      inkscape:current-layer="layer14"
      showgrid="true"
      inkscape:snap-global="true"
-     inkscape:window-width="1239"
-     inkscape:window-height="996"
+     inkscape:window-width="1920"
+     inkscape:window-height="1152"
      inkscape:window-x="1440"
-     inkscape:window-y="22"
+     inkscape:window-y="0"
      inkscape:window-maximized="0">
     <inkscape:grid
        type="xygrid"
@@ -197,7 +197,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -324,7 +324,7 @@
      inkscape:groupmode="layer"
      id="layer10"
      inkscape:label="Button"
-     style="display:inline">
+     style="display:none">
     <rect
        ry="0"
        style="fill:url(#linearGradient3832);fill-opacity:1;stroke:none;display:inline;filter:url(#filter4186)"
@@ -374,7 +374,7 @@
        height="4"
        width="16"
        id="rect3833"
-       style="fill:#39698a;fill-opacity:1;stroke:none;display:inline"
+       style="fill:#7890a1;fill-opacity:1;stroke:none;display:inline"
        transform="matrix(0,-1,1,0,0,0)" />
     <rect
        y="9"
@@ -382,7 +382,7 @@
        height="4"
        width="16"
        id="rect3835"
-       style="fill:#39698a;fill-opacity:1;stroke:none;display:inline" />
+       style="fill:#7890a1;fill-opacity:1;stroke:none;display:inline" />
     <text
        xml:space="preserve"
        style="font-size:4px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
@@ -415,7 +415,7 @@
        x="5"
        y="8" />
     <rect
-       style="fill:#39698a;fill-opacity:1;stroke:none;display:inline"
+       style="fill:#7890a1;fill-opacity:1;stroke:none;display:inline"
        id="rect3859"
        width="16"
        height="4"
@@ -451,7 +451,7 @@
        d="m 4,12.5 0,1.5 9,-4.5 9,4.5 0,-1.5 -9,-9 z"
        style="opacity:0.328;fill:#000000;fill-opacity:1;stroke:none" />
     <path
-       style="fill:#39698a;fill-opacity:1;stroke:none"
+       style="fill:#7890a1;fill-opacity:1;stroke:none"
        d="m 4,14 3,3 6,-6 6,6 3,-3 -9,-9 z"
        id="path3870"
        inkscape:connector-curvature="0"
@@ -460,7 +460,8 @@
   <g
      inkscape:groupmode="layer"
      id="layer14"
-     inkscape:label="Down">
+     inkscape:label="Down"
+     style="display:none">
     <path
        style="opacity:0.328;fill:#000000;fill-opacity:1;stroke:none;display:inline"
        d="m 4,6.5 3,-3 6,6 6,-6 3,3 0,1.5 -9,5 -9,-5 z"
@@ -478,7 +479,7 @@
        inkscape:connector-curvature="0"
        id="path3889"
        d="m 4,8 3,-3 6,6 6,-6 3,3 -9,9 z"
-       style="fill:#39698a;fill-opacity:1;stroke:none;display:inline" />
+       style="fill:#7890a1;fill-opacity:1;stroke:none;display:inline" />
   </g>
   <g
      inkscape:groupmode="layer"

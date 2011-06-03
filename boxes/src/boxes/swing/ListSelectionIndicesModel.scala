@@ -72,7 +72,7 @@ class ListSelectionIndicesModel(v:VarGeneral[Set[Int],_], setFilter: =>Boolean, 
 
 		//Skip when we are actually adjusting delegate in this class, so we
 		//don't respond to our own changes.
-		if (adjustingDelegate) return;
+		if (adjustingDelegate) return
 
 		//Update our cached selection
 		selection = delegateSelectionSet
@@ -118,7 +118,7 @@ class ListSelectionIndicesModel(v:VarGeneral[Set[Int],_], setFilter: =>Boolean, 
 				}
 
 				delegate.setValueIsAdjusting(false);
-
+        selection = indices
       }
 
     } finally {

@@ -578,12 +578,11 @@ object BoxesDemo {
 
     SwingView.nimbus
 
-    val p = new OptionPerson()
-    p.name() = "p"
-    val q = new OptionPerson()
-    q.name() = "q"
-
-    val list = ListVar(p, q, q, p, p, q, p, q, p, q, p, q, p, q, p, q, p, q, p, q, p, q, p, q)
+    val list = ListVar(Range(0, 10).map(i=>{
+      val p = new OptionPerson
+      p.name() = "Person " + i
+      p
+    }):_*)
 
     val indices = ListIndices(list, defaultSelection = DefaultSelection.AllIndices)
 

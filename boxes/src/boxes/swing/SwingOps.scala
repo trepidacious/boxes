@@ -66,6 +66,7 @@ object SwingButton {
 
 object ListStylePainter {
   val dividerColor = new Color(0, 0, 0, 51)
+  val dividerBright = new Color(1f, 1f, 1f, 0.4f)
   val topColor = new Color(0xaaaaaa)
   val image = new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/ListButton.png")).getImage
 
@@ -81,6 +82,18 @@ class ListStylePainter[T](paintLeft:Boolean = false, paintRight:Boolean = true) 
       g.drawLine(0, 0, 0, h-1)
     }
     if (paintRight) {
+      g.drawLine(w-1, 0, w-1, h-1)
+    }
+
+    g.setColor(ListStylePainter.dividerBright)
+    if (paintLeft) {
+      g.drawLine(1, 0, 1, h-1)
+    } else {
+      g.drawLine(0, 0, 0, h-1)
+    }
+    if (paintRight) {
+      g.drawLine(w-2, 0, w-2, h-1)
+    } else {
       g.drawLine(w-1, 0, w-1, h-1)
     }
 

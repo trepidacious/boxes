@@ -2,7 +2,6 @@ package boxes
 
 import scala.collection._
 import java.awt.event.{FocusEvent, FocusListener, ActionEvent, ActionListener}
-import java.awt.Component
 import javax.swing._
 import event.{TableModelEvent, ChangeEvent, TableColumnModelEvent}
 import javax.swing.JToggleButton.ToggleButtonModel
@@ -14,6 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import com.explodingpixels.macwidgets.plaf.ITunesTableUI
 import com.explodingpixels.macwidgets.ITunesTableHeaderRenderer
 import com.explodingpixels.widgets.TableHeaderUtils
+import java.awt.{Color, Component}
 
 //TODO implement rate-limiting of updates? But then we need to know that views don't rely on all updates being called, just the most recent
 //Should be easy enough to do, just make the views store some Atomic style stuff they need to use to update, and fiddle
@@ -84,9 +84,10 @@ object SwingView {
   def nimbus() {
     try {
       for (info <- UIManager.getInstalledLookAndFeels()) {
-          if ("Nimbus".equals(info.getName())) {
-              UIManager.setLookAndFeel(info.getClassName())
-          }
+        if ("Nimbus".equals(info.getName())) {
+          UIManager.setLookAndFeel(info.getClassName())
+          UIManager.put("nimbusSelectionBackground", new Color(120, 144, 161));
+        }
       }
     } catch {
       case _ => {}
