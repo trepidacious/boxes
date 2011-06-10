@@ -8,6 +8,7 @@ import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter
 import boxes.util.NumericClass
 import javax.swing._
+import border.{CompoundBorder, EmptyBorder}
 import math.ScalaNumber
 import java.awt.{Graphics2D, Graphics, Color, Component}
 import table.{DefaultTableCellRenderer, TableCellEditor}
@@ -130,14 +131,28 @@ class NumberCellEditor[N](val ftf:JFormattedTextField, val requiredContentsDescr
 
 }
 
+object CellEditorBorders {
+  val textBorder = new CompoundBorder(UIManager.getBorder("Table.focusCellHighlightBorder"), new EmptyBorder(1,3,0,0))
+  val rendererBorder = new EmptyBorder(1,4,0,1)
+  val selectedRendererBorder = new CompoundBorder(UIManager.getBorder("Table.focusCellHighlightBorder"), new EmptyBorder(1,3,0,0))
+}
+
+class CellEditorJTFormattedTextField extends JFormattedTextField {
+  setBorder(CellEditorBorders.textBorder)
+}
+
 object NumberCellEditor {
   def apply[N](c:Class[N])(implicit numericClass:NumericClass[N]) = new NumberCellEditor(
-    new JFormattedTextField(),
+    new CellEditorJTFormattedTextField(),
     if (numericClass.isWhole) "a whole number" else "a number"
   )(numericClass)
 }
 
-class SelectingTextCellEditor extends DefaultCellEditor(new JTextField()) {
+class CellEditorJTextField extends JTextField {
+  setBorder(CellEditorBorders.textBorder)
+}
+
+class SelectingTextCellEditor extends DefaultCellEditor(new CellEditorJTextField()) {
 	override def getTableCellEditorComponent(table:JTable, value:Object, isSelected:Boolean, row:Int, column:Int) = {
 		super.getTableCellEditorComponent(table, value, isSelected, row, column) match {
       case tf:JTextField => {
@@ -151,6 +166,57 @@ class SelectingTextCellEditor extends DefaultCellEditor(new JTextField()) {
 
 object SelectingTextCellEditor {
   def apply() = new SelectingTextCellEditor
+}
+
+class BoxesTableCellRenderer extends DefaultTableCellRenderer {
+  override def getTableCellRendererComponent(table:JTable, value:Object, isSelected:Boolean, hasFocus:Boolean, row:Int, column:Int) = {
+    if (isSelected) {
+      super.setForeground(table.getSelectionForeground())
+      super.setBackground(table.getSelectionBackground())
+	  } else {
+      var background = table.getBackground()
+      val alternateColor = UIManager.getColor("Table.alternateRowColor")
+      if (alternateColor != null && row % 2 == 0) background = alternateColor
+      super.setForeground(table.getForeground())
+      super.setBackground(background);
+	  }
+
+	  setFont(table.getFont())
+
+//	if (hasFocus) {
+//            Border border = null;
+//            if (isSelected) {
+//                border = DefaultLookup.getBorder(this, ui, "Table.focusSelectedCellHighlightBorder");
+//            }
+//            if (border == null) {
+//                border = DefaultLookup.getBorder(this, ui, "Table.focusCellHighlightBorder");
+//            }
+//            setBorder(border);
+//
+//	    if (!isSelected && table.isCellEditable(row, column)) {
+//                Color col;
+//                col = DefaultLookup.getColor(this, ui, "Table.focusCellForeground");
+//                if (col != null) {
+//                    super.setForeground(col);
+//                }
+//                col = DefaultLookup.getColor(this, ui, "Table.focusCellBackground");
+//                if (col != null) {
+//                    super.setBackground(col);
+//                }
+//	    }
+//	} else {
+//            setBorder(getNoFocusBorder());
+//	}
+
+    if (hasFocus && isSelected) {
+      setBorder(CellEditorBorders.selectedRendererBorder)
+    } else {
+      setBorder(CellEditorBorders.rendererBorder)
+    }
+    setValue(value)
+    this
+  }
+//  setBorder(CellEditorBorders.rendererBorder)
 }
 
 object BooleanCellRenderer {
@@ -178,7 +244,7 @@ object NumberCellRenderer {
   def apply[N](c:Class[N])(implicit nc:NumericClass[N]) = new NumberCellRenderer[N](nc)
 }
 
-class NumberCellRenderer[N](nc:NumericClass[N]) extends DefaultTableCellRenderer {
+class NumberCellRenderer[N](nc:NumericClass[N]) extends BoxesTableCellRenderer {
 
   setHorizontalAlignment(SwingConstants.RIGHT)
 

@@ -3,17 +3,20 @@ package boxes
 import scala.collection._
 import java.awt.event.{FocusEvent, FocusListener, ActionEvent, ActionListener}
 import javax.swing._
+import border.MatteBorder
 import event.{TableModelEvent, ChangeEvent, TableColumnModelEvent}
 import javax.swing.JToggleButton.ToggleButtonModel
 import math.Numeric
+import plaf.basic.BasicButtonUI
+import plaf.metal.MetalLookAndFeel
 import swing._
 import table._
 import util._
 import java.util.concurrent.atomic.AtomicBoolean
-import com.explodingpixels.macwidgets.plaf.ITunesTableUI
 import com.explodingpixels.macwidgets.ITunesTableHeaderRenderer
 import com.explodingpixels.widgets.TableHeaderUtils
-import java.awt.{Color, Component}
+import java.awt.{Dimension, Color, Component}
+import com.explodingpixels.macwidgets.plaf.{UnifiedToolbarButtonUI, ITunesTableUI}
 
 //TODO implement rate-limiting of updates? But then we need to know that views don't rely on all updates being called, just the most recent
 //Should be easy enough to do, just make the views store some Atomic style stuff they need to use to update, and fiddle
@@ -87,9 +90,28 @@ object SwingView {
         if ("Nimbus".equals(info.getName())) {
           UIManager.setLookAndFeel(info.getClassName())
           UIManager.put("nimbusSelectionBackground", new Color(120, 144, 161));
+          UIManager.put("Table.alternateRowColor", new Color(240, 240, 240))
+          UIManager.put("Table.backgroundColor", new Color(255, 255, 255))
+          UIManager.put("Table.selectionForeground", new Color(255, 255, 255))
+          UIManager.put("Table.selectionBackground", new Color(120, 144, 161))
+          UIManager.put("Table.focusCellHighlightBorder", new MatteBorder(1, 1, 1, 1, new Color(120, 144, 161).darker.darker))
         }
       }
     } catch {
+      case _ => {}
+    }
+  }
+
+  def nimbox() {
+    try {
+      UIManager.setLookAndFeel( new MetalLookAndFeel() )
+      UIManager.put("Table.alternateRowColor", new Color(240, 240, 240))
+      UIManager.put("Table.backgroundColor", new Color(255, 255, 255))
+      UIManager.put("Table.selectionForeground", new Color(255, 255, 255))
+      UIManager.put("Table.selectionBackground", new Color(120, 144, 161))
+      UIManager.put("Table.focusCellHighlightBorder", new MatteBorder(1, 1, 1, 1, new Color(120, 144, 161).darker.darker))
+    }
+    catch {
       case _ => {}
     }
   }
@@ -579,10 +601,7 @@ class LinkingJTable(val sv:SwingView, m:TableModel) extends JTable(m) {
 
   getTableHeader().setDefaultRenderer(new BoxesTableCellHeaderRenderer())
 
-  val defaultRenderer = new DefaultTableCellRenderer()
-
-  val numberRenderer = new DefaultTableCellRenderer()
-  numberRenderer.setHorizontalAlignment(SwingConstants.RIGHT)
+  val defaultRenderer = new BoxesTableCellRenderer()
 
   //Apologies for null, super constructor calls lots of
   //methods, leading to use of responding before it can be
@@ -592,6 +611,7 @@ class LinkingJTable(val sv:SwingView, m:TableModel) extends JTable(m) {
 
   setDefaultRenderer(classOf[Boolean],  BooleanCellRenderer.opaque)
   setDefaultRenderer(classOf[Char],     defaultRenderer)
+  setDefaultRenderer(classOf[String],     defaultRenderer)
 
   //We want to use implicits, so we can't use a list of classes, unfortunately
   setDefaultEditor(classOf[Byte],       NumberCellEditor(classOf[Byte]))
@@ -618,8 +638,13 @@ class LinkingJTable(val sv:SwingView, m:TableModel) extends JTable(m) {
 
   //TODO add default editor/renderer for Color
 
-  setRowHeight(26)
-  getTableHeader.
+  setRowHeight(24)
+
+  //Workarounds for when not using Nimbus
+//  setShowGrid(false)
+//  setIntercellSpacing(new Dimension(0, 0))
+//  setShowHorizontalLines(false)
+//  setShowVerticalLines(false)
 
   //See Java bug 4709394
   putClientProperty("terminateEditOnFocusLost", true);

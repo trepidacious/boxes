@@ -12,9 +12,9 @@ import boxes.util.{LogStep, Step, CoalescingResponder, NumericClass}
 import boxes._
 import list.{DefaultSelection, ListIndices, ListIndex}
 import persistence._
-import java.awt.{BorderLayout, Dimension}
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
 import swing.{SwingOp, SwingButton, ListMultiDeleteOp, ListMultiAddOp}
+import java.awt.{GridLayout, BorderLayout, Dimension}
 
 object BoxesDemo {
 
@@ -574,17 +574,14 @@ object BoxesDemo {
   }
 
 
-  def ledgerMulti() {
-
-    SwingView.nimbus
-
+  def buildLedgerMulti() = {
     val list = ListVar(Range(0, 10).map(i=>{
       val p = new OptionPerson
       p.name() = "Person " + i
       p
     }):_*)
 
-    val indices = ListIndices(list, defaultSelection = DefaultSelection.AllIndices)
+    val indices = ListIndices(list, defaultSelection = DefaultSelection.FirstIndex)
 
     val view = LensRecordView[OptionPerson](
       VarLens("Name", _.name),
@@ -605,8 +602,6 @@ object BoxesDemo {
 
     val delete = SwingButton(deleteAction)
 
-    val frame = new JFrame()
-
     val bottom = new JPanel(new BorderLayout())
 
     val panel = new JPanel()
@@ -622,8 +617,25 @@ object BoxesDemo {
 
     bottom.add(padding, BorderLayout.CENTER)
 
-    frame.add(ledgerView.component, BorderLayout.CENTER)
-    frame.add(bottom, BorderLayout.SOUTH)
+    val mainPanel = new JPanel(new BorderLayout())
+    mainPanel.add(ledgerView.component, BorderLayout.CENTER)
+    mainPanel.add(bottom, BorderLayout.SOUTH)
+
+    mainPanel
+  }
+
+  def ledgerMulti() {
+
+    SwingView.nimbus
+
+    val frame = new JFrame()
+
+    frame.setLayout(new GridLayout(2, 2))
+    frame.add(buildLedgerMulti)
+    frame.add(buildLedgerMulti)
+    frame.add(buildLedgerMulti)
+    frame.add(buildLedgerMulti)
+
     frame.pack
     frame.setMinimumSize(new Dimension(50, 50))
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)

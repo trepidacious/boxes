@@ -170,6 +170,8 @@ class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], loseIndexOn
     var newIndices = indices()
     val size = list().size
 
+    println("ListIndices responding to indices " + newIndices)
+
     for {
       queue <- list.changes
       indexAndChange <- queue
@@ -199,7 +201,10 @@ class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], loseIndexOn
     } else if (newIndices.isEmpty) {
       defaultSelection match {
         case FirstIndex => newIndices = Set(0)
-        case AllIndices => newIndices = Range(0, size).toSet
+        case AllIndices => {
+          newIndices = Range(0, size).toSet
+          println("Selecting all instead of none")
+        }
         case NoIndices => {}
       }
     }
@@ -217,7 +222,7 @@ class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], loseIndexOn
 }
 
 object ListIndices {
-  def apply[T](listRef:ListRef[T], initialIndices:Set[Int] = Set(0), loseIndexOnDeletion:Boolean = false, defaultSelection:DefaultSelection = FirstIndex) = {
+  def apply[T](listRef:ListRef[T], initialIndices:Set[Int] = Set[Int](), loseIndexOnDeletion:Boolean = false, defaultSelection:DefaultSelection = FirstIndex) = {
     val i = Var(initialIndices)
     val r = new ListIndicesReaction[T](listRef, i, loseIndexOnDeletion, defaultSelection)
     i.retainReaction(r)
