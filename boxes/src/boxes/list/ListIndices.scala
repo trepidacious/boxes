@@ -170,8 +170,6 @@ class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], loseIndexOn
     var newIndices = indices()
     val size = list().size
 
-    println("ListIndices responding to indices " + newIndices)
-
     for {
       queue <- list.changes
       indexAndChange <- queue
@@ -203,7 +201,6 @@ class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], loseIndexOn
         case FirstIndex => newIndices = Set(0)
         case AllIndices => {
           newIndices = Range(0, size).toSet
-          println("Selecting all instead of none")
         }
         case NoIndices => {}
       }

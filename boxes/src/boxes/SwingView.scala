@@ -7,16 +7,12 @@ import border.MatteBorder
 import event.{TableModelEvent, ChangeEvent, TableColumnModelEvent}
 import javax.swing.JToggleButton.ToggleButtonModel
 import math.Numeric
-import plaf.basic.BasicButtonUI
 import plaf.metal.MetalLookAndFeel
 import swing._
 import table._
 import util._
 import java.util.concurrent.atomic.AtomicBoolean
-import com.explodingpixels.macwidgets.ITunesTableHeaderRenderer
-import com.explodingpixels.widgets.TableHeaderUtils
-import java.awt.{Dimension, Color, Component}
-import com.explodingpixels.macwidgets.plaf.{UnifiedToolbarButtonUI, ITunesTableUI}
+import java.awt.{Color, Component}
 
 //TODO implement rate-limiting of updates? But then we need to know that views don't rely on all updates being called, just the most recent
 //Should be easy enough to do, just make the views store some Atomic style stuff they need to use to update, and fiddle

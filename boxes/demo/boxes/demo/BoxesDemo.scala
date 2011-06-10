@@ -13,7 +13,7 @@ import boxes._
 import list.{DefaultSelection, ListIndices, ListIndex}
 import persistence._
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
-import swing.{SwingOp, SwingButton, ListMultiDeleteOp, ListMultiAddOp}
+import swing.{SwingOp, SwingButton, ListMultiDeleteOp, ListMultiAddOp, ListMultiMoveOp}
 import java.awt.{GridLayout, BorderLayout, Dimension}
 
 object BoxesDemo {
@@ -596,11 +596,16 @@ object BoxesDemo {
     val indicesView = LabelView(Cal{indices().toString})
 
     val addAction = new ListMultiAddOp(list, indices, Some(new OptionPerson()))
-    val deleteAction = new ListMultiDeleteOp[OptionPerson](list, indices, t=>Unit)
-
     val add = SwingButton(addAction)
 
+    val deleteAction = new ListMultiDeleteOp[OptionPerson](list, indices, t=>Unit)
     val delete = SwingButton(deleteAction)
+
+    val upAction = new ListMultiMoveOp[OptionPerson](list, indices, true)
+    val up = SwingButton(upAction)
+
+    val downAction = new ListMultiMoveOp[OptionPerson](list, indices, false)
+    val down = SwingButton(downAction)
 
     val bottom = new JPanel(new BorderLayout())
 
@@ -608,6 +613,8 @@ object BoxesDemo {
     panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS))
     panel.add(add)
     panel.add(delete)
+    panel.add(up)
+    panel.add(down)
 
     bottom.add(panel, BorderLayout.WEST)
     val padding = SwingButton.buttonPadding

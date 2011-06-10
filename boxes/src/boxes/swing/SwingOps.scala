@@ -2,7 +2,7 @@ package boxes.swing
 
 import java.awt.event.ActionEvent
 import boxes.{SwingView, View, Op}
-import boxes.swing.{ListMultiDeleteOp, ListDeleteOp, ListMultiAddOp, ListAddOp}
+import boxes.swing.{ListMultiDeleteOp, ListDeleteOp, ListMultiAddOp, ListAddOp, ListMoveOp, ListMultiMoveOp}
 import com.explodingpixels.painter.Painter
 import javax.swing._
 import border.EmptyBorder
@@ -30,6 +30,8 @@ object SwingOp {
 
   val add = new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/Plus.png"))
   val delete = new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/Minus.png"))
+  val up = new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/Up.png"))
+  val down = new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/Down.png"))
 
 
   def apply(op:Op):SwingOpAction = {
@@ -38,6 +40,20 @@ object SwingOp {
       case o:ListMultiAddOp[_] => SwingOpAction("", add, op)
       case o:ListDeleteOp[_] => SwingOpAction("", delete, op)
       case o:ListMultiDeleteOp[_] => SwingOpAction("", delete, op)
+      case o:ListMoveOp[_] => {
+        if (o.up) {
+          SwingOpAction("", up, op)
+        } else {
+          SwingOpAction("", down, op)
+        }
+      }
+      case o:ListMultiMoveOp[_] => {
+        if (o.up) {
+          SwingOpAction("", up, op)
+        } else {
+          SwingOpAction("", down, op)
+        }
+      }
       //FIXME use implicits
       case _ => throw new IllegalArgumentException("Unknown op")
     }
@@ -54,7 +70,7 @@ object SwingButton {
     val button = new EPButton(a)
     button.setBorder(new EmptyBorder(4,2,3,2))
     button.setContentAreaFilled(false)
-    button.setBackgroundPainter(ListStylePainter[AbstractButton]())
+    button.setBackgroundPainter(new ListStyleButtonPainter())
     button
   }
   def buttonPadding() = {
@@ -66,6 +82,7 @@ object SwingButton {
 
 object ListStylePainter {
   val dividerColor = new Color(0, 0, 0, 51)
+  val pressedColor = new Color(0, 0, 0, 51)
   val dividerBright = new Color(1f, 1f, 1f, 0.4f)
   val topColor = new Color(0xaaaaaa)
   val image = new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/ListButton.png")).getImage
@@ -99,6 +116,17 @@ class ListStylePainter[T](paintLeft:Boolean = false, paintRight:Boolean = true) 
 
     g.setColor(ListStylePainter.topColor)
     g.drawLine(0, 0, w-1, 0)
+  }
+}
+
+class ListStyleButtonPainter(paintLeft:Boolean = false, paintRight:Boolean = true) extends ListStylePainter[AbstractButton] {
+  override def paint(g:Graphics2D, t:AbstractButton, w:Int, h:Int) {
+    super.paint(g, t, w, h)
+    if (t.getModel.isPressed) {
+      println("pressed")
+      g.setColor(ListStylePainter.pressedColor)
+      g.fillRect(0, 0, w, h)
+    }
   }
 }
 
