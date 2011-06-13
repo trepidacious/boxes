@@ -14,7 +14,7 @@ import list.{DefaultSelection, ListIndices, ListIndex}
 import persistence._
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
 import swing.{SwingOp, SwingButton, ListMultiDeleteOp, ListMultiAddOp, ListMultiMoveOp}
-import java.awt.{GridLayout, BorderLayout, Dimension}
+import java.awt.{Color, GridLayout, BorderLayout, Dimension}
 
 object BoxesDemo {
 
@@ -631,17 +631,98 @@ object BoxesDemo {
     mainPanel
   }
 
+  def fieldCompositeLedger() {
+
+    SwingView.nimbus
+
+    val p = new OptionPerson()
+    p.name() = "p"
+    val q = new OptionPerson()
+    q.name() = "q"
+
+    val list = ListVar(p, q, q, p)
+
+    val index = ListIndex(list)
+
+    val viewNA = LensRecordView[OptionPerson](
+      VarLens("Name", _.name),
+      VarLens("Age", _.age)
+    )
+    val ledgerNA = new ListLedger(list, viewNA)
+
+    val viewZ = LensRecordView[OptionPerson](
+      VarLens("Zombie?", _.zombie)
+    )
+    val ledgerZ = new ListLedger(list, viewZ)
+
+    val ledger = new FieldCompositeLedger(ledgerNA, ledgerZ)
+
+    ledger.update(0, 1, 42)
+
+    for (f <- 0 until ledger.fieldCount) {
+      print(ledger.fieldName(f) + "\t")
+    }
+    println()
+    for (f <- 0 until ledger.fieldCount) {
+      print(ledger.fieldClass(f) + "\t")
+    }
+    println()
+    for (r <- 0 until ledger.recordCount) {
+      for (f <- 0 until ledger.fieldCount) {
+        print(ledger(r, f) + "\t")
+      }
+      println()
+    }
+
+    val ledgerRef = Var(ledger)
+
+    val ledgerView = LedgerView.singleSelection(ledgerRef, index)
+
+    val indexView = NumberOptionView(index, Step(1))
+
+    val add = new JButton(new AbstractAction("Add") {
+      override def actionPerformed(e:ActionEvent) = {
+        val person = new OptionPerson()
+        person.name() = "New item at " + list().size
+        list.insert(list().size, person)
+      }
+    })
+
+    val delete = new JButton(new AbstractAction("Delete") {
+      override def actionPerformed(e:ActionEvent) = {
+        if (!list().isEmpty) list.remove(0, 1)
+      }
+    })
+
+    val frame = new JFrame()
+    val panel = new JPanel()
+    panel.add(add)
+    panel.add(delete)
+    panel.add(indexView.component)
+    frame.add(new JScrollPane(ledgerView.component), BorderLayout.CENTER)
+    frame.add(panel, BorderLayout.SOUTH)
+    frame.pack
+    frame.setMinimumSize(new Dimension(300, 50))
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+    frame.setVisible(true)
+
+  }
+
   def ledgerMulti() {
 
     SwingView.nimbus
 
     val frame = new JFrame()
 
-    frame.setLayout(new GridLayout(2, 2))
-    frame.add(buildLedgerMulti)
-    frame.add(buildLedgerMulti)
-    frame.add(buildLedgerMulti)
-    frame.add(buildLedgerMulti)
+    val panel = new JPanel(new GridLayout(2, 2, 1, 1))
+    panel.setBackground(new Color(130, 130, 130))
+
+    panel.add(buildLedgerMulti)
+    panel.add(buildLedgerMulti)
+    panel.add(buildLedgerMulti)
+    panel.add(buildLedgerMulti)
+
+    frame.add(panel)
 
     frame.pack
     frame.setMinimumSize(new Dimension(50, 50))
@@ -675,7 +756,9 @@ object BoxesDemo {
 
 //    listPath
 //    ledger
-    ledgerMulti
+    //ledgerMulti
+    ledger
+    fieldCompositeLedger
   }
 
 }

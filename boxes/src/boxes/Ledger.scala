@@ -1,5 +1,7 @@
 package boxes
 
+import scala.collection._
+
 trait Ledger extends Box[LedgerChange] {
 	def editable(record:Int, field:Int):Boolean
 	def apply(record:Int, field:Int):Any
@@ -8,6 +10,23 @@ trait Ledger extends Box[LedgerChange] {
   def fieldClass(field:Int):Class[_]
 	def recordCount():Int
 	def fieldCount():Int
+
+  private[boxes] def boxRead[T](read: =>T):T = {
+    try {
+      Box.beforeRead(this)
+      return read
+    } finally {
+      Box.afterRead(this)
+    }
+  }
+  private[boxes] def commitChange(change:LedgerChange) {
+    try {
+      Box.beforeWrite(this)
+      Box.commitWrite(this, change)
+    } finally {
+      Box.afterWrite(this)
+    }
+  }
 }
 
 //If a ledger change has occurred, then the contents of any cell may have changed.
@@ -15,6 +34,77 @@ trait Ledger extends Box[LedgerChange] {
 //columnsChanged may be true when these HAVEN'T changed.
 //Similarly rowCountChanged will be true if the number of rows may have changed.
 case class LedgerChange(columnsChanged:Boolean, rowCountChanged:Boolean)
+
+class FieldCompositeLedger(val ledgers:Ledger*) extends Ledger {
+
+  //When a component ledger changes, register a change
+  //that covers all component ledgers' changes
+  private val ledgersReaction = new Reaction() {
+    override def respond() = {
+
+      val allChanges = for {
+        ledger <- ledgers
+        changeQueue <- ledger.changes.toSeq
+        change <- changeQueue
+      } yield (change._2)
+
+
+      //See if any change affected columns, and same for rows.
+      val (columns, rows) = allChanges.foldLeft((false, false)){(cAndR, c) => (cAndR._1 | c.columnsChanged, cAndR._2 | c.rowCountChanged)}
+
+      if (columns || rows) {
+        {()=>commitChange(LedgerChange(columns, rows))}
+      } else {
+        {()=>()}
+      }
+
+    }
+    override def isView = false
+  }
+  Box.registerReaction(ledgersReaction)
+
+  val recordCountCal = Cal{ledgers.foldLeft(ledgers.head.recordCount){(min, l) => math.min(l.recordCount, min)}}
+  def recordCount = recordCountCal()
+
+  val fieldCountCal = Cal{ledgers.foldLeft(0){(sum, l) => sum + l.fieldCount}}
+  def fieldCount = fieldCountCal()
+
+  val cumulativeFieldCount = ListCal{ledgers.scanLeft(0){(c, l) => c + l.fieldCount}.toList} //Make cumulative field count, note starts with 0
+
+  private def ledgerAndField(field:Int):(Ledger,Int) = {
+    //Note that -1 is to allow for leading 0 in cumulativeFieldCount
+    val ledgerIndex = cumulativeFieldCount().findIndexOf(c => c > field) - 1
+
+    //This happens if EITHER findIndexOf fails and returns -1, OR field is negative and so matches first entry in cumulativeFieldCount
+    if (ledgerIndex < 0) throw new IndexOutOfBoundsException("Field " + field + " is not in composite ledger")
+
+    (ledgers(ledgerIndex), field - cumulativeFieldCount(ledgerIndex))
+  }
+
+  def editable(record:Int, field:Int) = boxRead {
+    val (l, f) = ledgerAndField(field)
+    l.editable(record, f)
+  }
+
+  def apply(record:Int, field:Int) = boxRead {
+    val (l, f) = ledgerAndField(field)
+    l.apply(record, f)
+  }
+
+  def update(record:Int, field:Int, value:Any) = boxRead {
+    val (l, f) = ledgerAndField(field)
+    l.update(record, f, value)
+  }
+  def fieldName(field:Int) = boxRead {
+    val (l, f) = ledgerAndField(field)
+    l.fieldName(f)
+  }
+  def fieldClass(field:Int) = boxRead[Class[_]] {
+    val (l, f) = ledgerAndField(field)
+    l.fieldClass(f)
+  }
+
+}
 
 case class RecordViewChange
 
@@ -81,14 +171,6 @@ class ListLedger[T](list:ListRef[T], rView:RecordView[T]) extends Ledger {
   }
   Box.registerReaction(recordViewChangeReaction)
 
-  private def commitChange(change:LedgerChange) {
-    try {
-      Box.beforeWrite(this)
-      Box.commitWrite(this, change)
-    } finally {
-      Box.afterWrite(this)
-    }
-  }
   def update(record:Int, field:Int, value:Any) = {
     try {
       Box.beforeWrite(this)
@@ -106,14 +188,6 @@ class ListLedger[T](list:ListRef[T], rView:RecordView[T]) extends Ledger {
   def recordCount() = boxRead{list().size}
   def fieldCount() = boxRead{rView.fieldCount}
 
-  private def boxRead[T](read: =>T):T = {
-    try {
-      Box.beforeRead(this)
-      return read
-    } finally {
-      Box.afterRead(this)
-    }
-  }
 }
 
 /**

@@ -168,16 +168,16 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="8"
-     inkscape:cx="-13.884589"
-     inkscape:cy="30.947766"
+     inkscape:cx="25.990411"
+     inkscape:cy="10.947766"
      inkscape:document-units="px"
-     inkscape:current-layer="layer14"
+     inkscape:current-layer="layer11"
      showgrid="true"
      inkscape:snap-global="true"
      inkscape:window-width="1920"
-     inkscape:window-height="1152"
+     inkscape:window-height="1058"
      inkscape:window-x="1440"
-     inkscape:window-y="0"
+     inkscape:window-y="22"
      inkscape:window-maximized="0">
     <inkscape:grid
        type="xygrid"
@@ -338,7 +338,7 @@
      inkscape:groupmode="layer"
      id="layer11"
      inkscape:label="Plus"
-     style="display:none">
+     style="display:inline">
     <rect
        style="opacity:0.8;fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
        id="rect3063"
@@ -355,8 +355,8 @@
        style="opacity:0.8;fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
        transform="matrix(0,-1,1,0,0,0)" />
     <rect
-       y="8"
-       x="5"
+       y="-18"
+       x="25"
        height="4"
        width="16"
        id="rect3839"
@@ -366,8 +366,8 @@
        id="rect3841"
        width="4"
        height="4"
-       x="11"
-       y="2" />
+       x="12"
+       y="-14" />
     <rect
        y="11"
        x="-19"
@@ -412,8 +412,8 @@
        id="rect3857"
        width="16"
        height="4"
-       x="5"
-       y="8" />
+       x="-7"
+       y="-15" />
     <rect
        style="fill:#7890a1;fill-opacity:1;stroke:none;display:inline"
        id="rect3859"
@@ -437,7 +437,7 @@
      inkscape:groupmode="layer"
      id="layer13"
      inkscape:label="Up"
-     style="display:inline">
+     style="display:none">
     <path
        sodipodi:nodetypes="ccccccccc"
        inkscape:connector-curvature="0"
@@ -448,7 +448,7 @@
        sodipodi:nodetypes="ccccccc"
        inkscape:connector-curvature="0"
        id="path3874"
-       d="m 4,12.5 0,1.5 9,-4.5 9,4.5 0,-1.5 -9,-9 z"
+       d="m -19,-24 0,1.5 9,-4.5 9,4.5 0,-1.5 -9,-9 z"
        style="opacity:0.328;fill:#000000;fill-opacity:1;stroke:none" />
     <path
        style="fill:#7890a1;fill-opacity:1;stroke:none"
@@ -464,7 +464,7 @@
      style="display:none">
     <path
        style="opacity:0.328;fill:#000000;fill-opacity:1;stroke:none;display:inline"
-       d="m 4,6.5 3,-3 6,6 6,-6 3,3 0,1.5 -9,5 -9,-5 z"
+       d="m 13,-26 3,-3 6,6 6,-6 3,3 0,1.5 -9,5 -9,-5 z"
        id="path3885"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="ccccccccc" />

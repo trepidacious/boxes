@@ -21,7 +21,10 @@ class SwingOpAction(name:String, icon:Icon, op:Op) extends AbstractAction(name, 
     val enabled = op.canApply()
     SwingView.replaceUpdate(
       this,
-      setEnabled(enabled)
+      {
+        setEnabled(enabled)
+//        println("Set button enabled? " + enabled)
+      }
     )
   }
 }
@@ -123,7 +126,6 @@ class ListStyleButtonPainter(paintLeft:Boolean = false, paintRight:Boolean = tru
   override def paint(g:Graphics2D, t:AbstractButton, w:Int, h:Int) {
     super.paint(g, t, w, h)
     if (t.getModel.isPressed) {
-      println("pressed")
       g.setColor(ListStylePainter.pressedColor)
       g.fillRect(0, 0, w, h)
     }
