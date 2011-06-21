@@ -10,6 +10,7 @@ import javax.swing._
 import java.awt.event.ActionEvent
 import boxes.util.{LogStep, Step, CoalescingResponder, NumericClass}
 import boxes._
+import graph._
 import list.{DefaultSelection, ListIndices, ListIndex}
 import persistence._
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
@@ -731,6 +732,32 @@ object BoxesDemo {
 
   }
 
+  def graph {
+    SwingView.nimbus
+
+    val frame = new JFrame()
+
+    val graph = Var(new GraphBasic(
+      ListVar[Series](
+        Series(
+          List(
+            Vec2D(0,0), Vec2D(0.25,0.5), Vec2D(0.75, 0.5), Vec2D(1, 1)
+          ),
+          Color.RED)
+        )
+      )
+    )
+
+    val v = new GraphSwingView(graph)
+
+    frame.add(v.component)
+
+    frame.pack
+    frame.setMinimumSize(new Dimension(50, 50))
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+    frame.setVisible(true)
+  }
+
   def main(args: Array[String]) {
 //    simpleCalc
 //    simplePath
@@ -757,8 +784,9 @@ object BoxesDemo {
 //    listPath
 //    ledger
     //ledgerMulti
-    ledger
-    fieldCompositeLedger
+//    ledger
+//    fieldCompositeLedger
+    graph
   }
 
 }
