@@ -312,80 +312,76 @@ object BoxesDemo {
   }
 
   def textViews() = {
-    SwingUtilities.invokeLater(new Runnable(){
-      override def run = {
-        val s = Var("S")
-        val t = Var{""}
-        Reaction(t, s()+"_T")
-        val sView = StringView(s)
-        val tView = StringView(t)
+    val s = Var("S")
+    val t = Var{""}
+    Reaction(t, s()+"_T")
+    val sView = StringView(s)
+    val tView = StringView(t)
 
-        val x = Var(true)
-        val y:Var[Option[Boolean]] = Var(Some(false))
-        Reaction(x, {
-          y() match {
-            case None => {
-              println("y is None, should set x true")
-              true
-            }
-            case Some(b) => {
-              println("y is Some(" + b + "), should set x " + !b)
-              !b
-            }
-          }
-        })
-        Reaction(y, {
-          println("x is " + x() + " should set y to " + !x())
-          Some(!x())
-        })
-        val xView = BooleanView(x, Val("X"))
-        val yView = BooleanOptionView(y, Val("Y"))
-
-        val button = new JButton(new AbstractAction() {
-          override def actionPerformed(e:ActionEvent) = {
-            println("Reactions targeting x:")
-            x.targetingReactions.foreach{r => println(r)}
-            println("Reactions targeting y:")
-            y.targetingReactions.foreach{r => println(r)}
-          }
-        })
-
-        val p = Var(10)
-        val q = Var(0)
-        Reaction(p, 10-q())
-        Reaction(q, 10-p())
-        val pView = RangeView(p, 0, 10)
-        val qView = RangeView(q, 0, 10)
-
-        val pView2 = NumberView(p, Step(1))
-        val qView2 = NumberView(q, Step(1))
-
-        val m = Var(1.0)
-
-        val mView = NumberView(m)
-        val nView = NumberView(m, LogStep(100))
-
-
-        val frame = new JFrame()
-        val panel = new JPanel()
-        panel.add(sView.component)
-        panel.add(tView.component)
-        panel.add(xView.component)
-        panel.add(yView.component)
-        panel.add(pView.component)
-        panel.add(qView.component)
-        panel.add(pView2.component)
-        panel.add(qView2.component)
-        panel.add(mView.component)
-        panel.add(nView.component)
-        panel.add(button)
-        frame.add(panel)
-        frame.pack
-        frame.setMinimumSize(new Dimension(300, 50))
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
-        frame.setVisible(true)
+    val x = Var(true)
+    val y:Var[Option[Boolean]] = Var(Some(false))
+    Reaction(x, {
+      y() match {
+        case None => {
+          println("y is None, should set x true")
+          true
+        }
+        case Some(b) => {
+          println("y is Some(" + b + "), should set x " + !b)
+          !b
+        }
       }
     })
+    Reaction(y, {
+      println("x is " + x() + " should set y to " + !x())
+      Some(!x())
+    })
+    val xView = BooleanView(x, Val("X"))
+    val yView = BooleanOptionView(y, Val("Y"))
+
+    val button = new JButton(new AbstractAction() {
+      override def actionPerformed(e:ActionEvent) = {
+        println("Reactions targeting x:")
+        x.targetingReactions.foreach{r => println(r)}
+        println("Reactions targeting y:")
+        y.targetingReactions.foreach{r => println(r)}
+      }
+    })
+
+    val p = Var(10)
+    val q = Var(0)
+    Reaction(p, 10-q())
+    Reaction(q, 10-p())
+    val pView = RangeView(p, 0, 10)
+    val qView = RangeView(q, 0, 10)
+
+    val pView2 = NumberView(p, Step(1))
+    val qView2 = NumberView(q, Step(1))
+
+    val m = Var(1.0)
+
+    val mView = NumberView(m)
+    val nView = NumberView(m, LogStep(100))
+
+
+    val frame = new JFrame()
+    val panel = new JPanel()
+    panel.add(sView.component)
+    panel.add(tView.component)
+    panel.add(xView.component)
+    panel.add(yView.component)
+    panel.add(pView.component)
+    panel.add(qView.component)
+    panel.add(pView2.component)
+    panel.add(qView2.component)
+    panel.add(mView.component)
+    panel.add(nView.component)
+    panel.add(button)
+    frame.add(panel)
+    frame.pack
+    frame.setMinimumSize(new Dimension(300, 50))
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+    frame.setVisible(true)
   }
 
   def sequences() {
@@ -716,7 +712,7 @@ object BoxesDemo {
     val frame = new JFrame()
 
     val panel = new JPanel(new GridLayout(2, 2, 1, 1))
-    panel.setBackground(new Color(130, 130, 130))
+    panel.setBackground(SwingView.dividingColor)
 
     panel.add(buildLedgerMulti)
     panel.add(buildLedgerMulti)
@@ -758,6 +754,17 @@ object BoxesDemo {
     frame.setVisible(true)
   }
 
+  def swingRun(r : => Unit) {
+    SwingUtilities.invokeLater(new Runnable(){
+      override def run = r
+    })
+  }
+
+
+  def axis() {
+    println(Axis.ticks((0.05, 1.05), 100, 10))
+  }
+
   def main(args: Array[String]) {
 //    simpleCalc
 //    simplePath
@@ -786,7 +793,11 @@ object BoxesDemo {
     //ledgerMulti
 //    ledger
 //    fieldCompositeLedger
-    graph
+
+    swingRun{
+      graph
+    }
+//    axis
   }
 
 }

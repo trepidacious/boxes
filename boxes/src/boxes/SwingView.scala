@@ -101,16 +101,20 @@ object SwingView {
   def nimbox() {
     try {
       UIManager.setLookAndFeel( new MetalLookAndFeel() )
-      UIManager.put("Table.alternateRowColor", new Color(240, 240, 240))
+      UIManager.put("Table.alternateRowColor", alternateBackgroundColor)
       UIManager.put("Table.backgroundColor", new Color(255, 255, 255))
       UIManager.put("Table.selectionForeground", new Color(255, 255, 255))
-      UIManager.put("Table.selectionBackground", new Color(120, 144, 161))
+      UIManager.put("Table.selectionBackground", selectionColor)
       UIManager.put("Table.focusCellHighlightBorder", new MatteBorder(1, 1, 1, 1, new Color(120, 144, 161).darker.darker))
     }
     catch {
       case _ => {}
     }
   }
+
+  val dividingColor = new Color(130, 130, 130)
+  val alternateBackgroundColor = new Color(240, 240, 240)
+  val selectionColor = new Color(120, 144, 161)
 
   //TODO add this
 //  val iconFactory = new ResourceIconFactory()
