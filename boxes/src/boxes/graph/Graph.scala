@@ -30,7 +30,7 @@ trait Graph {
   def borders:RefGeneral[Borders, _]
 }
 
-case class GraphSpaces(dataArea:Area, pixelArea:Area) {
+case class GraphSpaces(val dataArea:Area, val pixelArea:Area) {
   def toPixel(dataPos:Vec2D) = pixelArea.fromUnit(dataArea.toUnit(dataPos))
   def toData(pixelPos:Vec2D) = dataArea.fromUnit(pixelArea.toUnit(pixelPos))
 }
@@ -161,6 +161,7 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
 
       //ticks
       val format = new DecimalFormat("0.###");
+
       val xTicks = Axis.ticks((dataArea.origin.x, dataArea.origin.x + dataArea.size.x), dw, 50)
       xTicks.foreach(t => {
         val (x, major) = t
@@ -170,6 +171,20 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
         if (major) {
           g.setColor(SwingView.dividingColor.darker)
           g.string(format.format(x), start + Vec2D(0, 20))
+          g.setColor(SwingView.dividingColor.brighter)
+          g.line(start, start + Vec2D(0, spaces.pixelArea.size.y))
+        }
+      })
+
+      val yTicks = Axis.ticks((dataArea.origin.y, dataArea.origin.y + dataArea.size.y), dh, 50)
+      yTicks.foreach(t => {
+        val (y, major) = t
+        val start = spaces.toPixel(Vec2D(dataArea.origin.x, y))
+        g.setColor(SwingView.dividingColor)
+        g.line(start, start + Vec2D(if (major) -8 else -4))
+        if (major) {
+          g.setColor(SwingView.dividingColor.darker)
+          g.string(format.format(y), start + Vec2D(-20, 0))
         }
       })
 
