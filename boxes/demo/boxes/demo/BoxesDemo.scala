@@ -11,10 +11,10 @@ import java.awt.event.ActionEvent
 import boxes.util.{LogStep, Step, CoalescingResponder, NumericClass}
 import boxes._
 import graph._
-import list.{DefaultSelection, ListIndices, ListIndex}
+import list._
 import persistence._
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
-import swing.{SwingOp, SwingButton, ListMultiDeleteOp, ListMultiAddOp, ListMultiMoveOp}
+import boxes.swing.{SwingOp, SwingButton}
 import java.awt.{Color, GridLayout, BorderLayout, Dimension}
 
 object BoxesDemo {
@@ -795,6 +795,7 @@ object BoxesDemo {
 //    fieldCompositeLedger
 
     swingRun{
+      ledgerMulti
       graph
     }
 //    axis

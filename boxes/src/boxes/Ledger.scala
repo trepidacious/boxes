@@ -1,5 +1,6 @@
 package boxes
 
+import list.{ReplacementListChange, ListRef, ListCal}
 import scala.collection._
 
 trait Ledger extends Box[LedgerChange] {

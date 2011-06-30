@@ -1,5 +1,6 @@
 package boxes
 
+import list.{ListChange, ListVar}
 import util._
 import collection._
 

@@ -4,6 +4,7 @@ import org.scalatest.WordSpec
 import scala.collection._
 import boxes._
 import io.Source
+import list.ListVar
 import persistence._
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
 

@@ -1,6 +1,7 @@
-package boxes
+package boxes.list
 
 import collection._
+import boxes._
 
 trait ListChange
 

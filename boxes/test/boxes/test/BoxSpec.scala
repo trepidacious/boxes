@@ -2,9 +2,8 @@ package boxes.test
 
 import org.scalatest.WordSpec
 import boxes._
+import list._
 import scala.collection.immutable.Queue
-import list.{ListIndices, ListSelection, ListIndex}
-
 class BoxSpec extends WordSpec {
 
   //FIXME we should try to test effect of GC - make sure that reactions

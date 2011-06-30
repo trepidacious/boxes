@@ -2,7 +2,7 @@ package boxes.swing
 
 import java.awt.event.ActionEvent
 import boxes.{SwingView, View, Op}
-import boxes.swing.{ListMultiDeleteOp, ListDeleteOp, ListMultiAddOp, ListAddOp, ListMoveOp, ListMultiMoveOp}
+import boxes.list.{ListMultiDeleteOp, ListDeleteOp, ListMultiAddOp, ListAddOp, ListMoveOp, ListMultiMoveOp}
 import com.explodingpixels.painter.Painter
 import javax.swing._
 import border.EmptyBorder

@@ -1,4 +1,4 @@
-package boxes.swing
+package boxes.list
 
 import boxes._
 import scala.math.{min, max}
