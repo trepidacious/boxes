@@ -733,11 +733,11 @@ object BoxesDemo {
 
     val frame = new JFrame()
 
-    val graph = Var(new GraphBasic(
+    val graph = Var(GraphBasic.withSeries(
       ListVar[Series](
         Series(
           List(
-            Vec2D(0,0), Vec2D(0.25,0.5), Vec2D(0.75, 0.5), Vec2D(1, 1)
+            Vec2(0,0), Vec2(0.25,0.5), Vec2(0.75, 0.5), Vec2(1, 1)
           ),
           Color.RED)
         )
@@ -761,8 +761,8 @@ object BoxesDemo {
   }
 
 
-  def axis() {
-    println(Axis.ticks((0.05, 1.05), 100, 10))
+  def ticks() {
+    println(Ticks((0.05, 1.05), 100, 10))
   }
 
   def main(args: Array[String]) {
@@ -795,7 +795,7 @@ object BoxesDemo {
 //    fieldCompositeLedger
 
     swingRun{
-      ledgerMulti
+//      ledgerMulti
       graph
     }
 //    axis
