@@ -7,11 +7,7 @@ import com.explodingpixels.painter.Painter
 import javax.swing._
 import border.EmptyBorder
 import com.explodingpixels.swingx.{EPPanel, EPButton}
-import java.awt.{Component, Graphics2D, Color}
-
-object SwingOpAction {
-  def apply(name:String, icon:Icon, op:Op) = new SwingOpAction(name, icon, op)
-}
+import java.awt.{BorderLayout, Component, Graphics2D, Color}
 
 class SwingOpAction(name:String, icon:Icon, op:Op) extends AbstractAction(name, icon) {
   def actionPerformed(e:ActionEvent) {
@@ -23,7 +19,6 @@ class SwingOpAction(name:String, icon:Icon, op:Op) extends AbstractAction(name, 
       this,
       {
         setEnabled(enabled)
-//        println("Set button enabled? " + enabled)
       }
     )
   }
@@ -36,25 +31,26 @@ object SwingOp {
   val up = new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/Up.png"))
   val down = new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/Down.png"))
 
+  def apply(name:String, icon:Icon, op:Op):SwingOpAction = new SwingOpAction(name, icon, op)
 
   def apply(op:Op):SwingOpAction = {
     op match {
-      case o:ListAddOp[_] => SwingOpAction("", add, op)
-      case o:ListMultiAddOp[_] => SwingOpAction("", add, op)
-      case o:ListDeleteOp[_] => SwingOpAction("", delete, op)
-      case o:ListMultiDeleteOp[_] => SwingOpAction("", delete, op)
+      case o:ListAddOp[_] => SwingOp("", add, op)
+      case o:ListMultiAddOp[_] => SwingOp("", add, op)
+      case o:ListDeleteOp[_] => SwingOp("", delete, op)
+      case o:ListMultiDeleteOp[_] => SwingOp("", delete, op)
       case o:ListMoveOp[_] => {
         if (o.up) {
-          SwingOpAction("", up, op)
+          SwingOp("", up, op)
         } else {
-          SwingOpAction("", down, op)
+          SwingOp("", down, op)
         }
       }
       case o:ListMultiMoveOp[_] => {
         if (o.up) {
-          SwingOpAction("", up, op)
+          SwingOp("", up, op)
         } else {
-          SwingOpAction("", down, op)
+          SwingOp("", down, op)
         }
       }
       //FIXME use implicits
@@ -65,8 +61,14 @@ object SwingOp {
 }
 
 object SwingButton {
+  def apply(name:String, icon:Icon, op:Op):EPButton = {
+    ListStyleButton(SwingOp(name, icon, op))
+  }
   def apply(op:Op):EPButton = {
     ListStyleButton(SwingOp(op))
+  }
+  def apply(op:SwingOpAction):EPButton = {
+    ListStyleButton(op)
   }
 
   def ListStyleButton(a:Action) = {
@@ -80,6 +82,36 @@ object SwingButton {
     val panel = new EPPanel()
     panel.setBackgroundPainter(ListStylePainter[Component](false, false))
     panel
+  }
+}
+
+object SwingButtonBar {
+  def apply() = new SwingButtonBarBuilder(List[JComponent]())
+}
+
+class SwingButtonBarBuilder(val components:List[JComponent]) {
+  def add(c:JComponent) = new SwingButtonBarBuilder(components ::: List(c))
+  def add(op:Op):SwingButtonBarBuilder = add(SwingButton(op))
+
+  def buildWithComponent(c:JComponent) = {
+    val padding = SwingButton.buttonPadding
+    padding.setBorder(new EmptyBorder(2, 5, 2, 5))
+    padding.setLayout(new BorderLayout)
+    padding.add(c)
+    c.setOpaque(false)
+    build(padding)
+  }
+
+  def build(padding:JComponent = SwingButton.buttonPadding) = {
+    val buttonPanel = new JPanel()
+    buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS))
+    components.foreach(c => buttonPanel.add(c))
+
+    val bottom = new JPanel(new BorderLayout())
+    bottom.add(buttonPanel, BorderLayout.WEST)
+    bottom.add(padding, BorderLayout.CENTER)
+
+    bottom
   }
 }
 
@@ -131,5 +163,7 @@ class ListStyleButtonPainter(paintLeft:Boolean = false, paintRight:Boolean = tru
     }
   }
 }
+
+
 
 

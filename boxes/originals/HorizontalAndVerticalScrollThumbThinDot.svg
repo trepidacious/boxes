@@ -16,12 +16,23 @@
    version="1.1"
    inkscape:version="0.48.1 r9760"
    sodipodi:docname="HorizontalAndVerticalScrollThumbThinDot.svg"
-   inkscape:export-filename="/Users/trepidacious/Documents/boxes/boxes/src/boxes/swing/VerticalThumb.png"
+   inkscape:export-filename="/Users/trepidacious/Documents/boxes/boxes/src/boxes/swing/GraphShadowTopLeft.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90"
-   enable-background="new">
+   style="display:inline;enable-background:new">
   <defs
      id="defs4">
+    <linearGradient
+       id="linearGradient3862">
+      <stop
+         id="stop3864"
+         offset="0"
+         style="stop-color:#000000;stop-opacity:0.22352941;" />
+      <stop
+         id="stop3866"
+         offset="1"
+         style="stop-color:#000000;stop-opacity:0;" />
+    </linearGradient>
     <linearGradient
        id="linearGradient3834">
       <stop
@@ -102,7 +113,8 @@
        gradientTransform="translate(1,0)" />
     <filter
        inkscape:collect="always"
-       id="filter4186">
+       id="filter4186"
+       color-interpolation-filters="sRGB">
       <feBlend
          inkscape:collect="always"
          mode="lighten"
@@ -159,6 +171,26 @@
        y1="16.5"
        x2="1"
        y2="16.5" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3862"
+       id="linearGradient3092"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(10,-24)"
+       x1="9"
+       y1="21.25123"
+       x2="12"
+       y2="21.25123" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3862"
+       id="linearGradient3875"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-8,0)"
+       x1="9"
+       y1="21.25123"
+       x2="12"
+       y2="21.25123" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -167,17 +199,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="8"
-     inkscape:cx="25.990411"
-     inkscape:cy="10.947766"
+     inkscape:zoom="1"
+     inkscape:cx="13"
+     inkscape:cy="13"
      inkscape:document-units="px"
-     inkscape:current-layer="layer11"
-     showgrid="true"
+     inkscape:current-layer="layer10"
+     showgrid="false"
      inkscape:snap-global="true"
      inkscape:window-width="1920"
-     inkscape:window-height="1058"
-     inkscape:window-x="1440"
-     inkscape:window-y="22"
+     inkscape:window-height="1036"
+     inkscape:window-x="55"
+     inkscape:window-y="0"
      inkscape:window-maximized="0">
     <inkscape:grid
        type="xygrid"
@@ -322,9 +354,44 @@
   </g>
   <g
      inkscape:groupmode="layer"
+     id="layer15"
+     inkscape:label="Graph Shadow Top"
+     style="display:none">
+    <rect
+       transform="matrix(0,1,-1,0,0,0)"
+       style="fill:url(#linearGradient3092);fill-opacity:1;fill-rule:nonzero;stroke:none;display:inline"
+       id="rect3087"
+       width="6"
+       height="6"
+       x="18"
+       y="-6"
+       inkscape:export-filename="/Users/trepidacious/Documents/boxes/boxes/src/boxes/swing/HorizontalTrack.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"
+       ry="0" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer16"
+     inkscape:label="Graph Shadow Left"
+     style="display:none">
+    <rect
+       ry="0"
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/Users/trepidacious/Documents/boxes/boxes/src/boxes/swing/HorizontalTrack.png"
+       y="18"
+       x="0"
+       height="6"
+       width="6"
+       id="rect3868"
+       style="fill:url(#linearGradient3875);fill-opacity:1;fill-rule:nonzero;stroke:none;display:inline" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
      id="layer10"
      inkscape:label="Button"
-     style="display:none">
+     style="display:inline">
     <rect
        ry="0"
        style="fill:url(#linearGradient3832);fill-opacity:1;stroke:none;display:inline;filter:url(#filter4186)"
@@ -338,7 +405,7 @@
      inkscape:groupmode="layer"
      id="layer11"
      inkscape:label="Plus"
-     style="display:inline">
+     style="opacity:0.98000004;display:none">
     <rect
        style="opacity:0.8;fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
        id="rect3063"
@@ -394,6 +461,101 @@
          id="tspan3852"
          x="-7"
          y="35">2, 2 by 22, 22</tspan></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer21"
+     inkscape:label="Zoom Select BG"
+     style="display:none">
+    <rect
+       y="13"
+       x="7"
+       height="1"
+       width="8"
+       id="rect3922"
+       style="opacity:0.8;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;enable-background:new" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer18"
+     inkscape:label="Zoom Glass"
+     style="display:inline">
+    <path
+       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;opacity:0.8;color:#000000;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:2;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
+       d="m 11,3.5 c -4.130291,0 -7.5,3.369709 -7.5,7.5 0,4.130291 3.369709,7.5 7.5,7.5 1.459648,0 2.814242,-0.429709 3.96875,-1.15625 l 4.84375,4.84375 2.375,-2.375 0.0011,-1.014125 -4.84485,-3.829625 C 18.070291,13.814242 18.5,12.459648 18.5,11 18.5,6.869709 15.130291,3.5 11,3.5 z m 0,2 c 3.049411,0 5.5,2.4505892 5.5,5.5 0,3.049411 -2.450589,5.5 -5.5,5.5 C 7.9505892,16.5 5.5,14.049411 5.5,11 5.5,7.9505892 7.9505892,5.5 11,5.5 z"
+       id="path3899"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ssscccccsssssss" />
+    <path
+       sodipodi:type="arc"
+       style="fill:none;stroke:#7890a1;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="path3878"
+       sodipodi:cx="10.5"
+       sodipodi:cy="9.5"
+       sodipodi:rx="6.5"
+       sodipodi:ry="6.5"
+       d="m 17,9.5 a 6.5,6.5 0 1 1 -13,0 6.5,6.5 0 1 1 13,0 z"
+       transform="translate(0.5,0.5)" />
+    <path
+       style="fill:none;stroke:#7890a1;stroke-width:3.4000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 15,14 6,6"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer19"
+     inkscape:label="Zoom Select"
+     style="display:none">
+    <rect
+       style="opacity:0.98000004;fill:#7890a1;fill-opacity:0.42635701;stroke:#7890a1;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       id="rect3882"
+       width="7"
+       height="5"
+       x="7.5"
+       y="7.5" />
+  </g>
+  <g
+     style="display:none"
+     inkscape:label="Zoom Out"
+     id="g3893"
+     inkscape:groupmode="layer">
+    <rect
+       y="7"
+       x="-12"
+       height="8"
+       width="2"
+       id="rect3920"
+       style="opacity:0.8;fill:#ffffff;fill-opacity:1;stroke:none"
+       transform="matrix(0,-1,1,0,0,0)" />
+    <rect
+       transform="matrix(0,-1,1,0,0,0)"
+       style="fill:#7890a1;fill-opacity:1;stroke:none"
+       id="rect3897"
+       width="2"
+       height="8"
+       x="-11"
+       y="7" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer20"
+     inkscape:label="Zoom In"
+     style="display:none">
+    <rect
+       y="7"
+       x="10"
+       height="8"
+       width="2"
+       id="rect3918"
+       style="opacity:0.8;fill:#ffffff;fill-opacity:1;stroke:none" />
+    <rect
+       style="fill:#7890a1;fill-opacity:1;stroke:none"
+       id="rect3889"
+       width="2"
+       height="8"
+       x="10"
+       y="6" />
   </g>
   <g
      inkscape:groupmode="layer"

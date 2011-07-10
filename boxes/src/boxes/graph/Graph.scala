@@ -1,12 +1,13 @@
 package boxes.graph
 
-import javax.swing.JPanel
 import boxes._
-import java.awt.{RenderingHints, Graphics2D, Color, Graphics}
 import java.text.DecimalFormat
 import java.awt.image.BufferedImage
 import java.awt.event.{ComponentEvent, ComponentListener}
 import list.ListVal
+import javax.swing.{ImageIcon, JPanel}
+import java.awt.geom.{Path2D, PathIterator}
+import java.awt.{Shape, BasicStroke, RenderingHints, Graphics2D, Image, Color, Graphics}
 
 object Axis extends Enumeration {
    type Axis = Value
@@ -24,6 +25,8 @@ case class Vec2(x:Double = 0, y:Double = 0) {
   def *(d:Double) = Vec2(d * x, d * y)
   def dot(b:Vec2) = x * b.x + y * b.y
   def transpose = Vec2(y, x)
+  def withX(newX:Double) = Vec2(newX, y)
+  def withY(newY:Double) = Vec2(x, newY)
 }
 
 object Vec2 {
@@ -31,7 +34,7 @@ object Vec2 {
 }
 
 case class Borders(top:Double = 0, left:Double = 0, bottom:Double = 0, right:Double = 0)
-case class Series(curve:List[Vec2], color:Color)
+case class Series(curve:List[Vec2], color:Color = Color.black, width:Double = 1)
 
 case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
   def toUnit(v:Vec2) = (v - origin)/size
@@ -106,24 +109,50 @@ object Ticks {
   }
 }
 
-class GraphBGAndShadow(val bg:Color, val dataBG:Color) extends GraphLayer {
+class GraphBG(val bg:Color, val dataBG:Color) extends GraphLayer {
   def paint(canvas:GraphCanvas) {
     canvas.color = bg
     canvas.fillRect(canvas.spaces.componentArea.origin, canvas.spaces.componentArea.size)
 
     canvas.color = dataBG
     canvas.fillRect(canvas.spaces.pixelArea.origin, canvas.spaces.pixelArea.size)
-
-    canvas.color = SwingView.dividingColor.brighter
-    canvas.line(canvas.spaces.pixelArea.origin + Vec2(-1, 1), canvas.spaces.pixelArea.origin + Vec2(canvas.spaces.pixelArea.size.x, 1))
-    canvas.line(canvas.spaces.pixelArea.origin + Vec2(-1, 0), canvas.spaces.pixelArea.origin + Vec2(-1, canvas.spaces.pixelArea.size.y))
   }
 }
 
 class GraphOutline extends GraphLayer {
   def paint(canvas:GraphCanvas) {
-    canvas.color = SwingView.dividingColor
+    canvas.color = SwingView.dividingColor.brighter
     canvas.drawRect(canvas.spaces.pixelArea.origin, canvas.spaces.pixelArea.size)
+  }
+}
+class GraphHighlight extends GraphLayer {
+  def paint(canvas:GraphCanvas) {
+    canvas.color = SwingView.alternateBackgroundColor.brighter
+    canvas.drawRect(canvas.spaces.pixelArea.origin + Vec2(-1, 1), canvas.spaces.pixelArea.size + Vec2(2, -2))
+  }
+}
+
+object GraphShadow {
+  val topLeft = new ImageIcon(classOf[GraphShadow].getResource("/boxes/swing/GraphShadowTopLeft.png")).getImage
+  val top = new ImageIcon(classOf[GraphShadow].getResource("/boxes/swing/GraphShadowTop.png")).getImage
+  val left = new ImageIcon(classOf[GraphShadow].getResource("/boxes/swing/GraphShadowLeft.png")).getImage
+}
+
+class GraphShadow extends GraphLayer {
+  def paint(canvas:GraphCanvas) {
+    canvas.clipToData
+    val w = GraphShadow.topLeft.getWidth(null)
+    val h = GraphShadow.topLeft.getHeight(null)
+
+    val a = canvas.spaces.pixelArea
+    val tl = a.origin + a.size.withX(0)
+    val bl = a.origin
+    val br = a.origin + a.size.withY(0)
+
+    canvas.image(GraphShadow.top, tl, Vec2(a.size.x, h))
+    canvas.image(GraphShadow.left, tl, Vec2(w, -a.size.y))
+    canvas.image(GraphShadow.top, bl + Vec2(0, 2), Vec2(a.size.x, -h))
+    canvas.image(GraphShadow.left, br + Vec2(2, 0), Vec2(-w, a.size.y))
   }
 }
 
@@ -138,17 +167,23 @@ class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalF
       val (p, major) = t
       val start = canvas.spaces.toPixel(dataArea.axisPosition(axis, p))
 
-      canvas.color = SwingView.dividingColor
+      canvas.color = SwingView.dividingColor.brighter
       axis match {
         case X => canvas.line(start, start + Vec2(0, if (major) 8 else 4))
         case Y => canvas.line(start, start + Vec2(if (major) -8 else -4, 0))
       }
+      canvas.color = SwingView.alternateBackgroundColor.brighter
+      axis match {
+        case X => canvas.line(start + Vec2(1, 0), start + Vec2(1, if (major) 8 else 4))
+        case Y => canvas.line(start + Vec2(0, 1), start + Vec2(if (major) -8 else -4, 1))
+      }
+
 
       if (major) {
         canvas.color = SwingView.dividingColor.darker
         axis match {
-          case X => canvas.string(format.format(p), start + Vec2(0, 10), 0.5, 1)
-          case Y => canvas.string(format.format(p), start + Vec2(-10, 0), 1, 0.5)
+          case X => canvas.string(format.format(p), start + Vec2(0, 10), Vec2(0.5, 1))
+          case Y => canvas.string(format.format(p), start + Vec2(-10, 0), Vec2(1, 0.5))
         }
         canvas.color = new Color(230, 230, 230)
       } else {
@@ -159,6 +194,54 @@ class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalF
   }
 }
 
+class GraphAxisTitle(val axis:Axis, name:RefGeneral[String, _]) extends GraphLayer {
+
+  def paint(canvas:GraphCanvas) {
+
+    val a = canvas.spaces.pixelArea
+    val tl = a.origin + a.size.withX(0)
+    val bl = a.origin
+    val br = a.origin + a.size.withY(0)
+
+    canvas.color = SwingView.dividingColor.darker
+    axis match {
+      case X => canvas.string(name(), br + Vec2(-10, 32), Vec2(1, 1))
+      case Y => canvas.string(name(), tl + Vec2(-32, 10), Vec2(0.5, 1))
+    }
+  }
+}
+
+class VecListPathIterator(list:List[Vec2]) extends PathIterator {
+  var remaining = list
+  var first = true
+
+  def getWindingRule = PathIterator.WIND_NON_ZERO
+  def isDone = remaining.isEmpty
+  def next() {
+    remaining = remaining.tail
+  }
+  def currentSegment(coords:Array[Float]) = {
+    coords.update(0, remaining.head.x.asInstanceOf[Float])
+    coords.update(1, remaining.head.y.asInstanceOf[Float])
+    if (first) {
+      first = false
+      PathIterator.SEG_MOVETO
+    } else {
+      PathIterator.SEG_LINETO
+    }
+  }
+  def currentSegment(coords:Array[Double]) = {
+    coords.update(0, remaining.head.x)
+    coords.update(1, remaining.head.y)
+    if (first) {
+      first = false
+      PathIterator.SEG_MOVETO
+    } else {
+      PathIterator.SEG_LINETO
+    }
+  }
+}
+
 class GraphSeries(series:RefGeneral[List[Series], _]) extends GraphLayer {
   def paint(canvas:GraphCanvas) {
     canvas.clipToData
@@ -166,26 +249,27 @@ class GraphSeries(series:RefGeneral[List[Series], _]) extends GraphLayer {
       s <- series()
     } {
       canvas.color = s.color
-      s.curve.foldLeft(None:Option[Vec2]){(last, current) => {
-        last.foreach(someLast => canvas.dataLine(someLast, current))
-        Some(current)
-      }}
+      canvas.lineWidth = s.width
+      canvas.dataPath(s.curve)
     }
-    canvas.clipToAll
   }
 }
 
-case class GraphBasic(layers:RefGeneral[List[GraphLayer], _], dataArea:RefGeneral[Area, _] = Val(Area()), borders:RefGeneral[Borders, _] = Val(Borders(16, 55, 55, 16))) extends Graph
+case class GraphBasic(layers:RefGeneral[List[GraphLayer], _], dataArea:RefGeneral[Area, _], borders:RefGeneral[Borders, _]) extends Graph
 
 object GraphBasic {
-  def withSeries(series:RefGeneral[List[Series], _], dataArea:RefGeneral[Area, _] = Val(Area()), borders:RefGeneral[Borders, _] = Val(Borders(16, 55, 55, 16))) = {
+  def withSeries(series:RefGeneral[List[Series], _], dataArea:RefGeneral[Area, _] = Val(Area()), xName:RefGeneral[String, _]=Val("x"), yName:RefGeneral[String, _]=Val("y"), borders:RefGeneral[Borders, _] = Val(Borders(16, 55, 55, 16))) = {
     new GraphBasic(
       ListVal(
-        new GraphBGAndShadow(SwingView.alternateBackgroundColor, Color.white),
-        new GraphAxis(X),
+        new GraphBG(SwingView.alternateBackgroundColor, Color.white),
+        new GraphHighlight(),
         new GraphAxis(Y),
+        new GraphAxis(X),
         new GraphSeries(series),
-        new GraphOutline()
+        new GraphShadow(),
+        new GraphOutline(),
+        new GraphAxisTitle(X, xName),
+        new GraphAxisTitle(Y, yName)
       ),
       dataArea,
       borders
@@ -197,14 +281,19 @@ trait GraphCanvas {
   def spaces:GraphSpaces
   def color_=(color:Color)
   def color:Color
+  def lineWidth_=(w:Double)
+  def lineWidth:Double
   def dataLine(a:Vec2, b:Vec2)
   def line(a:Vec2, b:Vec2)
-  def string(s:String, v:Vec2, xAlign:Double = 0, yAlign:Double = 0)
+  def string(s:String, v:Vec2, align:Vec2 = Vec2.zero)
   def rect(origin:Vec2, size:Vec2, fill:Boolean)
   def fillRect(origin:Vec2, size:Vec2)
   def drawRect(origin:Vec2, size:Vec2)
   def clipToData()
   def clipToAll()
+  def image(i:Image, origin:Vec2, size:Vec2)
+  def image(i:Image, origin:Vec2)
+  def dataPath(path:List[Vec2])
 }
 
 class GraphCanvasFromGraphics2D(g:Graphics2D, val spaces:GraphSpaces) extends GraphCanvas {
@@ -212,12 +301,19 @@ class GraphCanvasFromGraphics2D(g:Graphics2D, val spaces:GraphSpaces) extends Gr
   val defaultClip = g.getClip
 
   var c = Color.black
+  var w = 1d
 
   def color_=(color:Color) {
     g.setColor(color)
     c = color
   }
   def color = c
+
+  def lineWidth_=(lineWidth:Double) {
+    g.setStroke(new BasicStroke(lineWidth.asInstanceOf[Float], BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER))
+    w = lineWidth
+  }
+  def lineWidth = w
 
   def dataLine(a:Vec2, b:Vec2) {
     line(spaces.toPixel(a), spaces.toPixel(b))
@@ -227,15 +323,18 @@ class GraphCanvasFromGraphics2D(g:Graphics2D, val spaces:GraphSpaces) extends Gr
     g.drawLine(a.x.asInstanceOf[Int], a.y.asInstanceOf[Int], b.x.asInstanceOf[Int], b.y.asInstanceOf[Int])
   }
 
-  def string(s:String, v:Vec2, xAlign:Double = 0, yAlign:Double = 0) {
+  def string(s:String, v:Vec2, align:Vec2 = Vec2.zero) {
     val d = g.getFontMetrics.getStringBounds(s, g)
     val w = d.getWidth
     val h = d.getHeight
-    val vo = v + Vec2(-w * xAlign, h * yAlign - g.getFontMetrics.getDescent)
+    val vo = v + Vec2(-w * align.x, h * align.y - g.getFontMetrics.getDescent)
 
     g.drawString(s, vo.x.asInstanceOf[Int], vo.y.asInstanceOf[Int])
   }
 
+  //Convert from a pair of vecs that may draw a "backwards"
+  //rect with negative size(s) to the dumb format needed by Java2D,
+  //with individual int values that must have a positive width and height
   def toDumbFormat(origin:Vec2, size:Vec2) = {
     var x = origin.x.asInstanceOf[Int]
     var y = origin.y.asInstanceOf[Int]
@@ -282,6 +381,31 @@ class GraphCanvasFromGraphics2D(g:Graphics2D, val spaces:GraphSpaces) extends Gr
     g.setClip(defaultClip)
   }
 
+  def image(i:Image, origin:Vec2, size:Vec2) {
+    val df = toDumbFormat(origin, size)
+    g.drawImage(i, origin.x.asInstanceOf[Int], origin.y.asInstanceOf[Int], size.x.asInstanceOf[Int], size.y.asInstanceOf[Int], null)
+  }
+
+  def image(i:Image, origin:Vec2) {
+    image(i, origin, Vec2(i.getWidth(null), i.getHeight(null)))
+  }
+
+  def dataPath(path:List[Vec2]) {
+    val path2D = new Path2D.Double()
+    val dataPath = path.map(p => spaces.toPixel(p))
+    path2D.append(new VecListPathIterator(dataPath), false)
+    g.draw(path2D)
+  }
+
+}
+
+object GraphSwingView {
+  val zoom = new ImageIcon(classOf[GraphSwingView].getResource("/boxes/swing/Zoom.png"))
+  val zoomIn = new ImageIcon(classOf[GraphSwingView].getResource("/boxes/swing/ZoomIn.png"))
+  val zoomOut = new ImageIcon(classOf[GraphSwingView].getResource("/boxes/swing/ZoomOut.png"))
+  val zoomSelect = new ImageIcon(classOf[GraphSwingView].getResource("/boxes/swing/ZoomSelect.png"))
+
+  def apply(graph:Ref[_ <: Graph]) = new GraphSwingView(graph)
 }
 
 class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
@@ -315,6 +439,10 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
   }
 
   val v = View {
+    //Note, view will not be called from multiple threads concurrently,
+    //so we don't need to synchronize our own use of the off-buffer.
+    //We just sync on swapping buffers, so we don't do it while the
+    //component is drawing the on-buffer.
     drawBuffer
     replaceUpdate {
       component.repaint()
@@ -349,9 +477,10 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
 
     val spaces = GraphSpaces(area, Area(Vec2(l, t+dh), Vec2(dw, -dh)), Area(Vec2.zero, size))
 
-    val canvas = new GraphCanvasFromGraphics2D(g, spaces)
-
-    layers.foreach(layer => layer.paint(canvas))
+    //Each layer paints on a fresh canvas, to avoid side effects from one affecting the next
+    layers.foreach(layer => {
+      layer.paint(new GraphCanvasFromGraphics2D(g.create().asInstanceOf[Graphics2D], spaces))
+    })
 
     g.dispose
 

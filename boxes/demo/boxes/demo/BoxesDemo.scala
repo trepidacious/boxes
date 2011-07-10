@@ -10,12 +10,13 @@ import javax.swing._
 import java.awt.event.ActionEvent
 import boxes.util.{LogStep, Step, CoalescingResponder, NumericClass}
 import boxes._
+import general.{RadioReaction, TrueOp}
 import graph._
 import list._
 import persistence._
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
-import boxes.swing.{SwingOp, SwingButton}
 import java.awt.{Color, GridLayout, BorderLayout, Dimension}
+import swing.{SwingButtonBar, SwingOp, SwingButton}
 
 object BoxesDemo {
 
@@ -592,38 +593,36 @@ object BoxesDemo {
 
     val indicesView = LabelView(Cal{indices().toString})
 
-    val addAction = new ListMultiAddOp(list, indices, Some(new OptionPerson()))
-    val add = SwingButton(addAction)
+    val add = new ListMultiAddOp(list, indices, Some(new OptionPerson()))
 
-    val deleteAction = new ListMultiDeleteOp[OptionPerson](list, indices, t=>Unit)
-    val delete = SwingButton(deleteAction)
+    val delete = new ListMultiDeleteOp[OptionPerson](list, indices, t=>Unit)
 
-    val upAction = new ListMultiMoveOp[OptionPerson](list, indices, true)
-    val up = SwingButton(upAction)
+    val up = new ListMultiMoveOp[OptionPerson](list, indices, true)
 
-    val downAction = new ListMultiMoveOp[OptionPerson](list, indices, false)
-    val down = SwingButton(downAction)
+    val down = new ListMultiMoveOp[OptionPerson](list, indices, false)
 
-    val bottom = new JPanel(new BorderLayout())
+    val buttons = SwingButtonBar().add(add).add(delete).add(up).add(down).buildWithComponent(indicesView.component)
 
-    val panel = new JPanel()
-    panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS))
-    panel.add(add)
-    panel.add(delete)
-    panel.add(up)
-    panel.add(down)
-
-    bottom.add(panel, BorderLayout.WEST)
-    val padding = SwingButton.buttonPadding
-    padding.setLayout(new BorderLayout)
-    padding.add(indicesView.component)
-    indicesView.component.setOpaque(false)
-
-    bottom.add(padding, BorderLayout.CENTER)
+//    val bottom = new JPanel(new BorderLayout())
+//
+//    val panel = new JPanel()
+//    panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS))
+//    panel.add(add)
+//    panel.add(delete)
+//    panel.add(up)
+//    panel.add(down)
+//
+//    bottom.add(panel, BorderLayout.WEST)
+//    val padding = SwingButton.buttonPadding
+//    padding.setLayout(new BorderLayout)
+//    padding.add(indicesView.component)
+//    indicesView.component.setOpaque(false)
+//
+//    bottom.add(padding, BorderLayout.CENTER)
 
     val mainPanel = new JPanel(new BorderLayout())
     mainPanel.add(ledgerView.component, BorderLayout.CENTER)
-    mainPanel.add(bottom, BorderLayout.SOUTH)
+    mainPanel.add(buttons, BorderLayout.SOUTH)
 
     mainPanel
   }
@@ -715,8 +714,8 @@ object BoxesDemo {
     panel.setBackground(SwingView.dividingColor)
 
     panel.add(buildLedgerMulti)
-    panel.add(buildLedgerMulti)
-    panel.add(buildLedgerMulti)
+    panel.add(buildGraphPanel)
+    panel.add(buildGraphPanel)
     panel.add(buildLedgerMulti)
 
     frame.add(panel)
@@ -728,28 +727,57 @@ object BoxesDemo {
 
   }
 
-  def graph {
-    SwingView.nimbus
-
-    val frame = new JFrame()
-
+  def buildGraphPanel() = {
     val graph = Var(GraphBasic.withSeries(
       ListVar[Series](
         Series(
           List(
             Vec2(0,0), Vec2(0.25,0.5), Vec2(0.75, 0.5), Vec2(1, 1)
           ),
-          Color.RED)
+          Color.RED,
+          3)
         )
       )
     )
 
-    val v = new GraphSwingView(graph)
+    val v = GraphSwingView(graph)
 
-    frame.add(v.component)
+    val zoomIn = Var(true)
+    val zoomOut = Var(false)
+    RadioReaction(zoomIn, zoomOut)
+
+    val zoomInOp = SwingButton(SwingOp("", GraphSwingView.zoomIn, TrueOp(zoomIn)))
+    val zoomOutOp = SwingButton(SwingOp("", GraphSwingView.zoomOut, TrueOp(zoomOut)))
+
+    val print = View{
+      println("in " + zoomIn() + ", out " + zoomOut())
+    }
+
+    val l = new JLabel("Time (s)    ")
+    l.setHorizontalAlignment(SwingConstants.RIGHT)
+    l.setVerticalAlignment(SwingConstants.TOP)
+    l.setBackground(SwingView.alternateBackgroundColor)
+    l.setOpaque(true)
+    l.setForeground(SwingView.dividingColor.darker)
+
+    val buttons = SwingButtonBar().add(zoomInOp).add(zoomOutOp).build(l)
+
+    val panel = new JPanel(new BorderLayout())
+    panel.add(v.component, BorderLayout.CENTER)
+    panel.add(buttons, BorderLayout.SOUTH)
+
+    panel
+  }
+
+  def graph {
+    SwingView.nimbus
+
+    val frame = new JFrame()
+
+    frame.add(buildGraphPanel)
 
     frame.pack
-    frame.setMinimumSize(new Dimension(50, 50))
+    frame.setMinimumSize(new Dimension(200, 200))
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
     frame.setVisible(true)
   }
@@ -795,8 +823,8 @@ object BoxesDemo {
 //    fieldCompositeLedger
 
     swingRun{
-//      ledgerMulti
-      graph
+      ledgerMulti
+//      graph
     }
 //    axis
   }
