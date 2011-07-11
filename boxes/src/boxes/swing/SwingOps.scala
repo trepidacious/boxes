@@ -93,7 +93,7 @@ class SwingButtonBarBuilder(val components:List[JComponent]) {
   def add(c:JComponent) = new SwingButtonBarBuilder(components ::: List(c))
   def add(op:Op):SwingButtonBarBuilder = add(SwingButton(op))
 
-  def buildWithComponent(c:JComponent) = {
+  def buildWithListStyleComponent(c:JComponent) = {
     val padding = SwingButton.buttonPadding
     padding.setBorder(new EmptyBorder(2, 5, 2, 5))
     padding.setLayout(new BorderLayout)

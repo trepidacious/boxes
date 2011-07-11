@@ -601,7 +601,7 @@ object BoxesDemo {
 
     val down = new ListMultiMoveOp[OptionPerson](list, indices, false)
 
-    val buttons = SwingButtonBar().add(add).add(delete).add(up).add(down).buildWithComponent(indicesView.component)
+    val buttons = SwingButtonBar().add(add).add(delete).add(up).add(down).buildWithListStyleComponent(indicesView.component)
 
 //    val bottom = new JPanel(new BorderLayout())
 //
@@ -728,15 +728,19 @@ object BoxesDemo {
   }
 
   def buildGraphPanel() = {
-    val graph = Var(GraphBasic.withSeries(
-      ListVar[Series](
-        Series(
-          List(
-            Vec2(0,0), Vec2(0.25,0.5), Vec2(0.75, 0.5), Vec2(1, 1)
-          ),
-          Color.RED,
-          3)
-        )
+    val graph = Var (
+      GraphBasic.withSeries (
+        series = ListVar[Series] (
+          Range(0, 10).map(i => {
+            Series(
+              Range(0, 100).map(x => x/100d).map(x => Vec2(x, math.sin((i/80d + x) * 2 * 3.1415) / 3 + 0.5)).toList,
+              Color.getHSBColor((9-i)/14f, 1f, 1f),
+              1
+            )
+          }).toList
+        ),
+        xName = Val("X Axis Name String"),
+        yName = Val("Y Axis Name String")
       )
     )
 
@@ -753,14 +757,7 @@ object BoxesDemo {
       println("in " + zoomIn() + ", out " + zoomOut())
     }
 
-    val l = new JLabel("Time (s)    ")
-    l.setHorizontalAlignment(SwingConstants.RIGHT)
-    l.setVerticalAlignment(SwingConstants.TOP)
-    l.setBackground(SwingView.alternateBackgroundColor)
-    l.setOpaque(true)
-    l.setForeground(SwingView.dividingColor.darker)
-
-    val buttons = SwingButtonBar().add(zoomInOp).add(zoomOutOp).build(l)
+    val buttons = SwingButtonBar().add(zoomInOp).add(zoomOutOp).buildWithListStyleComponent(new JLabel("Demo Graph"))
 
     val panel = new JPanel(new BorderLayout())
     panel.add(v.component, BorderLayout.CENTER)
@@ -823,8 +820,8 @@ object BoxesDemo {
 //    fieldCompositeLedger
 
     swingRun{
-      ledgerMulti
-//      graph
+//      ledgerMulti
+      graph
     }
 //    axis
   }

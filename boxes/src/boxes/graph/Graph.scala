@@ -6,8 +6,8 @@ import java.awt.image.BufferedImage
 import java.awt.event.{ComponentEvent, ComponentListener}
 import list.ListVal
 import javax.swing.{ImageIcon, JPanel}
-import java.awt.geom.{Path2D, PathIterator}
 import java.awt.{Shape, BasicStroke, RenderingHints, Graphics2D, Image, Color, Graphics}
+import java.awt.geom.{AffineTransform, Path2D, PathIterator}
 
 object Axis extends Enumeration {
    type Axis = Value
@@ -181,13 +181,14 @@ class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalF
 
       if (major) {
         canvas.color = SwingView.dividingColor.darker
+        canvas.fontSize = 9
         axis match {
           case X => canvas.string(format.format(p), start + Vec2(0, 10), Vec2(0.5, 1))
           case Y => canvas.string(format.format(p), start + Vec2(-10, 0), Vec2(1, 0.5))
         }
-        canvas.color = new Color(230, 230, 230)
+        canvas.color = new Color(0f, 0f, 0f, 0.1f)
       } else {
-        canvas.color = new Color(245, 245, 245)
+        canvas.color = new Color(0f, 0f, 0f, 0.05f)
       }
       canvas.line(start, start + canvas.spaces.pixelArea.axisPerpVec2(axis))
     })
@@ -204,9 +205,10 @@ class GraphAxisTitle(val axis:Axis, name:RefGeneral[String, _]) extends GraphLay
     val br = a.origin + a.size.withY(0)
 
     canvas.color = SwingView.dividingColor.darker
+    canvas.fontSize = 12
     axis match {
-      case X => canvas.string(name(), br + Vec2(-10, 32), Vec2(1, 1))
-      case Y => canvas.string(name(), tl + Vec2(-32, 10), Vec2(0.5, 1))
+      case X => canvas.string(name(), br + Vec2(-10, 28), Vec2(1, 1))
+      case Y => canvas.string(name(), tl + Vec2(-52, 10 ), Vec2(1, 0), -1)
     }
   }
 }
@@ -242,31 +244,45 @@ class VecListPathIterator(list:List[Vec2]) extends PathIterator {
   }
 }
 
-class GraphSeries(series:RefGeneral[List[Series], _]) extends GraphLayer {
+class GraphSeries(series:RefGeneral[List[Series], _], shadow:Boolean = false) extends GraphLayer {
   def paint(canvas:GraphCanvas) {
     canvas.clipToData
+    if (shadow) canvas.color = new Color(220, 220, 220)
+    val shadowOffset = Vec2(1, 1)
     for {
       s <- series()
     } {
-      canvas.color = s.color
-      canvas.lineWidth = s.width
-      canvas.dataPath(s.curve)
+      if (!shadow) {
+        canvas.color = s.color
+        canvas.lineWidth = s.width
+        canvas.dataPath(s.curve)
+      } else {
+        canvas.lineWidth = s.width + 1
+        canvas.path(s.curve.map(p => canvas.spaces.toPixel(p) + shadowOffset))
+      }
     }
+
   }
 }
 
 case class GraphBasic(layers:RefGeneral[List[GraphLayer], _], dataArea:RefGeneral[Area, _], borders:RefGeneral[Borders, _]) extends Graph
 
 object GraphBasic {
-  def withSeries(series:RefGeneral[List[Series], _], dataArea:RefGeneral[Area, _] = Val(Area()), xName:RefGeneral[String, _]=Val("x"), yName:RefGeneral[String, _]=Val("y"), borders:RefGeneral[Borders, _] = Val(Borders(16, 55, 55, 16))) = {
+  def withSeries(
+      series:RefGeneral[List[Series], _],
+      dataArea:RefGeneral[Area, _] = Val(Area()),
+      xName:RefGeneral[String, _] = Val("x"),
+      yName:RefGeneral[String, _] = Val("y"),
+      borders:RefGeneral[Borders, _] = Val(Borders(16, 74, 53, 16))) = {
     new GraphBasic(
       ListVal(
         new GraphBG(SwingView.alternateBackgroundColor, Color.white),
         new GraphHighlight(),
-        new GraphAxis(Y),
+        new GraphSeries(series, true),
+        new GraphAxis(Y, 50),
         new GraphAxis(X),
-        new GraphSeries(series),
         new GraphShadow(),
+        new GraphSeries(series),
         new GraphOutline(),
         new GraphAxisTitle(X, xName),
         new GraphAxisTitle(Y, yName)
@@ -283,9 +299,11 @@ trait GraphCanvas {
   def color:Color
   def lineWidth_=(w:Double)
   def lineWidth:Double
+  def fontSize_=(w:Double)
+  def fontSize:Double
   def dataLine(a:Vec2, b:Vec2)
   def line(a:Vec2, b:Vec2)
-  def string(s:String, v:Vec2, align:Vec2 = Vec2.zero)
+  def string(s:String, v:Vec2, align:Vec2 = Vec2.zero, rotateQuadrants:Int = 0)
   def rect(origin:Vec2, size:Vec2, fill:Boolean)
   def fillRect(origin:Vec2, size:Vec2)
   def drawRect(origin:Vec2, size:Vec2)
@@ -293,15 +311,18 @@ trait GraphCanvas {
   def clipToAll()
   def image(i:Image, origin:Vec2, size:Vec2)
   def image(i:Image, origin:Vec2)
+  def path(path:List[Vec2])
   def dataPath(path:List[Vec2])
 }
 
 class GraphCanvasFromGraphics2D(g:Graphics2D, val spaces:GraphSpaces) extends GraphCanvas {
 
   val defaultClip = g.getClip
+  val defaultFont = g.getFont
 
   var c = Color.black
   var w = 1d
+  var fs = 10d
 
   def color_=(color:Color) {
     g.setColor(color)
@@ -315,21 +336,44 @@ class GraphCanvasFromGraphics2D(g:Graphics2D, val spaces:GraphSpaces) extends Gr
   }
   def lineWidth = w
 
+  def fontSize_=(fontSize:Double) {
+    g.setFont(defaultFont.deriveFont(fontSize.asInstanceOf[Float]))
+    fs = fontSize
+  }
+  def fontSize = fs
+
   def dataLine(a:Vec2, b:Vec2) {
+    g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE)
     line(spaces.toPixel(a), spaces.toPixel(b))
+    g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_DEFAULT)
   }
 
   def line(a:Vec2, b:Vec2) {
     g.drawLine(a.x.asInstanceOf[Int], a.y.asInstanceOf[Int], b.x.asInstanceOf[Int], b.y.asInstanceOf[Int])
   }
 
-  def string(s:String, v:Vec2, align:Vec2 = Vec2.zero) {
+  def string(s:String, v:Vec2, align:Vec2 = Vec2.zero, rotateQuadrants:Int = 0) {
+
     val d = g.getFontMetrics.getStringBounds(s, g)
     val w = d.getWidth
     val h = d.getHeight
-    val vo = v + Vec2(-w * align.x, h * align.y - g.getFontMetrics.getDescent)
 
-    g.drawString(s, vo.x.asInstanceOf[Int], vo.y.asInstanceOf[Int])
+    val x = v.x.asInstanceOf[Int]
+    val y = v.y.asInstanceOf[Int]
+
+    val oldxForm = g.getTransform
+    val t = g.getTransform
+    t.concatenate(AffineTransform.getQuadrantRotateInstance(rotateQuadrants, x, y))
+    g.setTransform(t)
+
+    val vo = v + Vec2(-w * align.x, h * align.y)
+
+    val ox = vo.x.asInstanceOf[Int]
+    val oy = vo.y.asInstanceOf[Int]
+
+    g.drawString(s, ox, oy)
+
+    g.setTransform(oldxForm)
   }
 
   //Convert from a pair of vecs that may draw a "backwards"
@@ -390,11 +434,16 @@ class GraphCanvasFromGraphics2D(g:Graphics2D, val spaces:GraphSpaces) extends Gr
     image(i, origin, Vec2(i.getWidth(null), i.getHeight(null)))
   }
 
-  def dataPath(path:List[Vec2]) {
+  def path(path:List[Vec2]) {
     val path2D = new Path2D.Double()
-    val dataPath = path.map(p => spaces.toPixel(p))
-    path2D.append(new VecListPathIterator(dataPath), false)
+    path2D.append(new VecListPathIterator(path), false)
     g.draw(path2D)
+  }
+
+  def dataPath(dataPath:List[Vec2]) {
+    g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE)
+    path(dataPath.map(p => spaces.toPixel(p)))
+    g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_DEFAULT)
   }
 
 }
