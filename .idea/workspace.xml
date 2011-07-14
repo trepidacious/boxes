@@ -85,7 +85,7 @@
       <file leaf-file-name="Graph.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/graph/Graph.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="328" column="40" selection-start="10528" selection-end="10528" vertical-scroll-proportion="-3.505028">
+            <state line="74" column="32" selection-start="2052" selection-end="2052" vertical-scroll-proportion="0.8659218">
               <folding />
             </state>
           </provider>
@@ -242,6 +242,34 @@
             <PATH_ELEMENT>
               <option name="myItemId" value="BoxesProject" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="BoxesProject" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="boxes" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="BoxesProject" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="boxes" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="boxes" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
@@ -665,7 +693,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/graph/Graph.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="328" column="40" selection-start="10528" selection-end="10528" vertical-scroll-proportion="-3.505028">
+        <state line="74" column="32" selection-start="2052" selection-end="2052" vertical-scroll-proportion="0.8659218">
           <folding />
         </state>
       </provider>

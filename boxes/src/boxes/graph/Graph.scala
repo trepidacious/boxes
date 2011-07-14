@@ -49,7 +49,7 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
   }
   def axisPosition(a:Axis, p:Double) = a match {
     case X => Vec2(p, origin.y)
-    case Y => Vec2(origin.y, p)
+    case Y => Vec2(origin.x, p)
   }
   def axisVec2(a:Axis) = a match {
     case X => Vec2(size.x, 0)
@@ -58,6 +58,21 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
   def axisPerpVec2(a:Axis) = a match {
     case X => Vec2(0, size.y)
     case Y => Vec2(size.x, 0)
+  }
+  def normalise = {
+    var x = origin.x
+    var y = origin.y
+    var w = size.x
+    var h = size.y
+    if (h < 0) {
+      y = y + h
+      h = -h
+    }
+    if (w < 0) {
+      x = x + w
+      w = -w
+    }
+    Area(Vec2(x, y), Vec2(w, h))
   }
 }
 
@@ -242,37 +257,6 @@ class GraphAxisTitle(val axis:Axis, name:RefGeneral[String, _]) extends GraphDis
   }
 }
 
-class VecListPathIterator(list:List[Vec2]) extends PathIterator {
-  var remaining = list
-  var first = true
-
-  def getWindingRule = PathIterator.WIND_NON_ZERO
-  def isDone = remaining.isEmpty
-  def next() {
-    remaining = remaining.tail
-  }
-  def currentSegment(coords:Array[Float]) = {
-    coords.update(0, remaining.head.x.asInstanceOf[Float])
-    coords.update(1, remaining.head.y.asInstanceOf[Float])
-    if (first) {
-      first = false
-      PathIterator.SEG_MOVETO
-    } else {
-      PathIterator.SEG_LINETO
-    }
-  }
-  def currentSegment(coords:Array[Double]) = {
-    coords.update(0, remaining.head.x)
-    coords.update(1, remaining.head.y)
-    if (first) {
-      first = false
-      PathIterator.SEG_MOVETO
-    } else {
-      PathIterator.SEG_LINETO
-    }
-  }
-}
-
 class GraphSeries(series:RefGeneral[List[Series], _], shadow:Boolean = false) extends GraphDisplayLayer {
   def paint(canvas:GraphCanvas) {
     canvas.clipToData
@@ -314,7 +298,7 @@ class GraphBox(c:RefGeneral[Color, _], areaOut:VarGeneral[Area, _]) extends Grap
       })
       case RELEASE => area().foreach(a => {
         area() = None
-        areaOut() = Area(a.origin, e.dataPoint - a.origin)
+        areaOut() = Area(a.origin, e.dataPoint - a.origin).normalise
       })
       case _ => {}
     }
@@ -374,6 +358,37 @@ trait GraphCanvas {
   def image(i:Image, origin:Vec2)
   def path(path:List[Vec2])
   def dataPath(path:List[Vec2])
+}
+
+class VecListPathIterator(list:List[Vec2]) extends PathIterator {
+  var remaining = list
+  var first = true
+
+  def getWindingRule = PathIterator.WIND_NON_ZERO
+  def isDone = remaining.isEmpty
+  def next() {
+    remaining = remaining.tail
+  }
+  def currentSegment(coords:Array[Float]) = {
+    coords.update(0, remaining.head.x.asInstanceOf[Float])
+    coords.update(1, remaining.head.y.asInstanceOf[Float])
+    if (first) {
+      first = false
+      PathIterator.SEG_MOVETO
+    } else {
+      PathIterator.SEG_LINETO
+    }
+  }
+  def currentSegment(coords:Array[Double]) = {
+    coords.update(0, remaining.head.x)
+    coords.update(1, remaining.head.y)
+    if (first) {
+      first = false
+      PathIterator.SEG_MOVETO
+    } else {
+      PathIterator.SEG_LINETO
+    }
+  }
 }
 
 class GraphCanvasFromGraphics2D(g:Graphics2D, val spaces:GraphSpaces) extends GraphCanvas {
