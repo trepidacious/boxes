@@ -735,7 +735,7 @@ object BoxesDemo {
             Series(
               Range(0, 100).map(x => x/100d).map(x => Vec2(x, math.sin((i/80d + x) * 2 * 3.1415) / 3 + 0.5)).toList,
               Color.getHSBColor((9-i)/14f, 1f, 1f),
-              1
+              1 + i/2f
             )
           }).toList
         ),
@@ -820,8 +820,8 @@ object BoxesDemo {
 //    fieldCompositeLedger
 
     swingRun{
-//      ledgerMulti
-      graph
+      ledgerMulti
+//      graph
     }
 //    axis
   }

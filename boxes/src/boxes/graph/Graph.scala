@@ -3,11 +3,11 @@ package boxes.graph
 import boxes._
 import java.text.DecimalFormat
 import java.awt.image.BufferedImage
-import java.awt.event.{ComponentEvent, ComponentListener}
 import list.ListVal
 import javax.swing.{ImageIcon, JPanel}
 import java.awt.{Shape, BasicStroke, RenderingHints, Graphics2D, Image, Color, Graphics}
 import java.awt.geom.{AffineTransform, Path2D, PathIterator}
+import java.awt.event.{MouseMotionListener, MouseEvent, MouseListener, ComponentEvent, ComponentListener}
 
 object Axis extends Enumeration {
    type Axis = Value
@@ -68,12 +68,41 @@ trait Graph {
 }
 
 case class GraphSpaces(val dataArea:Area, val pixelArea:Area, val componentArea:Area) {
-  def toPixel(dataPos:Vec2) = pixelArea.fromUnit(dataArea.toUnit(dataPos))
-  def toData(pixelPos:Vec2) = dataArea.fromUnit(pixelArea.toUnit(pixelPos))
+  def toPixel(dataPos:Vec2):Vec2 = pixelArea.fromUnit(dataArea.toUnit(dataPos))
+  def toData(pixelPos:Vec2):Vec2 = dataArea.fromUnit(pixelArea.toUnit(pixelPos))
+  def toPixel(area:Area):Area = {
+    val o = toPixel(area.origin)
+    val s = area.size / dataArea.size * pixelArea.size
+    Area(o, s)
+  }
+  def toData(area:Area):Area = {
+    val o = toData(area.origin)
+    val s = area.size / pixelArea.size * dataArea.size
+    Area(o, s)
+  }
 }
+
+object GraphMouseEventType extends Enumeration {
+   type GraphMouseEventType = Value
+   val PRESS, RELEASE, DRAG, MOVE, CLICK = Value
+}
+import GraphMouseEventType._
+
+object GraphMouseButton extends Enumeration {
+   type GraphMouseButton = Value
+   val LEFT, MIDDLE, RIGHT, NONE = Value
+}
+import GraphMouseButton._
+
+case class GraphMouseEvent (spaces:GraphSpaces, dataPoint:Vec2, eventType:GraphMouseEventType, button:GraphMouseButton)
 
 trait GraphLayer {
   def paint(canvas:GraphCanvas)
+  def onMouse(event:GraphMouseEvent)
+}
+
+trait GraphDisplayLayer extends GraphLayer {
+  def onMouse(event:GraphMouseEvent) {}
 }
 
 object Ticks {
@@ -109,7 +138,7 @@ object Ticks {
   }
 }
 
-class GraphBG(val bg:Color, val dataBG:Color) extends GraphLayer {
+class GraphBG(val bg:Color, val dataBG:Color) extends GraphDisplayLayer {
   def paint(canvas:GraphCanvas) {
     canvas.color = bg
     canvas.fillRect(canvas.spaces.componentArea.origin, canvas.spaces.componentArea.size)
@@ -119,13 +148,13 @@ class GraphBG(val bg:Color, val dataBG:Color) extends GraphLayer {
   }
 }
 
-class GraphOutline extends GraphLayer {
+class GraphOutline extends GraphDisplayLayer {
   def paint(canvas:GraphCanvas) {
     canvas.color = SwingView.dividingColor.brighter
     canvas.drawRect(canvas.spaces.pixelArea.origin, canvas.spaces.pixelArea.size)
   }
 }
-class GraphHighlight extends GraphLayer {
+class GraphHighlight extends GraphDisplayLayer {
   def paint(canvas:GraphCanvas) {
     canvas.color = SwingView.alternateBackgroundColor.brighter
     canvas.drawRect(canvas.spaces.pixelArea.origin + Vec2(-1, 1), canvas.spaces.pixelArea.size + Vec2(2, -2))
@@ -138,7 +167,7 @@ object GraphShadow {
   val left = new ImageIcon(classOf[GraphShadow].getResource("/boxes/swing/GraphShadowLeft.png")).getImage
 }
 
-class GraphShadow extends GraphLayer {
+class GraphShadow extends GraphDisplayLayer {
   def paint(canvas:GraphCanvas) {
     canvas.clipToData
     val w = GraphShadow.topLeft.getWidth(null)
@@ -156,7 +185,7 @@ class GraphShadow extends GraphLayer {
   }
 }
 
-class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalFormat = new DecimalFormat("0.###")) extends GraphLayer {
+class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalFormat = new DecimalFormat("0.###")) extends GraphDisplayLayer {
 
   def paint(canvas:GraphCanvas) {
     val dataArea = canvas.spaces.dataArea
@@ -195,7 +224,7 @@ class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalF
   }
 }
 
-class GraphAxisTitle(val axis:Axis, name:RefGeneral[String, _]) extends GraphLayer {
+class GraphAxisTitle(val axis:Axis, name:RefGeneral[String, _]) extends GraphDisplayLayer {
 
   def paint(canvas:GraphCanvas) {
 
@@ -244,7 +273,7 @@ class VecListPathIterator(list:List[Vec2]) extends PathIterator {
   }
 }
 
-class GraphSeries(series:RefGeneral[List[Series], _], shadow:Boolean = false) extends GraphLayer {
+class GraphSeries(series:RefGeneral[List[Series], _], shadow:Boolean = false) extends GraphDisplayLayer {
   def paint(canvas:GraphCanvas) {
     canvas.clipToData
     if (shadow) canvas.color = new Color(220, 220, 220)
@@ -265,12 +294,39 @@ class GraphSeries(series:RefGeneral[List[Series], _], shadow:Boolean = false) ex
   }
 }
 
+class GraphBox(c:RefGeneral[Color, _], areaOut:VarGeneral[Area, _]) extends GraphLayer {
+  private val area:Var[Option[Area]] = Var(None)
+
+  def paint(canvas:GraphCanvas) {
+    area().foreach(a => {
+      canvas.color = c()
+      canvas.clipToData
+      canvas.fillRect(canvas.spaces.toPixel(a))
+    })
+  }
+
+  def onMouse(e:GraphMouseEvent) {
+    println("Clicked " + e)
+    e.eventType match {
+      case PRESS => area() = Some(Area(e.dataPoint, Vec2(0, 0)))
+      case DRAG => area().foreach(a => {
+        area() = Some(Area(a.origin, e.dataPoint - a.origin))
+      })
+      case RELEASE => area().foreach(a => {
+        area() = None
+        areaOut() = Area(a.origin, e.dataPoint - a.origin)
+      })
+      case _ => {}
+    }
+  }
+}
+
 case class GraphBasic(layers:RefGeneral[List[GraphLayer], _], dataArea:RefGeneral[Area, _], borders:RefGeneral[Borders, _]) extends Graph
 
 object GraphBasic {
   def withSeries(
       series:RefGeneral[List[Series], _],
-      dataArea:RefGeneral[Area, _] = Val(Area()),
+      dataArea:VarGeneral[Area, _] = Var(Area()),
       xName:RefGeneral[String, _] = Val("x"),
       yName:RefGeneral[String, _] = Val("y"),
       borders:RefGeneral[Borders, _] = Val(Borders(16, 74, 53, 16))) = {
@@ -283,6 +339,7 @@ object GraphBasic {
         new GraphAxis(X),
         new GraphShadow(),
         new GraphSeries(series),
+        new GraphBox(Val(new Color(0, 0, 200, 100)), dataArea),
         new GraphOutline(),
         new GraphAxisTitle(X, xName),
         new GraphAxisTitle(Y, yName)
@@ -307,6 +364,10 @@ trait GraphCanvas {
   def rect(origin:Vec2, size:Vec2, fill:Boolean)
   def fillRect(origin:Vec2, size:Vec2)
   def drawRect(origin:Vec2, size:Vec2)
+  def fillRect(area:Area)
+  def drawRect(area:Area)
+  def rect(area:Area, fill:Boolean)
+
   def clipToData()
   def clipToAll()
   def image(i:Image, origin:Vec2, size:Vec2)
@@ -404,6 +465,16 @@ class GraphCanvasFromGraphics2D(g:Graphics2D, val spaces:GraphSpaces) extends Gr
     }
   }
 
+  def fillRect(area:Area) {
+    rect(area, true)
+  }
+  def drawRect(area:Area) {
+    rect(area, false)
+  }
+  def rect(area:Area, fill:Boolean) {
+    rect(area.origin, area.size, fill)
+  }
+
   def fillRect(origin:Vec2, size:Vec2) {
     rect(origin, size, true)
   }
@@ -485,6 +556,43 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
       override def componentShown(e:ComponentEvent) {}
       override def componentHidden(e:ComponentEvent) {}
     })
+
+    def fireMouse(e:MouseEvent, eventType:GraphMouseEventType) {
+      val s = buildSpaces
+      val p = e.getPoint
+      val b = e.getButton match {
+        case MouseEvent.BUTTON1 => LEFT
+        case MouseEvent.BUTTON2 => MIDDLE
+        case MouseEvent.BUTTON3 => RIGHT
+        case _ => NONE
+      }
+      val dataPoint = s.toData(Vec2(p.getX, p.getY))
+      val gme = GraphMouseEvent(s, dataPoint, eventType, b)
+      graph().layers().foreach(layer => layer.onMouse(gme))
+    }
+
+    this.addMouseMotionListener(new MouseMotionListener() {
+      def mouseDragged(e: MouseEvent) {
+        fireMouse(e, DRAG)
+      }
+      def mouseMoved(e: MouseEvent) {
+        fireMouse(e, MOVE)
+      }
+    })
+
+    this.addMouseListener(new MouseListener(){
+      def mouseClicked(e: MouseEvent) {
+        fireMouse(e, CLICK)
+      }
+      def mousePressed(e: MouseEvent) {
+        fireMouse(e, PRESS)
+      }
+      def mouseReleased(e: MouseEvent) {
+        fireMouse(e, RELEASE)
+      }
+      def mouseEntered(e: MouseEvent) {}
+      def mouseExited(e: MouseEvent) {}
+    })
   }
 
   val v = View {
@@ -498,15 +606,31 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
     }
   }
 
-  def drawBuffer() {
+  def buildSpaces = {
 
     val size = componentSize()
     val area = graph().dataArea()
     val borders = graph().borders()
-    val layers = graph().layers()
 
     val w = size.x.asInstanceOf[Int]
     val h = size.y.asInstanceOf[Int]
+
+    val l = borders.left.asInstanceOf[Int]
+    val r = borders.right.asInstanceOf[Int]
+    val t = borders.top.asInstanceOf[Int]
+    val b = borders.bottom.asInstanceOf[Int]
+    val dw = w - l - r
+    val dh = h - t - b
+
+    GraphSpaces(area, Area(Vec2(l, t+dh), Vec2(dw, -dh)), Area(Vec2.zero, size))
+  }
+
+  def drawBuffer() {
+    val layers = graph().layers()
+    val spaces = buildSpaces
+
+    val w = spaces.componentArea.size.x.asInstanceOf[Int]
+    val h = spaces.componentArea.size.y.asInstanceOf[Int]
 
     if (offBuffer.getWidth != w || offBuffer.getHeight != h) {
       offBuffer = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB)
@@ -516,15 +640,6 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
 
     val g = buffer.getGraphics.asInstanceOf[Graphics2D]
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-
-    val l = borders.left.asInstanceOf[Int]
-    val r = borders.right.asInstanceOf[Int]
-    val t = borders.top.asInstanceOf[Int]
-    val b = borders.bottom.asInstanceOf[Int]
-    val dw = w - l - r
-    val dh = h - t - b
-
-    val spaces = GraphSpaces(area, Area(Vec2(l, t+dh), Vec2(dw, -dh)), Area(Vec2.zero, size))
 
     //Each layer paints on a fresh canvas, to avoid side effects from one affecting the next
     layers.foreach(layer => {
