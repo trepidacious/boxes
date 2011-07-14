@@ -290,7 +290,6 @@ class GraphBox(c:RefGeneral[Color, _], areaOut:VarGeneral[Area, _]) extends Grap
   }
 
   def onMouse(e:GraphMouseEvent) {
-    println("Clicked " + e)
     e.eventType match {
       case PRESS => area() = Some(Area(e.dataPoint, Vec2(0, 0)))
       case DRAG => area().foreach(a => {

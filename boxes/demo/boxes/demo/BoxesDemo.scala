@@ -820,8 +820,8 @@ object BoxesDemo {
 //    fieldCompositeLedger
 
     swingRun{
-      ledgerMulti
-//      graph
+//      ledgerMulti
+      graph
     }
 //    axis
   }

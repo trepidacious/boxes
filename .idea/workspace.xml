@@ -85,7 +85,7 @@
       <file leaf-file-name="Graph.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/graph/Graph.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="74" column="32" selection-start="2052" selection-end="2052" vertical-scroll-proportion="0.8659218">
+            <state line="292" column="0" selection-start="9341" selection-end="9341" vertical-scroll-proportion="0.49385476">
               <folding />
             </state>
           </provider>
@@ -130,7 +130,7 @@
       <file leaf-file-name="BoxesDemo.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="733" column="21" selection-start="17578" selection-end="17578" vertical-scroll-proportion="0.0">
+            <state line="824" column="6" selection-start="19535" selection-end="19535" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -686,14 +686,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="733" column="21" selection-start="17578" selection-end="17578" vertical-scroll-proportion="0.0">
+        <state line="824" column="6" selection-start="19535" selection-end="19535" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/graph/Graph.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="74" column="32" selection-start="2052" selection-end="2052" vertical-scroll-proportion="0.8659218">
+        <state line="292" column="0" selection-start="9341" selection-end="9341" vertical-scroll-proportion="0.49385476">
           <folding />
         </state>
       </provider>
