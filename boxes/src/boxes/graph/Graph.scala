@@ -57,21 +57,55 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
     case X => Vec2(0, size.y)
     case Y => Vec2(size.x, 0)
   }
+  def contains(v:Vec2) = normalise.rawContains(v)
+  private def rawContains(v:Vec2) = (v.x >= origin.x && v.y >= origin.y && v.x <= origin.x + size.x && v.y <= origin.y + size.y)
+
   def normalise = {
+    var w = size.x
+    var h = size.y
+    if (w >= 0 && h >0 ) {
+      this
+    } else {
+      var x = origin.x
+      var y = origin.y
+      if (h < 0) {
+        y = y + h
+        h = -h
+      }
+      if (w < 0) {
+        x = x + w
+        w = -w
+      }
+      Area(Vec2(x, y), Vec2(w, h))
+    }
+  }
+  def extendToContain(v:Vec2) = {
+    if (contains(v)) {
+      this
+    } else {
+      normalise.rawExtendToContain(v)
+    }
+  }
+  private def rawExtendToContain(v:Vec2) = {
     var x = origin.x
     var y = origin.y
     var w = size.x
     var h = size.y
-    if (h < 0) {
-      y = y + h
-      h = -h
+    if (v.x < x) {
+      w += x-v.x
+      x = v.x
+    } else if (v.x > x + w) {
+      w = v.x - x
     }
-    if (w < 0) {
-      x = x + w
-      w = -w
+    if (v.y < y) {
+      h += y-v.y
+      y = v.y
+    } else if (v.y > y + h) {
+      h = v.y - y
     }
     Area(Vec2(x, y), Vec2(w, h))
   }
+
 }
 
 trait Graph {
@@ -113,10 +147,15 @@ case class GraphMouseEvent (spaces:GraphSpaces, dataPoint:Vec2, eventType:GraphM
 trait GraphLayer {
   def paint(canvas:GraphCanvas)
   def onMouse(event:GraphMouseEvent)
+  def dataBounds:RefGeneral[Option[Area], _]
 }
 
 trait GraphDisplayLayer extends GraphLayer {
   def onMouse(event:GraphMouseEvent) {}
+}
+
+trait UnboundedGraphDisplayLayer extends GraphDisplayLayer {
+  val dataBounds = Val(None:Option[Area])
 }
 
 object Ticks {
@@ -152,7 +191,7 @@ object Ticks {
   }
 }
 
-class GraphBG(val bg:Color, val dataBG:Color) extends GraphDisplayLayer {
+class GraphBG(val bg:Color, val dataBG:Color) extends UnboundedGraphDisplayLayer {
   def paint(canvas:GraphCanvas) {
     canvas.color = bg
     canvas.fillRect(canvas.spaces.componentArea.origin, canvas.spaces.componentArea.size)
@@ -162,13 +201,13 @@ class GraphBG(val bg:Color, val dataBG:Color) extends GraphDisplayLayer {
   }
 }
 
-class GraphOutline extends GraphDisplayLayer {
+class GraphOutline extends UnboundedGraphDisplayLayer {
   def paint(canvas:GraphCanvas) {
     canvas.color = SwingView.dividingColor.brighter
     canvas.drawRect(canvas.spaces.pixelArea.origin, canvas.spaces.pixelArea.size)
   }
 }
-class GraphHighlight extends GraphDisplayLayer {
+class GraphHighlight extends UnboundedGraphDisplayLayer {
   def paint(canvas:GraphCanvas) {
     canvas.color = SwingView.alternateBackgroundColor.brighter
     canvas.drawRect(canvas.spaces.pixelArea.origin + Vec2(-1, 1), canvas.spaces.pixelArea.size + Vec2(2, -2))
@@ -181,7 +220,7 @@ object GraphShadow {
   val left = new ImageIcon(classOf[GraphShadow].getResource("/boxes/swing/GraphShadowLeft.png")).getImage
 }
 
-class GraphShadow extends GraphDisplayLayer {
+class GraphShadow extends UnboundedGraphDisplayLayer {
   def paint(canvas:GraphCanvas) {
     canvas.clipToData
     val w = GraphShadow.topLeft.getWidth(null)
@@ -199,7 +238,7 @@ class GraphShadow extends GraphDisplayLayer {
   }
 }
 
-class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalFormat = new DecimalFormat("0.###")) extends GraphDisplayLayer {
+class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalFormat = new DecimalFormat("0.###")) extends UnboundedGraphDisplayLayer {
 
   def paint(canvas:GraphCanvas) {
     val dataArea = canvas.spaces.dataArea
@@ -238,7 +277,7 @@ class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalF
   }
 }
 
-class GraphAxisTitle(val axis:Axis, name:RefGeneral[String, _]) extends GraphDisplayLayer {
+class GraphAxisTitle(val axis:Axis, name:RefGeneral[String, _]) extends UnboundedGraphDisplayLayer {
 
   def paint(canvas:GraphCanvas) {
 
@@ -275,16 +314,28 @@ class GraphSeries(series:RefGeneral[List[Series], _], shadow:Boolean = false) ex
     }
 
   }
+
+  val dataBounds = Cal{
+    series().foldLeft(None:Option[Area]){(seriesArea, series) => series.curve.foldLeft(seriesArea){
+      (area, v) => area match {
+        case None => Some(Area(v, Vec2.zero))
+        case Some(a) => Some(a.extendToContain(v))
+      }
+    }}
+  }
+
 }
 
-class GraphBox(c:RefGeneral[Color, _], areaOut:VarGeneral[Area, _]) extends GraphLayer {
+class GraphZoomBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], areaOut:VarGeneral[Area, _]) extends GraphLayer {
   private val area:Var[Option[Area]] = Var(None)
 
   def paint(canvas:GraphCanvas) {
     area().foreach(a => {
-      canvas.color = c()
       canvas.clipToData
+      canvas.color = fill()
       canvas.fillRect(canvas.spaces.toPixel(a))
+      canvas.color = outline()
+      canvas.drawRect(canvas.spaces.toPixel(a))
     })
   }
 
@@ -301,6 +352,9 @@ class GraphBox(c:RefGeneral[Color, _], areaOut:VarGeneral[Area, _]) extends Grap
       case _ => {}
     }
   }
+
+  val dataBounds = area
+
 }
 
 case class GraphBasic(layers:RefGeneral[List[GraphLayer], _], overlayers:RefGeneral[List[GraphLayer], _], dataArea:RefGeneral[Area, _], borders:RefGeneral[Borders, _]) extends Graph
@@ -326,7 +380,7 @@ object GraphBasic {
         new GraphAxisTitle(Y, yName)
       ),
       ListVal(
-        new GraphBox(Val(new Color(0, 0, 200, 100)), dataArea)
+        new GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), dataArea)
       ),
       dataArea,
       borders
