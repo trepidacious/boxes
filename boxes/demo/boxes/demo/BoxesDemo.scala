@@ -1,9 +1,3 @@
-/*
- * Created by IntelliJ IDEA.
- * User: trepidacious
- * Date: 22/02/2011
- * Time: 20:37
- */
 package boxes.demo
 
 import javax.swing._
@@ -16,7 +10,7 @@ import list._
 import persistence._
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
 import java.awt.{Color, GridLayout, BorderLayout, Dimension}
-import swing.{SwingButtonBar, SwingOp, SwingButton}
+import swing.{GraphSwingView, SwingButtonBar, SwingOp, SwingButton}
 
 object BoxesDemo {
 
@@ -820,8 +814,8 @@ object BoxesDemo {
 //    fieldCompositeLedger
 
     swingRun{
-//      ledgerMulti
-      graph
+      ledgerMulti
+//      graph
     }
 //    axis
   }

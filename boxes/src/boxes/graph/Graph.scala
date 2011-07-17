@@ -2,12 +2,10 @@ package boxes.graph
 
 import boxes._
 import java.text.DecimalFormat
-import java.awt.image.BufferedImage
 import list.ListVal
-import javax.swing.{ImageIcon, JPanel}
-import java.awt.{Shape, BasicStroke, RenderingHints, Graphics2D, Image, Color, Graphics}
-import java.awt.geom.{AffineTransform, Path2D, PathIterator}
-import java.awt.event.{MouseMotionListener, MouseEvent, MouseListener, ComponentEvent, ComponentListener}
+import javax.swing.{ImageIcon}
+import java.awt.{Image, Color}
+import java.awt.geom.{PathIterator}
 
 object Axis extends Enumeration {
    type Axis = Value
@@ -78,6 +76,7 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
 
 trait Graph {
   def layers:RefGeneral[List[GraphLayer], _]
+  def overlayers:RefGeneral[List[GraphLayer], _]
   def dataArea:RefGeneral[Area, _]
   def borders:RefGeneral[Borders, _]
 }
@@ -304,7 +303,7 @@ class GraphBox(c:RefGeneral[Color, _], areaOut:VarGeneral[Area, _]) extends Grap
   }
 }
 
-case class GraphBasic(layers:RefGeneral[List[GraphLayer], _], dataArea:RefGeneral[Area, _], borders:RefGeneral[Borders, _]) extends Graph
+case class GraphBasic(layers:RefGeneral[List[GraphLayer], _], overlayers:RefGeneral[List[GraphLayer], _], dataArea:RefGeneral[Area, _], borders:RefGeneral[Borders, _]) extends Graph
 
 object GraphBasic {
   def withSeries(
@@ -322,10 +321,12 @@ object GraphBasic {
         new GraphAxis(X),
         new GraphShadow(),
         new GraphSeries(series),
-        new GraphBox(Val(new Color(0, 0, 200, 100)), dataArea),
         new GraphOutline(),
         new GraphAxisTitle(X, xName),
         new GraphAxisTitle(Y, yName)
+      ),
+      ListVal(
+        new GraphBox(Val(new Color(0, 0, 200, 100)), dataArea)
       ),
       dataArea,
       borders
@@ -359,314 +360,4 @@ trait GraphCanvas {
   def dataPath(path:List[Vec2])
 }
 
-class VecListPathIterator(list:List[Vec2]) extends PathIterator {
-  var remaining = list
-  var first = true
 
-  def getWindingRule = PathIterator.WIND_NON_ZERO
-  def isDone = remaining.isEmpty
-  def next() {
-    remaining = remaining.tail
-  }
-  def currentSegment(coords:Array[Float]) = {
-    coords.update(0, remaining.head.x.asInstanceOf[Float])
-    coords.update(1, remaining.head.y.asInstanceOf[Float])
-    if (first) {
-      first = false
-      PathIterator.SEG_MOVETO
-    } else {
-      PathIterator.SEG_LINETO
-    }
-  }
-  def currentSegment(coords:Array[Double]) = {
-    coords.update(0, remaining.head.x)
-    coords.update(1, remaining.head.y)
-    if (first) {
-      first = false
-      PathIterator.SEG_MOVETO
-    } else {
-      PathIterator.SEG_LINETO
-    }
-  }
-}
-
-class GraphCanvasFromGraphics2D(g:Graphics2D, val spaces:GraphSpaces) extends GraphCanvas {
-
-  val defaultClip = g.getClip
-  val defaultFont = g.getFont
-
-  var c = Color.black
-  var w = 1d
-  var fs = 10d
-
-  def color_=(color:Color) {
-    g.setColor(color)
-    c = color
-  }
-  def color = c
-
-  def lineWidth_=(lineWidth:Double) {
-    g.setStroke(new BasicStroke(lineWidth.asInstanceOf[Float], BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER))
-    w = lineWidth
-  }
-  def lineWidth = w
-
-  def fontSize_=(fontSize:Double) {
-    g.setFont(defaultFont.deriveFont(fontSize.asInstanceOf[Float]))
-    fs = fontSize
-  }
-  def fontSize = fs
-
-  def dataLine(a:Vec2, b:Vec2) {
-    g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE)
-    line(spaces.toPixel(a), spaces.toPixel(b))
-    g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_DEFAULT)
-  }
-
-  def line(a:Vec2, b:Vec2) {
-    g.drawLine(a.x.asInstanceOf[Int], a.y.asInstanceOf[Int], b.x.asInstanceOf[Int], b.y.asInstanceOf[Int])
-  }
-
-  def string(s:String, v:Vec2, align:Vec2 = Vec2.zero, rotateQuadrants:Int = 0) {
-
-    val d = g.getFontMetrics.getStringBounds(s, g)
-    val w = d.getWidth
-    val h = d.getHeight
-
-    val x = v.x.asInstanceOf[Int]
-    val y = v.y.asInstanceOf[Int]
-
-    val oldxForm = g.getTransform
-    val t = g.getTransform
-    t.concatenate(AffineTransform.getQuadrantRotateInstance(rotateQuadrants, x, y))
-    g.setTransform(t)
-
-    val vo = v + Vec2(-w * align.x, h * align.y)
-
-    val ox = vo.x.asInstanceOf[Int]
-    val oy = vo.y.asInstanceOf[Int]
-
-    g.drawString(s, ox, oy)
-
-    g.setTransform(oldxForm)
-  }
-
-  //Convert from a pair of vecs that may draw a "backwards"
-  //rect with negative size(s) to the dumb format needed by Java2D,
-  //with individual int values that must have a positive width and height
-  def toDumbFormat(origin:Vec2, size:Vec2) = {
-    var x = origin.x.asInstanceOf[Int]
-    var y = origin.y.asInstanceOf[Int]
-    var w = size.x.asInstanceOf[Int]
-    var h = size.y.asInstanceOf[Int]
-    if (h < 0) {
-      y = y + h
-      h = -h
-    }
-    if (w < 0) {
-      x = x + w
-      w = -w
-    }
-    (x, y, w, h)
-  }
-
-  def rect(origin:Vec2, size:Vec2, fill:Boolean) {
-    val df = toDumbFormat(origin, size)
-    if (fill) {
-      g.fillRect(df._1, df._2, df._3, df._4)
-    } else {
-      g.drawRect(df._1, df._2, df._3, df._4)
-    }
-  }
-
-  def fillRect(area:Area) {
-    rect(area, true)
-  }
-  def drawRect(area:Area) {
-    rect(area, false)
-  }
-  def rect(area:Area, fill:Boolean) {
-    rect(area.origin, area.size, fill)
-  }
-
-  def fillRect(origin:Vec2, size:Vec2) {
-    rect(origin, size, true)
-  }
-
-  def drawRect(origin:Vec2, size:Vec2) {
-    rect(origin, size, false)
-  }
-
-  def clipToRect(origin:Vec2, size:Vec2) {
-    val df = toDumbFormat(origin, size)
-    g.setClip(df._1, df._2, df._3, df._4)
-  }
-
-  def clipToData() {
-    clipToRect(spaces.pixelArea.origin, spaces.pixelArea.size)
-  }
-
-  def clipToAll() {
-    g.setClip(defaultClip)
-  }
-
-  def image(i:Image, origin:Vec2, size:Vec2) {
-    val df = toDumbFormat(origin, size)
-    g.drawImage(i, origin.x.asInstanceOf[Int], origin.y.asInstanceOf[Int], size.x.asInstanceOf[Int], size.y.asInstanceOf[Int], null)
-  }
-
-  def image(i:Image, origin:Vec2) {
-    image(i, origin, Vec2(i.getWidth(null), i.getHeight(null)))
-  }
-
-  def path(path:List[Vec2]) {
-    val path2D = new Path2D.Double()
-    path2D.append(new VecListPathIterator(path), false)
-    g.draw(path2D)
-  }
-
-  def dataPath(dataPath:List[Vec2]) {
-    g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE)
-    path(dataPath.map(p => spaces.toPixel(p)))
-    g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_DEFAULT)
-  }
-
-}
-
-object GraphSwingView {
-  val zoom = new ImageIcon(classOf[GraphSwingView].getResource("/boxes/swing/Zoom.png"))
-  val zoomIn = new ImageIcon(classOf[GraphSwingView].getResource("/boxes/swing/ZoomIn.png"))
-  val zoomOut = new ImageIcon(classOf[GraphSwingView].getResource("/boxes/swing/ZoomOut.png"))
-  val zoomSelect = new ImageIcon(classOf[GraphSwingView].getResource("/boxes/swing/ZoomSelect.png"))
-
-  def apply(graph:Ref[_ <: Graph]) = new GraphSwingView(graph)
-}
-
-class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
-
-  val componentSize = Var(Vec2(10, 10))
-
-  var offBuffer = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB)
-  var onBuffer = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB)
-  var bufferLock = new Object()
-
-  val component = new JPanel() {
-
-    override def paintComponent(gr:Graphics) {
-      bufferLock.synchronized{
-        gr.drawImage(onBuffer, 0, 0, null)
-      }
-    }
-
-    def updateSize() {
-      componentSize() = Vec2(this.getWidth, this.getHeight)
-    }
-
-    this.addComponentListener(new ComponentListener(){
-      override def componentResized(e:ComponentEvent) {
-        updateSize
-      }
-      override def componentMoved(e:ComponentEvent) {}
-      override def componentShown(e:ComponentEvent) {}
-      override def componentHidden(e:ComponentEvent) {}
-    })
-
-    def fireMouse(e:MouseEvent, eventType:GraphMouseEventType) {
-      val s = buildSpaces
-      val p = e.getPoint
-      val b = e.getButton match {
-        case MouseEvent.BUTTON1 => LEFT
-        case MouseEvent.BUTTON2 => MIDDLE
-        case MouseEvent.BUTTON3 => RIGHT
-        case _ => NONE
-      }
-      val dataPoint = s.toData(Vec2(p.getX, p.getY))
-      val gme = GraphMouseEvent(s, dataPoint, eventType, b)
-      graph().layers().foreach(layer => layer.onMouse(gme))
-    }
-
-    this.addMouseMotionListener(new MouseMotionListener() {
-      def mouseDragged(e: MouseEvent) {
-        fireMouse(e, DRAG)
-      }
-      def mouseMoved(e: MouseEvent) {
-        fireMouse(e, MOVE)
-      }
-    })
-
-    this.addMouseListener(new MouseListener(){
-      def mouseClicked(e: MouseEvent) {
-        fireMouse(e, CLICK)
-      }
-      def mousePressed(e: MouseEvent) {
-        fireMouse(e, PRESS)
-      }
-      def mouseReleased(e: MouseEvent) {
-        fireMouse(e, RELEASE)
-      }
-      def mouseEntered(e: MouseEvent) {}
-      def mouseExited(e: MouseEvent) {}
-    })
-  }
-
-  val v = View {
-    //Note, view will not be called from multiple threads concurrently,
-    //so we don't need to synchronize our own use of the off-buffer.
-    //We just sync on swapping buffers, so we don't do it while the
-    //component is drawing the on-buffer.
-    drawBuffer
-    replaceUpdate {
-      component.repaint()
-    }
-  }
-
-  def buildSpaces = {
-
-    val size = componentSize()
-    val area = graph().dataArea()
-    val borders = graph().borders()
-
-    val w = size.x.asInstanceOf[Int]
-    val h = size.y.asInstanceOf[Int]
-
-    val l = borders.left.asInstanceOf[Int]
-    val r = borders.right.asInstanceOf[Int]
-    val t = borders.top.asInstanceOf[Int]
-    val b = borders.bottom.asInstanceOf[Int]
-    val dw = w - l - r
-    val dh = h - t - b
-
-    GraphSpaces(area, Area(Vec2(l, t+dh), Vec2(dw, -dh)), Area(Vec2.zero, size))
-  }
-
-  def drawBuffer() {
-    val layers = graph().layers()
-    val spaces = buildSpaces
-
-    val w = spaces.componentArea.size.x.asInstanceOf[Int]
-    val h = spaces.componentArea.size.y.asInstanceOf[Int]
-
-    if (offBuffer.getWidth != w || offBuffer.getHeight != h) {
-      offBuffer = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB)
-    }
-
-    val buffer = offBuffer
-
-    val g = buffer.getGraphics.asInstanceOf[Graphics2D]
-    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-
-    //Each layer paints on a fresh canvas, to avoid side effects from one affecting the next
-    layers.foreach(layer => {
-      layer.paint(new GraphCanvasFromGraphics2D(g.create().asInstanceOf[Graphics2D], spaces))
-    })
-
-    g.dispose
-
-    bufferLock.synchronized{
-      val t = onBuffer
-      onBuffer = offBuffer
-      offBuffer = t
-    }
-  }
-
-}
