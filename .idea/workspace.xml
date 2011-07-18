@@ -73,28 +73,28 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Graph.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="Graph.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/graph/Graph.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="331" column="28" selection-start="10256" selection-end="10256" vertical-scroll-proportion="0.56718343">
+            <state line="409" column="61" selection-start="12856" selection-end="12856" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GraphSwing.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="GraphSwing.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/swing/GraphSwing.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="293" column="43" selection-start="8568" selection-end="8568" vertical-scroll-proportion="0.0">
+            <state line="219" column="17" selection-start="6433" selection-end="6433" vertical-scroll-proportion="0.5763098">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="MouseMotionListener.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar:///Library/Java/JavaVirtualMachines/1.6.0_24-b07-334.jdk/Contents/Home/src.jar!/src/java/awt/event/MouseMotionListener.java">
+      <file leaf-file-name="ListRef.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/boxes/src/boxes/list/ListRef.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="37" column="0" selection-start="1370" selection-end="2116" vertical-scroll-proportion="0.0">
+            <state line="83" column="6" selection-start="2029" selection-end="2029" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -185,8 +185,8 @@
         <option value="$PROJECT_DIR$/boxes/src/boxes/general/General.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/swing/SwingOps.scala" />
         <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
-        <option value="$PROJECT_DIR$/boxes/src/boxes/swing/GraphSwing.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/graph/Graph.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/swing/GraphSwing.scala" />
       </list>
     </option>
   </component>
@@ -226,7 +226,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
       <pane id="Favorites" />
       <pane id="ProjectPane">
         <subPane>
@@ -248,6 +247,7 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
       <pane id="Scope" />
     </panes>
   </component>
@@ -264,9 +264,9 @@
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
     <property name="MemberChooser.showClasses" value="true" />
     <property name="GoToClass.includeLibraries" value="false" />
-    <property name="options.searchVisible" value="true" />
-    <property name="options.splitter.details.proportions" value="0.2" />
     <property name="dynamic.classpath" value="false" />
+    <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.searchVisible" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
@@ -524,7 +524,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="22" width="1920" height="1054" extended-state="6" />
+    <frame x="0" y="22" width="1920" height="1174" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -532,14 +532,14 @@
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24959914" sideWeight="0.7782516" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3993576" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.21199143" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.21157496" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32881084" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.15606627" sideWeight="0.6663113" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32977018" sideWeight="0.7782516" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3997281" sideWeight="0.7782516" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.16782469" sideWeight="0.85974306" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.16782469" sideWeight="0.86053133" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.14025696" sideWeight="0.75681454" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.13946868" sideWeight="0.75681454" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.248394" sideWeight="0.23890968" order="1" side_tool="false" content_ui="tabs" />
@@ -584,11 +584,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/general/General.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="59" column="16" selection-start="1737" selection-end="1737" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/swing/SwingOps.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="95" column="14" selection-start="2781" selection-end="2781" vertical-scroll-proportion="0.0" />
@@ -634,26 +629,28 @@
         <state line="818" column="13" selection-start="19458" selection-end="19458" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/swing/ScrollBars.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="16" column="7" selection-start="849" selection-end="849" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/package.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="67" column="43" selection-start="2842" selection-end="2842" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/swing/GraphSwing.scala">
+    <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/immutable/Range.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="293" column="43" selection-start="8568" selection-end="8568" vertical-scroll-proportion="0.0">
+        <state line="224" column="7" selection-start="7054" selection-end="7054" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/swing/ScrollBars.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="16" column="7" selection-start="849" selection-end="849" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/collection/immutable/Range.scala">
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/list/ListRef.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="224" column="7" selection-start="7054" selection-end="7054" vertical-scroll-proportion="0.0" />
+        <state line="83" column="6" selection-start="2029" selection-end="2029" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Ref.scala">
@@ -663,7 +660,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/graph/Graph.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="331" column="28" selection-start="10256" selection-end="10256" vertical-scroll-proportion="0.56718343">
+        <state line="409" column="61" selection-start="12856" selection-end="12856" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/swing/GraphSwing.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="219" column="17" selection-start="6433" selection-end="6433" vertical-scroll-proportion="0.5763098">
           <folding />
         </state>
       </provider>

@@ -2,10 +2,10 @@ package boxes.graph
 
 import boxes._
 import java.text.DecimalFormat
-import list.ListVal
 import javax.swing.{ImageIcon}
 import java.awt.{Image, Color}
 import java.awt.geom.{PathIterator}
+import list.{ListVar, ListVal}
 
 object Axis extends Enumeration {
    type Axis = Value
@@ -25,6 +25,18 @@ case class Vec2(x:Double = 0, y:Double = 0) {
   def transpose = Vec2(y, x)
   def withX(newX:Double) = Vec2(newX, y)
   def withY(newY:Double) = Vec2(x, newY)
+
+  //The Vec2 that has the minimum value in each component that is in either
+  //this Vec2, or b.
+  //Geometrically, the bottom left corner of a rectangle
+  //containing this Vec2 and b
+  def componentMinima(b:Vec2) = Vec2(math.min(x, b.x), math.min(y, b.y))
+
+  //The Vec2 that has the maximum value in each component that is in either
+  //this Vec2, or b.
+  //Geometrically, The top right corner of a rectangle
+  //containing this Vec2 and b
+  def componentMaxima(b:Vec2) = Vec2(math.max(x, b.x), math.max(y, b.y))
 }
 
 object Vec2 {
@@ -60,10 +72,16 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
   def contains(v:Vec2) = normalise.rawContains(v)
   private def rawContains(v:Vec2) = (v.x >= origin.x && v.y >= origin.y && v.x <= origin.x + size.x && v.y <= origin.y + size.y)
 
+  def contains(a:Area) = normalise.rawContains(a)
+  private def rawContains(a:Area) = {
+    val area = a.normalise
+    (area.origin.x >= origin.x && area.origin.y >= origin.y && area.origin.x + area.size.x <= origin.x + size.x && area.origin.y + area.size.y <= origin.y + size.y)
+  }
+
   def normalise = {
     var w = size.x
     var h = size.y
-    if (w >= 0 && h >0 ) {
+    if (w >= 0 && h >= 0 ) {
       this
     } else {
       var x = origin.x
@@ -106,9 +124,49 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
     Area(Vec2(x, y), Vec2(w, h))
   }
 
+  def extendToContain(a:Area) = {
+    if (contains(a)) {
+      this
+    } else {
+      normalise.rawExtendToContain(a.normalise)
+    }
+  }
+  private def rawExtendToContain(a:Area) = {
+
+    var x = origin.x
+    var y = origin.y
+    var w = size.x
+    var h = size.y
+    if (a.origin.x < x) {
+      w += x - a.origin.x
+      x = a.origin.x
+    } else if (a.origin.x + a.size.x > x + w) {
+      w = a.origin.x + a.size.x - x
+    }
+    if (a.origin.y < y) {
+      h += y - a.origin.y
+      y = a.origin.y
+    } else if (a.origin.y + a.size.y > y + h) {
+      h = a.origin.y + a.size.y - y
+    }
+    Area(Vec2(x, y), Vec2(w, h))
+  }
+
+  def intersection(a:Area) = normalise.rawIntersection(a.normalise)
+
+  def rawIntersection(a:Area) = {
+    //Find corners of the intersection
+    val bottomLeft = origin.componentMaxima(a.origin)
+    val topRight = (origin + size).componentMinima(a.origin + a.size)
+
+    //Produce area from corners
+    Area(bottomLeft, topRight - bottomLeft)
+  }
+
 }
 
 trait Graph {
+  def dataBounds:RefGeneral[Option[Area], _]
   def layers:RefGeneral[List[GraphLayer], _]
   def overlayers:RefGeneral[List[GraphLayer], _]
   def dataArea:RefGeneral[Area, _]
@@ -326,12 +384,11 @@ class GraphSeries(series:RefGeneral[List[Series], _], shadow:Boolean = false) ex
 
 }
 
-class GraphZoomBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], areaOut:VarGeneral[Area, _]) extends GraphLayer {
+class GraphZoomBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], areaOut:VarGeneral[Area, _], zoomOutArea:RefGeneral[Option[Area], _]) extends GraphLayer {
   private val area:Var[Option[Area]] = Var(None)
 
   def paint(canvas:GraphCanvas) {
     area().foreach(a => {
-      canvas.clipToData
       canvas.color = fill()
       canvas.fillRect(canvas.spaces.toPixel(a))
       canvas.color = outline()
@@ -347,17 +404,35 @@ class GraphZoomBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], area
       })
       case RELEASE => area().foreach(a => {
         area() = None
-        areaOut() = Area(a.origin, e.dataPoint - a.origin).normalise
+        val zoomArea = Area(a.origin, e.dataPoint - a.origin)
+        //Zoom out for second quadrant drag (x negative, y positive)
+        zoomOutArea() match {
+          case Some(zoomOutAreaValue) if (zoomArea.size.x < 0 && zoomArea.size.y > 0) => areaOut() = zoomOutAreaValue
+          case _ => areaOut() = zoomArea.normalise
+        }
       })
       case _ => {}
     }
   }
 
-  val dataBounds = area
+  val dataBounds = Val(None:Option[Area])
 
 }
 
-case class GraphBasic(layers:RefGeneral[List[GraphLayer], _], overlayers:RefGeneral[List[GraphLayer], _], dataArea:RefGeneral[Area, _], borders:RefGeneral[Borders, _]) extends Graph
+case class GraphBasic(layers:RefGeneral[List[GraphLayer], _], overlayers:RefGeneral[List[GraphLayer], _], dataArea:RefGeneral[Area, _], borders:RefGeneral[Borders, _]) extends Graph {
+  val dataBounds = Cal{
+    layers().foldLeft(None:Option[Area]){
+      (areaOption, layer) => areaOption match {
+        case None => layer.dataBounds()
+
+        case Some(area) => layer.dataBounds() match {
+          case None => Some(area)
+          case Some(layerArea) => Some(area.extendToContain(layerArea))
+        }
+      }
+    }
+  }
+}
 
 object GraphBasic {
   def withSeries(
@@ -366,7 +441,10 @@ object GraphBasic {
       xName:RefGeneral[String, _] = Val("x"),
       yName:RefGeneral[String, _] = Val("y"),
       borders:RefGeneral[Borders, _] = Val(Borders(16, 74, 53, 16))) = {
-    new GraphBasic(
+
+    val overlayers = ListVar[GraphLayer]()
+
+    val gb = new GraphBasic(
       ListVal(
         new GraphBG(SwingView.alternateBackgroundColor, Color.white),
         new GraphHighlight(),
@@ -379,12 +457,18 @@ object GraphBasic {
         new GraphAxisTitle(X, xName),
         new GraphAxisTitle(Y, yName)
       ),
-      ListVal(
-        new GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), dataArea)
-      ),
+      overlayers,
       dataArea,
       borders
     )
+
+    //TODO can we do this without a cyclic reference from Graph to GraphZoomBox to dataArea of Graph? Technically
+    //we can if we separate out the dataBounds var and make it first, but this seems messy as well.
+    //We can't build the zoomer until we have access to graph's databounds, so we need to use a ListVar and
+    //fill it out later
+    overlayers.insert(0, new GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), dataArea, gb.dataBounds))
+
+    gb
   }
 }
 

@@ -214,7 +214,23 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
         case MouseEvent.BUTTON3 => RIGHT
         case _ => NONE
       }
-      val dataPoint = s.toData(Vec2(p.getX, p.getY))
+      var x = p.x
+      var y = p.y
+      //Slight borders
+      val w = getWidth-2
+      val h = getHeight-2
+      if (x < 0) {
+        x = 0
+      } else if (x > w) {
+        x = w
+      }
+      if (y < 0) {
+        y = 0
+      } else if (y > h) {
+        y = h
+      }
+
+      val dataPoint = s.toData(Vec2(x, y))
       val gme = GraphMouseEvent(s, dataPoint, eventType, b)
       graph().layers().foreach(layer => layer.onMouse(gme))
       graph().overlayers().foreach(layer => layer.onMouse(gme))
