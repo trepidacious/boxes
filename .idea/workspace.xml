@@ -73,19 +73,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Graph.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="Graph.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/graph/Graph.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="409" column="61" selection-start="12856" selection-end="12856" vertical-scroll-proportion="0.0">
+            <state line="430" column="52" selection-start="13193" selection-end="13193" vertical-scroll-proportion="-0.42027333">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GraphSwing.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="GraphSwing.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/swing/GraphSwing.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="219" column="17" selection-start="6433" selection-end="6433" vertical-scroll-proportion="0.5763098">
+            <state line="219" column="17" selection-start="6433" selection-end="6433" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -185,8 +185,8 @@
         <option value="$PROJECT_DIR$/boxes/src/boxes/general/General.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/swing/SwingOps.scala" />
         <option value="$PROJECT_DIR$/boxes/demo/boxes/demo/BoxesDemo.scala" />
-        <option value="$PROJECT_DIR$/boxes/src/boxes/graph/Graph.scala" />
         <option value="$PROJECT_DIR$/boxes/src/boxes/swing/GraphSwing.scala" />
+        <option value="$PROJECT_DIR$/boxes/src/boxes/graph/Graph.scala" />
       </list>
     </option>
   </component>
@@ -614,6 +614,21 @@
         <state line="37" column="0" selection-start="1370" selection-end="2116" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Ref.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="47" column="11" selection-start="1017" selection-end="1017" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/swing/GraphSwing.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="219" column="17" selection-start="6433" selection-end="6433" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/list/ListRef.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="83" column="6" selection-start="2029" selection-end="2029" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
     <entry file="jar:///Library/Java/JavaVirtualMachines/1.6.0_24-b07-334.jdk/Contents/Home/src.jar!/src/java/awt/event/MouseListener.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="40" column="0" selection-start="1457" selection-end="2097" vertical-scroll-proportion="0.0" />
@@ -629,6 +644,11 @@
         <state line="818" column="13" selection-start="19458" selection-end="19458" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/swing/ScrollBars.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="16" column="7" selection-start="849" selection-end="849" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
     <entry file="jar://$USER_HOME$/scala/src/scala-library-src.jar!/scala/package.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="67" column="43" selection-start="2842" selection-end="2842" vertical-scroll-proportion="0.0" />
@@ -639,35 +659,9 @@
         <state line="224" column="7" selection-start="7054" selection-end="7054" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/swing/ScrollBars.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="16" column="7" selection-start="849" selection-end="849" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/list/ListRef.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="83" column="6" selection-start="2029" selection-end="2029" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/Ref.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="47" column="11" selection-start="1017" selection-end="1017" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/graph/Graph.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="409" column="61" selection-start="12856" selection-end="12856" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/boxes/src/boxes/swing/GraphSwing.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="219" column="17" selection-start="6433" selection-end="6433" vertical-scroll-proportion="0.5763098">
+        <state line="430" column="52" selection-start="13193" selection-end="13193" vertical-scroll-proportion="-0.42027333">
           <folding />
         </state>
       </provider>

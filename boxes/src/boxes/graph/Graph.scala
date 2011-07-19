@@ -163,10 +163,17 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
     Area(bottomLeft, topRight - bottomLeft)
   }
 
+  def pad(v:Vec2) = normalise.rawPad(v)
+  def rawPad(v:Vec2) = {
+    val padding = size * v
+    val o = origin - padding
+    val s = size + padding * (Vec2(2,2))
+    Area(o, s)
+  }
+
 }
 
 trait Graph {
-  def dataBounds:RefGeneral[Option[Area], _]
   def layers:RefGeneral[List[GraphLayer], _]
   def overlayers:RefGeneral[List[GraphLayer], _]
   def dataArea:RefGeneral[Area, _]
@@ -384,7 +391,7 @@ class GraphSeries(series:RefGeneral[List[Series], _], shadow:Boolean = false) ex
 
 }
 
-class GraphZoomBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], areaOut:VarGeneral[Area, _], zoomOutArea:RefGeneral[Option[Area], _]) extends GraphLayer {
+class GraphZoomBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], areaOut:VarGeneral[Option[Area], _]) extends GraphLayer {
   private val area:Var[Option[Area]] = Var(None)
 
   def paint(canvas:GraphCanvas) {
@@ -406,9 +413,10 @@ class GraphZoomBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], area
         area() = None
         val zoomArea = Area(a.origin, e.dataPoint - a.origin)
         //Zoom out for second quadrant drag (x negative, y positive)
-        zoomOutArea() match {
-          case Some(zoomOutAreaValue) if (zoomArea.size.x < 0 && zoomArea.size.y > 0) => areaOut() = zoomOutAreaValue
-          case _ => areaOut() = zoomArea.normalise
+        if (zoomArea.size.x < 0 && zoomArea.size.y > 0) {
+          areaOut() = None
+        } else {
+          areaOut() = Some(zoomArea.normalise)
         }
       })
       case _ => {}
@@ -419,33 +427,54 @@ class GraphZoomBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], area
 
 }
 
-case class GraphBasic(layers:RefGeneral[List[GraphLayer], _], overlayers:RefGeneral[List[GraphLayer], _], dataArea:RefGeneral[Area, _], borders:RefGeneral[Borders, _]) extends Graph {
-  val dataBounds = Cal{
-    layers().foldLeft(None:Option[Area]){
-      (areaOption, layer) => areaOption match {
-        case None => layer.dataBounds()
+case class GraphZoomerAxis(
+    requiredRange:Ref[Option[(Int, Int)]] = Var(None),
+    padding:Ref[Double] = Var(0.05)
+)
 
-        case Some(area) => layer.dataBounds() match {
-          case None => Some(area)
-          case Some(layerArea) => Some(area.extendToContain(layerArea))
-        }
+class GraphZoomer(
+    val dataBounds:RefGeneral[Option[Area], _],
+    val manualBounds:Var[Option[Area]] = Var(None),
+    val xAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
+    val yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis())) {
+
+  def autoArea = {
+    dataBounds() match {
+      case None => {
+        //We have no data bounds, so use the axes required ranges,
+        //or 0 to 1 in each axis if there are none.
+        val xRange = xAxis().requiredRange().getOrElse((0, 1))
+        val yRange = yAxis().requiredRange().getOrElse((0, 1))
+        Area(Vec2(xRange._1, yRange._1), Vec2(xRange._2, yRange._2)).normalise
+      }
+      case Some(area) => {
+        //We have a data bounds area, so pad it appropriately
+        val auto = area.pad(Vec2(xAxis().padding(), yAxis().padding()))
+
+        val padX = xAxis().requiredRange().foldLeft(auto){(area, range) => area.extendToContain(Vec2(range._1, auto.origin.y)).extendToContain(Vec2(range._2, auto.origin.y))}
+        val padY = yAxis().requiredRange().foldLeft(padX){(area, range) => area.extendToContain(Vec2(auto.origin.x, range._1)).extendToContain(Vec2(auto.origin.x, range._2))}
+
+        padY
       }
     }
   }
+
+  val dataArea = Cal{
+    //Use manual bounds if specified, automatic area from data bounds etc.
+    manualBounds().getOrElse(autoArea)
+  }
 }
+
+case class GraphBasic(layers:RefGeneral[List[GraphLayer], _], overlayers:RefGeneral[List[GraphLayer], _], dataArea:RefGeneral[Area, _], borders:RefGeneral[Borders, _]) extends Graph {}
 
 object GraphBasic {
   def withSeries(
       series:RefGeneral[List[Series], _],
-      dataArea:VarGeneral[Area, _] = Var(Area()),
       xName:RefGeneral[String, _] = Val("x"),
       yName:RefGeneral[String, _] = Val("y"),
       borders:RefGeneral[Borders, _] = Val(Borders(16, 74, 53, 16))) = {
 
-    val overlayers = ListVar[GraphLayer]()
-
-    val gb = new GraphBasic(
-      ListVal(
+    val layers = ListVal[GraphLayer](
         new GraphBG(SwingView.alternateBackgroundColor, Color.white),
         new GraphHighlight(),
         new GraphSeries(series, true),
@@ -456,19 +485,33 @@ object GraphBasic {
         new GraphOutline(),
         new GraphAxisTitle(X, xName),
         new GraphAxisTitle(Y, yName)
-      ),
-      overlayers,
-      dataArea,
-      borders
+      )
+
+    val dataBounds = Cal{
+      layers().foldLeft(None:Option[Area]){
+        (areaOption, layer) => areaOption match {
+          case None => layer.dataBounds()
+
+          case Some(area) => layer.dataBounds() match {
+            case None => Some(area)
+            case Some(layerArea) => Some(area.extendToContain(layerArea))
+          }
+        }
+      }
+    }
+
+    val zoomer = new GraphZoomer(dataBounds)
+
+    val overlayers = ListVal[GraphLayer](
+      new GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), zoomer.manualBounds)
     )
 
-    //TODO can we do this without a cyclic reference from Graph to GraphZoomBox to dataArea of Graph? Technically
-    //we can if we separate out the dataBounds var and make it first, but this seems messy as well.
-    //We can't build the zoomer until we have access to graph's databounds, so we need to use a ListVar and
-    //fill it out later
-    overlayers.insert(0, new GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), dataArea, gb.dataBounds))
-
-    gb
+    new GraphBasic(
+      layers,
+      overlayers,
+      zoomer.dataArea,
+      borders
+    )
   }
 }
 
