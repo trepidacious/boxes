@@ -391,35 +391,48 @@ class GraphSeries(series:RefGeneral[List[Series], _], shadow:Boolean = false) ex
 
 }
 
-class GraphZoomBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], areaOut:VarGeneral[Option[Area], _]) extends GraphLayer {
+class GraphZoomBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], areaOut:VarGeneral[Option[Area], _], enabled:RefGeneral[Boolean, _] = Val(true)) extends GraphLayer {
   private val area:Var[Option[Area]] = Var(None)
 
+  def bigEnough(a:Area) = (math.abs(a.size.x) > 5 || math.abs(a.size.y) > 5)
+
   def paint(canvas:GraphCanvas) {
-    area().foreach(a => {
-      canvas.color = fill()
-      canvas.fillRect(canvas.spaces.toPixel(a))
-      canvas.color = outline()
-      canvas.drawRect(canvas.spaces.toPixel(a))
-    })
+    if (enabled()) {
+      area().foreach(a => {
+        val pixelArea = canvas.spaces.toPixel(a)
+        if (bigEnough(pixelArea)) {
+          canvas.color = fill()
+          canvas.fillRect(canvas.spaces.toPixel(a))
+          canvas.color = outline()
+          canvas.drawRect(canvas.spaces.toPixel(a))
+        }
+      })
+    }
   }
 
   def onMouse(e:GraphMouseEvent) {
-    e.eventType match {
-      case PRESS => area() = Some(Area(e.dataPoint, Vec2(0, 0)))
-      case DRAG => area().foreach(a => {
-        area() = Some(Area(a.origin, e.dataPoint - a.origin))
-      })
-      case RELEASE => area().foreach(a => {
-        area() = None
-        val zoomArea = Area(a.origin, e.dataPoint - a.origin)
-        //Zoom out for second quadrant drag (x negative, y positive)
-        if (zoomArea.size.x < 0 && zoomArea.size.y > 0) {
-          areaOut() = None
-        } else {
-          areaOut() = Some(zoomArea.normalise)
-        }
-      })
-      case _ => {}
+    if (enabled()) {
+      e.eventType match {
+        case PRESS => area() = Some(Area(e.dataPoint, Vec2(0, 0)))
+        case DRAG => area().foreach(a => {
+          area() = Some(Area(a.origin, e.dataPoint - a.origin))
+        })
+        case RELEASE => area().foreach(a => {
+          area() = None
+          val zoomArea = Area(a.origin, e.dataPoint - a.origin)
+          val pixelZoomArea = e.spaces.toPixel(zoomArea)
+          //Only zoom on reasonable drag
+          if (bigEnough(pixelZoomArea)) {
+            //Zoom out for second quadrant drag (x negative, y positive)
+            if (zoomArea.size.x < 0 && zoomArea.size.y > 0) {
+              areaOut() = None
+            } else {
+              areaOut() = Some(zoomArea.normalise)
+            }
+          }
+        })
+        case _ => {}
+      }
     }
   }
 

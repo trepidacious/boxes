@@ -76,7 +76,7 @@
       <file leaf-file-name="Graph.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/boxes/src/boxes/graph/Graph.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="430" column="52" selection-start="13193" selection-end="13193" vertical-scroll-proportion="-0.42027333">
+            <state line="396" column="75" selection-start="12328" selection-end="12328" vertical-scroll-proportion="0.3861048">
               <folding />
             </state>
           </provider>
@@ -661,7 +661,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/boxes/src/boxes/graph/Graph.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="430" column="52" selection-start="13193" selection-end="13193" vertical-scroll-proportion="-0.42027333">
+        <state line="396" column="75" selection-start="12328" selection-end="12328" vertical-scroll-proportion="0.3861048">
           <folding />
         </state>
       </provider>
