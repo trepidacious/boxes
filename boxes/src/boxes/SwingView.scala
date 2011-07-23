@@ -13,6 +13,7 @@ import table._
 import util._
 import java.util.concurrent.atomic.AtomicBoolean
 import java.awt.{Color, Component}
+import sun.jvm.hotspot.debugger.posix.elf.ELFSectionHeader
 
 //TODO implement rate-limiting of updates? But then we need to know that views don't rely on all updates being called, just the most recent
 //Should be easy enough to do, just make the views store some Atomic style stuff they need to use to update, and fiddle
@@ -226,14 +227,14 @@ object BooleanControlType extends Enumeration {
 import BooleanControlType._
 
 object BooleanView {
-  def apply(v:VarGeneral[Boolean,_], n:RefGeneral[String,_], controlType:BooleanControlType = CHECKBOX, icon:RefGeneral[Option[Icon], _] = Val(None)) = new BooleanOptionView(v, n, new TConverter[Boolean], controlType, icon).asInstanceOf[SwingView]
+  def apply(v:VarGeneral[Boolean,_], n:RefGeneral[String,_], controlType:BooleanControlType = CHECKBOX, icon:RefGeneral[Option[Icon], _] = Val(None), toggle:Boolean = true) = new BooleanOptionView(v, n, new TConverter[Boolean], controlType, icon, toggle).asInstanceOf[SwingView]
 }
 
 object BooleanOptionView {
-  def apply(v:VarGeneral[Option[Boolean],_], n:RefGeneral[String,_], controlType:BooleanControlType = CHECKBOX, icon:RefGeneral[Option[Icon], _] = Val(None)) = new BooleanOptionView(v, n, new OptionTConverter[Boolean], controlType, icon).asInstanceOf[SwingView]
+  def apply(v:VarGeneral[Option[Boolean],_], n:RefGeneral[String,_], controlType:BooleanControlType = CHECKBOX, icon:RefGeneral[Option[Icon], _] = Val(None), toggle:Boolean = true) = new BooleanOptionView(v, n, new OptionTConverter[Boolean], controlType, icon, toggle).asInstanceOf[SwingView]
 }
 
-private class BooleanOptionView[G](v:VarGeneral[G,_], n:RefGeneral[String,_], c:GConverter[G, Boolean], controlType:BooleanControlType, icon:RefGeneral[Option[Icon], _]) extends SwingView {
+private class BooleanOptionView[G](v:VarGeneral[G,_], n:RefGeneral[String,_], c:GConverter[G, Boolean], controlType:BooleanControlType, icon:RefGeneral[Option[Icon], _], toggle:Boolean = true) extends SwingView {
 
   val component = controlType match {
     case CHECKBOX => new LinkingJCheckBox(this)
@@ -250,7 +251,7 @@ private class BooleanOptionView[G](v:VarGeneral[G,_], n:RefGeneral[String,_], c:
       override def actionPerformed(e:ActionEvent) = {
         c.toOption(v()) match {
           case None => None
-          case Some(b) => v() = c.toG(!b)
+          case Some(b) => v() = if (toggle) c.toG(!b) else c.toG(true)
         }
       }
     })

@@ -1,6 +1,6 @@
 package boxes.general
 
-import boxes.{RefGeneral, VarGeneral, Op, Val, Var, Reaction, Box}
+import boxes._
 
 object RadioReaction {
   def apply(options:Var[Boolean]*) = {
@@ -62,3 +62,15 @@ class TrueOp[T](v:VarGeneral[Boolean,_], val canApply:RefGeneral[Boolean, _] = V
   }
 }
 
+object SetOp {
+  def apply[T](v:VarGeneral[T, _], s:RefGeneral[T, _]) = new SetOp[T](v, s)
+}
+
+class SetOp[T](v:VarGeneral[T, _], s:RefGeneral[T, _]) extends Op {
+  def apply() {
+    Box.transact{
+      v() = s()
+    }
+  }
+  val canApply = Cal{v() != s()}
+}

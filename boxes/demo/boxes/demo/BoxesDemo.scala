@@ -4,7 +4,7 @@ import javax.swing._
 import java.awt.event.ActionEvent
 import boxes.util.{LogStep, Step, CoalescingResponder, NumericClass}
 import boxes._
-import general.{RadioReaction, TrueOp}
+import general.{RadioReaction, TrueOp, SetOp}
 import graph._
 import list._
 import persistence._
@@ -722,6 +722,12 @@ object BoxesDemo {
   }
 
   def buildGraphPanel() = {
+
+    val selectEnabled = Var(false)
+    val zoomEnabled = Var(true)
+    val manualBounds = Var(None:Option[Area])
+    RadioReaction(selectEnabled, zoomEnabled)
+
     val graph = Var (
       GraphBasic.withSeries (
         series = ListVar[Series] (
@@ -734,24 +740,26 @@ object BoxesDemo {
           }).toList
         ),
         xName = Val("X Axis Name String"),
-        yName = Val("Y Axis Name String")
+        yName = Val("Y Axis Name String"),
+        zoomEnabled = zoomEnabled,
+        manualBounds = manualBounds,
+        selectEnabled = selectEnabled
       )
     )
 
     val v = GraphSwingView(graph)
 
-    val zoomIn = Var(true)
-    val zoomOut = Var(false)
-    RadioReaction(zoomIn, zoomOut)
+    //Zoom out by clearing manual bounds to None
+    val zoomOutButton = SwingButton(SwingOp("", GraphSwingView.zoomOut, SetOp(manualBounds, Val(None:Option[Area]))))
 
-    val zoomInOp = SwingButton(SwingOp("", GraphSwingView.zoomIn, TrueOp(zoomIn)))
-    val zoomOutOp = SwingButton(SwingOp("", GraphSwingView.zoomOut, TrueOp(zoomOut)))
+    val zoomEnabledView = BooleanView(zoomEnabled, Val(""), BooleanControlType.TOOLBARBUTTON, Val(Some(GraphSwingView.zoomSelect)), false)
+    val selectEnabledView = BooleanView(selectEnabled, Val(""), BooleanControlType.TOOLBARBUTTON, Val(Some(GraphSwingView.boxSelect)), false)
 
-    val print = View{
-      println("in " + zoomIn() + ", out " + zoomOut())
-    }
+//    val print = View{
+//      println("in " + zoomIn() + ", out " + zoomOut())
+//    }
 
-    val buttons = SwingButtonBar().add(zoomInOp).add(zoomOutOp).buildWithListStyleComponent(new JLabel("Demo Graph"))
+    val buttons = SwingButtonBar().add(selectEnabledView).add(zoomEnabledView).add(zoomOutButton).buildWithListStyleComponent(new JLabel("Demo Graph"))
 
     val panel = new JPanel(new BorderLayout())
     panel.add(v.component, BorderLayout.CENTER)

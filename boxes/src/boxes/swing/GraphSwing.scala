@@ -159,6 +159,7 @@ object GraphSwingView {
   val zoomIn = new ImageIcon(classOf[GraphSwingView].getResource("/boxes/swing/ZoomIn.png"))
   val zoomOut = new ImageIcon(classOf[GraphSwingView].getResource("/boxes/swing/ZoomOut.png"))
   val zoomSelect = new ImageIcon(classOf[GraphSwingView].getResource("/boxes/swing/ZoomSelect.png"))
+  val boxSelect = new ImageIcon(classOf[GraphSwingView].getResource("/boxes/swing/BoxSelect.png"))
 
   def apply(graph:Ref[_ <: Graph]) = new GraphSwingView(graph)
 }
@@ -166,8 +167,9 @@ object GraphSwingView {
 class GraphBuffer(var image:BufferedImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB)) {
   val lock = new Object()
   def ensureSize(area:Vec2) {
-    val w = area.x.asInstanceOf[Int]
-    val h = area.y.asInstanceOf[Int]
+    val w = math.max(area.x.asInstanceOf[Int], 1)
+    val h = math.max(area.y.asInstanceOf[Int], 1)
+
     if (image.getWidth != w || image.getHeight != h) {
       image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
     }

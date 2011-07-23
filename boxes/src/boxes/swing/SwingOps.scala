@@ -13,7 +13,7 @@ class SwingOpAction(name:String, icon:Icon, op:Op) extends AbstractAction(name, 
   def actionPerformed(e:ActionEvent) {
     op()
   }
-  View {
+  val view = View {
     val enabled = op.canApply()
     SwingView.replaceUpdate(
       this,
@@ -101,6 +101,7 @@ object SwingButtonBar {
 class SwingButtonBarBuilder(val components:List[JComponent]) {
   def add(c:JComponent) = new SwingButtonBarBuilder(components ::: List(c))
   def add(op:Op):SwingButtonBarBuilder = add(SwingButton(op))
+  def add(v:SwingView) = new SwingButtonBarBuilder(components ::: List(v.component))
 
   def buildWithListStyleComponent(c:JComponent) = {
     val padding = SwingButton.buttonPadding
@@ -126,7 +127,7 @@ class SwingButtonBarBuilder(val components:List[JComponent]) {
 
 object ListStylePainter {
   val dividerColor = new Color(0, 0, 0, 51)
-  val pressedColor = new Color(0, 0, 0, 51)
+  val pressedColor = new Color(0, 0, 0, 25)
   val dividerBright = new Color(1f, 1f, 1f, 0.4f)
   val topColor = new Color(0xaaaaaa)
   val image = new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/ListButton.png")).getImage

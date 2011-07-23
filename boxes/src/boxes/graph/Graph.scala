@@ -441,6 +441,55 @@ class GraphZoomBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], area
 
 }
 
+class GraphSelectBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], enabled:RefGeneral[Boolean, _] = Val(true)) extends GraphLayer {
+  private val area:Var[Option[Area]] = Var(None)
+
+  def bigEnough(a:Area) = (math.abs(a.size.x) > 5 || math.abs(a.size.y) > 5)
+
+  def paint(canvas:GraphCanvas) {
+    if (enabled()) {
+      area().foreach(a => {
+        val pixelArea = canvas.spaces.toPixel(a)
+        if (bigEnough(pixelArea)) {
+          canvas.color = fill()
+          canvas.fillRect(canvas.spaces.toPixel(a))
+          canvas.color = outline()
+          canvas.drawRect(canvas.spaces.toPixel(a))
+        }
+      })
+    }
+  }
+
+  def onMouse(e:GraphMouseEvent) {
+    if (enabled()) {
+      e.eventType match {
+        case PRESS => area() = Some(Area(e.dataPoint, Vec2(0, 0)))
+        case DRAG => area().foreach(a => {
+          area() = Some(Area(a.origin, e.dataPoint - a.origin))
+        })
+        case RELEASE => area().foreach(a => {
+          area() = None
+//          val zoomArea = Area(a.origin, e.dataPoint - a.origin)
+//          val pixelZoomArea = e.spaces.toPixel(zoomArea)
+//          //Only zoom on reasonable drag
+//          if (bigEnough(pixelZoomArea)) {
+//            //Zoom out for second quadrant drag (x negative, y positive)
+//            if (zoomArea.size.x < 0 && zoomArea.size.y > 0) {
+//              areaOut() = None
+//            } else {
+//              areaOut() = Some(zoomArea.normalise)
+//            }
+//          }
+        })
+        case _ => {}
+      }
+    }
+  }
+
+  val dataBounds = Val(None:Option[Area])
+
+}
+
 case class GraphZoomerAxis(
     requiredRange:Ref[Option[(Int, Int)]] = Var(None),
     padding:Ref[Double] = Var(0.05)
@@ -448,7 +497,7 @@ case class GraphZoomerAxis(
 
 class GraphZoomer(
     val dataBounds:RefGeneral[Option[Area], _],
-    val manualBounds:Var[Option[Area]] = Var(None),
+    val manualBounds:RefGeneral[Option[Area], _] = Val(None),
     val xAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
     val yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis())) {
 
@@ -486,7 +535,12 @@ object GraphBasic {
       series:RefGeneral[List[Series], _],
       xName:RefGeneral[String, _] = Val("x"),
       yName:RefGeneral[String, _] = Val("y"),
-      borders:RefGeneral[Borders, _] = Val(Borders(16, 74, 53, 16))) = {
+      borders:RefGeneral[Borders, _] = Val(Borders(16, 74, 53, 16)),
+      zoomEnabled:RefGeneral[Boolean, _] = Val(true),
+      manualBounds:VarGeneral[Option[Area], _] = Var(None),
+      xAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
+      yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
+      selectEnabled:RefGeneral[Boolean, _] = Val(false)) = {
 
     val layers = ListVal[GraphLayer](
         new GraphBG(SwingView.alternateBackgroundColor, Color.white),
@@ -514,10 +568,11 @@ object GraphBasic {
       }
     }
 
-    val zoomer = new GraphZoomer(dataBounds)
+    val zoomer = new GraphZoomer(dataBounds, manualBounds, xAxis, yAxis)
 
     val overlayers = ListVal[GraphLayer](
-      new GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), zoomer.manualBounds)
+      new GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), manualBounds, zoomEnabled),
+      new GraphSelectBox(Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100)), selectEnabled)
     )
 
     new GraphBasic(
