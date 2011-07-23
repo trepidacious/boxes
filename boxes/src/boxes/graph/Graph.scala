@@ -4,8 +4,7 @@ import boxes._
 import java.text.DecimalFormat
 import javax.swing.{ImageIcon}
 import java.awt.{Image, Color}
-import java.awt.geom.{PathIterator}
-import list.{ListVar, ListVal}
+import list.ListVal
 
 object Axis extends Enumeration {
    type Axis = Value
@@ -105,6 +104,7 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
     }
   }
   private def rawExtendToContain(v:Vec2) = {
+    //TODO can probably be done more concisely using corners
     var x = origin.x
     var y = origin.y
     var w = size.x
@@ -133,6 +133,7 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
   }
   private def rawExtendToContain(a:Area) = {
 
+    //TODO can probably be done more concisely using corners
     var x = origin.x
     var y = origin.y
     var w = size.x

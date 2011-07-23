@@ -219,18 +219,28 @@ private class StringOptionView[G](v:VarGeneral[G,_], c:GConverter[G, String], mu
 class LinkingJScrollPane(val sv:SwingView, contents:Component) extends JScrollPane(contents) {}
 class LinkingJTextField(val sv:SwingView) extends JTextField {}
 
+object BooleanControlType extends Enumeration {
+   type BooleanControlType = Value
+   val CHECKBOX, TOGGLEBUTTON, TOOLBARBUTTON = Value
+}
+import BooleanControlType._
 
 object BooleanView {
-  def apply(v:VarGeneral[Boolean,_], n:RefGeneral[String,_], button:Boolean = false) = new BooleanOptionView(v, n, new TConverter[Boolean], button).asInstanceOf[SwingView]
+  def apply(v:VarGeneral[Boolean,_], n:RefGeneral[String,_], controlType:BooleanControlType = CHECKBOX, icon:RefGeneral[Option[Icon], _] = Val(None)) = new BooleanOptionView(v, n, new TConverter[Boolean], controlType, icon).asInstanceOf[SwingView]
 }
 
 object BooleanOptionView {
-  def apply(v:VarGeneral[Option[Boolean],_], n:RefGeneral[String,_], button:Boolean = false) = new BooleanOptionView(v, n, new OptionTConverter[Boolean], button).asInstanceOf[SwingView]
+  def apply(v:VarGeneral[Option[Boolean],_], n:RefGeneral[String,_], controlType:BooleanControlType = CHECKBOX, icon:RefGeneral[Option[Icon], _] = Val(None)) = new BooleanOptionView(v, n, new OptionTConverter[Boolean], controlType, icon).asInstanceOf[SwingView]
 }
 
-private class BooleanOptionView[G](v:VarGeneral[G,_], n:RefGeneral[String,_], c:GConverter[G, Boolean], button:Boolean) extends SwingView {
+private class BooleanOptionView[G](v:VarGeneral[G,_], n:RefGeneral[String,_], c:GConverter[G, Boolean], controlType:BooleanControlType, icon:RefGeneral[Option[Icon], _]) extends SwingView {
 
-  val component = if (!button) new LinkingJCheckBox(this) else new LinkingJToggleButton(this)
+  val component = controlType match {
+    case CHECKBOX => new LinkingJCheckBox(this)
+    case TOGGLEBUTTON => new LinkingJToggleButton(this)
+    case TOOLBARBUTTON => new LinkingToolbarToggleButton(this)
+  }
+
   private val model = new AutoButtonModel()
 
   {
@@ -250,12 +260,13 @@ private class BooleanOptionView[G](v:VarGeneral[G,_], n:RefGeneral[String,_], c:
     //Store the values for later use on Swing Thread
     val newV = v()
     val newN = n()
+    val newIcon = icon()
     //This will be called from Swing Thread
-    replaceUpdate { display(newV, newN) }
+    replaceUpdate { display(newV, newN, newIcon) }
   }
 
   //Update display if necessary
-  private def display(newV:G, newN:String) {
+  private def display(newV:G, newN:String, newIcon:Option[Icon]) {
     c.toOption(newV) match {
       case None => {
         model.enabled = false
@@ -269,6 +280,10 @@ private class BooleanOptionView[G](v:VarGeneral[G,_], n:RefGeneral[String,_], c:
     model.fire
     if (newN != component.getText) {
       component.setText(newN)
+    }
+    val iconOrNull = newIcon.getOrElse(null)
+    if (iconOrNull != component.getIcon) {
+      component.setIcon(iconOrNull)
     }
   }
 
@@ -284,7 +299,7 @@ private class BooleanOptionView[G](v:VarGeneral[G,_], n:RefGeneral[String,_], c:
 
 class LinkingJCheckBox(val sv:SwingView) extends JCheckBox {}
 class LinkingJToggleButton(val sv:SwingView) extends JToggleButton {}
-
+class LinkingToolbarToggleButton(val sv:SwingView) extends SwingToggleButton {}
 
 
 object RangeView {
