@@ -6,8 +6,8 @@ import boxes.list.{ListMultiDeleteOp, ListDeleteOp, ListMultiAddOp, ListAddOp, L
 import com.explodingpixels.painter.Painter
 import javax.swing._
 import border.EmptyBorder
-import com.explodingpixels.swingx.{EPPanel, EPButton}
 import java.awt.{BorderLayout, Component, Graphics2D, Color}
+import com.explodingpixels.swingx.{EPToggleButton, EPPanel, EPButton}
 
 class SwingOpAction(name:String, icon:Icon, op:Op) extends AbstractAction(name, icon) {
   def actionPerformed(e:ActionEvent) {
@@ -85,6 +85,15 @@ object SwingButton {
   }
 }
 
+
+class SwingToggleButton extends EPToggleButton{
+  {
+    setBorder(new EmptyBorder(4,2,3,2))
+    setContentAreaFilled(false)
+    setBackgroundPainter(new ListStyleToggleButtonPainter())
+  }
+}
+
 object SwingButtonBar {
   def apply() = new SwingButtonBarBuilder(List[JComponent]())
 }
@@ -158,6 +167,16 @@ class ListStyleButtonPainter(paintLeft:Boolean = false, paintRight:Boolean = tru
   override def paint(g:Graphics2D, t:AbstractButton, w:Int, h:Int) {
     super.paint(g, t, w, h)
     if (t.getModel.isPressed) {
+      g.setColor(ListStylePainter.pressedColor)
+      g.fillRect(0, 0, w, h)
+    }
+  }
+}
+
+class ListStyleToggleButtonPainter(paintLeft:Boolean = false, paintRight:Boolean = true) extends ListStylePainter[AbstractButton] {
+  override def paint(g:Graphics2D, t:AbstractButton, w:Int, h:Int) {
+    super.paint(g, t, w, h)
+    if (t.getModel.isSelected || t.getModel.isPressed) {
       g.setColor(ListStylePainter.pressedColor)
       g.fillRect(0, 0, w, h)
     }
