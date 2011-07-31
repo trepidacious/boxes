@@ -5,6 +5,8 @@ import java.text.DecimalFormat
 import javax.swing.{ImageIcon}
 import java.awt.{Image, Color}
 import list.ListVal
+import swing.VecListPathIterator
+import java.awt.geom.Rectangle2D
 
 object Axis extends Enumeration {
    type Axis = Value
@@ -43,7 +45,39 @@ object Vec2 {
 }
 
 case class Borders(top:Double = 0, left:Double = 0, bottom:Double = 0, right:Double = 0)
-case class Series(curve:List[Vec2], color:Color = Color.black, width:Double = 1)
+
+case class Series[K](key:K, curve:List[Vec2], color:Color = Color.black, width:Double = 1)
+
+class GraphSeries[K](series:RefGeneral[List[Series[K]], _], shadow:Boolean = false) extends GraphDisplayLayer {
+  def paint(canvas:GraphCanvas) {
+    canvas.clipToData
+    if (shadow) canvas.color = new Color(220, 220, 220)
+    val shadowOffset = Vec2(1, 1)
+    for {
+      s <- series()
+    } {
+      if (!shadow) {
+        canvas.color = s.color
+        canvas.lineWidth = s.width
+        canvas.dataPath(s.curve)
+      } else {
+        canvas.lineWidth = s.width + 1
+        canvas.path(s.curve.map(p => canvas.spaces.toPixel(p) + shadowOffset))
+      }
+    }
+
+  }
+
+  val dataBounds = Cal{
+    series().foldLeft(None:Option[Area]){(seriesArea, series) => series.curve.foldLeft(seriesArea){
+      (area, v) => area match {
+        case None => Some(Area(v, Vec2.zero))
+        case Some(a) => Some(a.extendToContain(v))
+      }
+    }}
+  }
+
+}
 
 case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
   def toUnit(v:Vec2) = (v - origin)/size
@@ -361,90 +395,64 @@ class GraphAxisTitle(val axis:Axis, name:RefGeneral[String, _]) extends Unbounde
   }
 }
 
-class GraphSeries(series:RefGeneral[List[Series], _], shadow:Boolean = false) extends GraphDisplayLayer {
-  def paint(canvas:GraphCanvas) {
-    canvas.clipToData
-    if (shadow) canvas.color = new Color(220, 220, 220)
-    val shadowOffset = Vec2(1, 1)
-    for {
-      s <- series()
-    } {
-      if (!shadow) {
-        canvas.color = s.color
-        canvas.lineWidth = s.width
-        canvas.dataPath(s.curve)
-      } else {
-        canvas.lineWidth = s.width + 1
-        canvas.path(s.curve.map(p => canvas.spaces.toPixel(p) + shadowOffset))
-      }
-    }
+object GraphSelectBox {
 
-  }
+  def curveIntersectsArea(curve:List[Vec2], area:Area) = {
+    val rect = new Rectangle2D.Double(area.origin.x, area.origin.y, area.size.x, area.size.y)
 
-  val dataBounds = Cal{
-    series().foldLeft(None:Option[Area]){(seriesArea, series) => series.curve.foldLeft(seriesArea){
-      (area, v) => area match {
-        case None => Some(Area(v, Vec2.zero))
-        case Some(a) => Some(a.extendToContain(v))
-      }
-    }}
-  }
-
-}
-
-class GraphZoomBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], areaOut:VarGeneral[Option[Area], _], enabled:RefGeneral[Boolean, _] = Val(true)) extends GraphLayer {
-  private val area:Var[Option[Area]] = Var(None)
-
-  def bigEnough(a:Area) = (math.abs(a.size.x) > 5 || math.abs(a.size.y) > 5)
-
-  def paint(canvas:GraphCanvas) {
-    if (enabled()) {
-      area().foreach(a => {
-        val pixelArea = canvas.spaces.toPixel(a)
-        if (bigEnough(pixelArea)) {
-          canvas.color = fill()
-          canvas.fillRect(canvas.spaces.toPixel(a))
-          canvas.color = outline()
-          canvas.drawRect(canvas.spaces.toPixel(a))
-        }
-      })
-    }
-  }
-
-  def onMouse(e:GraphMouseEvent) {
-    if (enabled()) {
-      e.eventType match {
-        case PRESS => area() = Some(Area(e.dataPoint, Vec2(0, 0)))
-        case DRAG => area().foreach(a => {
-          area() = Some(Area(a.origin, e.dataPoint - a.origin))
-        })
-        case RELEASE => area().foreach(a => {
-          area() = None
-          val zoomArea = Area(a.origin, e.dataPoint - a.origin)
-          val pixelZoomArea = e.spaces.toPixel(zoomArea)
-          //Only zoom on reasonable drag
-          if (bigEnough(pixelZoomArea)) {
-            //Zoom out for second quadrant drag (x negative, y positive)
-            if (zoomArea.size.x < 0 && zoomArea.size.y > 0) {
-              areaOut() = None
-            } else {
-              areaOut() = Some(zoomArea.normalise)
+    val result = curve.foldLeft((false, None:Option[Vec2])){
+      (result, current) => {
+        val intersects = result._1
+        val previous = result._2
+        if (intersects) {
+          (intersects, Some(current))
+        } else {
+          previous match {
+            case None => (false, Some(current))
+            case Some(p) => {
+              if (rect.intersectsLine(p.x, p.y, current.x, current.y)) {
+                (true, Some(current))
+              } else {
+                (false, Some(current))
+              }
             }
           }
-        })
-        case _ => {}
+        }
       }
     }
+
+    result._1
   }
 
-  val dataBounds = Val(None:Option[Area])
-
+  def apply[K](series:RefGeneral[List[Series[K]], _], fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], selectionOut:VarGeneral[Set[K], _], enabled:RefGeneral[Boolean, _] = Val(true)) = {
+    new GraphBox(fill, outline, enabled, (area:Area, spaces:GraphSpaces) => {
+      val areaN = area.normalise
+      val selected = series().collect{
+        case series if (curveIntersectsArea(series.curve, areaN)) => series.key
+      }
+      selectionOut() = selected.toSet
+    })
+  }
 }
 
-class GraphSelectBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], enabled:RefGeneral[Boolean, _] = Val(true)) extends GraphLayer {
+object GraphZoomBox {
+  def apply(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], areaOut:VarGeneral[Option[Area], _], enabled:RefGeneral[Boolean, _] = Val(true)) = {
+    new GraphBox(fill, outline, enabled, (zoomArea:Area, spaces:GraphSpaces) => {
+      //Zoom out for second quadrant drag (x negative, y positive)
+      if (zoomArea.size.x < 0 && zoomArea.size.y > 0) {
+        areaOut() = None
+      } else {
+        areaOut() = Some(zoomArea.normalise)
+      }
+    })
+  }
+}
+
+
+class GraphBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], enabled:RefGeneral[Boolean, _] = Val(true), action:(Area, GraphSpaces) => Unit, val minSize:Int = 5) extends GraphLayer {
   private val area:Var[Option[Area]] = Var(None)
 
-  def bigEnough(a:Area) = (math.abs(a.size.x) > 5 || math.abs(a.size.y) > 5)
+  def bigEnough(a:Area) = (math.abs(a.size.x) > minSize || math.abs(a.size.y) > minSize)
 
   def paint(canvas:GraphCanvas) {
     if (enabled()) {
@@ -469,17 +477,11 @@ class GraphSelectBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], en
         })
         case RELEASE => area().foreach(a => {
           area() = None
-//          val zoomArea = Area(a.origin, e.dataPoint - a.origin)
-//          val pixelZoomArea = e.spaces.toPixel(zoomArea)
-//          //Only zoom on reasonable drag
-//          if (bigEnough(pixelZoomArea)) {
-//            //Zoom out for second quadrant drag (x negative, y positive)
-//            if (zoomArea.size.x < 0 && zoomArea.size.y > 0) {
-//              areaOut() = None
-//            } else {
-//              areaOut() = Some(zoomArea.normalise)
-//            }
-//          }
+          val dragArea = Area(a.origin, e.dataPoint - a.origin)
+          val pixelDragArea = e.spaces.toPixel(dragArea)
+          if (bigEnough(pixelDragArea)) {
+            action.apply(dragArea, e.spaces)
+          }
         })
         case _ => {}
       }
@@ -531,8 +533,8 @@ class GraphZoomer(
 case class GraphBasic(layers:RefGeneral[List[GraphLayer], _], overlayers:RefGeneral[List[GraphLayer], _], dataArea:RefGeneral[Area, _], borders:RefGeneral[Borders, _]) extends Graph {}
 
 object GraphBasic {
-  def withSeries(
-      series:RefGeneral[List[Series], _],
+  def withSeries[K](
+      series:RefGeneral[List[Series[K]], _],
       xName:RefGeneral[String, _] = Val("x"),
       yName:RefGeneral[String, _] = Val("y"),
       borders:RefGeneral[Borders, _] = Val(Borders(16, 74, 53, 16)),
@@ -540,7 +542,9 @@ object GraphBasic {
       manualBounds:VarGeneral[Option[Area], _] = Var(None),
       xAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
       yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
-      selectEnabled:RefGeneral[Boolean, _] = Val(false)) = {
+      selectEnabled:RefGeneral[Boolean, _] = Val(false),
+      selection:VarGeneral[Set[K], _] = Var(Set[K]())
+      ) = {
 
     val layers = ListVal[GraphLayer](
         new GraphBG(SwingView.alternateBackgroundColor, Color.white),
@@ -549,7 +553,7 @@ object GraphBasic {
         new GraphAxis(Y, 50),
         new GraphAxis(X),
         new GraphShadow(),
-        new GraphSeries(series),
+        new GraphSeries[K](series),
         new GraphOutline(),
         new GraphAxisTitle(X, xName),
         new GraphAxisTitle(Y, yName)
@@ -571,8 +575,8 @@ object GraphBasic {
     val zoomer = new GraphZoomer(dataBounds, manualBounds, xAxis, yAxis)
 
     val overlayers = ListVal[GraphLayer](
-      new GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), manualBounds, zoomEnabled),
-      new GraphSelectBox(Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100)), selectEnabled)
+      GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), manualBounds, zoomEnabled),
+      GraphSelectBox(series, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100)), selection, selectEnabled)
     )
 
     new GraphBasic(
@@ -581,6 +585,14 @@ object GraphBasic {
       zoomer.dataArea,
       borders
     )
+  }
+}
+
+object ColorSeriesBySelection {
+  def apply[K](series:RefGeneral[List[Series[K]], _], indices:RefGeneral[Set[K],_], unselectedColor:Color = new Color(0, 0, 0, 30)) = Cal{
+    series().map{
+      s => Series(s.key, s.curve, if(indices().contains(s.key)) s.color else unselectedColor, s.width)
+    }
   }
 }
 
@@ -608,6 +620,7 @@ trait GraphCanvas {
   def image(i:Image, origin:Vec2)
   def path(path:List[Vec2])
   def dataPath(path:List[Vec2])
+
 }
 
 

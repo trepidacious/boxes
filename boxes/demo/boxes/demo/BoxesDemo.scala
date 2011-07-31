@@ -22,6 +22,12 @@ object BoxesDemo {
     //override def toString = name() + ", " + age() + ", friend: " + friend()
   }
 
+  class Sine {
+    val name = Var("Sine")
+    val phase = Var(0d)
+    val amplitude = Var(0d)
+  }
+
   class OptionPerson extends Node {
     val name = Var("name")
     val age = Var(32)
@@ -567,19 +573,33 @@ object BoxesDemo {
 
 
   def buildLedgerMulti() = {
+//    val list = ListVar(Range(0, 10).map(i=>{
+//      val p = new OptionPerson
+//      p.name() = "Person " + i
+//      p
+//    }):_*)
+//
+//    val view = LensRecordView[OptionPerson](
+//      VarLens("Name", _.name),
+//      VarLens("Age", _.age),
+//      VarLens("Zombie?", _.zombie)
+//    )
+
     val list = ListVar(Range(0, 10).map(i=>{
-      val p = new OptionPerson
-      p.name() = "Person " + i
-      p
+      val s = new Sine
+      s.name() = "Sine " + i
+      s.phase() = i/40d
+      s.amplitude() = 1
+      s
     }):_*)
 
-    val indices = ListIndices(list, defaultSelection = DefaultSelection.FirstIndex)
-
-    val view = LensRecordView[OptionPerson](
+    val view = LensRecordView[Sine](
       VarLens("Name", _.name),
-      VarLens("Age", _.age),
-      VarLens("Zombie?", _.zombie)
+      VarLens("Phase", _.phase),
+      VarLens("Amplitude", _.amplitude)
     )
+
+    val indices = ListIndices(list, defaultSelection = DefaultSelection.FirstIndex)
 
     val ledger = Var(ListLedger(list, view))
 
@@ -587,38 +607,21 @@ object BoxesDemo {
 
     val indicesView = LabelView(Cal{indices().toString})
 
-    val add = new ListMultiAddOp(list, indices, Some(new OptionPerson()))
+    val add = new ListMultiAddOp(list, indices, Some(new Sine()))
 
-    val delete = new ListMultiDeleteOp[OptionPerson](list, indices, t=>Unit)
+    val delete = new ListMultiDeleteOp[Sine](list, indices, t=>Unit)
 
-    val up = new ListMultiMoveOp[OptionPerson](list, indices, true)
+    val up = new ListMultiMoveOp[Sine](list, indices, true)
 
-    val down = new ListMultiMoveOp[OptionPerson](list, indices, false)
+    val down = new ListMultiMoveOp[Sine](list, indices, false)
 
     val buttons = SwingButtonBar().add(add).add(delete).add(up).add(down).buildWithListStyleComponent(indicesView.component)
-
-//    val bottom = new JPanel(new BorderLayout())
-//
-//    val panel = new JPanel()
-//    panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS))
-//    panel.add(add)
-//    panel.add(delete)
-//    panel.add(up)
-//    panel.add(down)
-//
-//    bottom.add(panel, BorderLayout.WEST)
-//    val padding = SwingButton.buttonPadding
-//    padding.setLayout(new BorderLayout)
-//    padding.add(indicesView.component)
-//    indicesView.component.setOpaque(false)
-//
-//    bottom.add(padding, BorderLayout.CENTER)
 
     val mainPanel = new JPanel(new BorderLayout())
     mainPanel.add(ledgerView.component, BorderLayout.CENTER)
     mainPanel.add(buttons, BorderLayout.SOUTH)
 
-    mainPanel
+    (mainPanel, list, indices)
   }
 
   def fieldCompositeLedger() {
@@ -707,10 +710,13 @@ object BoxesDemo {
     val panel = new JPanel(new GridLayout(2, 2, 1, 1))
     panel.setBackground(SwingView.dividingColor)
 
-    panel.add(buildLedgerMulti)
-    panel.add(buildGraphPanel)
-    panel.add(buildGraphPanel)
-    panel.add(buildLedgerMulti)
+    val stuff = buildLedgerMulti()
+    panel.add(stuff._1)
+    panel.add(buildGraphPanel(stuff._2, stuff._3))
+
+    val stuff2 = buildLedgerMulti()
+    panel.add(buildGraphPanel(stuff2._2, stuff2._3))
+    panel.add(stuff2._1)
 
     frame.add(panel)
 
@@ -721,29 +727,34 @@ object BoxesDemo {
 
   }
 
-  def buildGraphPanel() = {
+  def buildGraphPanel(sines: ListVar[Sine], indices:Var[Set[Int]]) = {
 
     val selectEnabled = Var(false)
     val zoomEnabled = Var(true)
     val manualBounds = Var(None:Option[Area])
     RadioReaction(selectEnabled, zoomEnabled)
 
+    val series = Cal{
+      sines().zipWithIndex.map(v => {
+        val s = v._1
+        val i = v._2
+        Series(i,
+          Range(0, 100).map(x => x/100d).map(x => Vec2(x, math.sin((x + s.phase()) * 2 * 3.1415) * s.amplitude())).toList,
+          Color.getHSBColor((9-i)/14f, 1f, 1f),
+          2//if (indices().contains(i)) 3 else 1
+        )
+      }).toList
+    }
+
     val graph = Var (
       GraphBasic.withSeries (
-        series = ListVar[Series] (
-          Range(0, 10).map(i => {
-            Series(
-              Range(0, 100).map(x => x/100d).map(x => Vec2(x, math.sin((i/80d + x) * 2 * 3.1415) / 3 + 0.5)).toList,
-              Color.getHSBColor((9-i)/14f, 1f, 1f),
-              1 + i/2f
-            )
-          }).toList
-        ),
-        xName = Val("X Axis Name String"),
-        yName = Val("Y Axis Name String"),
+        ColorSeriesBySelection(series, indices),
+        xName = Val("X (Time)"),
+        yName = Val("Y (Intensity)"),
         zoomEnabled = zoomEnabled,
         manualBounds = manualBounds,
-        selectEnabled = selectEnabled
+        selectEnabled = selectEnabled,
+        selection = indices
       )
     )
 
@@ -768,18 +779,18 @@ object BoxesDemo {
     panel
   }
 
-  def graph {
-    SwingView.nimbus
-
-    val frame = new JFrame()
-
-    frame.add(buildGraphPanel)
-
-    frame.pack
-    frame.setMinimumSize(new Dimension(200, 200))
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
-    frame.setVisible(true)
-  }
+//  def graph {
+//    SwingView.nimbus
+//
+//    val frame = new JFrame()
+//
+//    frame.add(buildGraphPanel)
+//
+//    frame.pack
+//    frame.setMinimumSize(new Dimension(200, 200))
+//    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+//    frame.setVisible(true)
+//  }
 
   def swingRun(r : => Unit) {
     SwingUtilities.invokeLater(new Runnable(){

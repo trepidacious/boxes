@@ -320,7 +320,14 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
       g.dispose
     }
   }
+}
 
+object VecListPathIterator {
+  def apply(path:List[Vec2]) = {
+    val path2D = new Path2D.Double()
+    path2D.append(new VecListPathIterator(path), false)
+    path2D
+  }
 }
 
 class VecListPathIterator(list:List[Vec2]) extends PathIterator {
