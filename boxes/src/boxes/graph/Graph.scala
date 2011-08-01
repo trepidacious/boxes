@@ -589,10 +589,17 @@ object GraphBasic {
 }
 
 object ColorSeriesBySelection {
-  def apply[K](series:RefGeneral[List[Series[K]], _], indices:RefGeneral[Set[K],_], unselectedColor:Color = new Color(0, 0, 0, 30)) = Cal{
-    series().map{
-      s => Series(s.key, s.curve, if(indices().contains(s.key)) s.color else unselectedColor, s.width)
+  def apply[K](series:RefGeneral[List[Series[K]], _], indices:RefGeneral[Set[K],_], unselectedColor:Color = new Color(230, 230, 230), unselectedWidth:Option[Double] = Some(1d)) = Cal{
+    val unselected = series().collect{
+      case s:Series[K] if !indices().contains(s.key) => s.copy(color = unselectedColor, width = unselectedWidth.getOrElse(s.width))
     }
+    val selected = series().filter(s => indices().contains(s.key))
+
+    unselected ::: selected
+
+//    series().map{
+//      s => s.copy(color = if(indices().contains(s.key)) s.color else unselectedColor, width = unselectedWidth.getOrElse(s.width))
+//    }
   }
 }
 
