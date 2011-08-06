@@ -596,10 +596,6 @@ object ColorSeriesBySelection {
     val selected = series().filter(s => indices().contains(s.key))
 
     unselected ::: selected
-
-//    series().map{
-//      s => s.copy(color = if(indices().contains(s.key)) s.color else unselectedColor, width = unselectedWidth.getOrElse(s.width))
-//    }
   }
 }
 

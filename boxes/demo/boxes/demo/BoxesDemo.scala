@@ -25,7 +25,7 @@ object BoxesDemo {
   class Sine {
     val name = Var("Sine")
     val phase = Var(0d)
-    val amplitude = Var(0d)
+    val amplitude = Var(1d)
   }
 
   class OptionPerson extends Node {
@@ -741,7 +741,7 @@ object BoxesDemo {
         Series(i,
           Range(0, 100).map(x => x/100d).map(x => Vec2(x, math.sin((x + s.phase()) * 2 * 3.1415) * s.amplitude())).toList,
           Color.getHSBColor((9-i)/14f, 1f, 1f),
-          2//if (indices().contains(i)) 3 else 1
+          2
         )
       }).toList
     }
@@ -833,6 +833,8 @@ object BoxesDemo {
 //    fieldCompositeLedger
 
     swingRun{
+      SwingView.nimbus()
+      textViews
       ledgerMulti
 //      graph
     }
