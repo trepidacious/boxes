@@ -834,7 +834,7 @@ object BoxesDemo {
 
     swingRun{
       SwingView.nimbus()
-      textViews
+//      textViews
       ledgerMulti
 //      graph
     }
