@@ -9,8 +9,9 @@ import graph._
 import list._
 import persistence._
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
-import java.awt.{Color, GridLayout, BorderLayout, Dimension}
 import swing.{GraphSwingView, SwingButtonBar, SwingOp, SwingButton}
+import java.awt.{GridLayout, Color, BorderLayout, Dimension}
+import java.util.concurrent.atomic.AtomicBoolean
 
 object BoxesDemo {
 
@@ -803,6 +804,47 @@ object BoxesDemo {
     println(Ticks((0.05, 1.05), 100, 10))
   }
 
+
+  def backgroundReaction() = {
+    val s = Var("S")
+    val t = Var{""}
+
+    val p = Var{0d}
+
+    //Note that we keep a reference so the reaction isn't GCed
+    val br = BackgroundReaction(s(),
+      (d:String, a:AtomicBoolean)=> {
+        Range(0, 100, 1).foreach(pc => {
+            val n = pc/100d
+            p() = n
+            if (!a.get()) Thread.sleep(10)
+          }
+        )
+        p() = 1
+
+        //TODO implement test to confirm that doing this (reading s()) causes an exception
+        //println(s())
+
+        if (!a.get()) t() = d + "_T"
+      })
+
+    val sView = StringView(s)
+    val tView = StringView(t)
+    val pView = PieView(p)
+
+
+    val frame = new JFrame()
+    val panel = new JPanel(new GridLayout(2, 1))
+    panel.add(sView.component)
+    panel.add(tView.component)
+    frame.add(panel, BorderLayout.CENTER)
+    frame.add(pView.component, BorderLayout.EAST)
+    frame.pack
+    frame.setMinimumSize(new Dimension(300, 50))
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+    frame.setVisible(true)
+  }
+
   def main(args: Array[String]) {
 //    simpleCalc
 //    simplePath
@@ -834,9 +876,11 @@ object BoxesDemo {
 
     swingRun{
       SwingView.nimbus()
+      backgroundReaction
 //      textViews
-      ledgerMulti
+//      ledgerMulti
 //      graph
+
     }
 //    axis
   }

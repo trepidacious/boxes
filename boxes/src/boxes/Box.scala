@@ -25,6 +25,9 @@ object Box {
   //they are Queues of (Long, C) where C matches the Box[C] used as a key
   private val boxToChanges = new mutable.HashMap[Box[_], Object]
 
+  //Threads that have asked not to be allowed to read
+  private val nonReadingThreads = new mutable.HashSet[Thread]
+
   //The next change index to assign
   private var changeIndex = 0L
 
@@ -45,6 +48,15 @@ object Box {
       return decode
     } finally {
       afterDecode
+    }
+  }
+
+  def withoutReading[T](action : =>T):T = {
+    nonReadingThreads.add(Thread.currentThread())
+    try {
+      return action
+    } finally {
+      nonReadingThreads.remove(Thread.currentThread())
     }
   }
 
@@ -78,6 +90,15 @@ object Box {
   def beforeRead[C](b:Box[C]) = {
     lock.lock
     if (!canRead) throw new InvalidReadException(b)
+
+    //We allow reading when we are servicing reactions, since
+    //these have their own enforcement of the timing of reading,
+    //done using canRead above.
+    if (activeReaction == None) {
+      if (nonReadingThreads.contains(Thread.currentThread())) {
+        throw new InvalidReadException(b)
+      }
+    }
   }
 
   def afterRead[C](b:Box[C]) = {

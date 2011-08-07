@@ -12,8 +12,10 @@ import swing._
 import table._
 import util._
 import java.util.concurrent.atomic.AtomicBoolean
-import java.awt.{Color, Component}
-import sun.jvm.hotspot.debugger.posix.elf.ELFSectionHeader
+import com.explodingpixels.painter.Painter
+import com.explodingpixels.swingx.EPPanel
+import java.awt.{Dimension, Paint, BasicStroke, RenderingHints, Graphics2D, Color, Component}
+import java.awt.geom.{Ellipse2D, Arc2D}
 
 //TODO implement rate-limiting of updates? But then we need to know that views don't rely on all updates being called, just the most recent
 //Should be easy enough to do, just make the views store some Atomic style stuff they need to use to update, and fiddle
@@ -302,7 +304,6 @@ class LinkingJCheckBox(val sv:SwingView) extends JCheckBox {}
 class LinkingJToggleButton(val sv:SwingView) extends JToggleButton {}
 class LinkingToolbarToggleButton(val sv:SwingView) extends SwingToggleButton {}
 
-
 object RangeView {
   def apply(v:VarGeneral[Int,_], min:Int, max:Int, progress:Boolean = false) = new RangeOptionView(v, min, max, new TConverter[Int], progress).asInstanceOf[SwingView]
 }
@@ -367,6 +368,87 @@ private class RangeOptionView[G](v:VarGeneral[G,_], min:Int, max:Int, c:GConvert
 
 class LinkingJSlider(val sv:SwingView, brm:BoundedRangeModel) extends JSlider(brm) {}
 class LinkingJProgressBar(val sv:SwingView, brm:BoundedRangeModel) extends JProgressBar(brm) {}
+
+object PiePainter {
+
+  val defaultFill = SwingView.selectionColor //new Color(70, 153, 70)
+	val defaultOutline = Color.white// Color(200, 200, 200)
+
+  def apply(border:Int = 3, dotRadius:Int = 2, fill:Paint = defaultFill, outline:Paint = defaultOutline) = new PiePainter(border, dotRadius, fill, outline)
+}
+
+class PiePainter(val border:Int, val dotRadius:Int, val fill:Paint, val outline:Paint) {
+
+  def paint(g:Graphics2D, n:Double, w:Int, h:Int, alpha:Double = 1) {
+
+		val oldAA = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING)
+    val oldFM = g.getRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS)
+
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+    g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON)
+
+    val arcAngle = - (n * 360).asInstanceOf[Int]
+
+    val size = math.min(w, h)
+
+		val circleDiameter = size - 2 * (dotRadius + border);
+
+		g.setStroke(new BasicStroke(dotRadius * 2 + 3));
+		g.setPaint(outline);
+		g.drawOval(border + dotRadius, border + dotRadius, circleDiameter, circleDiameter);
+
+		val arc = new Arc2D.Double(0, 0, size, size,
+        		90, arcAngle, Arc2D.PIE);
+
+		val clip = g.getClip();
+		g.setPaint(fill);
+		g.setClip(arc);
+		g.setStroke(new BasicStroke(dotRadius * 2));
+		g.drawOval(border + dotRadius, border + dotRadius, circleDiameter, circleDiameter);
+		g.setClip(clip);
+
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA)
+    g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, oldFM)
+  }
+}
+
+object PieView {
+  def apply(n:RefGeneral[Double,_]) = new PieOptionView(n, new TConverter[Double]).asInstanceOf[SwingView]
+}
+
+object PieOptionView {
+  def apply(n:RefGeneral[Option[Double],_]) = new PieOptionView(n, new OptionTConverter[Double]).asInstanceOf[SwingView]
+}
+
+private class PieOptionView[G](n:RefGeneral[G,_], c:GConverter[G, Double]) extends SwingView {
+
+  val pie = PiePainter()
+
+  val component:LinkingEPPanel = new LinkingEPPanel(this);
+
+  {
+    component.setBackgroundPainter(new Painter[Component] {
+      override def paint(g:Graphics2D, t:Component, w:Int, h:Int) {
+        pie.paint(g, nDisplay, w, h, 1)
+      }
+    })
+    component.setPreferredSize(new Dimension(24, 24))
+    component.setMinimumSize(new Dimension(24, 24))
+  }
+  var nDisplay = 0d
+
+  val view = View{
+    //Store the values for later use on Swing Thread
+    val newN = n()
+    //This will be called from Swing Thread
+    replaceUpdate {
+      nDisplay = c.toOption(newN).getOrElse(0d)
+      component.repaint()
+    }
+  }
+}
+
+class LinkingEPPanel(val sv:SwingView) extends EPPanel {}
 
 object NumberView {
   def apply[N](v:VarGeneral[N,_], s:Sequence[N] = LogStep(10))(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionView(v, s, new TConverter[N], n, nc).asInstanceOf[SwingView]
