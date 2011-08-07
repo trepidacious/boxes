@@ -830,7 +830,7 @@ object BoxesDemo {
 
     val sView = StringView(s)
     val tView = StringView(t)
-    val pView = PieView(p)
+    val pView = PieView(p, Cal{math.min(1, 7*(0.5 - math.abs(p() - 0.5)))})
 
 
     val frame = new JFrame()

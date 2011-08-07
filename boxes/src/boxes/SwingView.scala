@@ -119,6 +119,19 @@ object SwingView {
   val alternateBackgroundColor = new Color(240, 240, 240)
   val selectionColor = new Color(120, 144, 161)
 
+  def clip(value:Int, min:Int, max:Int) = {
+    if (value < min) min
+    else if (value > max) max
+    else value
+  }
+
+  def transparentColor(c:Color, factor:Double) = {
+    new Color(	c.getRed,
+    						c.getGreen,
+    						c.getBlue,
+    						clip((c.getAlpha() * factor).asInstanceOf[Int], 0, 255))
+  }
+
   //TODO add this
 //  val iconFactory = new ResourceIconFactory()
 }
@@ -374,10 +387,10 @@ object PiePainter {
   val defaultFill = SwingView.selectionColor //new Color(70, 153, 70)
 	val defaultOutline = Color.white// Color(200, 200, 200)
 
-  def apply(border:Int = 3, dotRadius:Int = 2, fill:Paint = defaultFill, outline:Paint = defaultOutline) = new PiePainter(border, dotRadius, fill, outline)
+  def apply(border:Int = 3, dotRadius:Int = 2, fill:Color = defaultFill, outline:Color = defaultOutline) = new PiePainter(border, dotRadius, fill, outline)
 }
 
-class PiePainter(val border:Int, val dotRadius:Int, val fill:Paint, val outline:Paint) {
+class PiePainter(val border:Int, val dotRadius:Int, val fill:Color, val outline:Color) {
 
   def paint(g:Graphics2D, n:Double, w:Int, h:Int, alpha:Double = 1) {
 
@@ -391,21 +404,20 @@ class PiePainter(val border:Int, val dotRadius:Int, val fill:Paint, val outline:
 
     val size = math.min(w, h)
 
-		val circleDiameter = size - 2 * (dotRadius + border);
+		val circleDiameter = size - 2 * (dotRadius + border)
 
-		g.setStroke(new BasicStroke(dotRadius * 2 + 3));
-		g.setPaint(outline);
-		g.drawOval(border + dotRadius, border + dotRadius, circleDiameter, circleDiameter);
+		g.setStroke(new BasicStroke(dotRadius * 2 + 3))
+		g.setPaint(SwingView.transparentColor(outline, alpha))
+		g.drawOval(border + dotRadius, border + dotRadius, circleDiameter, circleDiameter)
 
-		val arc = new Arc2D.Double(0, 0, size, size,
-        		90, arcAngle, Arc2D.PIE);
+		val arc = new Arc2D.Double(0, 0, size, size, 90, arcAngle, Arc2D.PIE)
 
-		val clip = g.getClip();
-		g.setPaint(fill);
-		g.setClip(arc);
-		g.setStroke(new BasicStroke(dotRadius * 2));
-		g.drawOval(border + dotRadius, border + dotRadius, circleDiameter, circleDiameter);
-		g.setClip(clip);
+		val clip = g.getClip()
+		g.setPaint(SwingView.transparentColor(fill, alpha))
+		g.setClip(arc)
+		g.setStroke(new BasicStroke(dotRadius * 2))
+		g.drawOval(border + dotRadius, border + dotRadius, circleDiameter, circleDiameter)
+		g.setClip(clip)
 
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA)
     g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, oldFM)
@@ -413,14 +425,14 @@ class PiePainter(val border:Int, val dotRadius:Int, val fill:Paint, val outline:
 }
 
 object PieView {
-  def apply(n:RefGeneral[Double,_]) = new PieOptionView(n, new TConverter[Double]).asInstanceOf[SwingView]
+  def apply(n:RefGeneral[Double,_], a:RefGeneral[Double,_] = Val(1d)) = new PieOptionView(n, new TConverter[Double], a, new TConverter[Double]).asInstanceOf[SwingView]
 }
 
 object PieOptionView {
-  def apply(n:RefGeneral[Option[Double],_]) = new PieOptionView(n, new OptionTConverter[Double]).asInstanceOf[SwingView]
+  def apply(n:RefGeneral[Option[Double],_], a:RefGeneral[Option[Double],_] = Val(Some(1d))) = new PieOptionView(n, new OptionTConverter[Double], a, new OptionTConverter[Double]).asInstanceOf[SwingView]
 }
 
-private class PieOptionView[G](n:RefGeneral[G,_], c:GConverter[G, Double]) extends SwingView {
+private class PieOptionView[G, H](n:RefGeneral[G,_], c:GConverter[G, Double], a:RefGeneral[H,_], d:GConverter[H, Double]) extends SwingView {
 
   val pie = PiePainter()
 
@@ -429,20 +441,23 @@ private class PieOptionView[G](n:RefGeneral[G,_], c:GConverter[G, Double]) exten
   {
     component.setBackgroundPainter(new Painter[Component] {
       override def paint(g:Graphics2D, t:Component, w:Int, h:Int) {
-        pie.paint(g, nDisplay, w, h, 1)
+        pie.paint(g, nDisplay, w, h, aDisplay)
       }
     })
     component.setPreferredSize(new Dimension(24, 24))
     component.setMinimumSize(new Dimension(24, 24))
   }
   var nDisplay = 0d
+  var aDisplay = 0d
 
   val view = View{
     //Store the values for later use on Swing Thread
     val newN = n()
+    val newA = a()
     //This will be called from Swing Thread
     replaceUpdate {
       nDisplay = c.toOption(newN).getOrElse(0d)
+      aDisplay = d.toOption(newA).getOrElse(0d)
       component.repaint()
     }
   }
