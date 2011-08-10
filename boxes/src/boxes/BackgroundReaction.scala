@@ -7,19 +7,19 @@ import java.util.concurrent.{Executor, Executors}
 object Responder {
 	val defaultExecutorService = Executors.newFixedThreadPool(4, new DaemonThreadFactory());
 
-  def apply[D](response:((D, AtomicBoolean) => Unit), executor:Executor = defaultExecutorService) = new Responder(response, executor)
+  def apply(executor:Executor = defaultExecutorService) = new Responder(executor)
 }
 
-class Responder[D](val response:((D, AtomicBoolean) => Unit), val executor:Executor) {
+class Responder(val executor:Executor) {
 
   private val responseLock = new Object()
-  private var responseData:Option[D] = None
+  private var nextResponse:Option[(AtomicBoolean => Unit)] = None //The next response function, if one is pending
   private var currentlyRunning = false
   private val shouldCancel = new AtomicBoolean(false)
 
-  def request(data:D) {
+  def request(response: (AtomicBoolean => Unit)) {
     responseLock.synchronized {
-      responseData = Some(data)
+      nextResponse = Some(response)
 
       //Cancel current response, and make sure another runs immediately afterwards
       if (currentlyRunning) {
@@ -35,21 +35,21 @@ class Responder[D](val response:((D, AtomicBoolean) => Unit), val executor:Execu
   //If required, schedule a new response
   private def launchNewResponse() {
     responseLock.synchronized {
-      responseData.foreach(data => {
-        responseData = None
+      nextResponse.foreach(response => {
+        nextResponse = None
         shouldCancel.set(false)
-        executor.execute(new ResponseRunnable(data))
+        executor.execute(new ResponseRunnable(response))
         currentlyRunning = true
       })
     }
   }
 
   //Call response, then start another response immediately if needed
-  private class ResponseRunnable(val d:D) extends Runnable {
+  private class ResponseRunnable(val response:(AtomicBoolean => Unit)) extends Runnable {
 
     override def run() {
       try {
-        response.apply(d, shouldCancel)
+        response.apply(shouldCancel)
       } catch {
         case e:Exception => e.printStackTrace()
       } finally {
@@ -63,30 +63,27 @@ class Responder[D](val response:((D, AtomicBoolean) => Unit), val executor:Execu
 
 }
 
-class BackgroundReaction[D](gather: =>D, process:((D, AtomicBoolean) => Unit), name:String) extends Reaction {
+class BackgroundReaction(responseSource: => (AtomicBoolean => Unit)) extends Reaction {
 
-  //The process should NOT read any state, only perform calculations on the
-  //state, then perform writes as appropriate. If any reading WERE to be done,
-  //it would not result in the data being registered as a source for the reaction,
-  //and so the reaction might not be called when necessary
-  val responder = Responder((d:D, a:AtomicBoolean) => {
-    Box.withoutReading(process(d, a))
-  })
+  val responder = Responder()
 
   def respond : (()=>Unit) = {
-    //Gather the data, so we make sure we read all relevant data
-    val d = gather
+    //Get a response from the source
+    val response = responseSource//.apply()
 
-    //Now schedule a response, will be performed in a background thread
-    responder.request(d)
+    //Now schedule a response, will be performed in a background thread, and we also
+    //assert that it doesn't perform any reads. If any reading WERE to be done,
+    //it would not result in the data being registered as a source for the reaction,
+    //and so the reaction might not be called when necessary
+    responder.request{
+      Box.withoutReading(response)
+    }
 
     //We are a view, so do nothing immediately, the background thread may have some effect
     {() => Unit}
   }
 
   def isView = true
-
-  override def toString = "BR: " + name
 
 }
 
@@ -96,8 +93,8 @@ object BackgroundReaction {
    * Note that it is essential to retain this reaction somewhere - as it is returned from this method,
    * it is not retained by ANY strong references, since it is actually a View.
    */
-  def apply[D](gather: =>D, process:((D, AtomicBoolean) => Unit), name:String = "Unnamed Background Reaction") = {
-    val r = new BackgroundReaction(gather, process, name)
+  def apply(responseSource: => (AtomicBoolean => Unit)) = {
+    val r = new BackgroundReaction(responseSource)
     Box.registerReaction(r)
     r
   }

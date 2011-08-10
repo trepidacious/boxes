@@ -12,6 +12,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
 import swing.{GraphSwingView, SwingButtonBar, SwingOp, SwingButton}
 import java.awt.{GridLayout, Color, BorderLayout, Dimension}
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.CancellationException
 
 object BoxesDemo {
 
@@ -812,21 +813,29 @@ object BoxesDemo {
     val p = Var{0d}
 
     //Note that we keep a reference so the reaction isn't GCed
-    val br = BackgroundReaction(s(),
-      (d:String, a:AtomicBoolean)=> {
+    val br = BackgroundReaction{
+
+      val sval = s()  //We store the actual value (String) here, so that we DON'T read the Var s in our background function
+
+      //This is the background function - it uses the stored String value sval, and so doesn't read any Box state
+      (cancel:AtomicBoolean) => {
+
+        //Create an artificial delay
         Range(0, 100, 1).foreach(pc => {
-            val n = pc/100d
-            p() = n
-            if (!a.get()) Thread.sleep(10)
-          }
-        )
+          val n = pc/100d
+          p() = n     //Update our progress var, to give visual feedback via PieView
+          if (!cancel.get()) Thread.sleep(10) //Use cancel to terminate early if requested
+        })
         p() = 1
 
         //TODO implement test to confirm that doing this (reading s()) causes an exception
         //println(s())
 
-        if (!a.get()) t() = d + "_T"
-      })
+        if (!cancel.get()) t() = sval + "_T"  //If cancelled, don't make the update. Note - in some cases you might
+                                              // want to make a partial update, it depends on the purpose of the reaction.
+                                              // For example, a fractal rendering reaction might display a lower res partial result.
+      }
+    }
 
     val sView = StringView(s)
     val tView = StringView(t)
@@ -878,7 +887,7 @@ object BoxesDemo {
       SwingView.nimbus()
       backgroundReaction
 //      textViews
-      ledgerMulti
+//      ledgerMulti
 //      graph
 
     }
