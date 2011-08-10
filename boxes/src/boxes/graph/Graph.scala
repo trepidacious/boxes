@@ -5,7 +5,6 @@ import java.text.DecimalFormat
 import javax.swing.{ImageIcon}
 import java.awt.{Image, Color}
 import list.ListVal
-import swing.VecListPathIterator
 import java.awt.geom.Rectangle2D
 
 object Axis extends Enumeration {
@@ -48,13 +47,16 @@ case class Borders(top:Double = 0, left:Double = 0, bottom:Double = 0, right:Dou
 
 case class Series[K](key:K, curve:List[Vec2], color:Color = Color.black, width:Double = 1)
 
-class GraphSeries[K](series:RefGeneral[List[Series[K]], _], shadow:Boolean = false) extends GraphDisplayLayer {
-  def paint(canvas:GraphCanvas) {
+class GraphSeries[K](series:RefGeneral[List[Series[K]], _], shadow:Boolean = false) extends GraphLayer[List[Series[K]]] {
+
+  def gather() = series()
+
+  def paint(gatheredSeries:List[Series[K]], canvas:GraphCanvas) {
     canvas.clipToData
     if (shadow) canvas.color = new Color(220, 220, 220)
     val shadowOffset = Vec2(1, 1)
     for {
-      s <- series()
+      s <- gatheredSeries
     } {
       if (!shadow) {
         canvas.color = s.color
@@ -76,6 +78,8 @@ class GraphSeries[K](series:RefGeneral[List[Series[K]], _], shadow:Boolean = fal
       }
     }}
   }
+
+  def onMouse(event:GraphMouseEvent) {}
 
 }
 
@@ -209,8 +213,8 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
 }
 
 trait Graph {
-  def layers:RefGeneral[List[GraphLayer], _]
-  def overlayers:RefGeneral[List[GraphLayer], _]
+  def layers:RefGeneral[List[GraphLayer[_]], _]
+  def overlayers:RefGeneral[List[GraphLayer[_]], _]
   def dataArea:RefGeneral[Area, _]
   def borders:RefGeneral[Borders, _]
 }
@@ -244,17 +248,18 @@ import GraphMouseButton._
 
 case class GraphMouseEvent (spaces:GraphSpaces, dataPoint:Vec2, eventType:GraphMouseEventType, button:GraphMouseButton)
 
-trait GraphLayer {
-  def paint(canvas:GraphCanvas)
+trait GraphLayer[D] {
+  def gather():D
+  def paint(d:D, canvas:GraphCanvas)
   def onMouse(event:GraphMouseEvent)
   def dataBounds:RefGeneral[Option[Area], _]
 }
 
-trait GraphDisplayLayer extends GraphLayer {
+trait GraphDisplayLayer[D] extends GraphLayer[D] {
   def onMouse(event:GraphMouseEvent) {}
 }
 
-trait UnboundedGraphDisplayLayer extends GraphDisplayLayer {
+trait UnboundedGraphDisplayLayer[D] extends GraphDisplayLayer[D] {
   val dataBounds = Val(None:Option[Area])
 }
 
@@ -291,8 +296,9 @@ object Ticks {
   }
 }
 
-class GraphBG(val bg:Color, val dataBG:Color) extends UnboundedGraphDisplayLayer {
-  def paint(canvas:GraphCanvas) {
+class GraphBG(val bg:Color, val dataBG:Color) extends UnboundedGraphDisplayLayer[Unit] {
+  def gather = Unit
+  def paint(d:Unit, canvas:GraphCanvas) {
     canvas.color = bg
     canvas.fillRect(canvas.spaces.componentArea.origin, canvas.spaces.componentArea.size)
 
@@ -301,14 +307,16 @@ class GraphBG(val bg:Color, val dataBG:Color) extends UnboundedGraphDisplayLayer
   }
 }
 
-class GraphOutline extends UnboundedGraphDisplayLayer {
-  def paint(canvas:GraphCanvas) {
+class GraphOutline extends UnboundedGraphDisplayLayer[Unit] {
+  def gather = Unit
+  def paint(d:Unit, canvas:GraphCanvas) {
     canvas.color = SwingView.dividingColor.brighter
     canvas.drawRect(canvas.spaces.pixelArea.origin, canvas.spaces.pixelArea.size)
   }
 }
-class GraphHighlight extends UnboundedGraphDisplayLayer {
-  def paint(canvas:GraphCanvas) {
+class GraphHighlight extends UnboundedGraphDisplayLayer[Unit] {
+  def gather = Unit
+  def paint(d:Unit, canvas:GraphCanvas) {
     canvas.color = SwingView.alternateBackgroundColor.brighter
     canvas.drawRect(canvas.spaces.pixelArea.origin + Vec2(-1, 1), canvas.spaces.pixelArea.size + Vec2(2, -2))
   }
@@ -320,8 +328,9 @@ object GraphShadow {
   val left = new ImageIcon(classOf[GraphShadow].getResource("/boxes/swing/GraphShadowLeft.png")).getImage
 }
 
-class GraphShadow extends UnboundedGraphDisplayLayer {
-  def paint(canvas:GraphCanvas) {
+class GraphShadow extends UnboundedGraphDisplayLayer[Unit] {
+  def gather = Unit
+  def paint(d:Unit, canvas:GraphCanvas) {
     canvas.clipToData
     val w = GraphShadow.topLeft.getWidth(null)
     val h = GraphShadow.topLeft.getHeight(null)
@@ -338,9 +347,11 @@ class GraphShadow extends UnboundedGraphDisplayLayer {
   }
 }
 
-class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalFormat = new DecimalFormat("0.###")) extends UnboundedGraphDisplayLayer {
+class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalFormat = new DecimalFormat("0.###")) extends UnboundedGraphDisplayLayer[Unit] {
 
-  def paint(canvas:GraphCanvas) {
+  def gather = Unit
+
+  def paint(d:Unit, canvas:GraphCanvas) {
     val dataArea = canvas.spaces.dataArea
 
     val ticks = Ticks(dataArea.axisBounds(axis), canvas.spaces.pixelArea.axisSize(axis), pixelsPerMajor)
@@ -377,20 +388,21 @@ class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalF
   }
 }
 
-class GraphAxisTitle(val axis:Axis, name:RefGeneral[String, _]) extends UnboundedGraphDisplayLayer {
+class GraphAxisTitle(val axis:Axis, name:RefGeneral[String, _]) extends UnboundedGraphDisplayLayer[String] {
 
-  def paint(canvas:GraphCanvas) {
+  def gather = name()
+
+  def paint(name:String, canvas:GraphCanvas) {
 
     val a = canvas.spaces.pixelArea
     val tl = a.origin + a.size.withX(0)
-    val bl = a.origin
     val br = a.origin + a.size.withY(0)
 
     canvas.color = SwingView.dividingColor.darker
     canvas.fontSize = 12
     axis match {
-      case X => canvas.string(name(), br + Vec2(-10, 28), Vec2(1, 1))
-      case Y => canvas.string(name(), tl + Vec2(-52, 10 ), Vec2(1, 0), -1)
+      case X => canvas.string(name, br + Vec2(-10, 28), Vec2(1, 1))
+      case Y => canvas.string(name, tl + Vec2(-52, 10 ), Vec2(1, 0), -1)
     }
   }
 }
@@ -449,19 +461,21 @@ object GraphZoomBox {
 }
 
 
-class GraphBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], enabled:RefGeneral[Boolean, _] = Val(true), action:(Area, GraphSpaces) => Unit, val minSize:Int = 5) extends GraphLayer {
+class GraphBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], enabled:RefGeneral[Boolean, _] = Val(true), action:(Area, GraphSpaces) => Unit, val minSize:Int = 5) extends GraphLayer[(Color, Color, Boolean, Option[Area])] {
   private val area:Var[Option[Area]] = Var(None)
 
   def bigEnough(a:Area) = (math.abs(a.size.x) > minSize || math.abs(a.size.y) > minSize)
 
-  def paint(canvas:GraphCanvas) {
-    if (enabled()) {
-      area().foreach(a => {
+  def gather = (fill(), outline(), enabled(), area())
+
+  def paint(data:(Color, Color, Boolean, Option[Area]), canvas:GraphCanvas) {
+    if (data._3) {
+      data._4.foreach(a => {
         val pixelArea = canvas.spaces.toPixel(a)
         if (bigEnough(pixelArea)) {
-          canvas.color = fill()
+          canvas.color = data._1
           canvas.fillRect(canvas.spaces.toPixel(a))
-          canvas.color = outline()
+          canvas.color = data._2
           canvas.drawRect(canvas.spaces.toPixel(a))
         }
       })
@@ -530,7 +544,7 @@ class GraphZoomer(
   }
 }
 
-case class GraphBasic(layers:RefGeneral[List[GraphLayer], _], overlayers:RefGeneral[List[GraphLayer], _], dataArea:RefGeneral[Area, _], borders:RefGeneral[Borders, _]) extends Graph {}
+case class GraphBasic(layers:RefGeneral[List[GraphLayer[_]], _], overlayers:RefGeneral[List[GraphLayer[_]], _], dataArea:RefGeneral[Area, _], borders:RefGeneral[Borders, _]) extends Graph {}
 
 object GraphBasic {
   def withSeries[K](
@@ -546,7 +560,7 @@ object GraphBasic {
       selection:VarGeneral[Set[K], _] = Var(Set[K]())
       ) = {
 
-    val layers = ListVal[GraphLayer](
+    val layers = ListVal[GraphLayer[_]](
         new GraphBG(SwingView.alternateBackgroundColor, Color.white),
         new GraphHighlight(),
         new GraphSeries(series, true),
@@ -574,7 +588,7 @@ object GraphBasic {
 
     val zoomer = new GraphZoomer(dataBounds, manualBounds, xAxis, yAxis)
 
-    val overlayers = ListVal[GraphLayer](
+    val overlayers = ListVal[GraphLayer[_]](
       GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), manualBounds, zoomEnabled),
       GraphSelectBox(series, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100)), selection, selectEnabled)
     )

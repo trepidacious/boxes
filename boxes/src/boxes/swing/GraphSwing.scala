@@ -5,10 +5,10 @@ import java.awt.image.BufferedImage
 import java.awt.event.{MouseListener, MouseMotionListener, MouseEvent, ComponentListener, ComponentEvent}
 import boxes.graph.GraphMouseEventType._
 import boxes.graph.GraphMouseButton._
-import boxes.{Ref, View, SwingView, Var}
 import boxes.graph.{GraphLayer, Graph, GraphMouseEvent, Area, Vec2, GraphCanvas, GraphSpaces}
 import java.awt.geom.{Rectangle2D, PathIterator, Path2D, AffineTransform}
 import java.awt.{AlphaComposite, Graphics, Image, Color, RenderingHints, BasicStroke, Graphics2D}
+import boxes.{Box, Ref, View, SwingView, Var}
 
 
 class GraphCanvasFromGraphics2D(g:Graphics2D, val spaces:GraphSpaces) extends GraphCanvas {
@@ -165,6 +165,7 @@ object GraphSwingView {
 }
 
 class GraphBuffer(var image:BufferedImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB)) {
+  val clearComposite = AlphaComposite.getInstance(AlphaComposite.CLEAR, 0.0f)
   val lock = new Object()
   def ensureSize(area:Vec2) {
     val w = math.max(area.x.asInstanceOf[Int], 1)
@@ -173,6 +174,12 @@ class GraphBuffer(var image:BufferedImage = new BufferedImage(10, 10, BufferedIm
     if (image.getWidth != w || image.getHeight != h) {
       image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
     }
+  }
+  def clear() {
+    val g = image.getGraphics.asInstanceOf[Graphics2D]
+    g.setComposite(clearComposite)
+    g.fill(new Rectangle2D.Double(0,0,image.getWidth,image.getHeight))
+    g.dispose()
   }
 }
 
@@ -183,11 +190,17 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
   val mainBuffer = new GraphBuffer()
   val overBuffer = new GraphBuffer()
 
+  val concBuffer = new GraphBuffer()
+  val concBackBuffer = new GraphBuffer()
+
   val component = new JPanel() {
 
     override def paintComponent(gr:Graphics) {
       mainBuffer.lock.synchronized{
         gr.drawImage(mainBuffer.image, 0, 0, null)
+      }
+      concBuffer.lock.synchronized{
+        gr.drawImage(concBuffer.image, 0, 0, null)
       }
       overBuffer.lock.synchronized{
         gr.drawImage(overBuffer.image, 0, 0, null)
@@ -218,9 +231,8 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
       }
       var x = p.x
       var y = p.y
-      //Slight borders
-      val w = getWidth-2
-      val h = getHeight-2
+      val w = getWidth
+      val h = getHeight
       if (x < 0) {
         x = 0
       } else if (x > w) {
@@ -276,6 +288,54 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
     }
   }
 
+//  val concView = View {
+//    val spaces = buildSpaces
+//
+//    val w = spaces.componentArea.size.x.asInstanceOf[Int]
+//    val h = spaces.componentArea.size.y.asInstanceOf[Int]
+//
+//    val concLayers = graph().concurrentLayers()
+//    val dataList = concLayers.map(layer => layer.gather())
+//    val layerAndDataList = concLayers.zip(dataList)
+//
+//    //TODO we should immediately clear the concBuffer here, IF
+//    //the graph data area
+//
+//    //In a background thread, we resize the back buffer and
+//    //draw to it. When this is finished, we lock the front buffer,
+//    //resize it and copy the back buffer across to it, then trigger
+//    //a repaint.
+//    backgroundStylee {
+//      concBackBuffer.lock.synchronized{
+//        concBackBuffer.ensureSize(spaces.componentArea.size)
+//        concBackBuffer.clear()
+//
+//        val g = concBackBuffer.image.getGraphics.asInstanceOf[Graphics2D]
+//        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+//
+//        //TODO would be nice to update a progress Var and use it to draw a progress overlay as well
+//
+//        //Each layer paints on a fresh canvas (but same buffer), to avoid side effects from one affecting the next
+//        layerAndDataList.foreach(layerAndData => {
+//          layerAndData._1.paint(layerAndData._2, new GraphCanvasFromGraphics2D(g.create().asInstanceOf[Graphics2D], spaces))
+//        })
+//
+//        g.dispose
+//
+//        concBuffer.lock.synchronized{
+//          concBuffer.ensureSize(spaces.componentArea.size)
+//          concBuffer.clear()
+//          concBuffer.image.getGraphics.asInstanceOf[Graphics2D].drawImage(concBackBuffer.image, 0, 0, null)
+//        }
+//      }
+//    }
+//
+//    replaceUpdate {
+//      component.repaint()
+//    }
+//  }
+
+
   def buildSpaces = {
 
     val size = componentSize()
@@ -295,7 +355,7 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
     GraphSpaces(area, Area(Vec2(l, t+dh), Vec2(dw, -dh)), Area(Vec2.zero, size))
   }
 
-  def drawBuffer(buffer:GraphBuffer, layers:List[GraphLayer]) {
+  def drawBuffer(buffer:GraphBuffer, layers:List[GraphLayer[_]]) {
     buffer.lock.synchronized{
       val spaces = buildSpaces
 
@@ -314,7 +374,12 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
 
       //Each layer paints on a fresh canvas, to avoid side effects from one affecting the next
       layers.foreach(layer => {
-        layer.paint(new GraphCanvasFromGraphics2D(g.create().asInstanceOf[Graphics2D], spaces))
+        //TODO There must be a nice way to do this
+        //Note that we know the data provides the correct type of data for itself
+        val data = layer.gather()
+        Box.withoutReading {
+          layer.asInstanceOf[GraphLayer[Any]].paint(data, new GraphCanvasFromGraphics2D(g.create().asInstanceOf[Graphics2D], spaces))
+        }
       })
 
       g.dispose
