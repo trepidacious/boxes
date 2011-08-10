@@ -355,7 +355,7 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
     GraphSpaces(area, Area(Vec2(l, t+dh), Vec2(dw, -dh)), Area(Vec2.zero, size))
   }
 
-  def drawBuffer(buffer:GraphBuffer, layers:List[GraphLayer[_]]) {
+  def drawBuffer(buffer:GraphBuffer, layers:List[GraphLayer]) {
     buffer.lock.synchronized{
       val spaces = buildSpaces
 
@@ -374,11 +374,9 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
 
       //Each layer paints on a fresh canvas, to avoid side effects from one affecting the next
       layers.foreach(layer => {
-        //TODO There must be a nice way to do this
-        //Note that we know the data provides the correct type of data for itself
-        val data = layer.gather()
+        val paint = layer.paint()
         Box.withoutReading {
-          layer.asInstanceOf[GraphLayer[Any]].paint(data, new GraphCanvasFromGraphics2D(g.create().asInstanceOf[Graphics2D], spaces))
+          paint.apply(new GraphCanvasFromGraphics2D(g.create().asInstanceOf[Graphics2D], spaces))
         }
       })
 

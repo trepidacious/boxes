@@ -885,9 +885,9 @@ object BoxesDemo {
 
     swingRun{
       SwingView.nimbus()
-      backgroundReaction
+//      backgroundReaction
 //      textViews
-//      ledgerMulti
+      ledgerMulti
 //      graph
 
     }

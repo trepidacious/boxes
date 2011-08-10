@@ -47,27 +47,29 @@ case class Borders(top:Double = 0, left:Double = 0, bottom:Double = 0, right:Dou
 
 case class Series[K](key:K, curve:List[Vec2], color:Color = Color.black, width:Double = 1)
 
-class GraphSeries[K](series:RefGeneral[List[Series[K]], _], shadow:Boolean = false) extends GraphLayer[List[Series[K]]] {
+class GraphSeries[K](series:RefGeneral[List[Series[K]], _], shadow:Boolean = false) extends GraphLayer {
 
   def gather() = series()
 
-  def paint(gatheredSeries:List[Series[K]], canvas:GraphCanvas) {
-    canvas.clipToData
-    if (shadow) canvas.color = new Color(220, 220, 220)
-    val shadowOffset = Vec2(1, 1)
-    for {
-      s <- gatheredSeries
-    } {
-      if (!shadow) {
-        canvas.color = s.color
-        canvas.lineWidth = s.width
-        canvas.dataPath(s.curve)
-      } else {
-        canvas.lineWidth = s.width + 1
-        canvas.path(s.curve.map(p => canvas.spaces.toPixel(p) + shadowOffset))
+  def paint() = {
+    val currentSeries = series()
+    (canvas:GraphCanvas) => {
+      canvas.clipToData
+      if (shadow) canvas.color = new Color(220, 220, 220)
+      val shadowOffset = Vec2(1, 1)
+      for {
+        s <- currentSeries
+      } {
+        if (!shadow) {
+          canvas.color = s.color
+          canvas.lineWidth = s.width
+          canvas.dataPath(s.curve)
+        } else {
+          canvas.lineWidth = s.width + 1
+          canvas.path(s.curve.map(p => canvas.spaces.toPixel(p) + shadowOffset))
+        }
       }
     }
-
   }
 
   val dataBounds = Cal{
@@ -213,8 +215,8 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
 }
 
 trait Graph {
-  def layers:RefGeneral[List[GraphLayer[_]], _]
-  def overlayers:RefGeneral[List[GraphLayer[_]], _]
+  def layers:RefGeneral[List[GraphLayer], _]
+  def overlayers:RefGeneral[List[GraphLayer], _]
   def dataArea:RefGeneral[Area, _]
   def borders:RefGeneral[Borders, _]
 }
@@ -248,18 +250,18 @@ import GraphMouseButton._
 
 case class GraphMouseEvent (spaces:GraphSpaces, dataPoint:Vec2, eventType:GraphMouseEventType, button:GraphMouseButton)
 
-trait GraphLayer[D] {
-  def gather():D
-  def paint(d:D, canvas:GraphCanvas)
+trait GraphLayer {
+  //When called, reads Box state and returns a method that will draw this state to a canvas
+  def paint():(GraphCanvas => Unit)
   def onMouse(event:GraphMouseEvent)
   def dataBounds:RefGeneral[Option[Area], _]
 }
 
-trait GraphDisplayLayer[D] extends GraphLayer[D] {
+trait GraphDisplayLayer extends GraphLayer {
   def onMouse(event:GraphMouseEvent) {}
 }
 
-trait UnboundedGraphDisplayLayer[D] extends GraphDisplayLayer[D] {
+trait UnboundedGraphDisplayLayer extends GraphDisplayLayer {
   val dataBounds = Val(None:Option[Area])
 }
 
@@ -296,29 +298,33 @@ object Ticks {
   }
 }
 
-class GraphBG(val bg:Color, val dataBG:Color) extends UnboundedGraphDisplayLayer[Unit] {
-  def gather = Unit
-  def paint(d:Unit, canvas:GraphCanvas) {
-    canvas.color = bg
-    canvas.fillRect(canvas.spaces.componentArea.origin, canvas.spaces.componentArea.size)
+class GraphBG(val bg:Color, val dataBG:Color) extends UnboundedGraphDisplayLayer {
+  def paint() = {
+    (canvas:GraphCanvas) => {
+      canvas.color = bg
+      canvas.fillRect(canvas.spaces.componentArea.origin, canvas.spaces.componentArea.size)
 
-    canvas.color = dataBG
-    canvas.fillRect(canvas.spaces.pixelArea.origin, canvas.spaces.pixelArea.size)
+      canvas.color = dataBG
+      canvas.fillRect(canvas.spaces.pixelArea.origin, canvas.spaces.pixelArea.size)
+    }
   }
 }
 
-class GraphOutline extends UnboundedGraphDisplayLayer[Unit] {
-  def gather = Unit
-  def paint(d:Unit, canvas:GraphCanvas) {
-    canvas.color = SwingView.dividingColor.brighter
-    canvas.drawRect(canvas.spaces.pixelArea.origin, canvas.spaces.pixelArea.size)
+class GraphOutline extends UnboundedGraphDisplayLayer {
+  def paint() = {
+    (canvas:GraphCanvas) => {
+      canvas.color = SwingView.dividingColor.brighter
+      canvas.drawRect(canvas.spaces.pixelArea.origin, canvas.spaces.pixelArea.size)
+    }
   }
 }
-class GraphHighlight extends UnboundedGraphDisplayLayer[Unit] {
-  def gather = Unit
-  def paint(d:Unit, canvas:GraphCanvas) {
-    canvas.color = SwingView.alternateBackgroundColor.brighter
-    canvas.drawRect(canvas.spaces.pixelArea.origin + Vec2(-1, 1), canvas.spaces.pixelArea.size + Vec2(2, -2))
+
+class GraphHighlight extends UnboundedGraphDisplayLayer {
+  def paint() = {
+    (canvas:GraphCanvas) => {
+      canvas.color = SwingView.alternateBackgroundColor.brighter
+      canvas.drawRect(canvas.spaces.pixelArea.origin + Vec2(-1, 1), canvas.spaces.pixelArea.size + Vec2(2, -2))
+    }
   }
 }
 
@@ -328,81 +334,82 @@ object GraphShadow {
   val left = new ImageIcon(classOf[GraphShadow].getResource("/boxes/swing/GraphShadowLeft.png")).getImage
 }
 
-class GraphShadow extends UnboundedGraphDisplayLayer[Unit] {
-  def gather = Unit
-  def paint(d:Unit, canvas:GraphCanvas) {
-    canvas.clipToData
-    val w = GraphShadow.topLeft.getWidth(null)
-    val h = GraphShadow.topLeft.getHeight(null)
+class GraphShadow extends UnboundedGraphDisplayLayer {
+  def paint() = {
+    (canvas:GraphCanvas) => {
+      canvas.clipToData
+      val w = GraphShadow.topLeft.getWidth(null)
+      val h = GraphShadow.topLeft.getHeight(null)
 
-    val a = canvas.spaces.pixelArea
-    val tl = a.origin + a.size.withX(0)
-    val bl = a.origin
-    val br = a.origin + a.size.withY(0)
+      val a = canvas.spaces.pixelArea
+      val tl = a.origin + a.size.withX(0)
+      val bl = a.origin
+      val br = a.origin + a.size.withY(0)
 
-    canvas.image(GraphShadow.top, tl, Vec2(a.size.x, h))
-    canvas.image(GraphShadow.left, tl, Vec2(w, -a.size.y))
-    canvas.image(GraphShadow.top, bl + Vec2(0, 2), Vec2(a.size.x, -h))
-    canvas.image(GraphShadow.left, br + Vec2(2, 0), Vec2(-w, a.size.y))
+      canvas.image(GraphShadow.top, tl, Vec2(a.size.x, h))
+      canvas.image(GraphShadow.left, tl, Vec2(w, -a.size.y))
+      canvas.image(GraphShadow.top, bl + Vec2(0, 2), Vec2(a.size.x, -h))
+      canvas.image(GraphShadow.left, br + Vec2(2, 0), Vec2(-w, a.size.y))
+    }
   }
 }
 
-class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalFormat = new DecimalFormat("0.###")) extends UnboundedGraphDisplayLayer[Unit] {
+class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalFormat = new DecimalFormat("0.###")) extends UnboundedGraphDisplayLayer {
 
-  def gather = Unit
+  def paint() = {
+    (canvas:GraphCanvas) => {
+      val dataArea = canvas.spaces.dataArea
 
-  def paint(d:Unit, canvas:GraphCanvas) {
-    val dataArea = canvas.spaces.dataArea
+      val ticks = Ticks(dataArea.axisBounds(axis), canvas.spaces.pixelArea.axisSize(axis), pixelsPerMajor)
 
-    val ticks = Ticks(dataArea.axisBounds(axis), canvas.spaces.pixelArea.axisSize(axis), pixelsPerMajor)
+      ticks.foreach(t => {
+        val (p, major) = t
+        val start = canvas.spaces.toPixel(dataArea.axisPosition(axis, p))
 
-    ticks.foreach(t => {
-      val (p, major) = t
-      val start = canvas.spaces.toPixel(dataArea.axisPosition(axis, p))
-
-      canvas.color = SwingView.dividingColor.brighter
-      axis match {
-        case X => canvas.line(start, start + Vec2(0, if (major) 8 else 4))
-        case Y => canvas.line(start, start + Vec2(if (major) -8 else -4, 0))
-      }
-      canvas.color = SwingView.alternateBackgroundColor.brighter
-      axis match {
-        case X => canvas.line(start + Vec2(1, 0), start + Vec2(1, if (major) 8 else 4))
-        case Y => canvas.line(start + Vec2(0, 1), start + Vec2(if (major) -8 else -4, 1))
-      }
-
-
-      if (major) {
-        canvas.color = SwingView.dividingColor.darker
-        canvas.fontSize = 9
+        canvas.color = SwingView.dividingColor.brighter
         axis match {
-          case X => canvas.string(format.format(p), start + Vec2(0, 10), Vec2(0.5, 1))
-          case Y => canvas.string(format.format(p), start + Vec2(-10, 0), Vec2(1, 0.5))
+          case X => canvas.line(start, start + Vec2(0, if (major) 8 else 4))
+          case Y => canvas.line(start, start + Vec2(if (major) -8 else -4, 0))
         }
-        canvas.color = new Color(0f, 0f, 0f, 0.1f)
-      } else {
-        canvas.color = new Color(0f, 0f, 0f, 0.05f)
-      }
-      canvas.line(start, start + canvas.spaces.pixelArea.axisPerpVec2(axis))
-    })
+        canvas.color = SwingView.alternateBackgroundColor.brighter
+        axis match {
+          case X => canvas.line(start + Vec2(1, 0), start + Vec2(1, if (major) 8 else 4))
+          case Y => canvas.line(start + Vec2(0, 1), start + Vec2(if (major) -8 else -4, 1))
+        }
+
+
+        if (major) {
+          canvas.color = SwingView.dividingColor.darker
+          canvas.fontSize = 9
+          axis match {
+            case X => canvas.string(format.format(p), start + Vec2(0, 10), Vec2(0.5, 1))
+            case Y => canvas.string(format.format(p), start + Vec2(-10, 0), Vec2(1, 0.5))
+          }
+          canvas.color = new Color(0f, 0f, 0f, 0.1f)
+        } else {
+          canvas.color = new Color(0f, 0f, 0f, 0.05f)
+        }
+        canvas.line(start, start + canvas.spaces.pixelArea.axisPerpVec2(axis))
+      })
+    }
   }
 }
 
-class GraphAxisTitle(val axis:Axis, name:RefGeneral[String, _]) extends UnboundedGraphDisplayLayer[String] {
+class GraphAxisTitle(val axis:Axis, name:RefGeneral[String, _]) extends UnboundedGraphDisplayLayer {
+  def paint() = {
+    val currentName = name()
 
-  def gather = name()
+    (canvas:GraphCanvas) => {
+      val a = canvas.spaces.pixelArea
+      val tl = a.origin + a.size.withX(0)
+      val br = a.origin + a.size.withY(0)
 
-  def paint(name:String, canvas:GraphCanvas) {
-
-    val a = canvas.spaces.pixelArea
-    val tl = a.origin + a.size.withX(0)
-    val br = a.origin + a.size.withY(0)
-
-    canvas.color = SwingView.dividingColor.darker
-    canvas.fontSize = 12
-    axis match {
-      case X => canvas.string(name, br + Vec2(-10, 28), Vec2(1, 1))
-      case Y => canvas.string(name, tl + Vec2(-52, 10 ), Vec2(1, 0), -1)
+      canvas.color = SwingView.dividingColor.darker
+      canvas.fontSize = 12
+      axis match {
+        case X => canvas.string(currentName, br + Vec2(-10, 28), Vec2(1, 1))
+        case Y => canvas.string(currentName, tl + Vec2(-52, 10 ), Vec2(1, 0), -1)
+      }
     }
   }
 }
@@ -412,6 +419,7 @@ object GraphSelectBox {
   def curveIntersectsArea(curve:List[Vec2], area:Area) = {
     val rect = new Rectangle2D.Double(area.origin.x, area.origin.y, area.size.x, area.size.y)
 
+    //TODO we should finish this early if possible - there is some way to do this
     val result = curve.foldLeft((false, None:Option[Vec2])){
       (result, current) => {
         val intersects = result._1
@@ -461,24 +469,32 @@ object GraphZoomBox {
 }
 
 
-class GraphBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], enabled:RefGeneral[Boolean, _] = Val(true), action:(Area, GraphSpaces) => Unit, val minSize:Int = 5) extends GraphLayer[(Color, Color, Boolean, Option[Area])] {
+class GraphBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], enabled:RefGeneral[Boolean, _] = Val(true), action:(Area, GraphSpaces) => Unit, val minSize:Int = 5) extends GraphLayer {
   private val area:Var[Option[Area]] = Var(None)
 
   def bigEnough(a:Area) = (math.abs(a.size.x) > minSize || math.abs(a.size.y) > minSize)
 
   def gather = (fill(), outline(), enabled(), area())
 
-  def paint(data:(Color, Color, Boolean, Option[Area]), canvas:GraphCanvas) {
-    if (data._3) {
-      data._4.foreach(a => {
-        val pixelArea = canvas.spaces.toPixel(a)
-        if (bigEnough(pixelArea)) {
-          canvas.color = data._1
-          canvas.fillRect(canvas.spaces.toPixel(a))
-          canvas.color = data._2
-          canvas.drawRect(canvas.spaces.toPixel(a))
-        }
-      })
+
+  def paint() = {
+    val cFill = fill()
+    val cOutline = outline()
+    val cEnabled = enabled()
+    val cArea = area()
+
+    (canvas:GraphCanvas) => {
+      if (cEnabled) {
+        cArea.foreach(a => {
+          val pixelArea = canvas.spaces.toPixel(a)
+          if (bigEnough(pixelArea)) {
+            canvas.color = cFill
+            canvas.fillRect(canvas.spaces.toPixel(a))
+            canvas.color = cOutline
+            canvas.drawRect(canvas.spaces.toPixel(a))
+          }
+        })
+      }
     }
   }
 
@@ -544,7 +560,7 @@ class GraphZoomer(
   }
 }
 
-case class GraphBasic(layers:RefGeneral[List[GraphLayer[_]], _], overlayers:RefGeneral[List[GraphLayer[_]], _], dataArea:RefGeneral[Area, _], borders:RefGeneral[Borders, _]) extends Graph {}
+case class GraphBasic(layers:RefGeneral[List[GraphLayer], _], overlayers:RefGeneral[List[GraphLayer], _], dataArea:RefGeneral[Area, _], borders:RefGeneral[Borders, _]) extends Graph {}
 
 object GraphBasic {
   def withSeries[K](
@@ -560,7 +576,7 @@ object GraphBasic {
       selection:VarGeneral[Set[K], _] = Var(Set[K]())
       ) = {
 
-    val layers = ListVal[GraphLayer[_]](
+    val layers = ListVal[GraphLayer](
         new GraphBG(SwingView.alternateBackgroundColor, Color.white),
         new GraphHighlight(),
         new GraphSeries(series, true),
@@ -588,7 +604,7 @@ object GraphBasic {
 
     val zoomer = new GraphZoomer(dataBounds, manualBounds, xAxis, yAxis)
 
-    val overlayers = ListVal[GraphLayer[_]](
+    val overlayers = ListVal[GraphLayer](
       GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), manualBounds, zoomEnabled),
       GraphSelectBox(series, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100)), selection, selectEnabled)
     )
