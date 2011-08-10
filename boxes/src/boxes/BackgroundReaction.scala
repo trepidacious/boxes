@@ -2,7 +2,7 @@ package boxes
 
 import util.DaemonThreadFactory
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.{Executor, Executors}
+import java.util.concurrent.{CancellationException, Executor, Executors}
 
 object Responder {
 	val defaultExecutorService = Executors.newFixedThreadPool(4, new DaemonThreadFactory());
@@ -68,8 +68,7 @@ class BackgroundReaction(responseSource: => (AtomicBoolean => Unit)) extends Rea
   val responder = Responder()
 
   def respond : (()=>Unit) = {
-    //Get a response from the source
-    val response = responseSource//.apply()
+    val response = responseSource
 
     //Now schedule a response, will be performed in a background thread, and we also
     //assert that it doesn't perform any reads. If any reading WERE to be done,
@@ -79,7 +78,7 @@ class BackgroundReaction(responseSource: => (AtomicBoolean => Unit)) extends Rea
       Box.withoutReading(response)
     }
 
-    //We are a view, so do nothing immediately, the background thread may have some effect
+    //Work is done by the responder, not immediately
     {() => Unit}
   }
 
@@ -93,10 +92,18 @@ object BackgroundReaction {
    * Note that it is essential to retain this reaction somewhere - as it is returned from this method,
    * it is not retained by ANY strong references, since it is actually a View.
    */
-  def apply(responseSource: => (AtomicBoolean => Unit)) = {
+  def apply(responseSource: => (AtomicBoolean => Unit)):BackgroundReaction = {
     val r = new BackgroundReaction(responseSource)
     Box.registerReaction(r)
     r
+  }
+
+  /**
+   * Note that it is essential to retain this reaction somewhere - as it is returned from this method,
+   * it is not retained by ANY strong references, since it is actually a View.
+   */
+  def applyWithoutCancel(response: => Unit):BackgroundReaction = {
+    apply((cancel:AtomicBoolean) => response)
   }
 
 }
