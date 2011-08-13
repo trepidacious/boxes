@@ -387,10 +387,10 @@ object PiePainter {
   val defaultFill = SwingView.selectionColor //new Color(70, 153, 70)
 	val defaultOutline = Color.white// Color(200, 200, 200)
 
-  def apply(border:Int = 3, dotRadius:Int = 2, fill:Color = defaultFill, outline:Color = defaultOutline) = new PiePainter(border, dotRadius, fill, outline)
+  def apply(border:Int = 3, dotRadius:Int = 2, fill:Color = defaultFill, outline:Color = defaultOutline, justDot:Boolean = false) = new PiePainter(border, dotRadius, fill, outline, justDot)
 }
 
-class PiePainter(val border:Int, val dotRadius:Int, val fill:Color, val outline:Color) {
+class PiePainter(val border:Int, val dotRadius:Int, val fill:Color, val outline:Color, val justDot:Boolean) {
 
   def paint(g:Graphics2D, n:Double, w:Int, h:Int, alpha:Double = 1) {
 
@@ -410,14 +410,23 @@ class PiePainter(val border:Int, val dotRadius:Int, val fill:Color, val outline:
 		g.setPaint(SwingView.transparentColor(outline, alpha))
 		g.drawOval(border + dotRadius, border + dotRadius, circleDiameter, circleDiameter)
 
-		val arc = new Arc2D.Double(0, 0, size, size, 90, arcAngle, Arc2D.PIE)
+    if (justDot) {
+      g.setPaint(SwingView.transparentColor(fill, alpha))
+      val x = (size/2 + math.cos(-(arcAngle+90)/360d * math.Pi * 2) * circleDiameter/2 + 1).asInstanceOf[Int]
+      val y = (size/2 + math.sin(-(arcAngle+90)/360d * math.Pi * 2) * circleDiameter/2 + 1).asInstanceOf[Int]
 
-		val clip = g.getClip()
-		g.setPaint(SwingView.transparentColor(fill, alpha))
-		g.setClip(arc)
-		g.setStroke(new BasicStroke(dotRadius * 2))
-		g.drawOval(border + dotRadius, border + dotRadius, circleDiameter, circleDiameter)
-		g.setClip(clip)
+      g.fillOval(x - dotRadius, y - dotRadius, dotRadius*2, dotRadius*2)
+
+    } else {
+      val arc = new Arc2D.Double(0, 0, size, size, 90, arcAngle, Arc2D.PIE)
+
+      val clip = g.getClip()
+      g.setPaint(SwingView.transparentColor(fill, alpha))
+      g.setClip(arc)
+      g.setStroke(new BasicStroke(dotRadius * 2))
+      g.drawOval(border + dotRadius, border + dotRadius, circleDiameter, circleDiameter)
+      g.setClip(clip)
+    }
 
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA)
     g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, oldFM)

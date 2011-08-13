@@ -41,6 +41,8 @@ case class Vec2(x:Double = 0, y:Double = 0) {
 
 object Vec2 {
   val zero = Vec2(0, 0)
+  def x(v:Double = 1) = Vec2(v, 0)
+  def y(v:Double = 1) = Vec2(0, v)
 }
 
 case class Borders(top:Double = 0, left:Double = 0, bottom:Double = 0, right:Double = 0)
@@ -48,8 +50,6 @@ case class Borders(top:Double = 0, left:Double = 0, bottom:Double = 0, right:Dou
 case class Series[K](key:K, curve:List[Vec2], color:Color = Color.black, width:Double = 1)
 
 class GraphSeries[K](series:RefGeneral[List[Series[K]], _], shadow:Boolean = false) extends GraphLayer {
-
-  def gather() = series()
 
   def paint() = {
     val currentSeries = series()
@@ -328,6 +328,23 @@ class GraphHighlight extends UnboundedGraphDisplayLayer {
   }
 }
 
+object GraphBusy {
+  val pencil = new ImageIcon(classOf[GraphShadow].getResource("/boxes/swing/GraphPencil.png")).getImage
+}
+
+class GraphBusy(val alpha:Var[Double]) extends UnboundedGraphDisplayLayer {
+  def paint() = {
+    val a = alpha()
+    (canvas:GraphCanvas) => {
+      canvas.color = SwingView.transparentColor(SwingView.selectionColor, a)
+      val pa = canvas.spaces.pixelArea
+      if (a > 0.5) {
+        canvas.image(GraphBusy.pencil, pa.origin + pa.size + Vec2(-32, 10))
+      }
+    }
+  }
+}
+
 object GraphShadow {
   val topLeft = new ImageIcon(classOf[GraphShadow].getResource("/boxes/swing/GraphShadowTopLeft.png")).getImage
   val top = new ImageIcon(classOf[GraphShadow].getResource("/boxes/swing/GraphShadowTop.png")).getImage
@@ -473,9 +490,6 @@ class GraphBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], enabled:
   private val area:Var[Option[Area]] = Var(None)
 
   def bigEnough(a:Area) = (math.abs(a.size.x) > minSize || math.abs(a.size.y) > minSize)
-
-  def gather = (fill(), outline(), enabled(), area())
-
 
   def paint() = {
     val cFill = fill()

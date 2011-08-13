@@ -9,10 +9,10 @@ import graph._
 import list._
 import persistence._
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
-import swing.{GraphSwingView, SwingButtonBar, SwingOp, SwingButton}
 import java.awt.{GridLayout, Color, BorderLayout, Dimension}
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.CancellationException
+import swing.{GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingButton}
 
 object BoxesDemo {
 
@@ -760,7 +760,7 @@ object BoxesDemo {
       )
     )
 
-    val v = GraphSwingView(graph)
+    val v = GraphSwingBGView(graph)
 
     //Zoom out by clearing manual bounds to None
     val zoomOutButton = SwingButton(SwingOp("", GraphSwingView.zoomOut, SetOp(manualBounds, Val(None:Option[Area]))))
@@ -882,6 +882,10 @@ object BoxesDemo {
     //ledgerMulti
 //    ledger
 //    fieldCompositeLedger
+
+//    val l = List(1, 2, 3)
+//    val l2 = l ::: List(4)
+//    println(l2)
 
     swingRun{
       SwingView.nimbus()
