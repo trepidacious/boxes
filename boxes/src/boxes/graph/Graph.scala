@@ -8,8 +8,10 @@ import list.ListVal
 import java.awt.geom.Rectangle2D
 
 object Axis extends Enumeration {
-   type Axis = Value
-   val X, Y = Value
+  type Axis = Value
+  val X, Y = Value
+
+  def other(axis:Axis) = if (axis == X) Y else X
 }
 import Axis._
 
@@ -37,6 +39,10 @@ case class Vec2(x:Double = 0, y:Double = 0) {
   //Geometrically, The top right corner of a rectangle
   //containing this Vec2 and b
   def componentMaxima(b:Vec2) = Vec2(math.max(x, b.x), math.max(y, b.y))
+  def onAxis(axis:Axis) = axis match {
+    case X => x
+    case Y => y
+  }
 }
 
 object Vec2 {
@@ -81,7 +87,7 @@ class GraphSeries[K](series:RefGeneral[List[Series[K]], _], shadow:Boolean = fal
     }}
   }
 
-  def onMouse(event:GraphMouseEvent) {}
+  def onMouse(event:GraphMouseEvent) = false
 
 }
 
@@ -253,12 +259,13 @@ case class GraphMouseEvent (spaces:GraphSpaces, dataPoint:Vec2, eventType:GraphM
 trait GraphLayer {
   //When called, reads Box state and returns a method that will draw this state to a canvas
   def paint():(GraphCanvas => Unit)
-  def onMouse(event:GraphMouseEvent)
+  //Handle an event, returns false to allow it to reach other layers, or true to consume it
+  def onMouse(event:GraphMouseEvent):Boolean
   def dataBounds:RefGeneral[Option[Area], _]
 }
 
 trait GraphDisplayLayer extends GraphLayer {
-  def onMouse(event:GraphMouseEvent) {}
+  def onMouse(event:GraphMouseEvent) = false
 }
 
 trait UnboundedGraphDisplayLayer extends GraphDisplayLayer {
@@ -339,7 +346,7 @@ class GraphBusy(val alpha:Var[Double]) extends UnboundedGraphDisplayLayer {
       canvas.color = SwingView.transparentColor(SwingView.selectionColor, a)
       val pa = canvas.spaces.pixelArea
       if (a > 0.5) {
-        canvas.image(GraphBusy.pencil, pa.origin + pa.size + Vec2(-32, 10))
+        canvas.image(GraphBusy.pencil, pa.origin + pa.size + Vec2(-43, 10))
       }
     }
   }
@@ -512,7 +519,7 @@ class GraphBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], enabled:
     }
   }
 
-  def onMouse(e:GraphMouseEvent) {
+  def onMouse(e:GraphMouseEvent) = {
     if (enabled()) {
       e.eventType match {
         case PRESS => area() = Some(Area(e.dataPoint, Vec2(0, 0)))
@@ -529,6 +536,9 @@ class GraphBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], enabled:
         })
         case _ => {}
       }
+      true
+    } else {
+      false
     }
   }
 
@@ -587,10 +597,13 @@ object GraphBasic {
       xAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
       yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
       selectEnabled:RefGeneral[Boolean, _] = Val(false),
-      selection:VarGeneral[Set[K], _] = Var(Set[K]())
+      selection:VarGeneral[Set[K], _] = Var(Set[K]()),
+      extraMainLayers:List[GraphLayer] = List[GraphLayer](),
+      extraOverLayers:List[GraphLayer] = List[GraphLayer]()
       ) = {
 
     val layers = ListVal[GraphLayer](
+      extraMainLayers ::: List(
         new GraphBG(SwingView.alternateBackgroundColor, Color.white),
         new GraphHighlight(),
         new GraphSeries(series, true),
@@ -602,6 +615,7 @@ object GraphBasic {
         new GraphAxisTitle(X, xName),
         new GraphAxisTitle(Y, yName)
       )
+    )
 
     val dataBounds = Cal{
       layers().foldLeft(None:Option[Area]){
@@ -619,8 +633,10 @@ object GraphBasic {
     val zoomer = new GraphZoomer(dataBounds, manualBounds, xAxis, yAxis)
 
     val overlayers = ListVal[GraphLayer](
-      GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), manualBounds, zoomEnabled),
-      GraphSelectBox(series, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100)), selection, selectEnabled)
+      extraOverLayers ::: List(
+        GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), manualBounds, zoomEnabled),
+        GraphSelectBox(series, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100)), selection, selectEnabled)
+      )
     )
 
     new GraphBasic(

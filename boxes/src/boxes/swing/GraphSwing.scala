@@ -295,8 +295,10 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
 
       val dataPoint = s.toData(Vec2(x, y))
       val gme = GraphMouseEvent(s, dataPoint, eventType, b)
-      graph().layers().foreach(layer => layer.onMouse(gme))
-      graph().overlayers().foreach(layer => layer.onMouse(gme))
+
+      val consumed = graph().overlayers().foldLeft(false)((consumed, layer) => if(!consumed) layer.onMouse(gme) else true)
+      graph().layers().foldLeft(consumed)((consumed, layer) => if(!consumed) layer.onMouse(gme) else true)
+
     }
 
     this.addMouseMotionListener(new MouseMotionListener() {
@@ -453,8 +455,9 @@ class GraphSwingBGView(graph:Ref[_ <: Graph]) extends SwingView {
 
       val dataPoint = s.toData(Vec2(x, y))
       val gme = GraphMouseEvent(s, dataPoint, eventType, b)
-      graph().layers().foreach(layer => layer.onMouse(gme))
-      graph().overlayers().foreach(layer => layer.onMouse(gme))
+
+      val consumed = graph().overlayers().foldLeft(false)((consumed, layer) => if(!consumed) layer.onMouse(gme) else true)
+      graph().layers().foldLeft(consumed)((consumed, layer) => if(!consumed) layer.onMouse(gme) else true)
     }
 
     this.addMouseMotionListener(new MouseMotionListener() {
@@ -488,11 +491,16 @@ class GraphSwingBGView(graph:Ref[_ <: Graph]) extends SwingView {
 
     (cancel:AtomicBoolean) => {
       Box.withoutReading {
+        //TODO Would be nice to fade the busy icon in after a short delay, to avoid flickering the icon, or flashing it
+        //for trivial redraws, then (perhaps) fade out later. This could then allow for an animated progress indicator.
+        //Requires a Timer or similar, so a little fiddly
         busyAlpha() = 1
         concBackBuffer.ensureSize(spaces.componentArea.size)
         val g = concBackBuffer.image.getGraphics.asInstanceOf[Graphics2D]
         concBackBuffer.clear()
-        //TODO include cancelling - pass cancel to each paint call, and don't call at all if it is true.
+        //TODO progress indicator, would need to pass a Var[Double] to each paint method, then estimate proportion
+        //of total time taken by each layer, or perhaps have a two-level progress indicator to show layers complete out
+        //of total, and progress on current layer, might look quite cool.
         paints.foreach(paint => paint.apply(new GraphCanvasFromGraphics2D(g.create().asInstanceOf[Graphics2D], spaces)))
         g.dispose
 
@@ -501,9 +509,9 @@ class GraphSwingBGView(graph:Ref[_ <: Graph]) extends SwingView {
           concBuffer.clear()
           concBuffer.image.getGraphics.asInstanceOf[Graphics2D].drawImage(concBackBuffer.image, 0, 0, null)
         }
+        busyAlpha() = 0
 
         replaceUpdate{
-          busyAlpha() = 0
           component.repaint();
         }
       }

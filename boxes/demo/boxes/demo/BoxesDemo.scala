@@ -748,6 +748,15 @@ object BoxesDemo {
       }).toList
     }
 
+    import boxes.graph.Axis._
+
+
+    val x = Var(0.5d)
+    val xThreshold = GraphThreshold(Val(X), x, Val(Color.blue), Val("X Threshold"), Val(true))
+
+    val y = Var(0.5d)
+    val yThreshold = GraphThreshold(Val(Y), y, Val(Color.red), Val("Y Threshold"), Val(true))
+
     val graph = Var (
       GraphBasic.withSeries (
         ColorSeriesBySelection(series, indices),
@@ -756,7 +765,8 @@ object BoxesDemo {
         zoomEnabled = zoomEnabled,
         manualBounds = manualBounds,
         selectEnabled = selectEnabled,
-        selection = indices
+        selection = indices,
+        extraOverLayers = List(xThreshold, yThreshold)
       )
     )
 
