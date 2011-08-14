@@ -17,11 +17,6 @@ import com.explodingpixels.swingx.EPPanel
 import java.awt.{Dimension, Paint, BasicStroke, RenderingHints, Graphics2D, Color, Component}
 import java.awt.geom.{Ellipse2D, Arc2D}
 
-//TODO implement rate-limiting of updates? But then we need to know that views don't rely on all updates being called, just the most recent
-//Should be easy enough to do, just make the views store some Atomic style stuff they need to use to update, and fiddle
-//with this from View methods, so that when update DOES get called, it clears out any updates that are needed. Only really
-//fiddly for tables, which need to remember the size of the change (columns and/or row count) and make sure that this
-//is synchronized between View handling and swing updates - a simple lock should do it.
 object SwingView {
 
   val viewToUpdates = new mutable.WeakHashMap[Any, mutable.ListBuffer[() => Unit]]()
@@ -192,18 +187,23 @@ private class StringOptionView[G](v:VarGeneral[G,_], c:GConverter[G, String], mu
 
   val text = if (multiline) new JTextArea(10, 20) else new LinkingJTextField(this)
   val component = if (multiline) new LinkingJScrollPane(this, text) else text
-  private var expectedString:Option[String] = None
+
+  //Note the handling of commit and display - when we want to display we REPLACE the update, so that
+  //it takes precedence. We ADD commits so that they won't replace any pending displays. This means
+  //that in cases where the view could either commit or display, it will display. In particular this
+  //handles the case where a change to the Var occurs just as the text field is losing focus - e.g. a
+  //click that moves focus out of the text field AND causes an edit to the Var using another component.
 
   {
     if (!multiline) {
       text.asInstanceOf[JTextField].addActionListener(new ActionListener() {
-				override def actionPerformed(e:ActionEvent) = commit
+				override def actionPerformed(e:ActionEvent) = addUpdate {commit}
 			})
     }
 
     text.addFocusListener(new FocusListener() {
-      override def focusLost(e:FocusEvent) = commit
-      override def focusGained(e:FocusEvent) = display(v())
+      override def focusLost(e:FocusEvent) = addUpdate {commit}
+      override def focusGained(e:FocusEvent) = replaceUpdate {display(v())}
     })
   }
 
@@ -215,26 +215,12 @@ private class StringOptionView[G](v:VarGeneral[G,_], c:GConverter[G, String], mu
   }
 
   private def commit = {
-    //Make sure we only commit edits when the Var is Some string,
-    //and that string is the one we expect to see (the same value
-    //we have most recently displayed). This prevents this editor
-    //from applying edits when the Var has changed "under it" during
-    //editing.
-    Box.transact {
-      c.toOption(v()).foreach(s => {
-        expectedString.foreach(es => {
-          if (es == s) {
-            v() = c.toG(text.getText)
-          }
-        })
-      })
-    }
+    v() = c.toG(text.getText)
   }
 
   //Update display if necessary
   private def display(s:G) {
-    expectedString = c.toOption(s)
-    val enableAndText = expectedString match {
+    val enableAndText = c.toOption(s) match {
       case None => (false, "")
       case Some(string) => (true, string)
     }
