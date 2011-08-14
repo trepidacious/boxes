@@ -231,7 +231,7 @@ object GraphSwingView {
 }
 
 
-
+//TODO remove shared code from GraphSwingView and GraphSwingBGView
 class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
 
   val componentSize = Var(Vec2(10, 10))

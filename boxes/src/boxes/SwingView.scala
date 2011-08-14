@@ -192,6 +192,7 @@ private class StringOptionView[G](v:VarGeneral[G,_], c:GConverter[G, String], mu
 
   val text = if (multiline) new JTextArea(10, 20) else new LinkingJTextField(this)
   val component = if (multiline) new LinkingJScrollPane(this, text) else text
+  private var expectedString:Option[String] = None
 
   {
     if (!multiline) {
@@ -214,12 +215,26 @@ private class StringOptionView[G](v:VarGeneral[G,_], c:GConverter[G, String], mu
   }
 
   private def commit = {
-    v() = c.toG(text.getText)
+    //Make sure we only commit edits when the Var is Some string,
+    //and that string is the one we expect to see (the same value
+    //we have most recently displayed). This prevents this editor
+    //from applying edits when the Var has changed "under it" during
+    //editing.
+    Box.transact {
+      c.toOption(v()).foreach(s => {
+        expectedString.foreach(es => {
+          if (es == s) {
+            v() = c.toG(text.getText)
+          }
+        })
+      })
+    }
   }
 
   //Update display if necessary
   private def display(s:G) {
-    val enableAndText = c.toOption(s) match {
+    expectedString = c.toOption(s)
+    val enableAndText = expectedString match {
       case None => (false, "")
       case Some(string) => (true, string)
     }

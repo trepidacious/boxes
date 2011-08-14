@@ -574,6 +574,8 @@ object BoxesDemo {
   }
 
 
+
+
   def buildLedgerMulti() = {
 //    val list = ListVar(Range(0, 10).map(i=>{
 //      val p = new OptionPerson
@@ -864,6 +866,79 @@ object BoxesDemo {
     frame.setVisible(true)
   }
 
+  def ledgerAndSelected() {
+
+    val people = Range(0, 10).map(i => {
+      val p = new OptionPerson()
+      p.name() = "Mr " + i
+      p.age() = i * 10 + 5
+      p
+    })
+
+    val list = ListVar(people:_*)
+
+    val index = ListIndex(list)
+
+    val view = LensRecordView[OptionPerson](
+      VarLens("Name", _.name),
+      VarLens("Age", _.age),
+      VarLens("Zombie?", _.zombie)
+    )
+
+    val ledger = Var(new ListLedger(list, view))
+
+    val ledgerView = LedgerView.singleSelection(ledger, index)
+
+    val indexView = NumberOptionView(index, Step(1))
+
+    val add = new JButton(new AbstractAction("Add") {
+      override def actionPerformed(e:ActionEvent) = {
+        val person = new OptionPerson()
+        person.name() = "New item at " + list().size
+        list.insert(list().size, person)
+      }
+    })
+
+    val delete = new JButton(new AbstractAction("Delete") {
+      override def actionPerformed(e:ActionEvent) = {
+        if (!list().isEmpty) list.remove(0, 1)
+      }
+    })
+
+    val selected = ListSelection(list, index)
+    val v = View{selected().foreach{s => println(s.name())}}
+
+    val name = PathViaOption{
+      for {
+        p <- selected()
+      } yield p.name
+    }
+    val nameView = StringOptionView(name)
+
+//    val age = PathViaOption{
+//      for {
+//        p <- selected()
+//      } yield p.age
+//    }
+//    val ageView = NumberOptionView(age)
+
+
+    val frame = new JFrame()
+    val panel = new JPanel()
+    panel.add(add)
+    panel.add(delete)
+    panel.add(indexView.component)
+    panel.add(nameView.component)
+//    panel.add(ageView.component)
+    frame.add(new JScrollPane(ledgerView.component), BorderLayout.CENTER)
+    frame.add(panel, BorderLayout.SOUTH)
+    frame.pack
+    frame.setMinimumSize(new Dimension(300, 50))
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+    frame.setVisible(true)
+
+  }
+
   def main(args: Array[String]) {
 //    simpleCalc
 //    simplePath
@@ -901,8 +976,9 @@ object BoxesDemo {
       SwingView.nimbus()
 //      backgroundReaction
 //      textViews
-      ledgerMulti
+//      ledgerMulti
 //      graph
+      ledgerAndSelected()
 
     }
 //    axis
