@@ -188,22 +188,16 @@ private class StringOptionView[G](v:VarGeneral[G,_], c:GConverter[G, String], mu
   val text = if (multiline) new JTextArea(10, 20) else new LinkingJTextField(this)
   val component = if (multiline) new LinkingJScrollPane(this, text) else text
 
-  //Note the handling of commit and display - when we want to display we REPLACE the update, so that
-  //it takes precedence. We ADD commits so that they won't replace any pending displays. This means
-  //that in cases where the view could either commit or display, it will display. In particular this
-  //handles the case where a change to the Var occurs just as the text field is losing focus - e.g. a
-  //click that moves focus out of the text field AND causes an edit to the Var using another component.
-
   {
     if (!multiline) {
       text.asInstanceOf[JTextField].addActionListener(new ActionListener() {
-				override def actionPerformed(e:ActionEvent) = addUpdate {commit}
+				override def actionPerformed(e:ActionEvent) = commit
 			})
     }
 
     text.addFocusListener(new FocusListener() {
-      override def focusLost(e:FocusEvent) = addUpdate {commit}
-      override def focusGained(e:FocusEvent) = replaceUpdate {display(v())}
+      override def focusLost(e:FocusEvent) = commit
+      override def focusGained(e:FocusEvent) = display(v())
     })
   }
 
@@ -480,7 +474,8 @@ object NumberView {
 }
 
 object NumberOptionView {
-  def apply[N](v:VarGeneral[Option[N],_], s:Sequence[N] = LogStep(10))(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionView(v, s, new OptionTConverter[N], n, nc).asInstanceOf[SwingView]
+  def apply[N](v:VarGeneral[Option[N],_])(implicit n:Numeric[N], nc:NumericClass[N]):SwingView = apply(v, nc.defaultSequence)
+  def apply[N](v:VarGeneral[Option[N],_], s:Sequence[N])(implicit n:Numeric[N], nc:NumericClass[N]):SwingView = new NumberOptionView(v, s, new OptionTConverter[N], n, nc).asInstanceOf[SwingView]
 }
 
 private class NumberOptionView[G, N](v:VarGeneral[G,_], s:Sequence[N], c:GConverter[G, N], n:Numeric[N], nc:NumericClass[N]) extends SwingView {
@@ -488,7 +483,7 @@ private class NumberOptionView[G, N](v:VarGeneral[G,_], s:Sequence[N], c:GConver
   private val model = new AutoSpinnerModel()
   val component = new LinkingJSpinner(this, model)
 
-  val view = View{
+  val view = View {
     //Store the values for later use on Swing Thread
     val newV = v()
     //This will be called from Swing Thread
@@ -529,7 +524,8 @@ private class NumberOptionView[G, N](v:VarGeneral[G,_], s:Sequence[N], c:GConver
 		override def setValue(spinnerValue:Object) {
       //Don't respond to our own changes, or incorrect classes
 			if (!firing && nc.javaWrapperClass.isAssignableFrom(spinnerValue.getClass)) {
-					v() = c.toG(spinnerValue.asInstanceOf[N]);
+        currentValue = spinnerValue.asInstanceOf[N]
+        v() = c.toG(currentValue)
 			}
 		}
 	}
@@ -729,7 +725,8 @@ class LinkingJTable(val sv:SwingView, m:TableModel) extends JTable(m) {
   //Apologies for null, super constructor calls lots of
   //methods, leading to use of responding before it can be
   //initialised. This is why I hate subclassing, but necessary
-  //to make a JTable.
+  //to make a JTable. We initialise responding wherever it first
+  //happens to get used.
   private var responding:AtomicBoolean = null
 
   setDefaultRenderer(classOf[Boolean],  BooleanCellRenderer.opaque)
@@ -794,7 +791,7 @@ class LinkingJTable(val sv:SwingView, m:TableModel) extends JTable(m) {
     responding.set(false);
   }
 
-  def isRespondingToChange() = {
+  def isRespondingToChange = {
     //See note on declaration of responding
     if (responding == null) {
        responding = new AtomicBoolean(false);

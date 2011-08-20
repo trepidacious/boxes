@@ -9,10 +9,12 @@ import graph._
 import list._
 import persistence._
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
-import java.awt.{GridLayout, Color, BorderLayout, Dimension}
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.CancellationException
 import swing.{GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingButton}
+import java.util.jar.Attributes.Name
+import java.security.PublicKey
+import java.awt.{GridLayout, Color, BorderLayout, Dimension}
 
 object BoxesDemo {
 
@@ -891,6 +893,9 @@ object BoxesDemo {
 
     val indexView = NumberOptionView(index, Step(1))
 
+
+
+
     val add = new JButton(new AbstractAction("Add") {
       override def actionPerformed(e:ActionEvent) = {
         val person = new OptionPerson()
@@ -906,8 +911,8 @@ object BoxesDemo {
     })
 
     val selected = ListSelection(list, index)
-    val v = View{selected().foreach{s => println(s.name())}}
 
+    //This can lead to wrong direction change propagation
     val name = PathViaOption{
       for {
         p <- selected()
@@ -915,21 +920,21 @@ object BoxesDemo {
     }
     val nameView = StringOptionView(name)
 
-//    val age = PathViaOption{
-//      for {
-//        p <- selected()
-//      } yield p.age
-//    }
-//    val ageView = NumberOptionView(age)
+    val age = PathViaOption{
+      for {
+        p <- selected()
+      } yield p.age
+    }
+    val ageView = NumberOptionView[Int](age)
 
 
     val frame = new JFrame()
-    val panel = new JPanel()
+    val panel = new JPanel(new GridLayout(1, 4))
     panel.add(add)
     panel.add(delete)
     panel.add(indexView.component)
     panel.add(nameView.component)
-//    panel.add(ageView.component)
+    panel.add(ageView.component)
     frame.add(new JScrollPane(ledgerView.component), BorderLayout.CENTER)
     frame.add(panel, BorderLayout.SOUTH)
     frame.pack
@@ -978,7 +983,7 @@ object BoxesDemo {
 //      textViews
 //      ledgerMulti
 //      graph
-      ledgerAndSelected()
+      ledgerAndSelected
 
     }
 //    axis

@@ -10,6 +10,7 @@ trait NumericClass[N] {
   def format(n:N):String
   def formatInstance:NumberFormat
   def isWhole:Boolean
+  def defaultSequence:Sequence[N]
 }
 
 object NumericClass {
@@ -22,6 +23,7 @@ object NumericClass {
     def parse(s:String) = format.synchronized(toN(format.parse(s)))
     def format(n:Int) = format.synchronized(format.format(n))
     val isWhole = true
+    val defaultSequence = Step(1)
   }
   implicit object ShortClass extends NumericClass[Short] {
     override def formatInstance = NumberFormat.getIntegerInstance
@@ -32,6 +34,7 @@ object NumericClass {
     def parse(s:String) = format.synchronized(toN(format.parse(s)))
     def format(n:Short) = format.synchronized(format.format(n))
     val isWhole = true
+    val defaultSequence = Step(1.asInstanceOf[Short])
   }
   implicit object ByteClass extends NumericClass[Byte] {
     override def formatInstance = NumberFormat.getIntegerInstance
@@ -42,6 +45,7 @@ object NumericClass {
     def parse(s:String) = format.synchronized(toN(format.parse(s)))
     def format(n:Byte) = format.synchronized(format.format(n))
     val isWhole = true
+    val defaultSequence = Step(1.asInstanceOf[Byte])
   }
   implicit object LongClass extends NumericClass[Long] {
     override def formatInstance = NumberFormat.getIntegerInstance
@@ -52,6 +56,7 @@ object NumericClass {
     def parse(s:String) = format.synchronized(toN(format.parse(s)))
     def format(n:Long) = format.synchronized(format.format(n))
     val isWhole = true
+    val defaultSequence = Step(1L)
   }
   implicit object FloatClass extends NumericClass[Float] {
     override def formatInstance = NumberFormat.getNumberInstance
@@ -62,6 +67,7 @@ object NumericClass {
     def parse(s:String) = format.synchronized(toN(format.parse(s)))
     def format(n:Float) = format.synchronized(format.format(n))
     val isWhole = false
+    val defaultSequence = Step(1f)
   }
   implicit object DoubleClass extends NumericClass[Double] {
     override def formatInstance = NumberFormat.getNumberInstance
@@ -72,6 +78,7 @@ object NumericClass {
     def parse(s:String) = format.synchronized(toN(format.parse(s)))
     def format(n:Double) = format.synchronized(format.format(n))
     val isWhole = false
+    val defaultSequence = LogStep(10)
   }
   implicit object BigIntClass extends NumericClass[BigInt] {
     override def formatInstance = {
@@ -91,6 +98,7 @@ object NumericClass {
     def parse(s:String) = format.synchronized(toN(format.parse(s)))
     def format(n:BigInt) = format.synchronized(format.format(n))
     val isWhole = true
+    val defaultSequence = Step(BigInt(1))
   }
 
   implicit object BigDecimalClass extends NumericClass[BigDecimal] {
@@ -110,6 +118,7 @@ object NumericClass {
     def parse(s:String) = format.synchronized(toN(format.parse(s)))
     def format(n:BigDecimal) = format.synchronized(format.format(n))
     val isWhole = false
+    val defaultSequence = Step(BigDecimal(1))
   }
 
   val classes = List(

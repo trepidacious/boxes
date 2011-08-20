@@ -1,6 +1,5 @@
 package boxes.util
 
-import math.Numeric
 import scala.math._
 
 trait Sequence[T] {

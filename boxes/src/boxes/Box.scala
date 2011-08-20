@@ -3,6 +3,7 @@ package boxes
 import collection._
 import util.WeakHashSet
 import actors.threadpool.locks.ReentrantLock
+import javax.accessibility.AccessibleText
 
 object Box {
 
@@ -41,6 +42,10 @@ object Box {
   private val lock = new ReentrantLock()
 
   private var decoding = false
+
+  private var _cycleIndex = -1
+
+  def cycleIndex = _cycleIndex
 
   def decode[T](decode : =>T):T = {
     beforeDecode
@@ -237,6 +242,8 @@ object Box {
     //Only enter one cycle at a time, and we don't cycle while decoding
     if (!cycling && !decoding) {
       cycling = true
+
+      _cycleIndex += 1
 
       val failedReactions = new mutable.HashSet[Reaction]()
 

@@ -79,7 +79,16 @@ class ListSelectionIndicesModel(v:VarGeneral[Set[Int],_], setFilter: =>Boolean, 
 
 		//If we can set selection, update the Var to match the delegate
 		if (setFilter) {
-      v() = selection
+      //Note that we delay this change to var, so that any pending swing
+      //actions occur BEFORE we change the var. This gives other swing code
+      //a chance to execute BEFORE it receives any additional changes.
+      //For example, anything editing an object selected (in a Cal) by
+      //the current index will have a chance to respond to losing focus
+      //by applying pending edits, BEFORE the selected object changes to
+      //a new instance.
+      SwingView.addUpdate(this,
+        v() = selection
+      )
 		//If we are ignoring changes to the delegate, then we need to
 		//revert the delegate back to mirroring the Var
 		} else {

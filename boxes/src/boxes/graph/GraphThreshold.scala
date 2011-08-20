@@ -4,8 +4,10 @@ import boxes.graph.Axis._
 import boxes.graph.GraphMouseEventType._
 import java.awt.Color
 import boxes.{VarGeneral, SwingView, Val, RefGeneral}
+import java.text.DecimalFormat
 
 object GraphThreshold {
+  val format = new DecimalFormat("0.00")
   val handleRadius = 4
 
   def apply(axis:RefGeneral[Axis, _], value:VarGeneral[Double, _], color:RefGeneral[Color, _], name:RefGeneral[String, _], enabled:RefGeneral[Boolean, _]) = new GraphThreshold(axis, value, color, name, enabled)
@@ -36,9 +38,11 @@ class GraphThreshold(axis:RefGeneral[Axis, _], value:VarGeneral[Double, _], colo
       canvas.lineWidth = 1
       canvas.line(start, end)
 
+      val label = n + " = " + GraphThreshold.format.format(v)
+
       a match {
-        case X => canvas.string(n, start + Vec2(-6, -6), Vec2(0, 0), -1)
-        case Y => canvas.string(n, start + Vec2(6, -6), Vec2(0, 0), 0)
+        case X => canvas.string(label, start + Vec2(-6, -6), Vec2(0, 0), -1)
+        case Y => canvas.string(label, start + Vec2(6, -6), Vec2(0, 0), 0)
       }
     }
   }
