@@ -4,40 +4,40 @@ import list.{ListChange, ListVar}
 import util._
 import collection._
 
-trait PathReactionHelp {
-  private var ignoreCycleIndex = -1
+//trait PathReactionHelp {
+//  private var ignoreCycleIndex = -1
+//
+//  private[boxes] def eToV(e:Box[_], v:Box[_]) = {
+//    val vIndex = v.firstChangeIndex
+//    val eIndex = e.firstChangeIndex
+//
+//    if (Box.cycleIndex == ignoreCycleIndex) {
+//      true
+//    } else {
+//
+//      //We only ever get one chance to propagate from v to e per cycle,
+//      //the first time we are called in that cycle. After that, it is
+//      //always from e to v.
+//      ignoreCycleIndex = Box.cycleIndex
+//
+//      vIndex match {
+//        //We have a write to v
+//        case Some(vIndexValue) => eIndex match {
+//            //TODO this might be best always returning true, since it is safest to go
+//            //from e to v when both have been written
+//          //We also have a write to e - if it came first, go from e to v
+//          case Some(eIndexValue) => eIndexValue < vIndexValue
+//          //We have a write to v, but not to e, so go from v to e
+//          case None => false
+//        }
+//        //No write to v, so go from e to v
+//        case None => true
+//      }
+//    }
+//  }
+//}
 
-  private[boxes] def eToV(e:Box[_], v:Box[_]) = {
-    val vIndex = v.firstChangeIndex
-    val eIndex = e.firstChangeIndex
-
-    if (Box.cycleIndex == ignoreCycleIndex) {
-      true
-    } else {
-
-      //We only ever get one chance to propagate from v to e per cycle,
-      //the first time we are called in that cycle. After that, it is
-      //always from e to v.
-      ignoreCycleIndex = Box.cycleIndex
-
-      vIndex match {
-        //We have a write to v
-        case Some(vIndexValue) => eIndex match {
-            //TODO this might be best always returning true, since it is safest to go
-            //from e to v when both have been written
-          //We also have a write to e - if it came first, go from e to v
-          case Some(eIndexValue) => eIndexValue < vIndexValue
-          //We have a write to v, but not to e, so go from v to e
-          case None => false
-        }
-        //No write to v, so go from e to v
-        case None => true
-      }
-    }
-  }
-}
-
-class PathReaction[T, G, CT, CG](v:VarGeneral[G, CG], path : => Option[VarGeneral[T, CT]], defaultValue:G, c:GConverter[G, T]) extends Reaction with PathReactionHelp {
+class PathReaction[T, G, CT, CG](v:VarGeneral[G, CG], path : => Option[VarGeneral[T, CT]], defaultValue:G, c:GConverter[G, T]) extends Reaction {
 
   def respond : (()=>Unit) = {
     path match {
@@ -55,7 +55,10 @@ class PathReaction[T, G, CT, CG](v:VarGeneral[G, CG], path : => Option[VarGenera
           {()=>()}
 
         } else {
-          if (eToV(e, v)) {
+          //Only propagate from v to e if only v has changed - otherwise, propagate from e to v.
+          //This means that only changes directly to v that have NOT altered the path OR the endpoint
+          //will be applied back to the endpoint.
+          if (Box.changedSources(this) != Set(v)) {
             {() => (v() = eContents)}
           } else {
             //Take vContents of type G up to a definite Option, then we
@@ -142,7 +145,7 @@ object PathViaOption {
   }
 }
 
-class ListPathReaction[T](v:ListVar[T], path : => Option[ListVar[T]]) extends Reaction with PathReactionHelp {
+class ListPathReaction[T](v:ListVar[T], path : => Option[ListVar[T]]) extends Reaction {
 
   private var lastE:Option[ListVar[T]] = None
   private var lastProcessedChangeIndex = -1L
@@ -193,7 +196,8 @@ class ListPathReaction[T](v:ListVar[T], path : => Option[ListVar[T]]) extends Re
           //and lose incremental changes - we are dealing with unsynced lists
           //so we cannot use incremental changes to get them up to date
           if (eChanged) {
-            if (eToV(e, v)) {
+//            if (eToV(e, v)) {
+            if (Box.changedSources(this) != Set(v)) {
               {() => (v() = eContents)}
             } else {
               {() => (e() = vContents)}
@@ -201,7 +205,8 @@ class ListPathReaction[T](v:ListVar[T], path : => Option[ListVar[T]]) extends Re
           //Otherwise we just need to use any new incremental changes
           //to update from one list to the other
           } else {
-            if (eToV(e, v)) {
+//            if (eToV(e, v)) {
+            if (Box.changedSources(this) != Set(v)) {
               val changes = unprocessedChanges(e);
               {() => v.updateWithChanges(eContents, changes:_*)}
             } else {

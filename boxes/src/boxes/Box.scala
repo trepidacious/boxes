@@ -1,6 +1,7 @@
 package boxes
 
 import collection._
+import mutable.MultiMap
 import util.WeakHashSet
 import actors.threadpool.locks.ReentrantLock
 import javax.accessibility.AccessibleText
@@ -29,6 +30,11 @@ object Box {
   //Threads that have asked not to be allowed to read
   private val nonReadingThreads = new mutable.HashSet[Thread]
 
+  //For each reaction that has had any source change, maps to the set of boxes that have changed for that reaction. Allows
+  //reactions to see why they have been called in any given cycle. Empty outside cycles. Note that from one call to
+  //a reaction to the next, may acquire additional entries, etc.
+  private val changedSourcesForReaction = new mutable.HashMap[Reaction, mutable.Set[Box[_]]] with MultiMap[Reaction, Box[_]]
+
   //The next change index to assign
   private var changeIndex = 0L
 
@@ -46,6 +52,8 @@ object Box {
   private var _cycleIndex = -1
 
   def cycleIndex = _cycleIndex
+
+  def changedSources(r:Reaction) = immutable.Set(changedSourcesForReaction.get(r).getOrElse(Set[Box[_]]()).toList:_*)
 
   def decode[T](decode : =>T):T = {
     beforeDecode
@@ -154,7 +162,7 @@ object Box {
     //Any reactions on this box are now pending
     for {
       reaction <- b.sourcingReactions
-    } pendReaction(reaction)
+    } pendReaction(reaction, List(b))
 
     cycle
   }
@@ -173,7 +181,8 @@ object Box {
     b.targetingReactions.add(r)
   }
 
-  private def pendReaction(r:Reaction) = {
+  private def pendReaction(r:Reaction, sourceBoxes:List[Box[_]] = List()) = {
+    sourceBoxes.foreach(b => changedSourcesForReaction.addBinding(r, b))
     r.isView match {
       case false => {
         if (!reactionsPending.contains(r)) {
@@ -347,7 +356,9 @@ object Box {
       checkingConflicts = false
 
       //Only valid during cycling
-      boxToChanges.clear
+      boxToChanges.clear()
+      changedSourcesForReaction.clear()
+
 
       //Done for this cycle
       cycling = false
