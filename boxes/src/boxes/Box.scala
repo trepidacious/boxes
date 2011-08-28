@@ -305,6 +305,14 @@ object Box {
             newReactions.remove(nextReaction)
             failedReactions.add(nextReaction)
           }
+          case e:Exception => {
+              //TODO need to respond better, but can't allow uncaught exception to just stop cycling
+            e.printStackTrace()
+            clearReactionSourcesAndTargets(nextReaction)
+            conflictReactions.remove(nextReaction)
+            newReactions.remove(nextReaction)
+            failedReactions.add(nextReaction)
+          }
         }
 
       }
@@ -346,6 +354,13 @@ object Box {
             reactionRespondAndApply(r)
           } catch {
             case e:BoxException => {
+              //Remove the reaction completely from the system, but remember that it failed
+              clearReactionSourcesAndTargets(r)
+              failedReactions.add(r)
+            }
+            case e:Exception => {
+              //TODO need to respond better, but can't allow uncaught exception to just stop cycling
+              e.printStackTrace()
               //Remove the reaction completely from the system, but remember that it failed
               clearReactionSourcesAndTargets(r)
               failedReactions.add(r)

@@ -912,13 +912,18 @@ object BoxesDemo {
 
     val selected = ListSelection(list, index)
 
-    //This can lead to wrong direction change propagation
-    val name = PathViaOption{
+//    val name = PathViaOption{
+//      for {
+//        p <- selected()
+//      } yield p.name
+//    }
+//    val nameView = StringOptionView(name)
+
+    val nameView = StringOptionView.pathViaOption{
       for {
         p <- selected()
       } yield p.name
     }
-    val nameView = StringOptionView(name)
 
     val age = PathViaOption{
       for {
@@ -981,7 +986,7 @@ object BoxesDemo {
       SwingView.nimbus()
 //      backgroundReaction
 //      textViews
-//      ledgerMulti
+      ledgerMulti
 //      graph
       ledgerAndSelected
 

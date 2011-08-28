@@ -181,6 +181,8 @@ object StringView {
 
 object StringOptionView {
   def apply(v:VarGeneral[Option[String],_], multiline:Boolean = false) = new StringOptionView(v, new OptionTConverter[String], multiline).asInstanceOf[SwingView]
+  def pathViaOption(path : => Option[Var[String]], multiline:Boolean = false) = apply(PathViaOption(path), multiline)
+  def pathToOption(path : => Option[Var[Option[String]]], multiline:Boolean = false) = apply(PathToOption(path), multiline)
 }
 
 private class StringOptionView[G](v:VarGeneral[G,_], c:GConverter[G, String], multiline:Boolean) extends SwingView {
