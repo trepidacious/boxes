@@ -4,17 +4,14 @@ import javax.swing._
 import java.awt.event.ActionEvent
 import boxes.util.{LogStep, Step, CoalescingResponder, NumericClass}
 import boxes._
-import general.{RadioReaction, TrueOp, SetOp}
+import general.{RadioReaction, SetOp}
 import graph._
 import list._
 import persistence._
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.CancellationException
-import java.util.jar.Attributes.Name
-import java.security.PublicKey
-import java.awt.{GridLayout, Color, BorderLayout, Dimension}
 import swing.{SwingButton, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
+import java.awt.{GridLayout, Color, BorderLayout, Dimension}
 
 object BoxesDemo {
 
@@ -341,8 +338,8 @@ object BoxesDemo {
       println("x is " + x() + " should set y to " + !x())
       Some(!x())
     })
-    val xView = BooleanView(x, Val("X"))
-    val yView = BooleanOptionView(y, Val("Y"))
+    val xView = BooleanView(x, Val("X"), BooleanControlType.TOGGLEBUTTON)
+    val yView = BooleanOptionView(y, Val("Y"), BooleanControlType.TOGGLEBUTTON)
 
     val button = new JButton(new AbstractAction() {
       override def actionPerformed(e:ActionEvent) = {
@@ -370,7 +367,7 @@ object BoxesDemo {
 
 
     val frame = new JFrame()
-    val panel = new JPanel()
+    val panel = new JPanel(new GridLayout(1, -1))
     panel.add(sView.component)
     panel.add(tView.component)
     panel.add(xView.component)
@@ -988,8 +985,8 @@ object BoxesDemo {
     swingRun{
       SwingView.nimbus()
 //      backgroundReaction
-//      textViews
-      ledgerMulti
+      textViews
+//      ledgerMulti
 //      graph
       ledgerAndSelected
 

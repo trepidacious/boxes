@@ -103,7 +103,7 @@ class SwingBarToggleButton extends EPToggleButton{
 
 class SwingToggleButton extends EPToggleButton{
   {
-    setBorder(new EmptyBorder(7,2,6,2))
+    setBorder(new EmptyBorder(7,12,6,12))
     setContentAreaFilled(false)
     setBackgroundPainter(new ButtonPainter())
   }
@@ -111,7 +111,7 @@ class SwingToggleButton extends EPToggleButton{
 
 class SwingButton(a:Action) extends EPButton(a) {
   {
-    setBorder(new EmptyBorder(7,2,6,2))
+    setBorder(new EmptyBorder(7,12,6,12))
     setContentAreaFilled(false)
     setBackgroundPainter(new ButtonPainter())
   }

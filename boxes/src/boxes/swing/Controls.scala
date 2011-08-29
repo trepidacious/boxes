@@ -1,15 +1,15 @@
 package boxes.swing
 
-import javax.swing.plaf.basic.BasicTextFieldUI
 import javax.swing.text.JTextComponent
 import com.explodingpixels.macwidgets.plaf.HudPaintingUtils
 import com.explodingpixels.painter.Painter
-import javax.swing.{AbstractButton, ImageIcon, BorderFactory, JComponent}
 import com.explodingpixels.widgets.ImageUtils
 import java.awt.{Insets, Component, Image, Graphics2D, RenderingHints, Graphics, Color}
 import javax.swing.border.{EmptyBorder, AbstractBorder}
 import boxes.SwingView
-
+import javax.swing.{JTextArea, JTextField, AbstractButton, ImageIcon, BorderFactory, JComponent}
+import javax.swing.plaf.basic.{BasicFormattedTextFieldUI, BasicTextAreaUI, BasicTextFieldUI}
+import java.beans.PropertyChangeEvent
 
 object BarStylePainter {
   val dividerColor = new Color(0, 0, 0, 51)
@@ -134,6 +134,24 @@ class ThreePartVariableHeightPainter(image:Image, t:Int = 10, m:Int = 8, b:Int =
       paintStrip(g, w, h, t, middle, middleStrip)
     }
   }
+
+  def paintStripWithoutRight(g:Graphics2D, w:Int, h:Int, y:Int, stripHeight:Int, parts:(Image, Image, Image)) {
+    val middle = w - pieceWidth
+    g.drawImage(parts._1, 0, y, pieceWidth, stripHeight, null)
+    if (middle > 0) {
+      g.drawImage(parts._2, pieceWidth, y, middle, stripHeight, null)
+    }
+  }
+
+  def paintWithoutRight(g:Graphics2D, w:Int, h:Int) {
+    val middle = h - t - b
+    paintStripWithoutRight(g, w, h, 0, t, topStrip)
+    paintStripWithoutRight(g, w, h, h - b, b, bottomStrip)
+    if (middle > 0) {
+      paintStripWithoutRight(g, w, h, t, middle, middleStrip)
+    }
+  }
+
 }
 
 object ButtonPainter {
@@ -183,52 +201,84 @@ class TextComponentPainter() extends Painter[Component] {
   }
 }
 
-class TextComponentBorder() extends AbstractBorder {
-  override def paintBorder(c:Component, g:Graphics, x:Int, y:Int, width:Int, height:Int) {
-    TextComponentPainter.instance.paint(g.asInstanceOf[Graphics2D], c, width, height)
+object SpinnerTextComponentPainter {
+  val instance = new SpinnerTextComponentPainter()
+}
+
+class SpinnerTextComponentPainter() extends Painter[Component] {
+  override def paint(g:Graphics2D, t:Component, w:Int, h:Int) {
+
+    if (t.isEnabled) {
+      TextComponentPainter.plain.paintWithoutRight(g, w, h)
+    } else {
+      TextComponentPainter.disabled.paintWithoutRight(g, w, h)
+    }
+
+    if (t.hasFocus) {
+      TextComponentPainter.focus.paintWithoutRight(g, w, h)
+    }
   }
+}
 
-  override def getBorderInsets(c: Component) = new Insets(2, 2, 2, 2)
-
-  override def getBorderInsets(c: Component, insets: Insets): Insets = {
-    insets.left = 2
-    insets.top = 2
-    insets.right = 2
-    insets.bottom = 2
-    insets
+object BoxesTextComponentUI {
+  def adjustComponent(c:JTextComponent) {
+    c.setOpaque(false)
+    c.setBorder(new EmptyBorder(7, 8, 6, 8))
+    c.setBackground(new Color(0, 0, 0, 0))
+    c.setForeground(SwingView.textColor)
+//      c.setFont(HudPaintingUtils.getHudFont)
+    c.setSelectedTextColor(SwingView.selectedTextColor)
+    c.setSelectionColor(SwingView.selectionColor)
+    c.setCaretColor(SwingView.textColor)
   }
-
-  override def isBorderOpaque = false
 }
 
 object BoxesTextFieldUI {
-  val ui = new BoxesTextFieldUI()
-  def apply(c:JComponent) = ui.installUI(c)
+  def apply(c:JTextField) = c.setUI(new BoxesTextFieldUI())
 }
-
 class BoxesTextFieldUI extends BasicTextFieldUI {
+  override def installUI(c:JComponent) {
+    super.installUI(c)
+    BoxesTextComponentUI.adjustComponent(c.asInstanceOf[JTextComponent])
+  }
 
-    override def installUI(c:JComponent) {
-        super.installUI(c)
+  override def paintSafely(g:Graphics) {
+    val c = getComponent
+    TextComponentPainter.instance.paint(g.asInstanceOf[Graphics2D], c, c.getWidth, c.getHeight)
+    super.paintSafely(g)
+  }
+}
 
-        val textComponent = c.asInstanceOf[JTextComponent]
+object BoxesTextAreaUI {
+  def apply(c:JTextArea) = c.setUI(new BoxesTextAreaUI())
+}
+class BoxesTextAreaUI extends BasicTextAreaUI {
+  override def installUI(c:JComponent) {
+    super.installUI(c)
+    BoxesTextComponentUI.adjustComponent(c.asInstanceOf[JTextComponent])
+  }
 
-        textComponent.setOpaque(false)
-        textComponent.setBorder(new EmptyBorder(7, 8, 6, 8))
-        textComponent.setBackground(new Color(0, 0, 0, 0))
-        textComponent.setForeground(SwingView.textColor)
-//        textComponent.setFont(HudPaintingUtils.getHudFont)
-        textComponent.setSelectedTextColor(SwingView.selectedTextColor)
-        textComponent.setSelectionColor(SwingView.selectionColor)
-        textComponent.setCaretColor(SwingView.textColor)
+  override def paintSafely(g:Graphics) {
+    val c = getComponent
+    TextComponentPainter.instance.paint(g.asInstanceOf[Graphics2D], c, c.getWidth, c.getHeight)
+    super.paintSafely(g)
+  }
+}
 
-    }
+object SpinnerTextFieldUI {
+  def apply(c:JTextField) = c.setUI(new SpinnerTextFieldUI())
+}
+class SpinnerTextFieldUI extends BasicFormattedTextFieldUI {
+  override def installUI(c:JComponent) {
+    super.installUI(c)
+    BoxesTextComponentUI.adjustComponent(c.asInstanceOf[JTextComponent])
+  }
 
-    override def paintSafely(graphics:Graphics) {
-        val g2d = graphics.asInstanceOf[Graphics2D]
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-
-        super.paintSafely(graphics)
-    }
+  override def paintSafely(g:Graphics) {
+    val c = getComponent
+    SpinnerTextComponentPainter.instance.paint(g.asInstanceOf[Graphics2D], c, c.getWidth, c.getHeight)
+    super.paintSafely(g)
+  }
 
 }
+

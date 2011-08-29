@@ -16,6 +16,8 @@ import com.explodingpixels.painter.Painter
 import com.explodingpixels.swingx.EPPanel
 import java.awt.geom.{Ellipse2D, Arc2D}
 import java.awt.{Graphics, Dimension, Paint, BasicStroke, RenderingHints, Graphics2D, Color, Component}
+import javax.swing.JSpinner.DefaultEditor
+import java.text.ParseException
 
 object SwingView {
 
@@ -189,7 +191,8 @@ object StringOptionView {
 
 private class StringOptionView[G](v:VarGeneral[G,_], c:GConverter[G, String], multiline:Boolean) extends SwingView {
 
-  val text = if (multiline) new JTextArea(10, 20) else new LinkingJTextField(this)
+  val text = if (multiline) new BoxesJTextArea(10, 20) else new LinkingJTextField(this)
+  //TODO need a nice scrollable text area with the minimal scrollbars from ledger view, inside the text area.
   val component = if (multiline) new LinkingJScrollPane(this, text) else text
 
   {
@@ -233,14 +236,11 @@ private class StringOptionView[G](v:VarGeneral[G,_], c:GConverter[G, String], mu
 //so that if users only retain the component, they still also retain the SwingView.
 class LinkingJScrollPane(val sv:SwingView, contents:Component) extends JScrollPane(contents) {}
 class LinkingJTextField(val sv:SwingView) extends JTextField {
-  {
-    BoxesTextFieldUI(this)
-  }
+  BoxesTextFieldUI(this)
+}
 
-  override def paintComponent(g:Graphics) {
-    TextComponentPainter.instance.paint(g.asInstanceOf[Graphics2D], this, this.getWidth, this.getHeight)
-    super.paintComponent(g)
-  }
+class BoxesJTextArea(r:Int, c:Int) extends JTextArea(r, c) {
+  BoxesTextAreaUI(this)
 }
 
 object BooleanControlType extends Enumeration {
@@ -322,7 +322,9 @@ private class BooleanOptionView[G](v:VarGeneral[G,_], n:RefGeneral[String,_], c:
 }
 
 class LinkingJCheckBox(val sv:SwingView) extends JCheckBox {}
-class LinkingJToggleButton(val sv:SwingView) extends JToggleButton {}
+
+class LinkingJToggleButton(val sv:SwingView) extends SwingToggleButton {}
+
 class LinkingToolbarToggleButton(val sv:SwingView) extends SwingBarToggleButton {}
 
 object RangeView {
@@ -496,7 +498,33 @@ private class NumberOptionView[G, N](v:VarGeneral[G,_], s:Sequence[N], c:GConver
   private val model = new AutoSpinnerModel()
   val component = new LinkingJSpinner(this, model)
 
-  val view = View {
+  //If the editor is a default editor, we can work around
+  //failure to commit when selecting a menu (and possibly other
+  //problems) by monitoring the editor, and committing its edits when it loses
+  //focus. This should happen automatically, and sometimes does by some
+  //means I have not yet located, but fails when immediately selecting a menu
+  //after editing, etc.
+  component.getEditor() match {
+    case dEditor:DefaultEditor => {
+      dEditor.getTextField().addFocusListener(new FocusListener() {
+
+        override def focusLost(e:FocusEvent) {
+          try {
+            component.commitEdit()
+          } catch {
+            case e:ParseException => {
+              update()
+            }
+          }
+        }
+
+        override def focusGained(e:FocusEvent) {}
+
+      })
+    }
+  }
+
+  def update() = {
     //Store the values for later use on Swing Thread
     val newV = v()
     //This will be called from Swing Thread
@@ -512,6 +540,10 @@ private class NumberOptionView[G, N](v:VarGeneral[G,_], s:Sequence[N], c:GConver
         }
       }
     }
+  }
+
+  val view = View {
+     update()
   }
 
   private class AutoSpinnerModel extends SpinnerNumberModel {
@@ -545,7 +577,11 @@ private class NumberOptionView[G, N](v:VarGeneral[G,_], s:Sequence[N], c:GConver
 
 }
 
-class LinkingJSpinner(val sv:SwingView, m:SpinnerModel) extends JSpinner(m) {}
+class LinkingJSpinner(val sv:SwingView, m:SpinnerModel) extends JSpinner(m) {
+  {
+    new BoxesSpinnerUI().installUI(this)
+  }
+}
 
 
 
