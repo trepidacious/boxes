@@ -9,7 +9,8 @@ import javax.swing.border.{EmptyBorder, AbstractBorder}
 import boxes.SwingView
 import javax.swing.{JTextArea, JTextField, AbstractButton, ImageIcon, BorderFactory, JComponent}
 import javax.swing.plaf.basic.{BasicFormattedTextFieldUI, BasicTextAreaUI, BasicTextFieldUI}
-import java.beans.PropertyChangeEvent
+import java.awt.event.{FocusEvent, FocusListener}
+import java.beans.{PropertyChangeListener, PropertyChangeEvent}
 
 object BarStylePainter {
   val dividerColor = new Color(0, 0, 0, 51)
@@ -230,6 +231,23 @@ object BoxesTextComponentUI {
     c.setSelectedTextColor(SwingView.selectedTextColor)
     c.setSelectionColor(SwingView.selectionColor)
     c.setCaretColor(SwingView.textColor)
+
+    //TODO is there a better way of doing this? Otherwise
+    //we don't get to repaint in paintSafely when focus changes
+    c.addFocusListener(new FocusListener {
+      def focusGained(e: FocusEvent) {
+        c.repaint()
+      }
+
+      def focusLost(e: FocusEvent) {
+        c.repaint()
+      }
+    })
+    c.addPropertyChangeListener("enabled", new PropertyChangeListener {
+      def propertyChange(evt: PropertyChangeEvent) {
+        c.repaint()
+      }
+    })
   }
 }
 
