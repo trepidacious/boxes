@@ -11,10 +11,10 @@ import persistence._
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.CancellationException
-import swing.{GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingButton}
 import java.util.jar.Attributes.Name
 import java.security.PublicKey
 import java.awt.{GridLayout, Color, BorderLayout, Dimension}
+import swing.{SwingButton, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
 
 object BoxesDemo {
 
@@ -777,14 +777,10 @@ object BoxesDemo {
     val v = GraphSwingBGView(graph)
 
     //Zoom out by clearing manual bounds to None
-    val zoomOutButton = SwingButton(SwingOp("", GraphSwingView.zoomOut, SetOp(manualBounds, Val(None:Option[Area]))))
+    val zoomOutButton = SwingBarButton(SwingOp("", Some(GraphSwingView.zoomOut), SetOp(manualBounds, Val(None:Option[Area]))))
 
     val zoomEnabledView = BooleanView(zoomEnabled, Val(""), BooleanControlType.TOOLBARBUTTON, Val(Some(GraphSwingView.zoomSelect)), false)
     val selectEnabledView = BooleanView(selectEnabled, Val(""), BooleanControlType.TOOLBARBUTTON, Val(Some(GraphSwingView.boxSelect)), false)
-
-//    val print = View{
-//      println("in " + zoomIn() + ", out " + zoomOut())
-//    }
 
     val buttons = SwingButtonBar().add(selectEnabledView).add(zoomEnabledView).add(zoomOutButton).buildWithListStyleComponent(new JLabel("Demo Graph"))
 
@@ -893,22 +889,29 @@ object BoxesDemo {
 
     val indexView = NumberOptionView(index, Step(1))
 
-
-
-
-    val add = new JButton(new AbstractAction("Add") {
-      override def actionPerformed(e:ActionEvent) = {
-        val person = new OptionPerson()
-        person.name() = "New item at " + list().size
-        list.insert(list().size, person)
-      }
+    val add = SwingButton("Add", None, Op{
+      val person = new OptionPerson()
+      person.name() = "New item at " + list().size
+      list.insert(list().size, person)
     })
 
-    val delete = new JButton(new AbstractAction("Delete") {
-      override def actionPerformed(e:ActionEvent) = {
-        if (!list().isEmpty) list.remove(0, 1)
-      }
-    })
+    val delete = SwingButton("Delete", None,
+      Op(if (!list().isEmpty) list.remove(0, 1), Cal(!list().isEmpty))
+    )
+
+//    val add = new JButton(new AbstractAction("Add") {
+//      override def actionPerformed(e:ActionEvent) = {
+//        val person = new OptionPerson()
+//        person.name() = "New item at " + list().size
+//        list.insert(list().size, person)
+//      }
+//    })
+//
+//    val delete = new JButton(new AbstractAction("Delete") {
+//      override def actionPerformed(e:ActionEvent) = {
+//        if (!list().isEmpty) list.remove(0, 1)
+//      }
+//    })
 
     val selected = ListSelection(list, index)
 

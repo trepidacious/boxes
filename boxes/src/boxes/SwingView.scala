@@ -14,8 +14,8 @@ import util._
 import java.util.concurrent.atomic.AtomicBoolean
 import com.explodingpixels.painter.Painter
 import com.explodingpixels.swingx.EPPanel
-import java.awt.{Dimension, Paint, BasicStroke, RenderingHints, Graphics2D, Color, Component}
 import java.awt.geom.{Ellipse2D, Arc2D}
+import java.awt.{Graphics, Dimension, Paint, BasicStroke, RenderingHints, Graphics2D, Color, Component}
 
 object SwingView {
 
@@ -113,6 +113,8 @@ object SwingView {
   val dividingColor = new Color(130, 130, 130)
   val alternateBackgroundColor = new Color(240, 240, 240)
   val selectionColor = new Color(120, 144, 161)
+  val selectedTextColor = Color.white
+  val textColor = Color.black
 
   def clip(value:Int, min:Int, max:Int) = {
     if (value < min) min
@@ -230,7 +232,16 @@ private class StringOptionView[G](v:VarGeneral[G,_], c:GConverter[G, String], mu
 //Special versions of components that link back to the SwingView using them,
 //so that if users only retain the component, they still also retain the SwingView.
 class LinkingJScrollPane(val sv:SwingView, contents:Component) extends JScrollPane(contents) {}
-class LinkingJTextField(val sv:SwingView) extends JTextField {}
+class LinkingJTextField(val sv:SwingView) extends JTextField {
+  {
+    BoxesTextFieldUI(this)
+  }
+
+  override def paintComponent(g:Graphics) {
+    TextComponentPainter.instance.paint(g.asInstanceOf[Graphics2D], this, this.getWidth, this.getHeight)
+    super.paintComponent(g)
+  }
+}
 
 object BooleanControlType extends Enumeration {
    type BooleanControlType = Value
@@ -312,7 +323,7 @@ private class BooleanOptionView[G](v:VarGeneral[G,_], n:RefGeneral[String,_], c:
 
 class LinkingJCheckBox(val sv:SwingView) extends JCheckBox {}
 class LinkingJToggleButton(val sv:SwingView) extends JToggleButton {}
-class LinkingToolbarToggleButton(val sv:SwingView) extends SwingToggleButton {}
+class LinkingToolbarToggleButton(val sv:SwingView) extends SwingBarToggleButton {}
 
 object RangeView {
   def apply(v:VarGeneral[Int,_], min:Int, max:Int, progress:Boolean = false) = new RangeOptionView(v, min, max, new TConverter[Int], progress).asInstanceOf[SwingView]

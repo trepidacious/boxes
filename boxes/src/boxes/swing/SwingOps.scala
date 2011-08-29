@@ -3,13 +3,14 @@ package boxes.swing
 import java.awt.event.ActionEvent
 import boxes.{SwingView, View, Op}
 import boxes.list.{ListMultiDeleteOp, ListDeleteOp, ListMultiAddOp, ListAddOp, ListMoveOp, ListMultiMoveOp}
-import com.explodingpixels.painter.Painter
 import javax.swing._
 import border.EmptyBorder
-import java.awt.{BorderLayout, Component, Graphics2D, Color}
 import com.explodingpixels.swingx.{EPToggleButton, EPPanel, EPButton}
+import java.awt.{BorderLayout, Component}
 
-class SwingOpAction(name:String, icon:Icon, op:Op) extends AbstractAction(name, icon) {
+//TODO should make an ExtendedOp that has a name:Ref[String] and icon:Ref[Icon] (not sure about
+//icon, maybe make return an image?, and an Action that is a view of these.
+class SwingOpAction(name:String, icon:Option[Icon], op:Op) extends AbstractAction(name, icon.getOrElse(null)) {
   def actionPerformed(e:ActionEvent) {
     op()
   }
@@ -26,12 +27,12 @@ class SwingOpAction(name:String, icon:Icon, op:Op) extends AbstractAction(name, 
 
 object SwingOp {
 
-  val add = new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/Plus.png"))
-  val delete = new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/Minus.png"))
-  val up = new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/Up.png"))
-  val down = new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/Down.png"))
+  val add = Some(new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/Plus.png")))
+  val delete = Some(new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/Minus.png")))
+  val up = Some(new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/Up.png")))
+  val down = Some(new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/Down.png")))
 
-  def apply(name:String, icon:Icon, op:Op):SwingOpAction = new SwingOpAction(name, icon, op)
+  def apply(name:String = "", icon:Option[Icon] = None, op:Op):SwingOpAction = new SwingOpAction(name, icon, op)
 
   def apply(op:Op):SwingOpAction = {
     op match {
@@ -60,37 +61,59 @@ object SwingOp {
 
 }
 
-object SwingButton {
-  def apply(name:String, icon:Icon, op:Op):EPButton = {
-    ListStyleButton(SwingOp(name, icon, op))
+object SwingBarButton {
+  def apply(name:String, icon:Option[Icon] = None, op:Op):EPButton = {
+    createButton(SwingOp(name, icon, op))
   }
   def apply(op:Op):EPButton = {
-    ListStyleButton(SwingOp(op))
+    createButton(SwingOp(op))
   }
   def apply(op:SwingOpAction):EPButton = {
-    ListStyleButton(op)
+    createButton(op)
   }
 
-  def ListStyleButton(a:Action) = {
+  def createButton(a:Action) = {
     val button = new EPButton(a)
     button.setBorder(new EmptyBorder(4,2,3,2))
     button.setContentAreaFilled(false)
-    button.setBackgroundPainter(new ListStyleButtonPainter())
+    button.setBackgroundPainter(new BarStyleButtonPainter())
     button
   }
+
   def buttonPadding() = {
     val panel = new EPPanel()
-    panel.setBackgroundPainter(ListStylePainter[Component](false, false))
+    panel.setBackgroundPainter(BarStylePainter[Component](false, false))
     panel
   }
 }
 
+object SwingButton {
+  def apply(name:String, icon:Option[Icon] = None, op:Op):EPButton = new SwingButton(SwingOp(name, icon, op))
+  def apply(op:Op):EPButton = new SwingButton(SwingOp(op))
+  def apply(op:SwingOpAction):EPButton = new SwingButton(op)
+}
 
-class SwingToggleButton extends EPToggleButton{
+class SwingBarToggleButton extends EPToggleButton{
   {
     setBorder(new EmptyBorder(4,2,3,2))
     setContentAreaFilled(false)
-    setBackgroundPainter(new ListStyleToggleButtonPainter())
+    setBackgroundPainter(new BarStyleToggleButtonPainter())
+  }
+}
+
+class SwingToggleButton extends EPToggleButton{
+  {
+    setBorder(new EmptyBorder(7,2,6,2))
+    setContentAreaFilled(false)
+    setBackgroundPainter(new ButtonPainter())
+  }
+}
+
+class SwingButton(a:Action) extends EPButton(a) {
+  {
+    setBorder(new EmptyBorder(7,2,6,2))
+    setContentAreaFilled(false)
+    setBackgroundPainter(new ButtonPainter())
   }
 }
 
@@ -100,11 +123,11 @@ object SwingButtonBar {
 
 class SwingButtonBarBuilder(val components:List[JComponent]) {
   def add(c:JComponent) = new SwingButtonBarBuilder(components ::: List(c))
-  def add(op:Op):SwingButtonBarBuilder = add(SwingButton(op))
+  def add(op:Op):SwingButtonBarBuilder = add(SwingBarButton(op))
   def add(v:SwingView) = new SwingButtonBarBuilder(components ::: List(v.component))
 
   def buildWithListStyleComponent(c:JComponent) = {
-    val padding = SwingButton.buttonPadding
+    val padding = SwingBarButton.buttonPadding
     padding.setBorder(new EmptyBorder(2, 5, 2, 5))
     padding.setLayout(new BorderLayout)
     padding.add(c)
@@ -112,7 +135,7 @@ class SwingButtonBarBuilder(val components:List[JComponent]) {
     build(padding)
   }
 
-  def build(padding:JComponent = SwingButton.buttonPadding) = {
+  def build(padding:JComponent = SwingBarButton.buttonPadding) = {
     val buttonPanel = new JPanel()
     buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS))
     components.foreach(c => buttonPanel.add(c))
@@ -125,64 +148,6 @@ class SwingButtonBarBuilder(val components:List[JComponent]) {
   }
 }
 
-object ListStylePainter {
-  val dividerColor = new Color(0, 0, 0, 51)
-  val pressedColor = new Color(0, 0, 0, 25)
-  val dividerBright = new Color(1f, 1f, 1f, 0.4f)
-  val topColor = new Color(0xaaaaaa)
-  val image = new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/ListButton.png")).getImage
-
-  def apply[T](paintLeft:Boolean = false, paintRight:Boolean = true) = new ListStylePainter[T](paintLeft, paintRight)
-}
-
-class ListStylePainter[T](paintLeft:Boolean = false, paintRight:Boolean = true) extends Painter[T] {
-  override def paint(g:Graphics2D, t:T, w:Int, h:Int) {
-    g.drawImage(ListStylePainter.image, 0, 0, w, h, null)
-
-    g.setColor(ListStylePainter.dividerColor)
-    if (paintLeft) {
-      g.drawLine(0, 0, 0, h-1)
-    }
-    if (paintRight) {
-      g.drawLine(w-1, 0, w-1, h-1)
-    }
-
-    g.setColor(ListStylePainter.dividerBright)
-    if (paintLeft) {
-      g.drawLine(1, 0, 1, h-1)
-    } else {
-      g.drawLine(0, 0, 0, h-1)
-    }
-    if (paintRight) {
-      g.drawLine(w-2, 0, w-2, h-1)
-    } else {
-      g.drawLine(w-1, 0, w-1, h-1)
-    }
-
-    g.setColor(ListStylePainter.topColor)
-    g.drawLine(0, 0, w-1, 0)
-  }
-}
-
-class ListStyleButtonPainter(paintLeft:Boolean = false, paintRight:Boolean = true) extends ListStylePainter[AbstractButton] {
-  override def paint(g:Graphics2D, t:AbstractButton, w:Int, h:Int) {
-    super.paint(g, t, w, h)
-    if (t.getModel.isPressed) {
-      g.setColor(ListStylePainter.pressedColor)
-      g.fillRect(0, 0, w, h)
-    }
-  }
-}
-
-class ListStyleToggleButtonPainter(paintLeft:Boolean = false, paintRight:Boolean = true) extends ListStylePainter[AbstractButton] {
-  override def paint(g:Graphics2D, t:AbstractButton, w:Int, h:Int) {
-    super.paint(g, t, w, h)
-    if (t.getModel.isSelected || t.getModel.isPressed) {
-      g.setColor(ListStylePainter.pressedColor)
-      g.fillRect(0, 0, w, h)
-    }
-  }
-}
 
 
 
