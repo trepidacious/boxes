@@ -7,6 +7,7 @@ import border.MatteBorder
 import event.{TableModelEvent, ChangeEvent, TableColumnModelEvent}
 import javax.swing.JToggleButton.ToggleButtonModel
 import math.Numeric
+import plaf.basic.BasicCheckBoxUI
 import plaf.metal.MetalLookAndFeel
 import swing._
 import table._
@@ -91,6 +92,7 @@ object SwingView {
           UIManager.put("Table.selectionForeground", new Color(255, 255, 255))
           UIManager.put("Table.selectionBackground", new Color(120, 144, 161))
           UIManager.put("Table.focusCellHighlightBorder", new MatteBorder(1, 1, 1, 1, new Color(120, 144, 161).darker.darker))
+          UIManager.put("CheckBox.icon", new ImageIcon(classOf[SwingView].getResource("/boxes/swing/Checkbox.png")))
         }
       }
     } catch {
@@ -245,16 +247,16 @@ class BoxesJTextArea(r:Int, c:Int) extends JTextArea(r, c) {
 
 object BooleanControlType extends Enumeration {
    type BooleanControlType = Value
-   val CHECKBOX, TOGGLEBUTTON, TOOLBARBUTTON = Value
+   val CHECKBOX, TOGGLEBUTTON, TOOLBARBUTTON, SLIDECHECK = Value
 }
 import BooleanControlType._
 
 object BooleanView {
-  def apply(v:VarGeneral[Boolean,_], n:RefGeneral[String,_], controlType:BooleanControlType = CHECKBOX, icon:RefGeneral[Option[Icon], _] = Val(None), toggle:Boolean = true) = new BooleanOptionView(v, n, new TConverter[Boolean], controlType, icon, toggle).asInstanceOf[SwingView]
+  def apply(v:VarGeneral[Boolean,_], n:RefGeneral[String,_] = Val(""), controlType:BooleanControlType = SLIDECHECK, icon:RefGeneral[Option[Icon], _] = Val(None), toggle:Boolean = true) = new BooleanOptionView(v, n, new TConverter[Boolean], controlType, icon, toggle).asInstanceOf[SwingView]
 }
 
 object BooleanOptionView {
-  def apply(v:VarGeneral[Option[Boolean],_], n:RefGeneral[String,_], controlType:BooleanControlType = CHECKBOX, icon:RefGeneral[Option[Icon], _] = Val(None), toggle:Boolean = true) = new BooleanOptionView(v, n, new OptionTConverter[Boolean], controlType, icon, toggle).asInstanceOf[SwingView]
+  def apply(v:VarGeneral[Option[Boolean],_], n:RefGeneral[String,_] = Val(""), controlType:BooleanControlType = SLIDECHECK, icon:RefGeneral[Option[Icon], _] = Val(None), toggle:Boolean = true) = new BooleanOptionView(v, n, new OptionTConverter[Boolean], controlType, icon, toggle).asInstanceOf[SwingView]
 }
 
 private class BooleanOptionView[G](v:VarGeneral[G,_], n:RefGeneral[String,_], c:GConverter[G, Boolean], controlType:BooleanControlType, icon:RefGeneral[Option[Icon], _], toggle:Boolean = true) extends SwingView {
@@ -263,6 +265,7 @@ private class BooleanOptionView[G](v:VarGeneral[G,_], n:RefGeneral[String,_], c:
     case CHECKBOX => new LinkingJCheckBox(this)
     case TOGGLEBUTTON => new LinkingJToggleButton(this)
     case TOOLBARBUTTON => new LinkingToolbarToggleButton(this)
+    case SLIDECHECK => new LinkingSlideCheckButton(this)
   }
 
   private val model = new AutoButtonModel()
@@ -321,11 +324,13 @@ private class BooleanOptionView[G](v:VarGeneral[G,_], n:RefGeneral[String,_], c:
 
 }
 
-class LinkingJCheckBox(val sv:SwingView) extends JCheckBox {}
+class LinkingSlideCheckButton(val sv:SwingView) extends SlideCheckButton
 
-class LinkingJToggleButton(val sv:SwingView) extends SwingToggleButton {}
+class LinkingJCheckBox(val sv:SwingView) extends BoxesCheckBox
 
-class LinkingToolbarToggleButton(val sv:SwingView) extends SwingBarToggleButton {}
+class LinkingJToggleButton(val sv:SwingView) extends SwingToggleButton
+
+class LinkingToolbarToggleButton(val sv:SwingView) extends SwingBarToggleButton
 
 object RangeView {
   def apply(v:VarGeneral[Int,_], min:Int, max:Int, progress:Boolean = false) = new RangeOptionView(v, min, max, new TConverter[Int], progress).asInstanceOf[SwingView]
@@ -579,7 +584,7 @@ private class NumberOptionView[G, N](v:VarGeneral[G,_], s:Sequence[N], c:GConver
 
 class LinkingJSpinner(val sv:SwingView, m:SpinnerModel) extends JSpinner(m) {
   {
-    new BoxesSpinnerUI().installUI(this)
+    this.setUI(new BoxesSpinnerUI())
   }
 }
 

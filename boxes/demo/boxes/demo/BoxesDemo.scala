@@ -317,6 +317,7 @@ object BoxesDemo {
     val s = Var("S")
     val t = Var{""}
     Reaction(t, s()+"_T")
+
     val sView = StringView(s)
     val tView = StringView(t)
 
@@ -338,8 +339,8 @@ object BoxesDemo {
       println("x is " + x() + " should set y to " + !x())
       Some(!x())
     })
-    val xView = BooleanView(x, Val("X"), BooleanControlType.TOGGLEBUTTON)
-    val yView = BooleanOptionView(y, Val("Y"), BooleanControlType.TOGGLEBUTTON)
+    val xView = BooleanView(x, Val(""), BooleanControlType.SLIDECHECK)
+    val yView = BooleanOptionView(y, Val(""), BooleanControlType.SLIDECHECK)
 
     val button = new JButton(new AbstractAction() {
       override def actionPerformed(e:ActionEvent) = {
@@ -502,8 +503,6 @@ object BoxesDemo {
 
   def ledger() {
 
-    SwingView.nimbus
-
     val p = new OptionPerson()
     p.name() = "p"
     val q = new OptionPerson()
@@ -629,8 +628,6 @@ object BoxesDemo {
 
   def fieldCompositeLedger() {
 
-    SwingView.nimbus
-
     val p = new OptionPerson()
     p.name() = "p"
     val q = new OptionPerson()
@@ -705,8 +702,6 @@ object BoxesDemo {
   }
 
   def ledgerMulti() {
-
-    SwingView.nimbus
 
     val frame = new JFrame()
 
@@ -896,28 +891,7 @@ object BoxesDemo {
       Op(if (!list().isEmpty) list.remove(0, 1), Cal(!list().isEmpty))
     )
 
-//    val add = new JButton(new AbstractAction("Add") {
-//      override def actionPerformed(e:ActionEvent) = {
-//        val person = new OptionPerson()
-//        person.name() = "New item at " + list().size
-//        list.insert(list().size, person)
-//      }
-//    })
-//
-//    val delete = new JButton(new AbstractAction("Delete") {
-//      override def actionPerformed(e:ActionEvent) = {
-//        if (!list().isEmpty) list.remove(0, 1)
-//      }
-//    })
-
     val selected = ListSelection(list, index)
-
-//    val name = PathViaOption{
-//      for {
-//        p <- selected()
-//      } yield p.name
-//    }
-//    val nameView = StringOptionView(name)
 
     val nameView = StringOptionView.pathViaOption{
       for {
@@ -932,6 +906,13 @@ object BoxesDemo {
     }
     val ageView = NumberOptionView[Int](age)
 
+    val zombie = PathViaOption{
+      for {
+        p <- selected()
+      } yield p.zombie
+    }
+    val zombieView = BooleanOptionView(zombie)
+
 
     val frame = new JFrame()
     val panel = new JPanel(new GridLayout(1, 4))
@@ -940,6 +921,7 @@ object BoxesDemo {
     panel.add(indexView.component)
     panel.add(nameView.component)
     panel.add(ageView.component)
+    panel.add(zombieView.component)
     frame.add(new JScrollPane(ledgerView.component), BorderLayout.CENTER)
     frame.add(panel, BorderLayout.SOUTH)
     frame.pack
@@ -985,7 +967,7 @@ object BoxesDemo {
     swingRun{
       SwingView.nimbus()
 //      backgroundReaction
-      textViews
+//      textViews
 //      ledgerMulti
 //      graph
       ledgerAndSelected
