@@ -16,9 +16,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 import com.explodingpixels.painter.Painter
 import com.explodingpixels.swingx.EPPanel
 import java.awt.geom.{Ellipse2D, Arc2D}
-import java.awt.{Graphics, Dimension, Paint, BasicStroke, RenderingHints, Graphics2D, Color, Component}
 import javax.swing.JSpinner.DefaultEditor
 import java.text.ParseException
+import java.awt.{Dimension, Graphics, Paint, BasicStroke, RenderingHints, Graphics2D, Color, Component}
 
 object SwingView {
 
@@ -585,6 +585,8 @@ private class NumberOptionView[G, N](v:VarGeneral[G,_], s:Sequence[N], c:GConver
 class LinkingJSpinner(val sv:SwingView, m:SpinnerModel) extends JSpinner(m) {
   {
     this.setUI(new BoxesSpinnerUI())
+    this.setMinimumSize(new Dimension(60, 28))
+    this.setPreferredSize(new Dimension(60, 28))
   }
 }
 

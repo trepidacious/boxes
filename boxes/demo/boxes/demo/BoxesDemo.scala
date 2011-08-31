@@ -1,6 +1,5 @@
 package boxes.demo
 
-import javax.swing._
 import java.awt.event.ActionEvent
 import boxes.util.{LogStep, Step, CoalescingResponder, NumericClass}
 import boxes._
@@ -12,6 +11,8 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
 import java.util.concurrent.atomic.AtomicBoolean
 import swing.{SwingButton, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
 import java.awt.{GridLayout, Color, BorderLayout, Dimension}
+import javax.swing._
+import border.EmptyBorder
 
 object BoxesDemo {
 
@@ -915,13 +916,22 @@ object BoxesDemo {
 
 
     val frame = new JFrame()
-    val panel = new JPanel(new GridLayout(1, 4))
+    val panel = new JPanel()
     panel.add(add)
     panel.add(delete)
+
+    panel.add(new JLabel("Index:"))
     panel.add(indexView.component)
+
+    panel.add(new JLabel("Name:"))
     panel.add(nameView.component)
+
+    panel.add(new JLabel("Age:"))
     panel.add(ageView.component)
+
+    panel.add(new JLabel("Zombie:"))
     panel.add(zombieView.component)
+    panel.setBorder(new EmptyBorder(5, 5, 5, 5))
     frame.add(new JScrollPane(ledgerView.component), BorderLayout.CENTER)
     frame.add(panel, BorderLayout.SOUTH)
     frame.pack
