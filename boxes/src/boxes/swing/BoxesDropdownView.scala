@@ -3,11 +3,11 @@ package boxes.swing
 import java.awt.{Toolkit, Dimension, Color, BorderLayout, Component}
 import javax.swing.event.{PopupMenuEvent, PopupMenuListener}
 import boxes.{SwingView, Cal, LabelOptionView, LedgerView, VarGeneral, Ledger, RefGeneral}
-import java.awt.event.{MouseEvent, MouseAdapter, KeyEvent, KeyAdapter, ActionEvent, ActionListener}
 import javax.swing.{JComponent, SwingConstants, KeyStroke, JInternalFrame, AbstractAction, JToggleButton, SwingUtilities, JPopupMenu}
 import javax.swing.border.{EmptyBorder, MatteBorder}
+import java.awt.event.{FocusEvent, FocusAdapter, MouseEvent, MouseAdapter, KeyEvent, KeyAdapter, ActionEvent, ActionListener}
 
-class BoxesDropdownView(v:RefGeneral[_<:Ledger,_], i:VarGeneral[Option[Int], _], sorting:Boolean = false, minWidth:Int = 150, maxHeight:Int = 600, displayHeader:Boolean = false) extends SwingView {
+class BoxesDropdownView(v:RefGeneral[_<:Ledger,_], i:VarGeneral[Option[Int], _], sorting:Boolean = false, minWidth:Int = 250, maxHeight:Int = 300, displayHeader:Boolean = false) extends SwingView {
 
   val component = new DropdownButton()
 
@@ -65,6 +65,14 @@ class BoxesDropdownView(v:RefGeneral[_<:Ledger,_], i:VarGeneral[Option[Int], _],
     }
   })
 
+  table.addFocusListener(new FocusAdapter() {
+    override def focusLost(e:FocusEvent) {
+      SwingUtilities.invokeLater(new Runnable() {
+        override def run() = handler.hide()
+      })
+    }
+  })
+
   //Do nothing on pressing enter - otherwise it moves selection down one row
   val jpropellerNullAction = new AbstractAction() {
     override def actionPerformed(e:ActionEvent) {}
@@ -101,7 +109,7 @@ class PopupHandler(popupComponent:Component, focusComponent:Component, invoker:C
 
   def show() {
     val width = math.max(invoker.getWidth, minWidth)
-    preparePopup
+    preparePopup.apply()
     popupComponent.setPreferredSize(new Dimension(width, popupComponent.getPreferredSize.height));
     popupComponent.setMinimumSize(new Dimension(width, popupComponent.getMinimumSize.height));
     popupComponent.setMaximumSize(new Dimension(width, popupComponent.getMaximumSize.height));

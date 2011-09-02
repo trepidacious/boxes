@@ -914,7 +914,7 @@ object BoxesDemo {
     }
     val zombieView = BooleanOptionView(zombie)
 
-    val personDropdown = new BoxesDropdownView(ledger, index, minWidth = 250)
+    val personDropdown = new BoxesDropdownView(ledger, index)
 
     val frame = new JFrame()
     val panel = new JPanel()
