@@ -2,23 +2,22 @@ package boxes
 
 import scala.collection._
 import java.awt.event.{FocusEvent, FocusListener, ActionEvent, ActionListener}
-import javax.swing._
-import border.MatteBorder
-import event.{TableModelEvent, ChangeEvent, TableColumnModelEvent}
 import javax.swing.JToggleButton.ToggleButtonModel
 import math.Numeric
-import plaf.basic.BasicCheckBoxUI
-import plaf.metal.MetalLookAndFeel
-import swing._
-import table._
-import util._
 import java.util.concurrent.atomic.AtomicBoolean
 import com.explodingpixels.painter.Painter
 import com.explodingpixels.swingx.EPPanel
-import java.awt.geom.{Ellipse2D, Arc2D}
+import java.awt.geom.Arc2D
 import javax.swing.JSpinner.DefaultEditor
 import java.text.ParseException
-import java.awt.{Dimension, Graphics, Paint, BasicStroke, RenderingHints, Graphics2D, Color, Component}
+import java.awt.{AlphaComposite, Dimension, BasicStroke, RenderingHints, Graphics2D, Color, Component}
+import javax.swing.plaf.metal.MetalLookAndFeel
+import javax.swing.border.{EmptyBorder, MatteBorder}
+import javax.swing.table.{TableModel, TableCellRenderer, TableCellEditor, AbstractTableModel}
+import javax.swing.{JTable, JSpinner, SpinnerModel, SpinnerNumberModel, JProgressBar, JSlider, BoundedRangeModel, DefaultBoundedRangeModel, SwingConstants, Icon, JTextArea, JScrollPane, JTextField, JLabel, JComponent, ImageIcon, UIManager, SwingUtilities}
+import javax.swing.event.{TableModelEvent, ChangeEvent, TableColumnModelEvent}
+import swing.{BooleanCellRenderer, SelectingTextCellEditor, NumberCellRenderer, NumberCellEditor, BoxesTableCellRenderer, BoxesTableCellHeaderRenderer, BoxesScrollBarUI, DotModel, ListSelectionIndicesModel, ListSelectionIndexModel, BoxesSpinnerUI, SwingBarToggleButton, SwingToggleButton, BoxesCheckBox, SlideCheckButton, BoxesTextAreaUI, BoxesTextFieldUI}
+import util.{LogStep, NumericClass, GConverter, OptionTConverter, TConverter, CoalescingResponder, Sequence}
 
 object SwingView {
 
@@ -133,6 +132,10 @@ object SwingView {
     						clip((c.getAlpha() * factor).asInstanceOf[Int], 0, 255))
   }
 
+  def graphicsForEnabledState(g:Graphics2D, e:Boolean) {
+    if (!e) g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f))
+  }
+
   //TODO add this
 //  val iconFactory = new ResourceIconFactory()
 }
@@ -179,7 +182,7 @@ private class LabelOptionView[G](v:RefGeneral[G,_], c:GConverter[G, String]) ext
 
 //Special versions of components that link back to the SwingView using them,
 //so that if users only retain the component, they still also retain the SwingView.
-class LinkingJLabel(val sv:SwingView) extends JLabel {}
+class LinkingJLabel(val sv:SwingView) extends Label {}
 
 object StringView {
   def apply(v:VarGeneral[String,_], multiline:Boolean = false) = new StringOptionView(v, new TConverter[String], multiline).asInstanceOf[SwingView]
@@ -257,6 +260,16 @@ object BooleanView {
 
 object BooleanOptionView {
   def apply(v:VarGeneral[Option[Boolean],_], n:RefGeneral[String,_] = Val(""), controlType:BooleanControlType = SLIDECHECK, icon:RefGeneral[Option[Icon], _] = Val(None), toggle:Boolean = true) = new BooleanOptionView(v, n, new OptionTConverter[Boolean], controlType, icon, toggle).asInstanceOf[SwingView]
+}
+
+object Label {
+  def apply(text:String, icon:Option[Icon] = None, horizontalAlignment:Int = SwingConstants.LEFT) = new Label(text, icon, horizontalAlignment)
+}
+
+class Label(text:String="", icon:Option[Icon] = None, horizontalAlignment:Int = SwingConstants.LEFT) extends JLabel(text, icon.getOrElse(null), horizontalAlignment) {
+  {
+    setBorder(new EmptyBorder(7, 2, 6, 2))
+  }
 }
 
 private class BooleanOptionView[G](v:VarGeneral[G,_], n:RefGeneral[String,_], c:GConverter[G, Boolean], controlType:BooleanControlType, icon:RefGeneral[Option[Icon], _], toggle:Boolean = true) extends SwingView {
@@ -490,6 +503,7 @@ private class PieOptionView[G, H](n:RefGeneral[G,_], c:GConverter[G, Double], a:
 class LinkingEPPanel(val sv:SwingView) extends EPPanel {}
 
 object NumberView {
+
   def apply[N](v:VarGeneral[N,_], s:Sequence[N] = LogStep(10))(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionView(v, s, new TConverter[N], n, nc).asInstanceOf[SwingView]
 }
 
@@ -618,6 +632,20 @@ object LedgerView {
     lv
   }
 
+  def singleSelectionScroll(v:RefGeneral[_<:Ledger,_], i:VarGeneral[Option[Int], _], sorting:Boolean = false) = {
+    val lv = new LedgerView(v)
+    lv.component.setSelectionModel(new ListSelectionIndexModel(i, !lv.component.isRespondingToChange, lv.component))
+    //TODO is there a better way to do the match?
+    val lsv = new LedgerScrollView(lv, v, Cal{
+      i() match {
+        case None => immutable.Set[Int]()
+        case Some(index) => immutable.Set(index)
+      }
+    })
+    if (sorting) lv.component.setAutoCreateRowSorter(true)
+    lsv
+  }
+
   def multiSelectionScroll(v:RefGeneral[_<:Ledger,_], i:VarGeneral[immutable.Set[Int], _], sorting:Boolean = false) = {
     val lv = new LedgerView(v)
     lv.component.setSelectionModel(new ListSelectionIndicesModel(i, !lv.component.isRespondingToChange, lv.component))
@@ -628,10 +656,10 @@ object LedgerView {
 
 }
 
-class LedgerScrollView(val ledgerView:LedgerView, val ledger:RefGeneral[_<:Ledger,_], val indices:VarGeneral[immutable.Set[Int], _]) extends SwingView {
+class LedgerScrollView(val ledgerView:LedgerView, val ledger:RefGeneral[_<:Ledger,_], val indices:RefGeneral[immutable.Set[Int], _]) extends SwingView {
   val component = new LinkingJScrollPane(this, ledgerView.component)
-  val dotModel = new DotModel
-  BoxesScrollBarUI.applyTo(component, new DotModel, dotModel, false, true)
+  val dotModel = new DotModel()
+  BoxesScrollBarUI.applyTo(component, new DotModel(), dotModel, false, true)
   val table = ledgerView.component
 
   val view = View {

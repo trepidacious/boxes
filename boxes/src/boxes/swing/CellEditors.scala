@@ -220,9 +220,8 @@ class BoxesTableCellRenderer extends DefaultTableCellRenderer {
 }
 
 object BooleanCellRenderer {
-  //TODO get these from SwingView icon factory, so they can be replaced easily
-  val tick = IconFactory.icon(classOf[BooleanCellRenderer], "tick.png")
-  val untick = IconFactory.icon(classOf[BooleanCellRenderer], "untick.png")
+  val tick = BoxesCheckBox.pressedIcon
+  val untick = BoxesCheckBox.disabledIcon
   val opaque = new BooleanCellRenderer(true)
   val transparent = new BooleanCellRenderer(false)
 }

@@ -9,10 +9,10 @@ import list._
 import persistence._
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
 import java.util.concurrent.atomic.AtomicBoolean
-import swing.{SwingButton, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
 import java.awt.{GridLayout, Color, BorderLayout, Dimension}
 import javax.swing._
 import border.EmptyBorder
+import swing.{BoxesDropdownView, SwingButton, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
 
 object BoxesDemo {
 
@@ -340,7 +340,7 @@ object BoxesDemo {
       println("x is " + x() + " should set y to " + !x())
       Some(!x())
     })
-    val xView = BooleanView(x, Val(""), BooleanControlType.SLIDECHECK)
+    val xView = BooleanView(x, Val("Some Text"), BooleanControlType.TOGGLEBUTTON)
     val yView = BooleanOptionView(y, Val(""), BooleanControlType.SLIDECHECK)
 
     val button = new JButton(new AbstractAction() {
@@ -878,7 +878,7 @@ object BoxesDemo {
 
     val ledger = Var(new ListLedger(list, view))
 
-    val ledgerView = LedgerView.singleSelection(ledger, index)
+    val ledgerView = LedgerView.singleSelectionScroll(ledger, index)
 
     val indexView = NumberOptionView(index, Step(1))
 
@@ -914,25 +914,31 @@ object BoxesDemo {
     }
     val zombieView = BooleanOptionView(zombie)
 
+    val personDropdown = new BoxesDropdownView(ledger, index, minWidth = 250)
 
     val frame = new JFrame()
     val panel = new JPanel()
     panel.add(add)
     panel.add(delete)
 
-    panel.add(new JLabel("Index:"))
+    panel.add(Label("Index:"))
     panel.add(indexView.component)
 
-    panel.add(new JLabel("Name:"))
+    panel.add(Label("Name:"))
     panel.add(nameView.component)
 
-    panel.add(new JLabel("Age:"))
+    panel.add(Label("Age:"))
     panel.add(ageView.component)
 
-    panel.add(new JLabel("Zombie:"))
+    panel.add(Label("Zombie:"))
     panel.add(zombieView.component)
+
+    panel.add(Label("Henchman:"))
+    panel.add(personDropdown.component)
+
+
     panel.setBorder(new EmptyBorder(5, 5, 5, 5))
-    frame.add(new JScrollPane(ledgerView.component), BorderLayout.CENTER)
+    frame.add(ledgerView.component, BorderLayout.CENTER)
     frame.add(panel, BorderLayout.SOUTH)
     frame.pack
     frame.setMinimumSize(new Dimension(300, 50))
@@ -977,7 +983,7 @@ object BoxesDemo {
     swingRun{
       SwingView.nimbus()
 //      backgroundReaction
-//      textViews
+      textViews
 //      ledgerMulti
 //      graph
       ledgerAndSelected

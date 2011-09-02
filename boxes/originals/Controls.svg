@@ -858,6 +858,26 @@
        y1="24"
        x2="7"
        y2="-2" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3834"
+       id="linearGradient4264"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-40.999998,4.5)"
+       x1="7"
+       y1="24"
+       x2="7"
+       y2="-2" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3834"
+       id="linearGradient4351"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-11.499998,4.5)"
+       x1="7"
+       y1="24"
+       x2="7"
+       y2="-2" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -866,18 +886,19 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="11.313708"
-     inkscape:cx="69.585566"
-     inkscape:cy="16.526335"
+     inkscape:zoom="22.627417"
+     inkscape:cx="4.2170289"
+     inkscape:cy="12.106917"
      inkscape:document-units="px"
-     inkscape:current-layer="layer43"
+     inkscape:current-layer="layer46"
      showgrid="true"
      inkscape:snap-global="true"
-     inkscape:window-width="2560"
-     inkscape:window-height="1392"
+     inkscape:window-width="1920"
+     inkscape:window-height="1032"
      inkscape:window-x="1366"
      inkscape:window-y="0"
-     inkscape:window-maximized="0">
+     inkscape:window-maximized="0"
+     inkscape:snap-grids="true">
     <inkscape:grid
        type="xygrid"
        id="grid3069"
@@ -1513,6 +1534,16 @@
        id="path4078"
        style="opacity:0.14299999;fill:#000000;fill-opacity:1;stroke:none;display:inline;enable-background:new"
        sodipodi:type="arc" />
+    <path
+       style="opacity:0.6;fill:none;stroke:#ffffff;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;enable-background:new"
+       d="m 158.5,8.5 -4,4 -4,-4"
+       id="path3389"
+       inkscape:connector-curvature="0" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path3391"
+       d="m 158.5,7.5 -4,4 -4,-4"
+       style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;enable-background:new" />
   </g>
   <g
      inkscape:groupmode="layer"
@@ -1658,6 +1689,92 @@
        id="path4651"
        d="M 0.4999999,-1.5 13.5,-1.5 c 1.662,0 3,1.338 3,3 l 0,17 c 0,1.662 -1.338,3 -3,3 l -13.0000001,0 c 0,-4 0,-18 0,-23 z"
        style="fill:none;stroke:#8c8c8c;stroke-opacity:1;display:inline;enable-background:new" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer48"
+     inkscape:label="ComboBoxArrowTestButton"
+     style="display:none">
+    <rect
+       y="2"
+       x="-26"
+       height="24"
+       width="43"
+       id="rect4252"
+       style="fill:url(#linearGradient4351);fill-opacity:1;stroke:none;display:inline;enable-background:new"
+       ry="5" />
+    <rect
+       y="2.5"
+       x="-25.5"
+       height="23"
+       width="41.999985"
+       id="rect4254"
+       style="fill:none;stroke:#8c8c8c;stroke-opacity:1;display:inline;enable-background:new"
+       ry="3" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path4256"
+       d="m -20,-15 0,13"
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:square;stroke-linejoin:miter;stroke-opacity:0.10666665;display:inline;enable-background:new" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:square;stroke-linejoin:miter;stroke-opacity:0.10666665;display:inline;enable-background:new"
+       d="m -17,-15 0,13"
+       id="path4258"
+       inkscape:connector-curvature="0" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path4260"
+       d="m -14,-15 0,13"
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:square;stroke-linejoin:miter;stroke-opacity:0.10666665;display:inline;enable-background:new" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:square;stroke-linejoin:miter;stroke-opacity:0.10666665;display:inline;enable-background:new"
+       d="m -11,-15 0,13"
+       id="path4262"
+       inkscape:connector-curvature="0" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer46"
+     inkscape:label="ComboBoxArrow"
+     style="display:inline">
+    <path
+       sodipodi:nodetypes="csssscc"
+       inkscape:connector-curvature="0"
+       id="path3426"
+       d="m 1,-1 12.5,0 c 1.464039,0 2.5,1.1685437 2.5,2.5 l 0,17 C 16,19.889515 14.889515,21 13.5,21 L 1,21 C 1,17 1,4 1,-1 z"
+       style="fill:#000000;fill-opacity:0.13333333;stroke:none;display:inline;enable-background:new"
+       transform="translate(0,4)" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path3401"
+       d="m 12.5,8.5 -4.0000002,4 -4,-4"
+       style="opacity:0.6;fill:none;stroke:#ffffff;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;enable-background:new"
+       transform="translate(0,4)" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;enable-background:new"
+       d="m 12.5,7.5 -4.0000002,4 -4,-4"
+       id="path3403"
+       inkscape:connector-curvature="0"
+       transform="translate(0,4)" />
+    <text
+       xml:space="preserve"
+       style="font-size:6px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="1.4142137"
+       y="35.866562"
+       id="text3414"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3416"
+         x="1.4142137"
+         y="35.866562">export: 19 x 28</tspan></text>
+    <rect
+       style="opacity:0.3;fill:#000000;fill-opacity:0.51999996;stroke:none"
+       id="rect4218"
+       width="1"
+       height="14"
+       x="1"
+       y="7"
+       ry="0.5" />
   </g>
   <g
      inkscape:groupmode="layer"
@@ -2111,7 +2228,7 @@
   </g>
   <g
      transform="translate(0,4)"
-     style="display:inline"
+     style="display:none"
      inkscape:label="SlideCheckSelect"
      id="g4334"
      inkscape:groupmode="layer">

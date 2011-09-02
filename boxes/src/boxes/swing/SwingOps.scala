@@ -61,59 +61,11 @@ object SwingOp {
 
 }
 
-object SwingBarButton {
-  def apply(name:String, icon:Option[Icon] = None, op:Op):EPButton = {
-    createButton(SwingOp(name, icon, op))
-  }
-  def apply(op:Op):EPButton = {
-    createButton(SwingOp(op))
-  }
-  def apply(op:SwingOpAction):EPButton = {
-    createButton(op)
-  }
-
-  def createButton(a:Action) = {
-    val button = new EPButton(a)
-    button.setBorder(new EmptyBorder(4,2,3,2))
-    button.setContentAreaFilled(false)
-    button.setBackgroundPainter(new BarStyleButtonPainter())
-    button
-  }
-
-  def buttonPadding() = {
+object SwingBarPadding {
+  def apply() = {
     val panel = new EPPanel()
     panel.setBackgroundPainter(BarStylePainter[Component](false, false))
     panel
-  }
-}
-
-object SwingButton {
-  def apply(name:String, icon:Option[Icon] = None, op:Op):EPButton = new SwingButton(SwingOp(name, icon, op))
-  def apply(op:Op):EPButton = new SwingButton(SwingOp(op))
-  def apply(op:SwingOpAction):EPButton = new SwingButton(op)
-}
-
-class SwingBarToggleButton extends EPToggleButton{
-  {
-    setBorder(new EmptyBorder(4,2,3,2))
-    setContentAreaFilled(false)
-    setBackgroundPainter(new BarStyleToggleButtonPainter())
-  }
-}
-
-class SwingToggleButton extends EPToggleButton{
-  {
-    setBorder(new EmptyBorder(7,12,6,12))
-    setContentAreaFilled(false)
-    setBackgroundPainter(new ButtonPainter())
-  }
-}
-
-class SwingButton(a:Action) extends EPButton(a) {
-  {
-    setBorder(new EmptyBorder(7,12,6,12))
-    setContentAreaFilled(false)
-    setBackgroundPainter(new ButtonPainter())
   }
 }
 
@@ -127,7 +79,7 @@ class SwingButtonBarBuilder(val components:List[JComponent]) {
   def add(v:SwingView) = new SwingButtonBarBuilder(components ::: List(v.component))
 
   def buildWithListStyleComponent(c:JComponent) = {
-    val padding = SwingBarButton.buttonPadding
+    val padding = SwingBarPadding()
     padding.setBorder(new EmptyBorder(2, 5, 2, 5))
     padding.setLayout(new BorderLayout)
     padding.add(c)
@@ -135,7 +87,7 @@ class SwingButtonBarBuilder(val components:List[JComponent]) {
     build(padding)
   }
 
-  def build(padding:JComponent = SwingBarButton.buttonPadding) = {
+  def build(padding:JComponent = SwingBarPadding()) = {
     val buttonPanel = new JPanel()
     buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS))
     components.foreach(c => buttonPanel.add(c))

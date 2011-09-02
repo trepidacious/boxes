@@ -1,21 +1,16 @@
 package boxes.swing
 
 import javax.swing.text.JTextComponent
-import com.explodingpixels.macwidgets.plaf.HudPaintingUtils
 import com.explodingpixels.widgets.ImageUtils
-import javax.swing.border.{EmptyBorder, AbstractBorder}
-import boxes.SwingView
+import javax.swing.border.EmptyBorder
 import java.awt.event.{FocusEvent, FocusListener}
 import java.beans.{PropertyChangeListener, PropertyChangeEvent}
-import javax.swing.{JCheckBox, JTextArea, JTextField, AbstractButton, ImageIcon, BorderFactory, JComponent}
-import javax.swing.plaf.metal.MetalCheckBoxUI
-import javax.swing.plaf.basic.{BasicCheckBoxUI, BasicFormattedTextFieldUI, BasicTextAreaUI, BasicTextFieldUI}
-import com.explodingpixels.painter.{ImagePainter, Painter}
-import com.explodingpixels.swingx.EPToggleButton
-import javax.swing.JComponent._
-import javax.swing.AbstractButton._
-import com.explodingpixels.swingx.EPToggleButton._
-import java.awt.{Dimension, AlphaComposite, Insets, Component, Image, Graphics2D, RenderingHints, Graphics, Color}
+import com.explodingpixels.painter.Painter
+import javax.swing.plaf.basic.{BasicGraphicsUtils, BasicCheckBoxUI, BasicFormattedTextFieldUI, BasicTextAreaUI, BasicTextFieldUI}
+import java.awt.{Rectangle, Dimension, Component, Image, Graphics2D, RenderingHints, Graphics, Color}
+import boxes.{Op, SwingView}
+import javax.swing.{ImageIcon, Action, Icon, JCheckBox, JTextArea, JTextField, AbstractButton, JComponent}
+import com.explodingpixels.swingx.{EPToggleButton, EPButton}
 
 object BarStylePainter {
   val dividerColor = new Color(0, 0, 0, 51)
@@ -181,10 +176,8 @@ object SlideCheckPainter {
 class SlideCheckPainter() extends Painter[AbstractButton] {
   override def paint(g:Graphics2D, b:AbstractButton, w:Int, h:Int) {
 
-    val disabled = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f)
     val oldComposite = g.getComposite
-
-    if (!b.getModel.isEnabled) g.setComposite(disabled)
+    SwingView.graphicsForEnabledState(g, b.getModel.isEnabled)
 
     if (b.getModel.isSelected) {
       g.drawImage(SlideCheckPainter.on, 0, 0, null)
@@ -204,26 +197,95 @@ class SlideCheckPainter() extends Painter[AbstractButton] {
 object ButtonPainter {
   def threePartPainter(resource:String) = new ThreePartPainter(new ImageIcon(classOf[ButtonPainter].getResource(resource)).getImage)
   val plain = threePartPainter("/boxes/swing/StandaloneButton.png")
-  val disabled = threePartPainter("/boxes/swing/StandaloneButtonDisabled.png")
   val focus = threePartPainter("/boxes/swing/StandaloneButtonFocusOverlay.png")
   val pressed = threePartPainter("/boxes/swing/StandaloneButtonPressed.png")
+  val comboArrow = new ImageIcon(classOf[ButtonPainter].getResource("/boxes/swing/ComboArrow.png")).getImage
+  val comboArrowWidth = comboArrow.getWidth(null)
 }
 
-class ButtonPainter() extends Painter[AbstractButton] {
+class ButtonPainter(combo:Boolean = false) extends Painter[AbstractButton] {
   override def paint(g:Graphics2D, b:AbstractButton, w:Int, h:Int) {
+
+    val oldComp = g.getComposite
+    SwingView.graphicsForEnabledState(g, b.getModel.isEnabled)
+
     if (b.getModel.isSelected || b.getModel.isPressed) {
       ButtonPainter.pressed.paint(g, w, h)
-    } else if (b.getModel.isEnabled) {
-      ButtonPainter.plain.paint(g, w, h)
     } else {
-      ButtonPainter.disabled.paint(g, w, h)
+      ButtonPainter.plain.paint(g, w, h)
     }
 
-    if (b.hasFocus) {
+    if (combo) {
+      g.drawImage(ButtonPainter.comboArrow, w - ButtonPainter.comboArrowWidth, 0, null)
+    }
+    g.setComposite(oldComp)
+
+    if (b.hasFocus || (combo && b.getModel.isSelected)) {
       ButtonPainter.focus.paint(g, w, h)
     }
   }
 }
+
+object SwingBarButton {
+  def apply(name:String, icon:Option[Icon] = None, op:Op):EPButton = {
+    apply(SwingOp(name, icon, op))
+  }
+  def apply(op:Op):EPButton = {
+    apply(SwingOp(op))
+  }
+  def apply(op:SwingOpAction):EPButton = {
+    apply(op)
+  }
+
+  def apply(a:Action) = new SwingBarButton(a)
+}
+
+class SwingBarButton(a:Action) extends EPButton(a:Action) {
+  {
+    setBorder(new EmptyBorder(4,2,3,2))
+    setContentAreaFilled(false)
+    setBackgroundPainter(new BarStyleButtonPainter())
+  }
+}
+
+class SwingBarToggleButton extends EPToggleButton{
+  {
+    setBorder(new EmptyBorder(4,2,3,2))
+    setContentAreaFilled(false)
+    setBackgroundPainter(new BarStyleToggleButtonPainter())
+  }
+}
+
+class SwingToggleButton extends EPToggleButton{
+  {
+    setBorder(new EmptyBorder(7,12,6,12))
+    setContentAreaFilled(false)
+    setBackgroundPainter(new ButtonPainter())
+  }
+}
+
+class DropdownButton extends EPToggleButton {
+  {
+    setBorder(new EmptyBorder(7,8,6,ButtonPainter.comboArrowWidth + 4))
+    setContentAreaFilled(false)
+    setBackgroundPainter(new ButtonPainter(true))
+  }
+}
+
+object SwingButton {
+  def apply(name:String, icon:Option[Icon] = None, op:Op):EPButton = new SwingButton(SwingOp(name, icon, op))
+  def apply(op:Op):EPButton = new SwingButton(SwingOp(op))
+  def apply(op:SwingOpAction):EPButton = new SwingButton(op)
+}
+
+class SwingButton(a:Action) extends EPButton(a) {
+  {
+    setBorder(new EmptyBorder(7,12,6,12))
+    setContentAreaFilled(false)
+    setBackgroundPainter(new ButtonPainter())
+  }
+}
+
 
 object TextComponentPainter {
   val instance = new TextComponentPainter()
@@ -354,15 +416,68 @@ object BoxesCheckBox {
   val pressedDisabledIcon = new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/CheckboxPressedDisabled.png"))
 }
 
-class BoxesCheckBox extends JCheckBox {
-  {
-    setIcon(BoxesCheckBox.normalIcon)
-    setDisabledIcon(BoxesCheckBox.disabledIcon)
-    setSelectedIcon(BoxesCheckBox.pressedIcon)
-    setDisabledSelectedIcon(BoxesCheckBox.pressedDisabledIcon)
-    setPressedIcon(BoxesCheckBox.pressedIcon)
-    setRolloverIcon(BoxesCheckBox.normalIcon)
-    setRolloverSelectedIcon(BoxesCheckBox.pressedIcon)
+class BoxesCheckBoxUI extends BasicCheckBoxUI {
+
+  override def installDefaults(b:AbstractButton) {
+    super.installDefaults(b)
+
+//        HudPaintingUtils.initHudComponent(b);
+//        b.setIconTextGap((int) (HudPaintingUtils.FONT_SIZE / 2));
+
+    icon = new BoxesCheckIcon()
   }
+
+  override def paint(graphics:Graphics, c:JComponent) {
+    val g = graphics.asInstanceOf[Graphics2D]
+    val oldComposite = g.getComposite
+    SwingView.graphicsForEnabledState(g, c.isEnabled)
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+    super.paint(g, c);
+    g.setComposite(oldComposite)
+  }
+
+  override def paintText(g:Graphics, c:JComponent, textRect:Rectangle, text:String) {
+    val button = c.asInstanceOf[AbstractButton]
+    val fontMetrics = g.getFontMetrics(button.getFont());
+    val mnemonicIndex = button.getDisplayedMnemonicIndex();
+
+    g.setColor(button.getForeground)
+    BasicGraphicsUtils.drawStringUnderlineCharAt(g, text, mnemonicIndex,
+      textRect.x + getTextShiftOffset(),
+      textRect.y + fontMetrics.getAscent() + getTextShiftOffset())
+  }
+
+  class BoxesCheckIcon extends Icon {
+
+    def paintIcon(c:Component, g:Graphics, x:Int, y:Int) {
+
+      val button = c.asInstanceOf[AbstractButton]
+      val model = button.getModel
+
+      val graphics = g.create().asInstanceOf[Graphics2D]
+      graphics.translate(x, y);
+
+      if (model.isSelected()) {
+        BoxesCheckBox.pressedIcon.paintIcon(c, graphics, 0, 0)
+      } else {
+        BoxesCheckBox.normalIcon.paintIcon(c, graphics, 0, 0)
+      }
+
+      if (c.hasFocus) {
+        BoxesCheckBox.focusIcon.paintIcon(c, graphics, 0, 0)
+      }
+
+      graphics.dispose();
+    }
+
+    def getIconWidth = BoxesCheckBox.normalIcon.getIconWidth
+    def getIconHeight = BoxesCheckBox.normalIcon.getIconHeight
+  }
+
+}
+
+
+class BoxesCheckBox extends JCheckBox {
+  setUI(new BoxesCheckBoxUI())
 }
 

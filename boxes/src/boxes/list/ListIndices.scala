@@ -76,10 +76,12 @@ class ListIndexReaction[T](list:ListRef[T], i:Var[Option[Int]], loseIndexOnDelet
 
       //Check value
       case Some(newIValue) => {
-        if (newIValue < 0) throw new RuntimeException("Index should never adjust to less than 0")
+        //If var is set directly to a negative value, just select nothing
+        if (newIValue < 0) {
+          newI = None
 
         //Empty list can't have a selection
-        if (size == 0) {
+        } else if (size == 0) {
           newI = None
 
         //Selection after end of list indicates a deletion from selection to end of list, response
@@ -111,7 +113,7 @@ object ListIndex {
 }
 
 object ListSelection {
-  def apply[T](l:ListRef[T], i:Var[Option[Int]]) = Cal(for (index <- i() if index < l().size) yield l(index))
+  def apply[T](l:ListRef[T], i:Var[Option[Int]]) = Cal(for (index <- i() if (index >= 0 && index < l().size)) yield l(index))
 }
 
 object DefaultSelection extends Enumeration {
