@@ -6,11 +6,11 @@ import javax.swing.border.EmptyBorder
 import java.awt.event.{FocusEvent, FocusListener}
 import java.beans.{PropertyChangeListener, PropertyChangeEvent}
 import com.explodingpixels.painter.Painter
-import javax.swing.plaf.basic.{BasicGraphicsUtils, BasicCheckBoxUI, BasicFormattedTextFieldUI, BasicTextAreaUI, BasicTextFieldUI}
 import java.awt.{Rectangle, Dimension, Component, Image, Graphics2D, RenderingHints, Graphics, Color}
 import boxes.{Op, SwingView}
-import javax.swing.{ImageIcon, Action, Icon, JCheckBox, JTextArea, JTextField, AbstractButton, JComponent}
 import com.explodingpixels.swingx.{EPToggleButton, EPButton}
+import javax.swing.plaf.basic.{BasicLabelUI, BasicGraphicsUtils, BasicCheckBoxUI, BasicFormattedTextFieldUI, BasicTextAreaUI, BasicTextFieldUI}
+import javax.swing.{SwingConstants, JLabel, ImageIcon, Action, Icon, JCheckBox, JTextArea, JTextField, AbstractButton, JComponent}
 
 object BarStylePainter {
   val dividerColor = new Color(0, 0, 0, 51)
@@ -231,13 +231,13 @@ object SwingBarButton {
     apply(SwingOp(name, icon, op))
   }
   def apply(op:Op):EPButton = {
-    apply(SwingOp(op))
-  }
-  def apply(op:SwingOpAction):EPButton = {
-    apply(op)
+    val s = SwingOp(op)
+    apply(s)
   }
 
-  def apply(a:Action) = new SwingBarButton(a)
+  def apply(a:Action) = {
+    new SwingBarButton(a)
+  }
 }
 
 class SwingBarButton(a:Action) extends EPButton(a:Action) {
@@ -330,9 +330,11 @@ class SpinnerTextComponentPainter() extends Painter[Component] {
 }
 
 object BoxesTextComponentUI {
+  val textBorder = new EmptyBorder(7, 8, 6, 8)
+
   def adjustComponent(c:JTextComponent) {
     c.setOpaque(false)
-    c.setBorder(new EmptyBorder(7, 8, 6, 8))
+    c.setBorder(textBorder)
     c.setBackground(new Color(0, 0, 0, 0))
     c.setForeground(SwingView.textColor)
 //      c.setFont(HudPaintingUtils.getHudFont)
@@ -398,6 +400,7 @@ class SpinnerTextFieldUI extends BasicFormattedTextFieldUI {
   override def installUI(c:JComponent) {
     super.installUI(c)
     BoxesTextComponentUI.adjustComponent(c.asInstanceOf[JTextComponent])
+    c.setBorder(new EmptyBorder(7, 8, 6, 4))
   }
 
   override def paintSafely(g:Graphics) {
@@ -481,3 +484,33 @@ class BoxesCheckBox extends JCheckBox {
   setUI(new BoxesCheckBoxUI())
 }
 
+
+class HeaderLabelUI extends BasicLabelUI {
+  override def installUI(c:JComponent) {
+      super.installUI(c)
+      c.setOpaque(false)
+  }
+
+  override def uninstallUI(c:JComponent) {
+      super.uninstallUI(c)
+  }
+
+  override def paint(g:Graphics, c:JComponent) {
+    g.drawImage(HeaderLabel.shadow, 0, HeaderLabel.height, c.getWidth, 12, null)
+    BoxesTableCellHeaderRenderer.lastBGPainter.paint(g.asInstanceOf[Graphics2D], c, c.getWidth, HeaderLabel.height)
+    super.paint(g, c)
+  }
+
+}
+
+object HeaderLabel {
+  val height = 22
+  val shadow = new ImageIcon(classOf[HeaderLabelUI].getResource("/boxes/swing/Shadow.png")).getImage
+  def apply(text:String, icon:Option[Icon] = None, horizontalAlignment:Int = SwingConstants.LEFT) = {
+    val label = new JLabel(text, icon.getOrElse(null), horizontalAlignment)
+    label.setUI(new HeaderLabelUI())
+    label.setBorder(new EmptyBorder(7, 8, 16, 8))
+    label.setPreferredSize(new Dimension(26, height + 10))
+    label
+  }
+}

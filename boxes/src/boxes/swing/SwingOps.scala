@@ -5,7 +5,7 @@ import boxes.{SwingView, View, Op}
 import boxes.list.{ListMultiDeleteOp, ListDeleteOp, ListMultiAddOp, ListAddOp, ListMoveOp, ListMultiMoveOp}
 import javax.swing._
 import border.EmptyBorder
-import com.explodingpixels.swingx.{EPToggleButton, EPPanel, EPButton}
+import com.explodingpixels.swingx.EPPanel
 import java.awt.{BorderLayout, Component}
 
 //TODO should make an ExtendedOp that has a name:Ref[String] and icon:Ref[Icon] (not sure about
@@ -80,7 +80,7 @@ class SwingButtonBarBuilder(val components:List[JComponent]) {
 
   def buildWithListStyleComponent(c:JComponent) = {
     val padding = SwingBarPadding()
-    padding.setBorder(new EmptyBorder(2, 5, 2, 5))
+    padding.setBorder(new EmptyBorder(0, 5, 0, 5))
     padding.setLayout(new BorderLayout)
     padding.add(c)
     c.setOpaque(false)

@@ -190,8 +190,6 @@ object StringView {
 
 object StringOptionView {
   def apply(v:VarGeneral[Option[String],_], multiline:Boolean = false) = new StringOptionView(v, new OptionTConverter[String], multiline).asInstanceOf[SwingView]
-  def pathViaOption(path : => Option[Var[String]], multiline:Boolean = false) = apply(PathViaOption(path), multiline)
-  def pathToOption(path : => Option[Var[Option[String]]], multiline:Boolean = false) = apply(PathToOption(path), multiline)
 }
 
 private class StringOptionView[G](v:VarGeneral[G,_], c:GConverter[G, String], multiline:Boolean) extends SwingView {
@@ -503,8 +501,8 @@ private class PieOptionView[G, H](n:RefGeneral[G,_], c:GConverter[G, Double], a:
 class LinkingEPPanel(val sv:SwingView) extends EPPanel {}
 
 object NumberView {
-
-  def apply[N](v:VarGeneral[N,_], s:Sequence[N] = LogStep(10))(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionView(v, s, new TConverter[N], n, nc).asInstanceOf[SwingView]
+  def apply[N](v:VarGeneral[N,_])(implicit n:Numeric[N], nc:NumericClass[N]):SwingView = apply(v, nc.defaultSequence)
+  def apply[N](v:VarGeneral[N,_], s:Sequence[N])(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionView(v, s, new TConverter[N], n, nc).asInstanceOf[SwingView]
 }
 
 object NumberOptionView {

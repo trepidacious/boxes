@@ -3,10 +3,7 @@ package boxes.swing
 import javax.swing.plaf.UIResource
 import javax.swing.table.{DefaultTableCellRenderer}
 import javax.swing._
-import border.{EmptyBorder, EtchedBorder, Border}
-import com.explodingpixels.macwidgets.MacColorUtils
 import java.awt._
-import com.explodingpixels.macwidgets.plaf.EmphasizedLabelUI
 import com.explodingpixels.painter.Painter
 
 object HeaderPainter {

@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.awt.{GridLayout, Color, BorderLayout, Dimension}
 import javax.swing._
 import border.EmptyBorder
-import swing.{BoxesDropdownView, SwingButton, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
+import swing.{SheetBuilder, BoxesDropdownView, SwingButton, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
 
 object BoxesDemo {
 
@@ -576,17 +576,6 @@ object BoxesDemo {
 
 
   def buildLedgerMulti() = {
-//    val list = ListVar(Range(0, 10).map(i=>{
-//      val p = new OptionPerson
-//      p.name() = "Person " + i
-//      p
-//    }):_*)
-//
-//    val view = LensRecordView[OptionPerson](
-//      VarLens("Name", _.name),
-//      VarLens("Age", _.age),
-//      VarLens("Zombie?", _.zombie)
-//    )
 
     val list = ListVar(Range(0, 10).map(i=>{
       val s = new Sine
@@ -709,12 +698,15 @@ object BoxesDemo {
     val panel = new JPanel(new GridLayout(2, 2, 1, 1))
     panel.setBackground(SwingView.dividingColor)
 
+
     val stuff = buildLedgerMulti()
     panel.add(stuff._1)
     panel.add(buildGraphPanel(stuff._2, stuff._3))
 
+
     val stuff2 = buildLedgerMulti()
     panel.add(buildGraphPanel(stuff2._2, stuff2._3))
+
     panel.add(stuff2._1)
 
     frame.add(panel)
@@ -775,27 +767,15 @@ object BoxesDemo {
     val zoomEnabledView = BooleanView(zoomEnabled, Val(""), BooleanControlType.TOOLBARBUTTON, Val(Some(GraphSwingView.zoomSelect)), false)
     val selectEnabledView = BooleanView(selectEnabled, Val(""), BooleanControlType.TOOLBARBUTTON, Val(Some(GraphSwingView.boxSelect)), false)
 
-    val buttons = SwingButtonBar().add(selectEnabledView).add(zoomEnabledView).add(zoomOutButton).buildWithListStyleComponent(new JLabel("Demo Graph"))
+    val buttons = SwingButtonBar().add(selectEnabledView).add(zoomEnabledView).add(zoomOutButton).buildWithListStyleComponent(Label("Demo Graph"))
 
     val panel = new JPanel(new BorderLayout())
     panel.add(v.component, BorderLayout.CENTER)
+
     panel.add(buttons, BorderLayout.SOUTH)
 
     panel
   }
-
-//  def graph {
-//    SwingView.nimbus
-//
-//    val frame = new JFrame()
-//
-//    frame.add(buildGraphPanel)
-//
-//    frame.pack
-//    frame.setMinimumSize(new Dimension(200, 200))
-//    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
-//    frame.setVisible(true)
-//  }
 
   def swingRun(r : => Unit) {
     SwingUtilities.invokeLater(new Runnable(){
@@ -894,11 +874,11 @@ object BoxesDemo {
 
     val selected = ListSelection(list, index)
 
-    val nameView = StringOptionView.pathViaOption{
+    val nameView = StringOptionView(PathViaOption{
       for {
         p <- selected()
       } yield p.name
-    }
+    })
 
     val age = PathViaOption{
       for {
@@ -947,6 +927,31 @@ object BoxesDemo {
 
   }
 
+  def sheetBuilder() {
+
+    val p = new OptionPerson()
+    p.name() = "Bob"
+    p.age() = 55
+
+    val nameView = StringView(p.name)
+
+    val ageView = NumberView[Int](p.age)
+
+    val zombieView = BooleanView(p.zombie)
+
+    val frame = new JFrame()
+
+    val sheet = SheetBuilder()
+    val panel = sheet.separator("Edit Bob").view("Name", nameView).view("Age", ageView).view("Zombie", zombieView).panel
+
+    frame.add(panel)
+    frame.pack
+    frame.setMinimumSize(new Dimension(300, 50))
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+    frame.setVisible(true)
+
+  }
+
   def main(args: Array[String]) {
 //    simpleCalc
 //    simplePath
@@ -983,11 +988,11 @@ object BoxesDemo {
     swingRun{
       SwingView.nimbus()
 //      backgroundReaction
-      textViews
-//      ledgerMulti
-//      graph
-      ledgerAndSelected
+//      textViews
+      ledgerMulti
+//      ledgerAndSelected
 
+      sheetBuilder
     }
 //    axis
   }
