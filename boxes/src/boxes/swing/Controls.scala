@@ -501,6 +501,17 @@ class HeaderLabelUI extends BasicLabelUI {
     super.paint(g, c)
   }
 
+  override def paintEnabledText(label:JLabel, graphics:Graphics, s:String, textX:Int, textY:Int) {
+    val g = graphics.asInstanceOf[Graphics2D]
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+    g.setFont(label.getFont());
+    g.setColor(SwingView.textUnderlightColor)
+    BasicGraphicsUtils.drawStringUnderlineCharAt(g, s, -1, textX, textY + 1);
+//    g.setColor(WindowUtils.isParentWindowFocused(label)
+    g.setColor(label.getForeground)
+    BasicGraphicsUtils.drawStringUnderlineCharAt(g, s, -1, textX, textY);
+  }
+
 }
 
 object HeaderLabel {
