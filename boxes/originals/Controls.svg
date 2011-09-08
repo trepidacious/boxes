@@ -1002,6 +1002,16 @@
          k2="1"
          result="result4" />
     </filter>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3834"
+       id="linearGradient3467"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(3.500002,4.5)"
+       x1="7"
+       y1="24"
+       x2="7"
+       y2="-2" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -1010,12 +1020,12 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1"
-     inkscape:cx="6.8263988"
-     inkscape:cy="5.3125"
+     inkscape:zoom="22.627417"
+     inkscape:cx="24.630331"
+     inkscape:cy="10.945154"
      inkscape:document-units="px"
-     inkscape:current-layer="layer60"
-     showgrid="false"
+     inkscape:current-layer="g3459"
+     showgrid="true"
      inkscape:snap-global="true"
      inkscape:window-width="2560"
      inkscape:window-height="1392"
@@ -1225,7 +1235,7 @@
      inkscape:groupmode="layer"
      id="layer26"
      inkscape:label="BGColor"
-     style="display:inline"
+     style="display:none"
      transform="translate(0,4)">
     <rect
        style="fill:#dedede;fill-opacity:1;stroke:none;display:inline;enable-background:new"
@@ -2351,10 +2361,10 @@
      inkscape:groupmode="layer"
      id="layer60"
      inkscape:label="TextProgressOVerlay"
-     style="display:inline">
+     style="display:none">
     <rect
        ry="1"
-       style="fill:url(#linearGradient4239);fill-opacity:1;stroke:none;display:inline;enable-background:new;filter:url(#filter4241)"
+       style="fill:url(#linearGradient4239);fill-opacity:1;stroke:none;display:inline;filter:url(#filter4241);enable-background:new"
        id="rect4223"
        width="13"
        height="18"
@@ -2368,6 +2378,39 @@
        x="-21.5"
        y="10.5"
        ry="1" />
+  </g>
+  <g
+     style="display:inline"
+     inkscape:label="TextProgressOVerlay copy"
+     id="g3459"
+     inkscape:groupmode="layer">
+    <rect
+       y="5"
+       x="1"
+       height="18"
+       width="4"
+       id="rect3461"
+       style="fill:url(#linearGradient3467);fill-opacity:1;stroke:none;display:inline;filter:url(#filter4241);enable-background:new"
+       ry="1" />
+    <rect
+       ry="1"
+       y="10.5"
+       x="-21.5"
+       height="18"
+       width="13"
+       id="rect3463"
+       style="opacity:0.70516716;fill:#7790a1;fill-opacity:1;stroke:none;filter:url(#filter4241)" />
+    <text
+       xml:space="preserve"
+       style="font-size:6px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="0.17677683"
+       y="35.115261"
+       id="text3469"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3471"
+         x="0.17677683"
+         y="35.115261">6 x 28</tspan></text>
   </g>
   <g
      inkscape:groupmode="layer"
