@@ -357,7 +357,7 @@ object BoxesDemo {
     Reaction(p, 10-q())
     Reaction(q, 10-p())
     val pView = RangeView(p, 0, 10)
-    val qView = RangeView(q, 0, 10)
+    val qView = RangeView(q, 0, 10, true)
 
     val pView2 = NumberView(p, Step(1))
     val qView2 = NumberView(q, Step(1))
@@ -988,7 +988,7 @@ object BoxesDemo {
     swingRun{
       SwingView.nimbus()
 //      backgroundReaction
-//      textViews
+      textViews
       ledgerMulti
 //      ledgerAndSelected
 

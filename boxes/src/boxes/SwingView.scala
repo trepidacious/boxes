@@ -16,7 +16,7 @@ import javax.swing.border.{EmptyBorder, MatteBorder}
 import javax.swing.table.{TableModel, TableCellRenderer, TableCellEditor, AbstractTableModel}
 import javax.swing.{JTable, JSpinner, SpinnerModel, SpinnerNumberModel, JProgressBar, JSlider, BoundedRangeModel, DefaultBoundedRangeModel, SwingConstants, Icon, JTextArea, JScrollPane, JTextField, JLabel, JComponent, ImageIcon, UIManager, SwingUtilities}
 import javax.swing.event.{TableModelEvent, ChangeEvent, TableColumnModelEvent}
-import swing.{BoxesSliderUI, BooleanCellRenderer, SelectingTextCellEditor, NumberCellRenderer, NumberCellEditor, BoxesTableCellRenderer, BoxesTableCellHeaderRenderer, BoxesScrollBarUI, DotModel, ListSelectionIndicesModel, ListSelectionIndexModel, BoxesSpinnerUI, SwingBarToggleButton, SwingToggleButton, BoxesCheckBox, SlideCheckButton, BoxesTextAreaUI, BoxesTextFieldUI}
+import swing.{BoxesProgressUI, BoxesSliderUI, BooleanCellRenderer, SelectingTextCellEditor, NumberCellRenderer, NumberCellEditor, BoxesTableCellRenderer, BoxesTableCellHeaderRenderer, BoxesScrollBarUI, DotModel, ListSelectionIndicesModel, ListSelectionIndexModel, BoxesSpinnerUI, SwingBarToggleButton, SwingToggleButton, BoxesCheckBox, SlideCheckButton, BoxesTextAreaUI, BoxesTextFieldUI}
 import util.{LogStep, NumericClass, GConverter, OptionTConverter, TConverter, CoalescingResponder, Sequence}
 
 object SwingView {
@@ -411,7 +411,11 @@ class LinkingJSlider(val sv:SwingView, brm:BoundedRangeModel) extends JSlider(br
     setUI(new BoxesSliderUI(this))
   }
 }
-class LinkingJProgressBar(val sv:SwingView, brm:BoundedRangeModel) extends JProgressBar(brm) {}
+class LinkingJProgressBar(val sv:SwingView, brm:BoundedRangeModel) extends JProgressBar(brm) {
+  {
+    setUI(new BoxesProgressUI())
+  }
+}
 
 object PiePainter {
 

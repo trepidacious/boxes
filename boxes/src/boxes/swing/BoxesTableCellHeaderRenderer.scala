@@ -12,9 +12,11 @@ object HeaderPainter {
   val image = new ImageIcon(classOf[BoxesTableCellHeaderRenderer].getResource("/boxes/swing/Header.png")).getImage
 }
 
-class HeaderPainter(paintLeft:Boolean = false, paintRight:Boolean = true) extends Painter[Component] {
+class HeaderPainter(paintLeft:Boolean = false, paintRight:Boolean = true, paintImage:Boolean = true) extends Painter[Component] {
   override def paint(g:Graphics2D, t:Component, w:Int, h:Int) {
-    g.drawImage(HeaderPainter.image, 0, 0, w, h, null)
+    if (paintImage) {
+      g.drawImage(HeaderPainter.image, 0, 0, w, h, null)
+    }
 
     g.setColor(HeaderPainter.dividerColor)
     if (paintLeft) {
@@ -31,8 +33,10 @@ class HeaderPainter(paintLeft:Boolean = false, paintRight:Boolean = true) extend
 
 object BoxesTableCellHeaderRenderer {
   val border = BorderFactory.createEmptyBorder(1, 5, 1, 6);
-  val bgPainter = new HeaderPainter
+  val bgPainter = new HeaderPainter(false, true)
   val lastBGPainter = new HeaderPainter(false, false)
+  val linesOnlyPainter = new HeaderPainter(false, true, false)
+  val lastLinesOnlyPainter = new HeaderPainter(false, false, false)
   val cornerBGPainter = new HeaderPainter(true, false)
 }
 
@@ -41,6 +45,7 @@ class BoxesTableCellHeaderRenderer() extends DefaultTableCellRenderer with UIRes
   setHorizontalAlignment(SwingConstants.CENTER)
   setBorder(BoxesTableCellHeaderRenderer.border)
   setPreferredSize(new Dimension(getPreferredSize.width, 22))
+  setUI(new HeaderLabelUI())
 
   var lastColumn = false
 
@@ -92,13 +97,13 @@ class BoxesTableCellHeaderRenderer() extends DefaultTableCellRenderer with UIRes
   }
 
   override def paintComponent(g:Graphics) {
+    super.paintComponent(g);
     val g2d = g.create.asInstanceOf[Graphics2D]
     if (lastColumn) {
-      BoxesTableCellHeaderRenderer.lastBGPainter.paint(g2d, this, this.getWidth, this.getHeight)
+      BoxesTableCellHeaderRenderer.lastLinesOnlyPainter.paint(g2d, this, this.getWidth, this.getHeight)
     } else {
-      BoxesTableCellHeaderRenderer.bgPainter.paint(g2d, this, this.getWidth, this.getHeight)
+      BoxesTableCellHeaderRenderer.linesOnlyPainter.paint(g2d, this, this.getWidth, this.getHeight)
     }
-    super.paintComponent(g);
     g2d.dispose();
   }
 

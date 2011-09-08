@@ -3,7 +3,7 @@ package boxes.swing
 import javax.swing.plaf.basic.BasicSliderUI
 import javax.swing.{JComponent, ImageIcon, JSlider}
 import boxes.SwingView
-import java.awt.{Rectangle, RenderingHints, Graphics2D, Graphics, Dimension}
+import java.awt.{Graphics2D, Graphics, Dimension}
 
 object BoxesSliderUI {
   val trackImage = new ImageIcon(classOf[BoxesSliderUI].getResource("/boxes/swing/Slider.png")).getImage

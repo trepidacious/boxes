@@ -914,6 +914,94 @@
        y1="14.459845"
        x2="7"
        y2="3.655628" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3834"
+       id="linearGradient4225"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-6.499998,35.5)"
+       x1="7"
+       y1="24"
+       x2="7"
+       y2="-2" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3834"
+       id="linearGradient4239"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(7.500002,4.5)"
+       x1="7"
+       y1="24"
+       x2="7"
+       y2="-2" />
+    <filter
+       id="filter4241"
+       inkscape:label="Colorize"
+       inkscape:menu="Color"
+       inkscape:menu-tooltip="Blend image or object with a flood color and set lightness and contrast"
+       x="0"
+       y="0"
+       width="1"
+       height="1"
+       color-interpolation-filters="sRGB">
+      <feColorMatrix
+         id="feColorMatrix4243"
+         values="1"
+         in="SourceGraphic"
+         type="saturate"
+         result="result2" />
+      <feFlood
+         id="feFlood4245"
+         flood-color="rgb(119,144,161)"
+         flood-opacity="0.62871287128712872"
+         result="result1" />
+      <feBlend
+         id="feBlend4247"
+         in2="result2"
+         mode="multiply"
+         in="result1"
+         result="result3" />
+      <feComposite
+         id="feComposite4249"
+         in2="SourceGraphic"
+         operator="in"
+         k2="1"
+         result="result4" />
+    </filter>
+    <filter
+       id="filter4251"
+       inkscape:label="Colorize"
+       inkscape:menu="Color"
+       inkscape:menu-tooltip="Blend image or object with a flood color and set lightness and contrast"
+       x="0"
+       y="0"
+       width="1"
+       height="1"
+       color-interpolation-filters="sRGB">
+      <feColorMatrix
+         id="feColorMatrix4253"
+         values="1"
+         in="SourceGraphic"
+         type="saturate"
+         result="result2" />
+      <feFlood
+         id="feFlood4255"
+         flood-color="rgb(254,102,0)"
+         flood-opacity="1"
+         result="result1" />
+      <feBlend
+         id="feBlend4257"
+         in2="result2"
+         mode="multiply"
+         in="result1"
+         result="result3" />
+      <feComposite
+         id="feComposite4259"
+         in2="SourceGraphic"
+         operator="in"
+         k2="1"
+         result="result4" />
+    </filter>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -922,15 +1010,15 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="16"
-     inkscape:cx="20.536758"
-     inkscape:cy="7.9958911"
+     inkscape:zoom="1"
+     inkscape:cx="6.8263988"
+     inkscape:cy="5.3125"
      inkscape:document-units="px"
-     inkscape:current-layer="layer59"
-     showgrid="true"
+     inkscape:current-layer="layer60"
+     showgrid="false"
      inkscape:snap-global="true"
-     inkscape:window-width="1920"
-     inkscape:window-height="1032"
+     inkscape:window-width="2560"
+     inkscape:window-height="1392"
      inkscape:window-x="1366"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -1137,7 +1225,7 @@
      inkscape:groupmode="layer"
      id="layer26"
      inkscape:label="BGColor"
-     style="display:none"
+     style="display:inline"
      transform="translate(0,4)">
     <rect
        style="fill:#dedede;fill-opacity:1;stroke:none;display:inline;enable-background:new"
@@ -1499,7 +1587,7 @@
      inkscape:groupmode="layer"
      id="layer59"
      inkscape:label="SliderSelect"
-     style="display:inline">
+     style="display:none">
     <rect
        ry="5.5"
        style="fill:none;stroke:#7790a1;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;enable-background:new"
@@ -1572,6 +1660,18 @@
        id="rect4259"
        style="fill:none;stroke:#8c8c8c;stroke-opacity:1;display:inline;enable-background:new"
        ry="11.5" />
+  </g>
+  <g
+     style="display:none"
+     inkscape:label="SearchTextProgress"
+     id="g4216"
+     inkscape:groupmode="layer">
+    <path
+       style="fill:#7790a1;fill-opacity:1;stroke:none;display:inline;enable-background:new"
+       d="m 14,3 10,0 c 0,5 0,15 0,22 L 14,25 C 7.906,25 3,20.094 3,14 3,7.906 7.906,3 14,3 z"
+       id="rect4220"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="sccsss" />
   </g>
   <g
      inkscape:groupmode="layer"
@@ -2185,7 +2285,7 @@
      inkscape:groupmode="layer"
      id="layer32"
      inkscape:label="TextBG"
-     style="display:none">
+     style="display:inline">
     <rect
        ry="4"
        y="-2"
@@ -2236,7 +2336,7 @@
      inkscape:groupmode="layer"
      id="layer30"
      inkscape:label="Text"
-     style="display:none">
+     style="display:inline">
     <rect
        transform="translate(0,4)"
        y="-1.5"
@@ -2246,6 +2346,28 @@
        id="rect5267"
        style="fill:none;stroke:#8c8c8c;stroke-opacity:1;display:inline;enable-background:new"
        ry="3" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer60"
+     inkscape:label="TextProgressOVerlay"
+     style="display:inline">
+    <rect
+       ry="1"
+       style="fill:url(#linearGradient4239);fill-opacity:1;stroke:none;display:inline;enable-background:new;filter:url(#filter4241)"
+       id="rect4223"
+       width="13"
+       height="18"
+       x="5"
+       y="5" />
+    <rect
+       style="opacity:0.70516716;fill:#7790a1;fill-opacity:1;stroke:none;filter:url(#filter4241)"
+       id="rect3443"
+       width="13"
+       height="18"
+       x="-21.5"
+       y="10.5"
+       ry="1" />
   </g>
   <g
      inkscape:groupmode="layer"
