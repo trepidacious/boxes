@@ -16,7 +16,7 @@ import javax.swing.border.{EmptyBorder, MatteBorder}
 import javax.swing.table.{TableModel, TableCellRenderer, TableCellEditor, AbstractTableModel}
 import javax.swing.{JTable, JSpinner, SpinnerModel, SpinnerNumberModel, JProgressBar, JSlider, BoundedRangeModel, DefaultBoundedRangeModel, SwingConstants, Icon, JTextArea, JScrollPane, JTextField, JLabel, JComponent, ImageIcon, UIManager, SwingUtilities}
 import javax.swing.event.{TableModelEvent, ChangeEvent, TableColumnModelEvent}
-import swing.{BoxesProgressUI, BoxesSliderUI, BooleanCellRenderer, SelectingTextCellEditor, NumberCellRenderer, NumberCellEditor, BoxesTableCellRenderer, BoxesTableCellHeaderRenderer, BoxesScrollBarUI, DotModel, ListSelectionIndicesModel, ListSelectionIndexModel, BoxesSpinnerUI, SwingBarToggleButton, SwingToggleButton, BoxesCheckBox, SlideCheckButton, BoxesTextAreaUI, BoxesTextFieldUI}
+import swing.{BoxesRadioButton, BoxesProgressUI, BoxesSliderUI, BooleanCellRenderer, SelectingTextCellEditor, NumberCellRenderer, NumberCellEditor, BoxesTableCellRenderer, BoxesTableCellHeaderRenderer, BoxesScrollBarUI, DotModel, ListSelectionIndicesModel, ListSelectionIndexModel, BoxesSpinnerUI, SwingBarToggleButton, SwingToggleButton, BoxesCheckBox, SlideCheckButton, BoxesTextAreaUI, BoxesTextFieldUI}
 import util.{LogStep, NumericClass, GConverter, OptionTConverter, TConverter, CoalescingResponder, Sequence}
 
 object SwingView {
@@ -249,7 +249,7 @@ class BoxesJTextArea(r:Int, c:Int) extends JTextArea(r, c) {
 
 object BooleanControlType extends Enumeration {
    type BooleanControlType = Value
-   val CHECKBOX, TOGGLEBUTTON, TOOLBARBUTTON, SLIDECHECK = Value
+   val CHECKBOX, TOGGLEBUTTON, TOOLBARBUTTON, SLIDECHECK, RADIO = Value
 }
 import BooleanControlType._
 
@@ -275,6 +275,7 @@ private class BooleanOptionView[G](v:VarGeneral[G,_], n:RefGeneral[String,_], c:
 
   val component = controlType match {
     case CHECKBOX => new LinkingJCheckBox(this)
+    case RADIO => new LinkingJRadioButton(this)
     case TOGGLEBUTTON => new LinkingJToggleButton(this)
     case TOOLBARBUTTON => new LinkingToolbarToggleButton(this)
     case SLIDECHECK => new LinkingSlideCheckButton(this)
@@ -339,6 +340,8 @@ private class BooleanOptionView[G](v:VarGeneral[G,_], n:RefGeneral[String,_], c:
 class LinkingSlideCheckButton(val sv:SwingView) extends SlideCheckButton
 
 class LinkingJCheckBox(val sv:SwingView) extends BoxesCheckBox
+
+class LinkingJRadioButton(val sv:SwingView) extends BoxesRadioButton
 
 class LinkingJToggleButton(val sv:SwingView) extends SwingToggleButton
 

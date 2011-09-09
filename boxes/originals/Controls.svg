@@ -1020,12 +1020,12 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="22.627417"
-     inkscape:cx="24.630331"
-     inkscape:cy="10.945154"
+     inkscape:zoom="8"
+     inkscape:cx="12.637671"
+     inkscape:cy="30.945154"
      inkscape:document-units="px"
-     inkscape:current-layer="g3459"
-     showgrid="true"
+     inkscape:current-layer="layer49"
+     showgrid="false"
      inkscape:snap-global="true"
      inkscape:window-width="2560"
      inkscape:window-height="1392"
@@ -1857,31 +1857,31 @@
      inkscape:label="RadioDot"
      style="display:none">
     <path
-       sodipodi:type="arc"
-       style="fill:#000000;fill-opacity:1;stroke:none;display:inline;enable-background:new"
-       id="path4076"
-       sodipodi:cx="224.5"
-       sodipodi:cy="9.5"
-       sodipodi:rx="4"
-       sodipodi:ry="4"
-       d="m 228.5,9.5 a 4,4 0 1 1 -8,0 4,4 0 1 1 8,0 z"
-       transform="translate(-215.5,4.5)" />
-    <path
        transform="translate(-214.5,5.5)"
-       d="m 228.5,9.5 a 4,4 0 1 1 -8,0 4,4 0 1 1 8,0 z"
-       sodipodi:ry="4"
-       sodipodi:rx="4"
+       d="m 227.5,9.5 a 3,3 0 1 1 -6,0 3,3 0 1 1 6,0 z"
+       sodipodi:ry="3"
+       sodipodi:rx="3"
        sodipodi:cy="9.5"
        sodipodi:cx="224.5"
        id="path4078"
        style="opacity:0.14299999;fill:#000000;fill-opacity:1;stroke:none;display:inline;enable-background:new"
        sodipodi:type="arc" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#34414b;fill-opacity:1;stroke:none;display:inline;enable-background:new"
+       id="path4076"
+       sodipodi:cx="224.5"
+       sodipodi:cy="9.5"
+       sodipodi:rx="3"
+       sodipodi:ry="3"
+       d="m 227.5,9.5 a 3,3 0 1 1 -6,0 3,3 0 1 1 6,0 z"
+       transform="translate(-215.5,4.5)" />
   </g>
   <g
      inkscape:groupmode="layer"
      id="layer50"
      inkscape:label="RadioSelect"
-     style="display:none">
+     style="display:inline">
     <rect
        y="8"
        x="3"
@@ -2295,7 +2295,7 @@
      inkscape:groupmode="layer"
      id="layer32"
      inkscape:label="TextBG"
-     style="display:inline">
+     style="display:none">
     <rect
        ry="4"
        y="-2"
@@ -2346,7 +2346,7 @@
      inkscape:groupmode="layer"
      id="layer30"
      inkscape:label="Text"
-     style="display:inline">
+     style="display:none">
     <rect
        transform="translate(0,4)"
        y="-1.5"
@@ -2380,7 +2380,7 @@
        ry="1" />
   </g>
   <g
-     style="display:inline"
+     style="display:none"
      inkscape:label="TextProgressOVerlay copy"
      id="g3459"
      inkscape:groupmode="layer">
@@ -2947,7 +2947,7 @@
        sodipodi:cy="9.5"
        sodipodi:rx="6.5"
        sodipodi:ry="6.5"
-       d="M 17,9.5 C 17,13.089851 14.089851,16 10.5,16 6.9101491,16 4,13.089851 4,9.5 4,5.9101491 6.9101491,3 10.5,3 14.089851,3 17,5.9101491 17,9.5 z"
+       d="m 17,9.5 a 6.5,6.5 0 1 1 -13,0 6.5,6.5 0 1 1 13,0 z"
        transform="translate(0.5,0.5)" />
     <path
        style="fill:none;stroke:#7890a1;stroke-width:3.4000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"

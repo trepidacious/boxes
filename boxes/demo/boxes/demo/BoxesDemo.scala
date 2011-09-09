@@ -340,7 +340,7 @@ object BoxesDemo {
       println("x is " + x() + " should set y to " + !x())
       Some(!x())
     })
-    val xView = BooleanView(x, Val("Some Text"), BooleanControlType.TOGGLEBUTTON)
+    val xView = BooleanView(x, Val("Some Text"), BooleanControlType.RADIO)
     val yView = BooleanOptionView(y, Val(""), BooleanControlType.SLIDECHECK)
 
     val button = new JButton(new AbstractAction() {

@@ -412,21 +412,24 @@ class SpinnerTextFieldUI extends BasicFormattedTextFieldUI {
 }
 
 object BoxesCheckBox {
-  val normalIcon = new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/Checkbox.png"))
-  val disabledIcon = new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/CheckboxDisabled.png"))
-  val focusIcon = new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/CheckboxFocusOverlay.png"))
-  val pressedIcon = new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/CheckboxPressed.png"))
-  val pressedDisabledIcon = new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/CheckboxPressedDisabled.png"))
+  val checkboxIcons = (
+    new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/Checkbox.png")),
+    new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/CheckboxPressed.png")),
+    new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/CheckboxFocusOverlay.png"))
+  )
+  val radioIcons = (
+    new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/Radio.png")),
+    new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/RadioPressed.png")),
+    new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/RadioFocusOverlay.png"))
+  )
 }
 
-class BoxesCheckBoxUI extends BasicCheckBoxUI {
+class BoxesCheckBoxUI(val radio:Boolean = false) extends BasicCheckBoxUI {
+
+  val icons = if (radio) BoxesCheckBox.radioIcons else BoxesCheckBox.checkboxIcons
 
   override def installDefaults(b:AbstractButton) {
     super.installDefaults(b)
-
-//        HudPaintingUtils.initHudComponent(b);
-//        b.setIconTextGap((int) (HudPaintingUtils.FONT_SIZE / 2));
-
     icon = new BoxesCheckIcon()
   }
 
@@ -461,20 +464,20 @@ class BoxesCheckBoxUI extends BasicCheckBoxUI {
       graphics.translate(x, y);
 
       if (model.isSelected()) {
-        BoxesCheckBox.pressedIcon.paintIcon(c, graphics, 0, 0)
+        icons._2.paintIcon(c, graphics, 0, 0)
       } else {
-        BoxesCheckBox.normalIcon.paintIcon(c, graphics, 0, 0)
+        icons._1.paintIcon(c, graphics, 0, 0)
       }
 
       if (c.hasFocus) {
-        BoxesCheckBox.focusIcon.paintIcon(c, graphics, 0, 0)
+        icons._3.paintIcon(c, graphics, 0, 0)
       }
 
       graphics.dispose();
     }
 
-    def getIconWidth = BoxesCheckBox.normalIcon.getIconWidth
-    def getIconHeight = BoxesCheckBox.normalIcon.getIconHeight
+    def getIconWidth = BoxesCheckBox.checkboxIcons._1.getIconWidth
+    def getIconHeight = BoxesCheckBox.checkboxIcons._1.getIconHeight
   }
 
 }
@@ -484,6 +487,9 @@ class BoxesCheckBox extends JCheckBox {
   setUI(new BoxesCheckBoxUI())
 }
 
+class BoxesRadioButton extends JCheckBox {
+  setUI(new BoxesCheckBoxUI(true))
+}
 
 class HeaderLabelUI extends BasicLabelUI {
   override def installUI(c:JComponent) {
