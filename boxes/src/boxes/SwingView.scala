@@ -85,13 +85,15 @@ object SwingView {
       for (info <- UIManager.getInstalledLookAndFeels()) {
         if ("Nimbus".equals(info.getName())) {
           UIManager.setLookAndFeel(info.getClassName())
-          UIManager.put("nimbusSelectionBackground", new Color(120, 144, 161));
-          UIManager.put("Table.alternateRowColor", new Color(240, 240, 240))
-          UIManager.put("Table.backgroundColor", new Color(255, 255, 255))
-          UIManager.put("Table.selectionForeground", new Color(255, 255, 255))
-          UIManager.put("Table.selectionBackground", new Color(120, 144, 161))
-          UIManager.put("Table.focusCellHighlightBorder", new MatteBorder(1, 1, 1, 1, new Color(120, 144, 161).darker.darker))
+          UIManager.put("control", background)
+          UIManager.put("nimbusSelectionBackground", selectionColor);
+          UIManager.put("Table.alternateRowColor", alternateBackgroundColor)
+          UIManager.put("Table.backgroundColor", selectedTextColor)
+          UIManager.put("Table.selectionForeground", selectedTextColor)
+          UIManager.put("Table.selectionBackground", selectionColor)
+          UIManager.put("Table.focusCellHighlightBorder", new MatteBorder(1, 1, 1, 1, selectionColor.darker.darker))
           UIManager.put("CheckBox.icon", new ImageIcon(classOf[SwingView].getResource("/boxes/swing/Checkbox.png")))
+
         }
       }
     } catch {
@@ -103,16 +105,17 @@ object SwingView {
     try {
       UIManager.setLookAndFeel( new MetalLookAndFeel() )
       UIManager.put("Table.alternateRowColor", alternateBackgroundColor)
-      UIManager.put("Table.backgroundColor", new Color(255, 255, 255))
-      UIManager.put("Table.selectionForeground", new Color(255, 255, 255))
+      UIManager.put("Table.backgroundColor", selectedTextColor)
+      UIManager.put("Table.selectionForeground", selectedTextColor)
       UIManager.put("Table.selectionBackground", selectionColor)
-      UIManager.put("Table.focusCellHighlightBorder", new MatteBorder(1, 1, 1, 1, new Color(120, 144, 161).darker.darker))
+      UIManager.put("Table.focusCellHighlightBorder", new MatteBorder(1, 1, 1, 1, selectionColor.darker.darker))
     }
     catch {
       case _ => {}
     }
   }
 
+  val background = new Color(240, 240, 240)
   val dividingColor = new Color(130, 130, 130)
   val alternateBackgroundColor = new Color(240, 240, 240)
   val selectionColor = new Color(120, 144, 161)
@@ -715,9 +718,9 @@ class LedgerScrollView(val ledgerView:LedgerView, val ledger:RefGeneral[_<:Ledge
 }
 
 object BoxesScrollPane {
-  def apply(component:JComponent) = {
+  def apply(component:JComponent, horizontal:Boolean = false, vertical:Boolean = true) = {
     val scroll = new JScrollPane(component)
-    BoxesScrollBarUI.applyTo(scroll)
+    BoxesScrollBarUI.applyTo(scroll, horizontal = horizontal, vertical = vertical)
     scroll
   }
   def horizontal(component:JComponent) = {

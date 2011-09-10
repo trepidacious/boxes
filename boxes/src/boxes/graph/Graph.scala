@@ -604,7 +604,7 @@ object GraphBasic {
 
     val layers = ListVal[GraphLayer](
       extraMainLayers ::: List(
-        new GraphBG(SwingView.alternateBackgroundColor, Color.white),
+        new GraphBG(SwingView.background, Color.white),
         new GraphHighlight(),
         new GraphSeries(series, true),
         new GraphAxis(Y, 50),
