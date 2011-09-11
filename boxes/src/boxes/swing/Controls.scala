@@ -1,16 +1,17 @@
 package boxes.swing
 
-import javax.swing.text.JTextComponent
 import com.explodingpixels.widgets.ImageUtils
 import javax.swing.border.EmptyBorder
 import java.awt.event.{FocusEvent, FocusListener}
 import java.beans.{PropertyChangeListener, PropertyChangeEvent}
 import com.explodingpixels.painter.Painter
-import java.awt.{Rectangle, Dimension, Component, Image, Graphics2D, RenderingHints, Graphics, Color}
 import boxes.{Op, SwingView}
-import com.explodingpixels.swingx.{EPToggleButton, EPButton}
-import javax.swing.plaf.basic.{BasicLabelUI, BasicGraphicsUtils, BasicCheckBoxUI, BasicFormattedTextFieldUI, BasicTextAreaUI, BasicTextFieldUI}
-import javax.swing.{SwingConstants, JLabel, ImageIcon, Action, Icon, JCheckBox, JTextArea, JTextField, AbstractButton, JComponent}
+import com.explodingpixels.swingx.{EPPanel, EPToggleButton, EPButton}
+import sun.swing.SwingUtilities2
+import javax.swing.text.{View, JTextComponent}
+import javax.swing.plaf.basic.{BasicHTML, BasicButtonUI, BasicLabelUI, BasicGraphicsUtils, BasicCheckBoxUI, BasicFormattedTextFieldUI, BasicTextAreaUI, BasicTextFieldUI}
+import java.awt.{FontMetrics, Rectangle, Dimension, Component, Image, Graphics2D, RenderingHints, Graphics, Color}
+import javax.swing.{JToggleButton, ButtonModel, SwingConstants, JLabel, ImageIcon, Action, Icon, JCheckBox, JTextArea, JTextField, AbstractButton, JComponent}
 
 object BarStylePainter {
   val dividerColor = new Color(0, 0, 0, 51)
@@ -151,6 +152,164 @@ class ThreePartVariableHeightPainter(image:Image, t:Int = 10, m:Int = 8, b:Int =
     if (middle > 0) {
       paintStripWithoutRight(g, w, h, t, middle, middleStrip)
     }
+  }
+
+}
+
+class TabPainter(image:Image, top:Int = 4, waist:Int = 3, indicator:Int = 24, bottom:Int = 4, left:Int = 4, middle:Int = 4, right:Int = 16) {
+
+  //Extract left, middle and right parts of a horizontal image strip
+  def strip(y:Int, h:Int) = (
+    ImageUtils.getSubImage(image, 0, y, left, h),
+    ImageUtils.getSubImage(image, left, y, middle, h),
+    ImageUtils.getSubImage(image, image.getWidth(null) - right, y, right, h)
+  )
+
+  def topStrip = strip(0, top)
+  def waistStrip = strip(top, waist)
+  def indicatorStrip = strip(top + waist, indicator)
+  def bottomStrip = strip(image.getHeight(null) - bottom, bottom)
+
+  def paintStrip(g:Graphics2D, w:Int, h:Int, y:Int, stripHeight:Int, parts:(Image, Image, Image)) {
+    val middleStretched = w - left - right
+
+    g.drawImage(parts._1, 0, y, left, stripHeight, null)
+    g.drawImage(parts._3, w - right, y, right, stripHeight, null)
+    if (middleStretched > 0) {
+      g.drawImage(parts._2, left, y, middleStretched, stripHeight, null)
+    }
+  }
+
+  def paint(g:Graphics2D, w:Int, h:Int, paintBottom:Boolean) {
+    val bottomUsed = if (paintBottom) bottom else 0
+
+    val waistStretched = h - top - bottomUsed
+
+    paintStrip(g, w, h, 0, top, topStrip)
+
+    if (paintBottom) {
+      paintStrip(g, w, h, h - bottom, bottom, bottomStrip)
+    }
+
+    //TODO paint the waist in two sections, above and below indicator, so that transparent images will work
+    if (waistStretched > 0) {
+      paintStrip(g, w, h, top, waistStretched, waistStrip)
+    }
+
+    val indicatorY = (h - indicator)/2
+    paintStrip(g, w, h, indicatorY, indicator, indicatorStrip)
+
+  }
+}
+
+object TabSpacer {
+  def apply() = new TabSpacer()
+}
+
+class TabSpacer extends EPPanel {
+  {
+    setBackgroundPainter(new TabSpacerPainter(false))
+  }
+}
+
+//class TabButton(paintBottom:Boolean = true) extends EPToggleButton {
+//  {
+//    setBorder(null)
+//    setContentAreaFilled(false)
+//    setBackgroundPainter(new TabButtonPainter(paintBottom))
+//    setPreferredSize(new Dimension(39, 38))
+//    setMinimumSize(new Dimension(39, 38))
+//    setForeground(SwingView.selectedTextColor)
+//    setHorizontalTextPosition(SwingConstants.CENTER)
+//    setVerticalTextPosition(SwingConstants.BOTTOM)
+//    //TODO add borders to avoid indicator overpaint, set foreground/background etc.
+//  }
+//}
+
+class TabButton(paintBottom:Boolean = true) extends JToggleButton {
+  {
+    setUI(new TabButtonUI())
+  }
+}
+
+
+object TabButtonPainter {
+  def painter(resource:String) = new TabPainter(new ImageIcon(classOf[SlideCheckPainter].getResource(resource)).getImage)
+  val off = painter("/boxes/swing/Tab.png")
+  val on = painter("/boxes/swing/TabPressed.png")
+//  val focus = painter("/boxes/swing/SlideCheckFocusOverlay.png")
+}
+
+class TabButtonPainter(paintBottom:Boolean = true) extends Painter[AbstractButton] {
+  override def paint(g:Graphics2D, b:AbstractButton, w:Int, h:Int) {
+
+    val oldComposite = g.getComposite
+    SwingView.graphicsForEnabledState(g, b.getModel.isEnabled)
+
+    if (b.getModel.isSelected) {
+      TabButtonPainter.on.paint(g, w, h, paintBottom)
+    } else {
+      TabButtonPainter.off.paint(g, w, h, paintBottom)
+    }
+
+//    if (b.hasFocus) {
+//      g.drawImage(SlideCheckPainter.focus, 0, 0, null)
+//    }
+
+    g.setComposite(oldComposite)
+  }
+}
+
+class TabSpacerPainter(paintBottom:Boolean = true) extends Painter[Component] {
+  override def paint(g:Graphics2D, b:Component, w:Int, h:Int) {
+    TabButtonPainter.off.paint(g, w, h, paintBottom)
+  }
+}
+
+class TabButtonUI extends BasicButtonUI {
+  override def installUI(c:JComponent) {
+    super.installUI(c)
+    val b = c.asInstanceOf[AbstractButton]
+    b.setBorder(null)
+    b.setContentAreaFilled(false)
+    b.setPreferredSize(new Dimension(39, 38))
+    b.setMinimumSize(new Dimension(39, 38))
+    b.setForeground(SwingView.selectedTextColor)
+    b.setHorizontalTextPosition(SwingConstants.CENTER)
+    b.setVerticalTextPosition(SwingConstants.BOTTOM)
+  }
+
+  override def paint(graphics: Graphics, c: JComponent) {
+    var b = c.asInstanceOf[AbstractButton]
+
+    val g = graphics.asInstanceOf[Graphics2D]
+    val w = c.getWidth
+    val h = c.getHeight
+
+    if (b.getModel.isSelected) {
+      TabButtonPainter.on.paint(g, w, h, true)
+    } else {
+      TabButtonPainter.off.paint(g, w, h, true)
+    }
+
+    val oldComposite = g.getComposite
+    SwingView.graphicsForEnabledState(g, b.getModel.isSelected)
+
+    super.paint(graphics, c)
+
+    g.setComposite(oldComposite)
+  }
+
+  override def paintText(g: Graphics, b: AbstractButton, textRect: Rectangle, text: String) {
+    var fm = SwingUtilities2.getFontMetrics(b, g)
+    var mnemonicIndex = b.getDisplayedMnemonicIndex
+
+    //TODO get from SwingViews
+    g.setColor(new Color(0,0,0,140))
+    SwingUtilities2.drawStringUnderlineCharAt(b, g, text, mnemonicIndex, textRect.x, textRect.y + fm.getAscent + 1)
+
+    g.setColor(b.getForeground)
+    SwingUtilities2.drawStringUnderlineCharAt(b, g, text, mnemonicIndex, textRect.x, textRect.y + fm.getAscent)
   }
 
 }
