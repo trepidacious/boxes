@@ -5,10 +5,7 @@ import javax.swing.plaf.basic.BasicSpinnerUI
 import com.explodingpixels.painter.Painter
 import java.awt.{Image, Graphics2D, Dimension, Container, Component, LayoutManager}
 import com.explodingpixels.widgets.ImageUtils
-import javax.swing.{SwingConstants, AbstractButton, ImageIcon, JPanel, JSpinner, JComponent}
-import javax.swing.JComponent._
-import javax.swing.border.EmptyBorder
-import javax.swing.AbstractButton._
+import javax.swing.{AbstractButton, ImageIcon, JSpinner, JComponent}
 import com.explodingpixels.swingx.EPButton
 
 object BoxesSpinnerLayout {

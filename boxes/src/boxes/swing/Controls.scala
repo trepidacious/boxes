@@ -272,8 +272,6 @@ class TabButtonUI extends BasicButtonUI {
     val b = c.asInstanceOf[AbstractButton]
     b.setBorder(null)
     b.setContentAreaFilled(false)
-    b.setPreferredSize(new Dimension(39, 38))
-    b.setMinimumSize(new Dimension(39, 38))
     b.setForeground(SwingView.selectedTextColor)
     b.setHorizontalTextPosition(SwingConstants.CENTER)
     b.setVerticalTextPosition(SwingConstants.BOTTOM)
@@ -304,7 +302,7 @@ class TabButtonUI extends BasicButtonUI {
     var fm = SwingUtilities2.getFontMetrics(b, g)
     var mnemonicIndex = b.getDisplayedMnemonicIndex
 
-    //TODO get from SwingViews
+    //TODO get shadow color from SwingViews
     g.setColor(new Color(0,0,0,140))
     SwingUtilities2.drawStringUnderlineCharAt(b, g, text, mnemonicIndex, textRect.x, textRect.y + fm.getAscent + 1)
 

@@ -9,12 +9,11 @@ import list._
 import persistence._
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
 import java.util.concurrent.atomic.AtomicBoolean
+import java.awt.{Dimension, BorderLayout, GridLayout, Color}
+import com.jgoodies.forms.layout.{CellConstraints, FormLayout}
+import swing.{TabBuilder, TabSpacer, SheetBuilder, BoxesDropdownView, SwingButton, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
 import javax.swing._
 import border.EmptyBorder
-import java.awt.{Dimension, BorderLayout, GridLayout, Color}
-import com.jgoodies.forms.builder.DefaultFormBuilder
-import com.jgoodies.forms.layout.{CellConstraints, FormLayout}
-import swing.{TabSpacer, SheetBuilder, BoxesDropdownView, SwingButton, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
 
 object BoxesDemo {
 
@@ -727,41 +726,24 @@ object BoxesDemo {
     val up = new ImageIcon(classOf[SwingView].getResource("/boxes/swing/UpTab.png"))
     val down = new ImageIcon(classOf[SwingView].getResource("/boxes/swing/DownTab.png"))
 
-    val icons = List(plus, minus, up, down, plus)
-
     val frame = new JFrame()
 
-    val layout = new FormLayout("fill:64px", "fill:64px, fill:64px, fill:64px, fill:64px, fill:64px, fill:30px:grow")
-    val builder = new DefaultFormBuilder(layout)
-    val cc = new CellConstraints()
+    val tabs = TabBuilder()
+      .add(new JLabel("Plus"), Val("Plus"), Val(Some(plus)))
+      .add(new JLabel("Minus"), Val("Minus"), Val(Some(minus)))
+      .add(new JLabel("Up"), Val("Up"), Val(Some(up)))
+      .add(new JLabel("Down"), Val("Down"), Val(Some(down)))
+      .panel()
 
-    val tabVars = Range(1, 6).map(i => {
-      val b = Var(false)
-      val v = BooleanView(b, Val("Tab " + i), controlType = BooleanControlType.TAB, toggle = false, icon = Val(Some(icons(i-1))))
-      builder.add(v.component, cc.xy(1, i))
-      b
-    })
-    RadioReaction(tabVars:_*)
-    tabVars.head() = true
-
-    builder.add(new TabSpacer(), cc.xy(1, 6))
-
-    val tabs = builder.getPanel
-
-    val panel = new JPanel(new BorderLayout())
-
-    val stuff = buildLedgerMulti()
-    panel.add(stuff._1, BorderLayout.CENTER)
-    panel.add(tabs, BorderLayout.WEST)
-//    panel.add(buildGraphPanel(stuff._2, stuff._3))
+//    val tabs = TabBuilder()
+//      .add(new JLabel("Plus"), Val("Plus"))
+//      .add(new JLabel("Minus"), Val("Minus"))
+//      .add(new JLabel("Up"), Val("Up"))
+//      .add(new JLabel("Down"), Val("Down"))
+//      .panel(64, 32)
 
 
-//    val stuff2 = buildLedgerMulti()
-//    panel.add(buildGraphPanel(stuff2._2, stuff2._3))
-//
-//    panel.add(stuff2._1)
-
-    frame.add(panel)
+    frame.add(tabs)
 
     frame.pack
     frame.setMinimumSize(new Dimension(50, 50))
@@ -1042,7 +1024,7 @@ object BoxesDemo {
       SwingView.nimbus()
 //      backgroundReaction
 //      textViews
-//      ledgerMulti
+      ledgerMulti
 //      ledgerAndSelected
 
 //      sheetBuilder
