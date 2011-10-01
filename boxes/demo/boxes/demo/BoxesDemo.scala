@@ -29,6 +29,7 @@ object BoxesDemo {
     val name = Var("Sine")
     val phase = Var(0d)
     val amplitude = Var(1d)
+    val enabled = Var(true)
   }
 
   class OptionPerson extends Node {
@@ -576,46 +577,6 @@ object BoxesDemo {
 
 
 
-  def buildLedgerMulti() = {
-
-    val list = ListVar(Range(0, 10).map(i=>{
-      val s = new Sine
-      s.name() = "Sine " + i
-      s.phase() = i/40d
-      s.amplitude() = 1
-      s
-    }):_*)
-
-    val view = LensRecordView[Sine](
-      VarLens("Name", _.name),
-      VarLens("Phase", _.phase),
-      VarLens("Amplitude", _.amplitude)
-    )
-
-    val indices = ListIndices(list, defaultSelection = DefaultSelection.FirstIndex)
-
-    val ledger = Var(ListLedger(list, view))
-
-    val ledgerView = LedgerView.multiSelectionScroll(ledger, indices, sorting=true)
-
-    val indicesView = LabelView(Cal{indices().toString})
-
-    val add = new ListMultiAddOp(list, indices, Some(new Sine()))
-
-    val delete = new ListMultiDeleteOp[Sine](list, indices, t=>Unit)
-
-    val up = new ListMultiMoveOp[Sine](list, indices, true)
-
-    val down = new ListMultiMoveOp[Sine](list, indices, false)
-
-    val buttons = SwingButtonBar().add(add).add(delete).add(up).add(down).buildWithListStyleComponent(indicesView.component)
-
-    val mainPanel = new JPanel(new BorderLayout())
-    mainPanel.add(ledgerView.component, BorderLayout.CENTER)
-    mainPanel.add(buttons, BorderLayout.SOUTH)
-
-    (mainPanel, list, indices)
-  }
 
   def fieldCompositeLedger() {
 
@@ -719,38 +680,6 @@ object BoxesDemo {
 
   }
 
-  def tabs() {
-
-    val plus = new ImageIcon(classOf[SwingView].getResource("/boxes/swing/PlusTab.png"))
-    val minus = new ImageIcon(classOf[SwingView].getResource("/boxes/swing/MinusTab.png"))
-    val up = new ImageIcon(classOf[SwingView].getResource("/boxes/swing/UpTab.png"))
-    val down = new ImageIcon(classOf[SwingView].getResource("/boxes/swing/DownTab.png"))
-
-    val frame = new JFrame()
-
-    val tabs = TabBuilder()
-      .add(new JLabel("Plus"), Val("Plus"), Val(Some(plus)))
-      .add(new JLabel("Minus"), Val("Minus"), Val(Some(minus)))
-      .add(new JLabel("Up"), Val("Up"), Val(Some(up)))
-      .add(new JLabel("Down"), Val("Down"), Val(Some(down)))
-      .panel()
-
-//    val tabs = TabBuilder()
-//      .add(new JLabel("Plus"), Val("Plus"))
-//      .add(new JLabel("Minus"), Val("Minus"))
-//      .add(new JLabel("Up"), Val("Up"))
-//      .add(new JLabel("Down"), Val("Down"))
-//      .panel(64, 32)
-
-
-    frame.add(tabs)
-
-    frame.pack
-    frame.setMinimumSize(new Dimension(50, 50))
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
-    frame.setVisible(true)
-
-  }
 
 
   def buildGraphPanel(sines: ListVar[Sine], indices:Var[Set[Int]]) = {
@@ -765,7 +694,7 @@ object BoxesDemo {
         val s = v._1
         val i = v._2
         Series(i,
-          Range(0, 100).map(x => x/100d).map(x => Vec2(x, math.sin((x + s.phase()) * 2 * 3.1415) * s.amplitude())).toList,
+          if (s.enabled()) Range(0, 100).map(x => x/100d).map(x => Vec2(x, math.sin((x + s.phase()) * 2 * 3.1415) * s.amplitude())).toList else List[Vec2](),
           Color.getHSBColor((9-i)/14f, 1f, 1f),
           2
         )
@@ -977,7 +906,7 @@ object BoxesDemo {
     val frame = new JFrame()
 
     val sheet = SheetBuilder()
-    val panel = sheet.separator("Edit Bob").view("Name", nameView).view("Age", ageView).view("Zombie", zombieView).panel
+    val panel = sheet separator("Edit Bob") view("Name", nameView) view("Age", ageView) view("Zombie", zombieView) panel
 
     frame.add(panel)
     frame.pack
@@ -986,6 +915,115 @@ object BoxesDemo {
     frame.setVisible(true)
 
   }
+
+
+  def buildLedgerMulti() = {
+
+    val list = ListVar(Range(0, 10).map(i=>{
+      val s = new Sine
+      s.name() = "Sine " + i
+      s.phase() = i/40d
+      s.amplitude() = 1
+      s
+    }):_*)
+
+    val view = LensRecordView[Sine](
+      VarLens("Name", _.name),
+      VarLens("Phase", _.phase),
+      VarLens("Amplitude", _.amplitude),
+      VarLens("Enabled", _.enabled)
+    )
+
+    val indices = ListIndices(list, defaultSelection = DefaultSelection.FirstIndex)
+
+    val ledger = Var(ListLedger(list, view))
+
+    val ledgerView = LedgerView.multiSelectionScroll(ledger, indices, sorting=true)
+
+    val indicesView = LabelView(Cal{indices().toString})
+
+    val add = new ListMultiAddOp(list, indices, Some(new Sine()))
+
+    val delete = new ListMultiDeleteOp[Sine](list, indices, t=>Unit)
+
+    val up = new ListMultiMoveOp[Sine](list, indices, true)
+
+    val down = new ListMultiMoveOp[Sine](list, indices, false)
+
+    val buttons = SwingButtonBar().add(add).add(delete).add(up).add(down).buildWithListStyleComponent(indicesView.component)
+
+    val firstSelected = Cal{
+      val is = indices()
+      if (is.isEmpty) {
+        None
+      } else {
+        val min = is.min
+        if (min >= 0 && min < list().size) {
+          Some(list(min))
+        } else {
+          None
+        }
+      }
+    }
+
+    val mainPanel = new JPanel(new BorderLayout())
+    mainPanel.add(ledgerView.component, BorderLayout.CENTER)
+    mainPanel.add(buttons, BorderLayout.SOUTH)
+
+    (mainPanel, list, indices, firstSelected)
+  }
+
+  def tabs() {
+
+    val graphIcon = new ImageIcon(classOf[SwingView].getResource("/boxes/swing/GraphTab.png"))
+    val tableIcon = new ImageIcon(classOf[SwingView].getResource("/boxes/swing/TableTab.png"))
+    val propertiesIcon = new ImageIcon(classOf[SwingView].getResource("/boxes/swing/PropertiesTab.png"))
+
+    val frame = new JFrame()
+
+    val stuff = buildLedgerMulti()
+    val table = stuff._1
+    val graph = buildGraphPanel(stuff._2, stuff._3)
+
+    val sine = stuff._4
+
+    val nameView = StringOptionView(PathViaOption(for (s <- sine()) yield s.name))
+    val amplitudeView = NumberOptionView(PathViaOption(for (s <- sine()) yield s.amplitude))
+    val phaseView = NumberOptionView(PathViaOption(for (s <- sine()) yield s.phase))
+    val enabledView = BooleanOptionView(PathViaOption(for (s <- sine()) yield s.enabled))
+
+    val sheet = SheetBuilder()
+    val properties = sheet
+                      .separator("Edit Sine")
+                      .view("Name", nameView)
+                      .view("Amplitude", amplitudeView)
+                      .view("Phase", phaseView)
+                      .view("Enabled", enabledView)
+                     .panel
+
+    val tabs = TabBuilder()
+      .add(graph, Val("Graph"), Val(Some(graphIcon)))
+      .add(table, Val("Table"), Val(Some(tableIcon)))
+      .add(properties, Val("Edit"), Val(Some(propertiesIcon)))
+      .panel()
+
+//    val tabs = TabBuilder()
+//      .add(new JLabel("Plus"), Val("Plus"))
+//      .add(new JLabel("Minus"), Val("Minus"))
+//      .add(new JLabel("Up"), Val("Up"))
+//      .add(new JLabel("Down"), Val("Down"))
+//      .panel(64, 32)
+
+
+    frame.add(tabs)
+
+    frame.pack
+    frame.setMinimumSize(new Dimension(50, 50))
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+    frame.setVisible(true)
+
+  }
+
 
   def main(args: Array[String]) {
 //    simpleCalc
@@ -1024,7 +1062,7 @@ object BoxesDemo {
       SwingView.nimbus()
 //      backgroundReaction
 //      textViews
-      ledgerMulti
+//      ledgerMulti
 //      ledgerAndSelected
 
 //      sheetBuilder

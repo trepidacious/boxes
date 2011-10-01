@@ -220,8 +220,8 @@ class BoxesTableCellRenderer extends DefaultTableCellRenderer {
 }
 
 object BooleanCellRenderer {
-  val tick = new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/Checkbox.png"))
-  val untick = new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/CheckboxDisabled.png"))
+  val tick = new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/CheckboxPressed.png"))
+  val untick = new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/Checkbox.png"))
   val opaque = new BooleanCellRenderer(true)
   val transparent = new BooleanCellRenderer(false)
 }

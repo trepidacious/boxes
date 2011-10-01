@@ -1148,36 +1148,6 @@
        y1="7"
        x2="12"
        y2="3" />
-    <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3817"
-       id="linearGradient5386"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(1,0,0,0.75,0,0.75)"
-       x1="12"
-       y1="7"
-       x2="12"
-       y2="3" />
-    <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3834"
-       id="linearGradient6172"
-       x1="17"
-       y1="13"
-       x2="21"
-       y2="13"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0.5,0,0,2,-22.5,-7)" />
-    <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3834"
-       id="linearGradient6180"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0.5,0,0,2,-26.5,-11)"
-       x1="17"
-       y1="13"
-       x2="21"
-       y2="13" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -1187,15 +1157,15 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1"
-     inkscape:cx="7.257348"
-     inkscape:cy="13.079174"
+     inkscape:cx="21.365882"
+     inkscape:cy="2.472572"
      inkscape:document-units="px"
-     inkscape:current-layer="g4440"
-     showgrid="false"
+     inkscape:current-layer="layer61"
+     showgrid="true"
      inkscape:snap-global="true"
      inkscape:window-width="1920"
      inkscape:window-height="1032"
-     inkscape:window-x="0"
+     inkscape:window-x="1366"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:snap-grids="true"
@@ -1416,8 +1386,7 @@
      inkscape:groupmode="layer"
      id="layer61"
      inkscape:label="Tab"
-     style="display:none"
-     sodipodi:insensitive="true">
+     style="display:inline">
     <rect
        style="fill:#716c6c;fill-opacity:1;stroke:none"
        id="rect3466"
@@ -1848,7 +1817,7 @@
      inkscape:groupmode="layer"
      id="g4392"
      inkscape:label="TableTab"
-     style="opacity:0.98000004;display:none"
+     style="opacity:0.98000004;display:inline"
      transform="translate(0,4)">
     <rect
        y="13"
@@ -1949,204 +1918,104 @@
   <g
      transform="translate(0,4)"
      style="opacity:0.98000004;display:inline"
-     inkscape:label="PropertiesTab"
-     id="g4440"
+     inkscape:label="TableTab"
+     id="g4392"
      inkscape:groupmode="layer">
     <rect
        style="opacity:0.35;fill:#000000;fill-opacity:1;stroke:none;display:inline"
-       id="rect4442"
-       width="8"
-       height="2"
-       x="13"
-       y="13" />
-    <rect
-       y="9"
-       x="13"
-       height="2"
-       width="8"
-       id="rect4444"
-       style="opacity:0.35;fill:#000000;fill-opacity:1;stroke:none;display:inline" />
-    <rect
-       style="opacity:0.35;fill:#000000;fill-opacity:1;stroke:none;display:inline"
-       id="rect4446"
+       id="rect4453"
        width="16"
        height="2"
        x="5"
+       y="13" />
+    <rect
+       y="9"
+       x="5"
+       height="2"
+       width="16"
+       id="rect4455"
+       style="opacity:0.35;fill:#000000;fill-opacity:1;stroke:none;display:inline" />
+    <rect
+       style="opacity:0.35;fill:#000000;fill-opacity:1;stroke:none;display:inline"
+       id="rect4457"
+       width="6"
+       height="2"
+       x="5"
        y="5" />
+    <rect
+       y="5"
+       x="13"
+       height="2"
+       width="3"
+       id="rect4459"
+       style="opacity:0.35;fill:#000000;fill-opacity:1;stroke:none;display:inline" />
+    <rect
+       style="opacity:0.35;fill:#000000;fill-opacity:1;stroke:none;display:inline"
+       id="rect4461"
+       width="3"
+       height="2"
+       x="18"
+       y="5" />
+    <rect
+       y="17"
+       x="5"
+       height="2"
+       width="16"
+       id="rect4394"
+       style="opacity:0.35;fill:#000000;fill-opacity:1;stroke:none;display:inline" />
     <text
        sodipodi:linespacing="125%"
-       id="text4454"
+       id="text4396"
        y="35"
        x="-7"
        style="font-size:4px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
        xml:space="preserve"><tspan
          y="35"
          x="-7"
-         id="tspan4456"
+         id="tspan4398"
          sodipodi:role="line">2, 2 by 22, 22</tspan></text>
     <rect
        style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
-       id="rect4458"
-       width="8"
+       id="rect4408"
+       width="16"
        height="2"
-       x="13"
+       x="5"
        y="8" />
     <rect
-       style="fill:url(#linearGradient5386);fill-opacity:1;stroke:none;display:inline"
-       id="rect4462"
+       y="16"
+       x="5"
+       height="2"
        width="16"
+       id="rect4414"
+       style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline" />
+    <rect
+       style="fill:url(#linearGradient4443);fill-opacity:1;stroke:none;display:inline"
+       id="rect4421"
+       width="6"
        height="3"
        x="5"
        y="3" />
     <rect
-       y="17"
-       x="-14"
-       height="4"
-       width="2"
-       id="rect4464"
-       style="fill:url(#linearGradient6172);fill-opacity:1;stroke:none;display:inline"
-       transform="matrix(0,-1,1,0,0,0)" />
-    <rect
-       y="9"
-       x="6.5"
+       y="12"
+       x="5"
        height="2"
-       width="1"
-       id="rect6158"
-       style="fill:#000000;fill-opacity:0.43555555;stroke:none;display:inline" />
+       width="16"
+       id="rect4439"
+       style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline" />
     <rect
-       style="fill:#7aab81;fill-opacity:1;stroke:none;display:inline"
-       id="rect6164"
-       width="4"
-       height="2"
+       y="3"
        x="13"
-       y="12" />
+       height="3"
+       width="3"
+       id="rect4445"
+       style="fill:url(#linearGradient4447);fill-opacity:1;stroke:none;display:inline" />
     <rect
-       y="17"
-       x="13"
-       height="2"
-       width="8"
-       id="rect6174"
-       style="opacity:0.35;fill:#000000;fill-opacity:1;stroke:none;display:inline" />
-    <rect
-       transform="matrix(0,-1,1,0,0,0)"
-       style="fill:url(#linearGradient6180);fill-opacity:1;stroke:none;display:inline"
-       id="rect6176"
-       width="2"
-       height="4"
-       x="-18"
-       y="13" />
-    <rect
-       y="16"
-       x="17"
-       height="2"
-       width="4"
-       id="rect6178"
-       style="fill:#a7a7a7;fill-opacity:1;stroke:none;display:inline" />
-    <rect
-       style="fill:#000000;fill-opacity:0.43555555;stroke:none;display:inline"
-       id="rect6200"
-       width="1"
-       height="2"
-       x="8.5"
-       y="9" />
-    <rect
-       y="9"
-       x="10.5"
-       height="2"
-       width="1"
-       id="rect6202"
-       style="fill:#000000;fill-opacity:0.43555555;stroke:none;display:inline" />
-    <rect
-       y="13"
-       x="8.5"
-       height="2"
-       width="1"
-       id="rect6208"
-       style="fill:#000000;fill-opacity:0.43555555;stroke:none;display:inline" />
-    <rect
-       style="fill:#000000;fill-opacity:0.43555555;stroke:none;display:inline"
-       id="rect6210"
-       width="1"
-       height="2"
-       x="10.5"
-       y="13" />
-    <rect
-       y="17"
-       x="6.5"
-       height="2"
-       width="1"
-       id="rect6214"
-       style="fill:#000000;fill-opacity:0.43555555;stroke:none;display:inline" />
-    <rect
-       style="fill:#000000;fill-opacity:0.43555555;stroke:none;display:inline"
-       id="rect6216"
-       width="1"
-       height="2"
-       x="8.5"
-       y="17" />
-    <rect
-       y="17"
-       x="10.5"
-       height="2"
-       width="1"
-       id="rect6218"
-       style="fill:#000000;fill-opacity:0.43555555;stroke:none;display:inline" />
-    <rect
-       style="fill:#d1d1d1;fill-opacity:1;stroke:none;display:inline"
-       id="rect6222"
-       width="1"
-       height="2"
-       x="6.5"
-       y="8" />
-    <rect
-       y="9"
-       x="8.5"
-       height="1"
-       width="1"
-       id="rect6224"
-       style="fill:#d1d1d1;fill-opacity:1;stroke:none;display:inline" />
-    <rect
-       style="fill:#d1d1d1;fill-opacity:1;stroke:none;display:inline"
-       id="rect6226"
-       width="1"
-       height="1"
-       x="10.5"
-       y="9" />
-    <rect
-       style="fill:#d1d1d1;fill-opacity:1;stroke:none;display:inline"
-       id="rect6228"
-       width="1"
-       height="2"
-       x="8.5"
-       y="12" />
-    <rect
-       y="13"
-       x="10.5"
-       height="1"
-       width="1"
-       id="rect6230"
-       style="fill:#d1d1d1;fill-opacity:1;stroke:none;display:inline" />
-    <rect
-       style="fill:#d1d1d1;fill-opacity:1;stroke:none;display:inline"
-       id="rect6232"
-       width="1"
-       height="2"
-       x="6.5"
-       y="16" />
-    <rect
-       y="17"
-       x="8.5"
-       height="1"
-       width="1"
-       id="rect6234"
-       style="fill:#d1d1d1;fill-opacity:1;stroke:none;display:inline" />
-    <rect
-       style="fill:#d1d1d1;fill-opacity:1;stroke:none;display:inline"
-       id="rect6236"
-       width="1"
-       height="1"
-       x="10.5"
-       y="17" />
+       style="fill:url(#linearGradient4451);fill-opacity:1;stroke:none;display:inline"
+       id="rect4449"
+       width="3"
+       height="3"
+       x="18"
+       y="3" />
   </g>
   <g
      inkscape:groupmode="layer"
@@ -3713,7 +3582,7 @@
     <rect
        ry="2.5"
        style="fill:none;stroke:#7790a1;stroke-opacity:1;display:inline;enable-background:new"
-       id="rect4697"
+       id="rect4464"
        width="33"
        height="22"
        x="45"
@@ -3723,13 +3592,13 @@
        x="87"
        height="22"
        width="33"
-       id="rect4699"
+       id="rect4466"
        style="fill:none;stroke:#7790a1;stroke-opacity:1;display:inline;enable-background:new"
        ry="2.5" />
     <rect
        ry="2.5"
        style="fill:none;stroke:#7790a1;stroke-opacity:1;display:inline;enable-background:new"
-       id="rect4701"
+       id="rect4468"
        width="33"
        height="22"
        x="129"
