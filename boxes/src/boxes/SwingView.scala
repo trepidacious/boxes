@@ -6,7 +6,6 @@ import javax.swing.JToggleButton.ToggleButtonModel
 import math.Numeric
 import java.util.concurrent.atomic.AtomicBoolean
 import com.explodingpixels.painter.Painter
-import com.explodingpixels.swingx.EPPanel
 import java.awt.geom.Arc2D
 import javax.swing.JSpinner.DefaultEditor
 import java.text.ParseException
@@ -14,10 +13,11 @@ import javax.swing.plaf.metal.MetalLookAndFeel
 import javax.swing.border.{EmptyBorder, MatteBorder}
 import javax.swing.table.{TableModel, TableCellRenderer, TableCellEditor, AbstractTableModel}
 import javax.swing.event.{TableModelEvent, ChangeEvent, TableColumnModelEvent}
-import swing.{TabButton, BoxesRadioButton, BoxesProgressUI, BoxesSliderUI, BooleanCellRenderer, SelectingTextCellEditor, NumberCellRenderer, NumberCellEditor, BoxesTableCellRenderer, BoxesTableCellHeaderRenderer, BoxesScrollBarUI, DotModel, ListSelectionIndicesModel, ListSelectionIndexModel, BoxesSpinnerUI, SwingBarToggleButton, SwingToggleButton, BoxesCheckBox, SlideCheckButton, BoxesTextAreaUI, BoxesTextFieldUI}
-import util.{LogStep, NumericClass, GConverter, OptionTConverter, TConverter, CoalescingResponder, Sequence}
-import java.awt.{LayoutManager, AlphaComposite, Dimension, BasicStroke, RenderingHints, Graphics2D, Color, Component}
-import javax.swing.{JPanel, JTable, JSpinner, SpinnerModel, SpinnerNumberModel, JProgressBar, JSlider, BoundedRangeModel, DefaultBoundedRangeModel, SwingConstants, Icon, JTextArea, JScrollPane, JTextField, JLabel, JComponent, ImageIcon, UIManager, SwingUtilities}
+import swing.{TextComponentPainter, WhitePainter, TabButton, BoxesRadioButton, BoxesProgressUI, BoxesSliderUI, BooleanCellRenderer, SelectingTextCellEditor, NumberCellRenderer, NumberCellEditor, BoxesTableCellRenderer, BoxesTableCellHeaderRenderer, BoxesScrollBarUI, DotModel, ListSelectionIndicesModel, ListSelectionIndexModel, BoxesSpinnerUI, SwingBarToggleButton, SwingToggleButton, BoxesCheckBox, SlideCheckButton, BoxesTextAreaUI, BoxesTextFieldUI}
+import util.{NumericClass, GConverter, OptionTConverter, TConverter, CoalescingResponder, Sequence}
+import javax.swing.{ScrollPaneConstants, JTable, JSpinner, SpinnerModel, SpinnerNumberModel, JProgressBar, JSlider, BoundedRangeModel, DefaultBoundedRangeModel, SwingConstants, Icon, JTextArea, JScrollPane, JTextField, JLabel, JComponent, ImageIcon, UIManager, SwingUtilities}
+import com.explodingpixels.swingx.EPPanel
+import java.awt.{BorderLayout, AlphaComposite, Dimension, BasicStroke, RenderingHints, Graphics2D, Color, Component}
 
 object SwingView {
 
@@ -200,7 +200,7 @@ private class StringOptionView[G](v:VarGeneral[G,_], c:GConverter[G, String], mu
 
   val text = if (multiline) new BoxesJTextArea(10, 20) else new LinkingJTextField(this)
   //TODO need a nice scrollable text area with the minimal scrollbars from ledger view, inside the text area.
-  val component = if (multiline) new LinkingJScrollPane(this, text) else text
+  val component = if (multiline) new LinkingTextEPPanel(this, new LinkingTextJScrollPane(this, text)) else text
 
   {
     if (!multiline) {
@@ -239,9 +239,29 @@ private class StringOptionView[G](v:VarGeneral[G,_], c:GConverter[G, String], mu
   }
 }
 
+class LinkingTextEPPanel(val sv:SwingView, contents:Component) extends EPPanel {
+  setBackgroundPainter(new TextComponentPainter())
+  setBorder(new EmptyBorder(7,5,4,4))
+  setLayout(new BorderLayout())
+  add(contents)
+}
+
 //Special versions of components that link back to the SwingView using them,
 //so that if users only retain the component, they still also retain the SwingView.
-class LinkingJScrollPane(val sv:SwingView, contents:Component) extends JScrollPane(contents) {}
+class LinkingJScrollPane(val sv:SwingView, contents:Component) extends JScrollPane(contents) {
+  BoxesScrollBarUI.applyTo(this)
+}
+
+class LinkingTextJScrollPane(val sv:SwingView, contents:Component) extends JScrollPane(contents) {
+  BoxesScrollBarUI.applyTo(this, plain = true)
+  val lowerRightCorner = new EPPanel()
+  lowerRightCorner.setBackgroundPainter(new WhitePainter())
+  setCorner(ScrollPaneConstants.LOWER_RIGHT_CORNER, lowerRightCorner)
+  setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED)
+  setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED)
+}
+
+
 class LinkingJTextField(val sv:SwingView) extends JTextField {
   BoxesTextFieldUI(this)
 }

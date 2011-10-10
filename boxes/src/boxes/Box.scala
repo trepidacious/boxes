@@ -4,7 +4,13 @@ import collection._
 import mutable.MultiMap
 import util.WeakHashSet
 import actors.threadpool.locks.ReentrantLock
-import javax.accessibility.AccessibleText
+
+object BoxImplicits {
+  implicit def closureToPathViaOption[T](path : => Option[Var[T]]) = PathViaOption(path)
+  implicit def closureToPath[T](path : =>Var[T]) = Path(path)
+  implicit def closureToPathToOption[T](path : => Option[Var[Option[T]]]) = PathToOption(path)
+  implicit def valueToVal[T](t:T) = Val(t)
+}
 
 object Box {
 

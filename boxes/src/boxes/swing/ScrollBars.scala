@@ -12,7 +12,14 @@ import com.explodingpixels.macwidgets.plaf.{ArtworkUtils, IAppScrollBarArtworkUt
 import com.explodingpixels.widgets.{ImageUtils, ImageBasedJComponent}
 import java.awt.{Graphics2D, Component, Dimension, Image, Rectangle, Point, Color}
 
-class BoxesScrollBarUI(dotModel:DotModel) extends SkinnableScrollBarUI(BoxesScrollBarUI.createScrollBarSkinProvider(dotModel))
+class BoxesScrollBarUI(dotModel:DotModel, plain:Boolean = false) extends SkinnableScrollBarUI(BoxesScrollBarUI.createScrollBarSkinProvider(dotModel, plain))
+
+class WhitePainter extends Painter[Component] {
+  def paint(g:Graphics2D, t:Component, w:Int, h:Int) {
+    g.setColor(Color.white)
+    g.fillRect(0, 0, w, h)
+  }
+}
 
 object BoxesScrollBarUI {
 
@@ -57,10 +64,10 @@ object BoxesScrollBarUI {
 
   def defaultThickness = 15
 
-  def applyTo(scrollPane:JScrollPane, horizontalDotModel:DotModel = new DotModel(), verticalDotModel:DotModel = new DotModel(), horizontal:Boolean = true, vertical:Boolean = true) = {
+  def applyTo(scrollPane:JScrollPane, horizontalDotModel:DotModel = new DotModel(), verticalDotModel:DotModel = new DotModel(), horizontal:Boolean = true, vertical:Boolean = true, plain:Boolean = false) = {
     scrollPane.setBorder(BorderFactory.createEmptyBorder())
-    scrollPane.getVerticalScrollBar().setUI(new BoxesScrollBarUI(verticalDotModel))
-    scrollPane.getHorizontalScrollBar().setUI(new BoxesScrollBarUI(horizontalDotModel))
+    scrollPane.getVerticalScrollBar().setUI(new BoxesScrollBarUI(verticalDotModel, plain))
+    scrollPane.getHorizontalScrollBar().setUI(new BoxesScrollBarUI(horizontalDotModel, plain))
     scrollPane.setCorner(ScrollPaneConstants.UPPER_RIGHT_CORNER, topRightCorner)
     scrollPane.setCorner(ScrollPaneConstants.LOWER_RIGHT_CORNER, corner)
     scrollPane.setVerticalScrollBarPolicy(if (vertical) ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS else ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER)
@@ -79,30 +86,30 @@ object BoxesScrollBarUI {
     p
   }
 
-  def createScrollBarSkinProvider(dotModel:DotModel):ScrollBarSkinProvider = {
+  def createScrollBarSkinProvider(dotModel:DotModel, plain:Boolean):ScrollBarSkinProvider = {
     new ScrollBarSkinProvider() {
       override def provideSkin(orientation:ScrollBarOrientation) = {
         if (orientation == ScrollBarOrientation.HORIZONTAL) {
-          horizontalSkin(dotModel)
+          horizontalSkin(dotModel, plain)
         } else {
-          verticalSkin(dotModel)
+          verticalSkin(dotModel, plain)
         }
       }
     }
   }
 
-  def horizontalSkin(dotModel:DotModel):ScrollBarSkin = {
+  def horizontalSkin(dotModel:DotModel, plain:Boolean):ScrollBarSkin = {
     val minimumThumbSize = IAppScrollBarArtworkUtils.getHorizontalScrollBarMinimumSize()
-    val trackPainter = new ImagePainter(new ImageIcon(classOf[BoxesScrollBarUI].getResource("/boxes/swing/HorizontalTrack.png")).getImage)
+    val trackPainter = if(plain) new WhitePainter() else new ImagePainter(new ImageIcon(classOf[BoxesScrollBarUI].getResource("/boxes/swing/HorizontalTrack.png")).getImage)
     val scrollerThumb = createHorizontalScrollerThumb
     val preferredSize = new Dimension(100, defaultThickness)
 
     new BoxesScrollBarSkin(trackPainter, scrollerThumb, minimumThumbSize, preferredSize, dotModel)
   }
 
-  def verticalSkin(dotModel:DotModel):ScrollBarSkin = {
+  def verticalSkin(dotModel:DotModel, plain:Boolean):ScrollBarSkin = {
     val minimumThumbSize = IAppScrollBarArtworkUtils.getVerticalScrollBarMinimumSize()
-    val trackPainter = new ImagePainter(new ImageIcon(classOf[BoxesScrollBarUI].getResource("/boxes/swing/VerticalTrack.png")).getImage)
+    val trackPainter = if (plain) new WhitePainter() else new ImagePainter(new ImageIcon(classOf[BoxesScrollBarUI].getResource("/boxes/swing/VerticalTrack.png")).getImage)
     val scrollerThumb = createVerticalScrollerThumb()
     val preferredSize = new Dimension(defaultThickness, 100)
 

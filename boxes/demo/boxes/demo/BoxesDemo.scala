@@ -14,6 +14,7 @@ import com.jgoodies.forms.layout.{CellConstraints, FormLayout}
 import swing.{TabBuilder, TabSpacer, SheetBuilder, BoxesDropdownView, SwingButton, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
 import javax.swing._
 import border.EmptyBorder
+import boxes.BoxImplicits._
 
 object BoxesDemo {
 
@@ -987,10 +988,10 @@ object BoxesDemo {
 
     val sine = stuff._4
 
-    val nameView = StringOptionView(PathViaOption(for (s <- sine()) yield s.name))
-    val amplitudeView = NumberOptionView(PathViaOption(for (s <- sine()) yield s.amplitude))
-    val phaseView = NumberOptionView(PathViaOption(for (s <- sine()) yield s.phase))
-    val enabledView = BooleanOptionView(PathViaOption(for (s <- sine()) yield s.enabled))
+    val nameView = StringOptionView(for (s <- sine()) yield s.name)
+    val amplitudeView = NumberOptionView(for (s <- sine()) yield s.amplitude)
+    val phaseView = NumberOptionView(for (s <- sine()) yield s.phase)
+    val enabledView = BooleanOptionView(for (s <- sine()) yield s.enabled)
 
     val sheet = SheetBuilder()
     val properties = sheet
@@ -999,12 +1000,13 @@ object BoxesDemo {
                       .view("Amplitude", amplitudeView)
                       .view("Phase", phaseView)
                       .view("Enabled", enabledView)
-                     .panel
+                     .panel()
 
-    val tabs = TabBuilder()
-      .add(graph, Val("Graph"), Val(Some(graphIcon)))
-      .add(table, Val("Table"), Val(Some(tableIcon)))
-      .add(properties, Val("Edit"), Val(Some(propertiesIcon)))
+    val tabs =
+      TabBuilder()
+        .add(graph,       "Graph",  Some(graphIcon))
+        .add(table,       "Table",  Some(tableIcon))
+        .add(properties,  "Edit",   Some(propertiesIcon))
       .panel()
 
 //    val tabs = TabBuilder()
@@ -1013,7 +1015,6 @@ object BoxesDemo {
 //      .add(new JLabel("Up"), Val("Up"))
 //      .add(new JLabel("Down"), Val("Down"))
 //      .panel(64, 32)
-
 
     frame.add(tabs)
 
@@ -1024,6 +1025,23 @@ object BoxesDemo {
 
   }
 
+
+  def textArea() {
+
+    val frame = new JFrame()
+
+    val name = Var("Name")
+
+    val nameView = StringView(name, true)
+
+    frame.add(nameView.component)
+
+    frame.pack
+    frame.setMinimumSize(new Dimension(50, 50))
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+    frame.setVisible(true)
+
+  }
 
   def main(args: Array[String]) {
 //    simpleCalc
@@ -1066,7 +1084,8 @@ object BoxesDemo {
 //      ledgerAndSelected
 
 //      sheetBuilder
-      tabs
+//      tabs
+      textArea()
     }
 //    axis
   }
