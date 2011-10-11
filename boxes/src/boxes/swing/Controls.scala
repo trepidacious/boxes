@@ -538,7 +538,7 @@ object BoxesTextAreaUI {
 //  def apply(c:JTextArea) = c.setUI(new BoxesTextAreaUI())
   def apply(c:JTextArea) {
     c.setOpaque(true)
-    c.setBorder(new EmptyBorder(1,1,1,1))
+    c.setBorder(null)
     c.setBackground(Color.white)
     c.setForeground(SwingView.textColor)
 //      c.setFont(HudPaintingUtils.getHudFont)

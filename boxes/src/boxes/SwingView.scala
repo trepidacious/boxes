@@ -241,7 +241,7 @@ private class StringOptionView[G](v:VarGeneral[G,_], c:GConverter[G, String], mu
 
 class LinkingTextEPPanel(val sv:SwingView, contents:Component) extends EPPanel {
   setBackgroundPainter(new TextComponentPainter())
-  setBorder(new EmptyBorder(7,5,4,4))
+  setBorder(new EmptyBorder(9,9,4,4))
   setLayout(new BorderLayout())
   add(contents)
 }
