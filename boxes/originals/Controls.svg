@@ -16,7 +16,7 @@
    version="1.1"
    inkscape:version="0.48.1 r9760"
    sodipodi:docname="Controls.svg"
-   inkscape:export-filename="/Users/trepidacious/Documents/boxes/boxes/src/boxes/swing/TabPressed.png"
+   inkscape:export-filename="/Users/trepidacious/Documents/boxes/boxes/src/boxes/swing/Text.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90"
    style="display:inline;enable-background:new">
@@ -315,7 +315,7 @@
        x1="60"
        y1="-3.0000002"
        x2="59.999992"
-       y2="9.9999981"
+       y2="3.9999983"
        gradientTransform="translate(-41.999991,1.7e-6)" />
     <linearGradient
        inkscape:collect="always"
@@ -1187,21 +1187,21 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1"
-     inkscape:cx="7.257348"
+     inkscape:cx="11.683755"
      inkscape:cy="13.079174"
      inkscape:document-units="px"
-     inkscape:current-layer="g4440"
+     inkscape:current-layer="layer30"
      showgrid="false"
      inkscape:snap-global="true"
      inkscape:window-width="1920"
-     inkscape:window-height="1032"
+     inkscape:window-height="1156"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:snap-grids="true"
      showguides="true"
      inkscape:guide-bbox="true"
-     showborder="false">
+     showborder="true">
     <inkscape:grid
        type="xygrid"
        id="grid3069"
@@ -1948,7 +1948,7 @@
   </g>
   <g
      transform="translate(0,4)"
-     style="opacity:0.98000004;display:inline"
+     style="opacity:0.98000004;display:none"
      inkscape:label="PropertiesTab"
      id="g4440"
      inkscape:groupmode="layer">
@@ -3197,7 +3197,7 @@
      inkscape:groupmode="layer"
      id="layer32"
      inkscape:label="TextBG"
-     style="display:none">
+     style="display:inline">
     <rect
        ry="4"
        y="-2"
@@ -3248,7 +3248,7 @@
      inkscape:groupmode="layer"
      id="layer30"
      inkscape:label="Text"
-     style="display:none">
+     style="display:inline">
     <rect
        transform="translate(0,4)"
        y="-1.5"

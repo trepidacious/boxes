@@ -569,7 +569,7 @@ class SpinnerTextFieldUI extends BasicFormattedTextFieldUI {
   override def installUI(c:JComponent) {
     super.installUI(c)
     BoxesTextComponentUI.adjustComponent(c.asInstanceOf[JTextComponent])
-    c.setBorder(new EmptyBorder(7, 8, 6, 4))
+    c.setBorder(new EmptyBorder(5, 7, 6, 4))
   }
 
   override def paintSafely(g:Graphics) {

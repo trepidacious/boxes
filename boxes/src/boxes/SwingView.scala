@@ -198,12 +198,15 @@ object StringOptionView {
 
 private class StringOptionView[G](v:VarGeneral[G,_], c:GConverter[G, String], multiline:Boolean) extends SwingView {
 
-  val text = if (multiline) new BoxesJTextArea(10, 20) else new LinkingJTextField(this)
+  val text = if (multiline) new BoxesJTextArea(1, 1) else new LinkingJTextField(this)
   //TODO need a nice scrollable text area with the minimal scrollbars from ledger view, inside the text area.
   val component = if (multiline) new LinkingTextEPPanel(this, new LinkingTextJScrollPane(this, text)) else text
 
   {
-    if (!multiline) {
+    if (multiline) {
+      component.setMinimumSize(new Dimension(50, 100))
+      component.setPreferredSize(new Dimension(50, 100))
+    } else {
       text.asInstanceOf[JTextField].addActionListener(new ActionListener() {
 				override def actionPerformed(e:ActionEvent) = commit
 			})
@@ -241,16 +244,14 @@ private class StringOptionView[G](v:VarGeneral[G,_], c:GConverter[G, String], mu
 
 class LinkingTextEPPanel(val sv:SwingView, contents:Component) extends EPPanel {
   setBackgroundPainter(new TextComponentPainter())
-  setBorder(new EmptyBorder(9,9,4,4))
+  setBorder(new EmptyBorder(7,8,4,4))
   setLayout(new BorderLayout())
   add(contents)
 }
 
 //Special versions of components that link back to the SwingView using them,
 //so that if users only retain the component, they still also retain the SwingView.
-class LinkingJScrollPane(val sv:SwingView, contents:Component) extends JScrollPane(contents) {
-  BoxesScrollBarUI.applyTo(this)
-}
+class LinkingJScrollPane(val sv:SwingView, contents:Component) extends JScrollPane(contents)
 
 class LinkingTextJScrollPane(val sv:SwingView, contents:Component) extends JScrollPane(contents) {
   BoxesScrollBarUI.applyTo(this, plain = true)

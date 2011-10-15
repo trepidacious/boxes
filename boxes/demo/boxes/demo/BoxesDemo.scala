@@ -31,6 +31,7 @@ object BoxesDemo {
     val phase = Var(0d)
     val amplitude = Var(1d)
     val enabled = Var(true)
+    val description = Var("Default Description\nCan have multiple lines")
   }
 
   class OptionPerson extends Node {
@@ -992,6 +993,7 @@ object BoxesDemo {
     val amplitudeView = NumberOptionView(for (s <- sine()) yield s.amplitude)
     val phaseView = NumberOptionView(for (s <- sine()) yield s.phase)
     val enabledView = BooleanOptionView(for (s <- sine()) yield s.enabled)
+    val descriptionView = StringOptionView(for (s <- sine()) yield s.description, true)
 
     val sheet = SheetBuilder()
     val properties = sheet
@@ -1000,6 +1002,7 @@ object BoxesDemo {
                       .view("Amplitude", amplitudeView)
                       .view("Phase", phaseView)
                       .view("Enabled", enabledView)
+                      .view("Description", descriptionView, true)
                      .panel()
 
     val tabs =
@@ -1084,8 +1087,8 @@ object BoxesDemo {
 //      ledgerAndSelected
 
 //      sheetBuilder
-//      tabs
-      textArea()
+      tabs
+//      textArea()
     }
 //    axis
   }
