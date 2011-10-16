@@ -3,8 +3,8 @@ package boxes.swing
 import com.jgoodies.forms.builder.DefaultFormBuilder
 import com.jgoodies.forms.layout.{ConstantSize, CellConstraints, FormLayout}
 import java.awt.{Dimension}
-import boxes.{Label, SwingView}
 import javax.swing.{SwingConstants, JLabel, JComponent}
+import boxes.{BoxesScrollPane, Label, SwingView}
 
 object SheetBuilder {
   def apply() = new SheetBuilder()
@@ -51,5 +51,6 @@ class SheetBuilder {
     builder.getPanel
   }
 
+  def scrollingPanel = BoxesScrollPane(panel)
 }
 

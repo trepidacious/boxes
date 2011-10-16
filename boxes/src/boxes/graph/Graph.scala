@@ -102,6 +102,10 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
     case X => size.x
     case Y => size.y
   }
+  def axisRelativePosition(a:Axis, v:Vec2) = a match {
+    case X => (v - origin).x
+    case Y => (v - origin).y
+  }
   def axisPosition(a:Axis, p:Double) = a match {
     case X => Vec2(p, origin.y)
     case Y => Vec2(origin.x, p)
@@ -244,7 +248,7 @@ case class GraphSpaces(val dataArea:Area, val pixelArea:Area, val componentArea:
 
 object GraphMouseEventType extends Enumeration {
    type GraphMouseEventType = Value
-   val PRESS, RELEASE, DRAG, MOVE, CLICK = Value
+   val PRESS, RELEASE, DRAG, MOVE, CLICK, ENTER, EXIT = Value
 }
 import GraphMouseEventType._
 
@@ -378,7 +382,15 @@ class GraphShadow extends UnboundedGraphDisplayLayer {
   }
 }
 
-class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalFormat = new DecimalFormat("0.###")) extends UnboundedGraphDisplayLayer {
+object GraphAxis {
+  val fontSize = 9
+  val fontColor = SwingView.dividingColor.darker
+  val defaultFormat = new DecimalFormat("0.###")
+
+  def apply(axis:Axis, pixelsPerMajor:Int = 100, format:DecimalFormat = GraphAxis.defaultFormat) = new GraphAxis(axis, pixelsPerMajor, format)
+}
+
+class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalFormat = GraphAxis.defaultFormat) extends UnboundedGraphDisplayLayer {
 
   def paint() = {
     (canvas:GraphCanvas) => {
@@ -403,8 +415,8 @@ class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalF
 
 
         if (major) {
-          canvas.color = SwingView.dividingColor.darker
-          canvas.fontSize = 9
+          canvas.color = GraphAxis.fontColor
+          canvas.fontSize = GraphAxis.fontSize
           axis match {
             case X => canvas.string(format.format(p), start + Vec2(0, 10), Vec2(0.5, 1))
             case Y => canvas.string(format.format(p), start + Vec2(-10, 0), Vec2(1, 0.5))
@@ -492,6 +504,124 @@ object GraphZoomBox {
   }
 }
 
+object GraphGrab{
+  def apply(enabled:RefGeneral[Boolean, _] = Val(true), manualDataArea:VarGeneral[Option[Area], _], displayedDataArea:RefGeneral[Area, _]) = new GraphGrab(enabled, manualDataArea, displayedDataArea)
+}
+
+class GraphGrab(enabled:RefGeneral[Boolean, _] = Val(true), manualDataArea:VarGeneral[Option[Area], _], displayedDataArea:RefGeneral[Area, _]) extends GraphLayer {
+
+  private var maybeInitial:Option[GraphMouseEvent] = None
+
+  def paint() = (canvas:GraphCanvas) => {}
+
+  def onMouse(current:GraphMouseEvent) = {
+    if (enabled()) {
+      Box.transact{
+        current.eventType match {
+          case PRESS => {
+            maybeInitial = Some(current)
+            true
+          }
+          case DRAG => {
+            maybeInitial.foreach(initial => {
+              //If there is no manual zoom area, set it to the displayed area
+              if (manualDataArea() == None) {
+                manualDataArea() = Some(displayedDataArea())
+              }
+              manualDataArea().foreach(a => {
+                val initialArea = initial.spaces.dataArea
+                val currentPixelOnInitialArea = initial.spaces.toData(current.spaces.toPixel(current.dataPoint))
+
+                val dataDrag = initial.dataPoint - currentPixelOnInitialArea
+                manualDataArea() = Some(Area(initialArea.origin + dataDrag, initialArea.size))
+              })
+            })
+            true
+          }
+          case RELEASE => {
+            maybeInitial = None
+            true
+          }
+          case _ => false
+        }
+      }
+      true
+    } else {
+      false
+    }
+  }
+
+  val dataBounds = Val(None:Option[Area])
+
+}
+
+object AxisTooltip {
+  val format = new DecimalFormat("0.0000")
+  def apply(axis:Axis, enabled:RefGeneral[Boolean, _] = Val(true)) = new AxisTooltip(axis, enabled)
+}
+
+class AxisTooltip(axis:Axis, enabled:RefGeneral[Boolean, _] = Val(true)) extends GraphLayer {
+
+  private val value:Var[Option[Double]] = Var(None)
+
+  def paint() = {
+
+    val a = axis
+    val maybeV = value()
+    val e = enabled()
+
+    (canvas:GraphCanvas) => {
+      if (e) {
+        maybeV.foreach(v => {
+          canvas.clipToData()
+          val dataArea = canvas.spaces.dataArea
+          val start = canvas.spaces.toPixel(dataArea.axisPosition(a, v))
+          val end = start + canvas.spaces.pixelArea.axisPerpVec2(a)
+
+          canvas.lineWidth = 1
+          canvas.color = SwingView.dividingColor.brighter
+          canvas.line(start, end)
+
+          val label = AxisTooltip.format.format(v)
+          canvas.color = GraphAxis.fontColor
+          canvas.fontSize = GraphAxis.fontSize
+
+          a match {
+            case X => canvas.string(label, start + Vec2(-6, -6), Vec2(0, 0), -1)
+            case Y => canvas.string(label, start + Vec2(6, -6), Vec2(0, 0), 0)
+          }
+        })
+      }
+    }
+  }
+
+  def onMouse(e:GraphMouseEvent) = {
+    if (enabled()) {
+      e.eventType match {
+        case MOVE => {
+          val axisPosition = e.spaces.pixelArea.axisRelativePosition(Axis.other(axis), e.spaces.toPixel(e.dataPoint)) * (if (axis == X) -1 else 1)
+//          val dataUnitPoint = e.spaces.dataArea.toUnit(e.dataPoint).onAxis()
+          if (axisPosition <= 0 && axisPosition > -32) {
+            value() = Some(e.dataPoint.onAxis(axis))
+          } else {
+            value() = None
+          }
+        }
+        case EXIT => {
+          value() = None
+        }
+        case _ => {}
+      }
+      false
+    } else {
+      false
+    }
+  }
+
+  val dataBounds = Val(None:Option[Area])
+
+}
+
 
 class GraphBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], enabled:RefGeneral[Boolean, _] = Val(true), action:(Area, GraphSpaces) => Unit, val minSize:Int = 5) extends GraphLayer {
   private val area:Var[Option[Area]] = Var(None)
@@ -522,21 +652,29 @@ class GraphBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], enabled:
   def onMouse(e:GraphMouseEvent) = {
     if (enabled()) {
       e.eventType match {
-        case PRESS => area() = Some(Area(e.dataPoint, Vec2(0, 0)))
-        case DRAG => area().foreach(a => {
-          area() = Some(Area(a.origin, e.dataPoint - a.origin))
-        })
-        case RELEASE => area().foreach(a => {
-          area() = None
-          val dragArea = Area(a.origin, e.dataPoint - a.origin)
-          val pixelDragArea = e.spaces.toPixel(dragArea)
-          if (bigEnough(pixelDragArea)) {
-            action.apply(dragArea, e.spaces)
-          }
-        })
-        case _ => {}
+        case PRESS => {
+          area() = Some(Area(e.dataPoint, Vec2(0, 0)))
+          true
+        }
+        case DRAG => {
+          area().foreach(a => {
+            area() = Some(Area(a.origin, e.dataPoint - a.origin))
+          })
+          true
+        }
+        case RELEASE => {
+          area().foreach(a => {
+            area() = None
+            val dragArea = Area(a.origin, e.dataPoint - a.origin)
+            val pixelDragArea = e.spaces.toPixel(dragArea)
+            if (bigEnough(pixelDragArea)) {
+              action.apply(dragArea, e.spaces)
+            }
+          })
+          true
+        }
+        case _ => false
       }
-      true
     } else {
       false
     }
@@ -598,6 +736,7 @@ object GraphBasic {
       yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
       selectEnabled:RefGeneral[Boolean, _] = Val(false),
       selection:VarGeneral[Set[K], _] = Var(Set[K]()),
+      grabEnabled:RefGeneral[Boolean, _] = Val(false),
       extraMainLayers:List[GraphLayer] = List[GraphLayer](),
       extraOverLayers:List[GraphLayer] = List[GraphLayer]()
       ) = {
@@ -635,7 +774,10 @@ object GraphBasic {
     val overlayers = ListVal[GraphLayer](
       extraOverLayers ::: List(
         GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), manualBounds, zoomEnabled),
-        GraphSelectBox(series, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100)), selection, selectEnabled)
+        GraphSelectBox(series, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100)), selection, selectEnabled),
+        GraphGrab(grabEnabled, manualBounds, zoomer.dataArea),
+        AxisTooltip(X, Val(true)),
+        AxisTooltip(Y, Val(true))
       )
     )
 

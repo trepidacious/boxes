@@ -5,10 +5,10 @@ import javax.swing.table.{DefaultTableCellRenderer}
 import javax.swing._
 import java.awt._
 import com.explodingpixels.painter.Painter
+import boxes.SwingView
 
 object HeaderPainter {
   val dividerColor = new Color(0, 0, 0, 51)
-  val bottomColor = new Color(0x555555)
   val image = new ImageIcon(classOf[BoxesTableCellHeaderRenderer].getResource("/boxes/swing/Header.png")).getImage
 }
 
@@ -26,7 +26,7 @@ class HeaderPainter(paintLeft:Boolean = false, paintRight:Boolean = true, paintI
       g.drawLine(w-1, 0, w-1, h-1)
     }
 
-    g.setColor(HeaderPainter.bottomColor)
+    g.setColor(SwingView.dividingColor)
     g.drawLine(0, h-1, w-1, h-1)
   }
 }

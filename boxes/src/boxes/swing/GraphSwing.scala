@@ -221,11 +221,16 @@ class GraphBuffer(var image:BufferedImage = new BufferedImage(10, 10, BufferedIm
 
 
 object GraphSwingView {
-  val zoom = new ImageIcon(classOf[GraphSwingView].getResource("/boxes/swing/Zoom.png"))
-  val zoomIn = new ImageIcon(classOf[GraphSwingView].getResource("/boxes/swing/ZoomIn.png"))
-  val zoomOut = new ImageIcon(classOf[GraphSwingView].getResource("/boxes/swing/ZoomOut.png"))
-  val zoomSelect = new ImageIcon(classOf[GraphSwingView].getResource("/boxes/swing/ZoomSelect.png"))
-  val boxSelect = new ImageIcon(classOf[GraphSwingView].getResource("/boxes/swing/BoxSelect.png"))
+
+  def icon(name:String) = new ImageIcon(classOf[GraphSwingView].getResource("/boxes/swing/" + name + ".png"))
+
+  val zoom = icon("Zoom")
+  val zoomIn = icon("ZoomIn")
+  val zoomOut = icon("ZoomOut")
+  val zoomSelect = icon("ZoomSelect")
+  val boxSelect = icon("BoxSelect")
+  val grabHand = icon("GrabHand")
+  val move = icon("Move")
 
   def apply(graph:Ref[_ <: Graph]) = new GraphSwingView(graph)
 }
@@ -320,8 +325,12 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
       def mouseReleased(e: MouseEvent) {
         fireMouse(e, RELEASE)
       }
-      def mouseEntered(e: MouseEvent) {}
-      def mouseExited(e: MouseEvent) {}
+      def mouseEntered(e: MouseEvent) {
+        fireMouse(e, ENTER)
+      }
+      def mouseExited(e: MouseEvent) {
+        fireMouse(e, EXIT)
+      }
     })
   }
 
@@ -479,8 +488,12 @@ class GraphSwingBGView(graph:Ref[_ <: Graph]) extends SwingView {
       def mouseReleased(e: MouseEvent) {
         fireMouse(e, RELEASE)
       }
-      def mouseEntered(e: MouseEvent) {}
-      def mouseExited(e: MouseEvent) {}
+      def mouseEntered(e: MouseEvent) {
+        fireMouse(e, ENTER)
+      }
+      def mouseExited(e: MouseEvent) {
+        fireMouse(e, EXIT)
+      }
     })
   }
 

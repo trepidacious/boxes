@@ -8,10 +8,10 @@ import com.explodingpixels.painter.Painter
 import boxes.{Op, SwingView}
 import com.explodingpixels.swingx.{EPPanel, EPToggleButton, EPButton}
 import sun.swing.SwingUtilities2
-import javax.swing.text.{View, JTextComponent}
-import javax.swing.plaf.basic.{BasicHTML, BasicButtonUI, BasicLabelUI, BasicGraphicsUtils, BasicCheckBoxUI, BasicFormattedTextFieldUI, BasicTextAreaUI, BasicTextFieldUI}
-import java.awt.{FontMetrics, Rectangle, Dimension, Component, Image, Graphics2D, RenderingHints, Graphics, Color}
-import javax.swing.{JToggleButton, ButtonModel, SwingConstants, JLabel, ImageIcon, Action, Icon, JCheckBox, JTextArea, JTextField, AbstractButton, JComponent}
+import javax.swing.text.{JTextComponent}
+import javax.swing.plaf.basic.{BasicButtonUI, BasicLabelUI, BasicGraphicsUtils, BasicCheckBoxUI, BasicFormattedTextFieldUI, BasicTextAreaUI, BasicTextFieldUI}
+import java.awt.{Rectangle, Dimension, Component, Image, Graphics2D, RenderingHints, Graphics, Color}
+import javax.swing.{JToggleButton, SwingConstants, JLabel, ImageIcon, Action, Icon, JCheckBox, JTextArea, JTextField, AbstractButton, JComponent}
 
 object BarStylePainter {
   val dividerColor = new Color(0, 0, 0, 51)
@@ -697,6 +697,41 @@ object HeaderLabel {
     label.setUI(new HeaderLabelUI())
     label.setBorder(new EmptyBorder(7, 8, 16, 8))
     label.setPreferredSize(new Dimension(26, height + 10))
+    label
+  }
+}
+
+class EmbossedLabelUI extends BasicLabelUI {
+  override def installUI(c:JComponent) {
+      super.installUI(c)
+      c.setBorder(new EmptyBorder(7, 2, 6, 2))
+  }
+
+  override def uninstallUI(c:JComponent) {
+      super.uninstallUI(c)
+  }
+
+  override def paint(g:Graphics, c:JComponent) {
+    super.paint(g, c)
+  }
+
+  override def paintEnabledText(label:JLabel, graphics:Graphics, s:String, textX:Int, textY:Int) {
+    val g = graphics.asInstanceOf[Graphics2D]
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+    g.setFont(label.getFont());
+    g.setColor(SwingView.textUnderlightColor)
+    BasicGraphicsUtils.drawStringUnderlineCharAt(g, s, -1, textX, textY + 1);
+//    g.setColor(WindowUtils.isParentWindowFocused(label)
+    g.setColor(label.getForeground)
+    BasicGraphicsUtils.drawStringUnderlineCharAt(g, s, -1, textX, textY);
+  }
+
+}
+
+object EmbossedLabel {
+  def apply(text:String, icon:Option[Icon] = None, horizontalAlignment:Int = SwingConstants.LEFT) = {
+    val label = new JLabel(text, icon.getOrElse(null), horizontalAlignment)
+    label.setUI(new EmbossedLabelUI())
     label
   }
 }

@@ -11,10 +11,10 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
 import java.util.concurrent.atomic.AtomicBoolean
 import java.awt.{Dimension, BorderLayout, GridLayout, Color}
 import com.jgoodies.forms.layout.{CellConstraints, FormLayout}
-import swing.{TabBuilder, TabSpacer, SheetBuilder, BoxesDropdownView, SwingButton, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
 import javax.swing._
 import border.EmptyBorder
 import boxes.BoxImplicits._
+import swing.{EmbossedLabel, TabBuilder, TabSpacer, SheetBuilder, BoxesDropdownView, SwingButton, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
 
 object BoxesDemo {
 
@@ -688,8 +688,9 @@ object BoxesDemo {
 
     val selectEnabled = Var(false)
     val zoomEnabled = Var(true)
+    val grabEnabled = Var(false)
     val manualBounds = Var(None:Option[Area])
-    RadioReaction(selectEnabled, zoomEnabled)
+    RadioReaction(selectEnabled, zoomEnabled, grabEnabled)
 
     val series = Cal{
       sines().zipWithIndex.map(v => {
@@ -707,20 +708,21 @@ object BoxesDemo {
 
 
     val x = Var(0.5d)
-    val xThreshold = GraphThreshold(Val(X), x, Val(Color.blue), Val("X Threshold"), Val(true))
+    val xThreshold = GraphThreshold(X, x, Color.blue, "X Threshold", true)
 
     val y = Var(0.5d)
-    val yThreshold = GraphThreshold(Val(Y), y, Val(Color.red), Val("Y Threshold"), Val(true))
+    val yThreshold = GraphThreshold(Y, y, Color.red, "Y Threshold", true)
 
     val graph = Var (
       GraphBasic.withSeries (
         ColorSeriesBySelection(series, indices),
-        xName = Val("X (Time)"),
-        yName = Val("Y (Intensity)"),
+        xName = "X (Time)",
+        yName = "Y (Intensity)",
         zoomEnabled = zoomEnabled,
         manualBounds = manualBounds,
         selectEnabled = selectEnabled,
         selection = indices,
+        grabEnabled = grabEnabled,
         extraOverLayers = List(xThreshold, yThreshold)
       )
     )
@@ -728,12 +730,19 @@ object BoxesDemo {
     val v = GraphSwingBGView(graph)
 
     //Zoom out by clearing manual bounds to None
-    val zoomOutButton = SwingBarButton(SwingOp("", Some(GraphSwingView.zoomOut), SetOp(manualBounds, Val(None:Option[Area]))))
+    val zoomOutButton = SwingBarButton(SwingOp("", Some(GraphSwingView.zoomOut), SetOp(manualBounds, None:Option[Area])))
 
-    val zoomEnabledView = BooleanView(zoomEnabled, Val(""), BooleanControlType.TOOLBARBUTTON, Val(Some(GraphSwingView.zoomSelect)), false)
-    val selectEnabledView = BooleanView(selectEnabled, Val(""), BooleanControlType.TOOLBARBUTTON, Val(Some(GraphSwingView.boxSelect)), false)
+    val zoomEnabledView = BooleanView(zoomEnabled, "", BooleanControlType.TOOLBARBUTTON, Some(GraphSwingView.zoomSelect), false)
+    val selectEnabledView = BooleanView(selectEnabled, "", BooleanControlType.TOOLBARBUTTON, Some(GraphSwingView.boxSelect), false)
 
-    val buttons = SwingButtonBar().add(selectEnabledView).add(zoomEnabledView).add(zoomOutButton).buildWithListStyleComponent(Label("Demo Graph"))
+    val grabEnabledView = BooleanView(grabEnabled, "", BooleanControlType.TOOLBARBUTTON, Some(GraphSwingView.move), false)
+
+    val buttons = SwingButtonBar()
+                    .add(selectEnabledView)
+                    .add(grabEnabledView)
+                    .add(zoomEnabledView)
+                    .add(zoomOutButton)
+                  .buildWithListStyleComponent(EmbossedLabel("Demo Graph"))
 
     val panel = new JPanel(new BorderLayout())
     panel.add(v.component, BorderLayout.CENTER)
@@ -942,8 +951,6 @@ object BoxesDemo {
 
     val ledgerView = LedgerView.multiSelectionScroll(ledger, indices, sorting=true)
 
-    val indicesView = LabelView(Cal{indices().toString})
-
     val add = new ListMultiAddOp(list, indices, Some(new Sine()))
 
     val delete = new ListMultiDeleteOp[Sine](list, indices, t=>Unit)
@@ -952,7 +959,7 @@ object BoxesDemo {
 
     val down = new ListMultiMoveOp[Sine](list, indices, false)
 
-    val buttons = SwingButtonBar().add(add).add(delete).add(up).add(down).buildWithListStyleComponent(indicesView.component)
+    val buttons = SwingButtonBar().add(add).add(delete).add(up).add(down).buildWithListStyleComponent(EmbossedLabel("Sine Table"))
 
     val firstSelected = Cal{
       val is = indices()
