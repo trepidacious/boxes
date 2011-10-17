@@ -52,6 +52,11 @@ class GraphCanvasFromGraphics2D(g:Graphics2D, val spaces:GraphSpaces) extends Gr
     g.drawLine(a.x.asInstanceOf[Int], a.y.asInstanceOf[Int], b.x.asInstanceOf[Int], b.y.asInstanceOf[Int])
   }
 
+  def stringSize(s:String) = {
+    val d = g.getFontMetrics.getStringBounds(s, g)
+    Vec2(d.getWidth, d.getHeight)
+  }
+
   def string(s:String, v:Vec2, align:Vec2 = Vec2.zero, rotateQuadrants:Int = 0) {
 
     val d = g.getFontMetrics.getStringBounds(s, g)

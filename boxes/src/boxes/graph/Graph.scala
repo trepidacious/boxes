@@ -6,6 +6,8 @@ import javax.swing.{ImageIcon}
 import java.awt.{Image, Color}
 import list.ListVal
 import java.awt.geom.Rectangle2D
+import com.explodingpixels.widgets.ImageUtils
+import swing.SwingOpAction
 
 object Axis extends Enumeration {
   type Axis = Value
@@ -383,7 +385,7 @@ class GraphShadow extends UnboundedGraphDisplayLayer {
 }
 
 object GraphAxis {
-  val fontSize = 9
+  val fontSize = 10
   val fontColor = SwingView.dividingColor.darker
   val defaultFormat = new DecimalFormat("0.###")
 
@@ -555,9 +557,102 @@ class GraphGrab(enabled:RefGeneral[Boolean, _] = Val(true), manualDataArea:VarGe
 
 }
 
+//Draw a horizontal component made up of a left, middle and right portion. Portions are
+//taken from the thirds of an image, and middle is stretched horizontally to fit.
+class GraphThreePartPainter(image:Image) {
+  val pieceWidth = image.getWidth(null)/3
+  val pieceHeight = image.getHeight(null)
+  val parts = (
+    ImageUtils.getSubImage(image, 0, 0, pieceWidth, pieceHeight),
+    ImageUtils.getSubImage(image, pieceWidth, 0, pieceWidth, pieceHeight),
+    ImageUtils.getSubImage(image, pieceWidth * 2, 0, pieceWidth, pieceHeight)
+  )
+
+  def paint(canvas:GraphCanvas, p:Vec2, s:Vec2) {
+    val middle = s.x - pieceWidth * 2
+    canvas.image(parts._1, p)
+    canvas.image(parts._3, p + Vec2(s.x - pieceWidth))
+    if (middle > 0) {
+      canvas.image(parts._2, p + Vec2(pieceWidth, 0), Vec2(middle, pieceHeight))
+    }
+  }
+}
+
+class GraphThreePartPainterVertical(image:Image) {
+  val pieceHeight = image.getHeight(null)/3
+  val pieceWidth = image.getWidth(null)
+  val parts = (
+    ImageUtils.getSubImage(image, 0, 0,               pieceWidth, pieceHeight),
+    ImageUtils.getSubImage(image, 0, pieceHeight,     pieceWidth, pieceHeight),
+    ImageUtils.getSubImage(image, 0, pieceHeight * 2, pieceWidth, pieceHeight)
+  )
+
+  def paint(canvas:GraphCanvas, p:Vec2, s:Vec2) {
+    val middle = s.y - pieceHeight * 2
+    canvas.image(parts._1, p)
+    canvas.image(parts._3, p + Vec2(0, s.y - pieceHeight))
+    if (middle > 0) {
+      canvas.image(parts._2, p + Vec2(0, pieceHeight), Vec2(pieceWidth, middle))
+    }
+  }
+}
+
+
 object AxisTooltip {
   val format = new DecimalFormat("0.0000")
   def apply(axis:Axis, enabled:RefGeneral[Boolean, _] = Val(true)) = new AxisTooltip(axis, enabled)
+  val horizTabPainter = new GraphThreePartPainter(new ImageIcon(classOf[AxisTooltip].getResource("/boxes/swing/HorizontalLineLabel.png")).getImage)
+  val vertTabPainter = new GraphThreePartPainterVertical(new ImageIcon(classOf[AxisTooltip].getResource("/boxes/swing/VerticalLineLabel.png")).getImage)
+  val lineColor = new Color(0,0,0,0.6f)
+
+  def drawAxisLine(canvas:GraphCanvas, v:Double, a:Axis, label:String, color:Option[Color]) = {
+    canvas.clipToData()
+    val dataArea = canvas.spaces.dataArea
+    val start = canvas.spaces.toPixel(dataArea.axisPosition(a, v))
+    val end = start + canvas.spaces.pixelArea.axisPerpVec2(a)
+
+    canvas.lineWidth = 1
+    canvas.color = color.getOrElse(AxisTooltip.lineColor)
+    canvas.line(start, end)
+
+    canvas.color = GraphAxis.fontColor
+    canvas.fontSize = GraphAxis.fontSize
+
+    val size = canvas.stringSize(label)
+
+    val colorOffset = if (color == None) 0 else 12;
+
+    a match {
+      case X => {
+        AxisTooltip.vertTabPainter.paint(canvas, start + Vec2(-16, -4 - 23 - size.x - colorOffset), Vec2(16, size.x + 23 + colorOffset))
+        canvas.color = SwingView.selectedTextColor
+        canvas.string(label, start + Vec2(-3, -15 - colorOffset), Vec2(0, 0), -1)
+        color.foreach(c => {
+          val swatch = Area(start + Vec2(-11, -21), Vec2(7, 7))
+          canvas.color = c
+          canvas.fillRect(swatch)
+          canvas.color = SwingView.selectedTextColor
+          canvas.drawRect(swatch)
+        })
+      }
+      case Y => {
+        AxisTooltip.horizTabPainter.paint(canvas, start + Vec2(4, -16), Vec2(size.x + 23 + colorOffset, 16))
+        canvas.color = SwingView.selectedTextColor
+        canvas.string(label, start + Vec2(15 + colorOffset, -3), Vec2(0, 0), 0)
+        color.foreach(c => {
+          val swatch = Area(start + Vec2(14, -11), Vec2(7, 7))
+          canvas.color = c
+          canvas.fillRect(swatch)
+          canvas.color = SwingView.selectedTextColor
+          canvas.drawRect(swatch)
+        })
+      }
+    }
+
+    size.x + 23 + 4 + colorOffset
+
+  }
+
 }
 
 class AxisTooltip(axis:Axis, enabled:RefGeneral[Boolean, _] = Val(true)) extends GraphLayer {
@@ -573,23 +668,8 @@ class AxisTooltip(axis:Axis, enabled:RefGeneral[Boolean, _] = Val(true)) extends
     (canvas:GraphCanvas) => {
       if (e) {
         maybeV.foreach(v => {
-          canvas.clipToData()
-          val dataArea = canvas.spaces.dataArea
-          val start = canvas.spaces.toPixel(dataArea.axisPosition(a, v))
-          val end = start + canvas.spaces.pixelArea.axisPerpVec2(a)
-
-          canvas.lineWidth = 1
-          canvas.color = SwingView.dividingColor.brighter
-          canvas.line(start, end)
-
           val label = AxisTooltip.format.format(v)
-          canvas.color = GraphAxis.fontColor
-          canvas.fontSize = GraphAxis.fontSize
-
-          a match {
-            case X => canvas.string(label, start + Vec2(-6, -6), Vec2(0, 0), -1)
-            case Y => canvas.string(label, start + Vec2(6, -6), Vec2(0, 0), 0)
-          }
+          AxisTooltip.drawAxisLine(canvas, v, a, label, None)
         })
       }
     }
@@ -600,7 +680,6 @@ class AxisTooltip(axis:Axis, enabled:RefGeneral[Boolean, _] = Val(true)) extends
       e.eventType match {
         case MOVE => {
           val axisPosition = e.spaces.pixelArea.axisRelativePosition(Axis.other(axis), e.spaces.toPixel(e.dataPoint)) * (if (axis == X) -1 else 1)
-//          val dataUnitPoint = e.spaces.dataArea.toUnit(e.dataPoint).onAxis()
           if (axisPosition <= 0 && axisPosition > -32) {
             value() = Some(e.dataPoint.onAxis(axis))
           } else {
@@ -812,6 +891,7 @@ trait GraphCanvas {
   def dataLine(a:Vec2, b:Vec2)
   def line(a:Vec2, b:Vec2)
   def string(s:String, v:Vec2, align:Vec2 = Vec2.zero, rotateQuadrants:Int = 0)
+  def stringSize(s:String):Vec2
   def rect(origin:Vec2, size:Vec2, fill:Boolean)
   def fillRect(origin:Vec2, size:Vec2)
   def drawRect(origin:Vec2, size:Vec2)
