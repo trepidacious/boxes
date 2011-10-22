@@ -3,11 +3,10 @@ package boxes.graph
 import boxes._
 import java.text.DecimalFormat
 import javax.swing.{ImageIcon}
-import java.awt.{Image, Color}
 import list.ListVal
 import java.awt.geom.Rectangle2D
 import com.explodingpixels.widgets.ImageUtils
-import swing.SwingOpAction
+import java.awt.{Color, Image}
 
 object Axis extends Enumeration {
   type Axis = Value
@@ -55,7 +54,83 @@ object Vec2 {
 
 case class Borders(top:Double = 0, left:Double = 0, bottom:Double = 0, right:Double = 0)
 
-case class Series[K](key:K, curve:List[Vec2], color:Color = Color.black, width:Double = 1)
+trait SeriesPainter{
+  def paint(canvas:GraphCanvas, series:Series[_], shadow:Boolean = false)
+  def linesDrawn(series:Series[_]):Boolean
+}
+
+case class Series[K](key:K, curve:List[Vec2], color:Color = Color.black, width:Double = 1, painter:SeriesPainter = SeriesStyles.line)
+
+class LineSeriesPainter extends SeriesPainter {
+  def paint(canvas:GraphCanvas, s:Series[_], shadow:Boolean = false) {
+    if (shadow) {
+      canvas.color = GraphSeries.shadowColor
+      canvas.lineWidth = s.width + 1
+      canvas.path(s.curve.map(p => canvas.spaces.toPixel(p) + GraphSeries.shadowOffset))
+    } else {
+      canvas.color = s.color
+      canvas.lineWidth = s.width
+      canvas.dataPath(s.curve)
+    }
+  }
+  def linesDrawn(series:Series[_]) = true
+}
+
+trait PointPainter {
+  def paint(canvas:GraphCanvas, p:Vec2)
+}
+
+class CrossPointPainter extends PointPainter {
+  def paint(canvas:GraphCanvas, p:Vec2) {
+    canvas.line(p - Vec2(2, 2), p + Vec2(2, 2))
+    canvas.line(p - Vec2(-2, 2), p + Vec2(-2, 2))
+  }
+}
+
+class PlusPointPainter extends PointPainter {
+  def paint(canvas:GraphCanvas, p:Vec2) {
+    canvas.line(p - Vec2(0, 2), p + Vec2(0, 2))
+    canvas.line(p - Vec2(2, 0), p + Vec2(2, 0))
+  }
+}
+
+class SquarePointPainter extends PointPainter {
+  def paint(canvas:GraphCanvas, p:Vec2) {
+    canvas.drawRect(p - Vec2(2,2), Vec2(4, 4))
+  }
+}
+
+object SeriesStyles {
+  val cross = new PointSeriesPainter(new CrossPointPainter())
+  val plus = new PointSeriesPainter(new PlusPointPainter())
+  val square = new PointSeriesPainter(new SquarePointPainter())
+  val line = new LineSeriesPainter()
+}
+
+class PointSeriesPainter(val pointPainter:PointPainter = new CrossPointPainter()) extends SeriesPainter {
+
+  def paint(canvas:GraphCanvas, s:Series[_], shadow:Boolean = false) {
+    if (shadow) {
+      canvas.color = GraphSeries.shadowColor
+      canvas.lineWidth = s.width + 1
+      for (p <- s.curve.map(p => canvas.spaces.toPixel(p) + GraphSeries.shadowOffset)) {
+        pointPainter.paint(canvas, p)
+      }
+    } else {
+      canvas.color = s.color
+      canvas.lineWidth = s.width
+      for (p <- s.curve.map(p => canvas.spaces.toPixel(p))) {
+        pointPainter.paint(canvas, p)
+      }
+    }
+  }
+  def linesDrawn(series:Series[_]) = false
+}
+
+object GraphSeries {
+  val shadowColor = new Color(220, 220, 220)
+  val shadowOffset = Vec2(1, 1)
+}
 
 class GraphSeries[K](series:RefGeneral[List[Series[K]], _], shadow:Boolean = false) extends GraphLayer {
 
@@ -63,19 +138,8 @@ class GraphSeries[K](series:RefGeneral[List[Series[K]], _], shadow:Boolean = fal
     val currentSeries = series()
     (canvas:GraphCanvas) => {
       canvas.clipToData
-      if (shadow) canvas.color = new Color(220, 220, 220)
-      val shadowOffset = Vec2(1, 1)
-      for {
-        s <- currentSeries
-      } {
-        if (!shadow) {
-          canvas.color = s.color
-          canvas.lineWidth = s.width
-          canvas.dataPath(s.curve)
-        } else {
-          canvas.lineWidth = s.width + 1
-          canvas.path(s.curve.map(p => canvas.spaces.toPixel(p) + shadowOffset))
-        }
+      for (s <- currentSeries) {
+        s.painter.paint(canvas, s, shadow)
       }
     }
   }
@@ -454,6 +518,12 @@ class GraphAxisTitle(val axis:Axis, name:RefGeneral[String, _]) extends Unbounde
 
 object GraphSelectBox {
 
+  def curvePointInArea(curve:List[Vec2], area:Area) = {
+    curve.foldLeft(false) {
+      (contains, p) => contains || area.contains(p)
+    }
+  }
+
   def curveIntersectsArea(curve:List[Vec2], area:Area) = {
     val rect = new Rectangle2D.Double(area.origin.x, area.origin.y, area.size.x, area.size.y)
 
@@ -482,11 +552,20 @@ object GraphSelectBox {
     result._1
   }
 
+  def seriesSelected(series:Series[_], area:Area) = {
+    if (series.painter.linesDrawn(series)) {
+      curveIntersectsArea(series.curve, area)
+    } else {
+      curvePointInArea(series.curve, area)
+    }
+  }
+
+
   def apply[K](series:RefGeneral[List[Series[K]], _], fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], selectionOut:VarGeneral[Set[K], _], enabled:RefGeneral[Boolean, _] = Val(true)) = {
     new GraphBox(fill, outline, enabled, (area:Area, spaces:GraphSpaces) => {
       val areaN = area.normalise
       val selected = series().collect{
-        case series if (curveIntersectsArea(series.curve, areaN)) => series.key
+        case s if (seriesSelected(s, areaN)) => s.key
       }
       selectionOut() = selected.toSet
     })
@@ -622,6 +701,7 @@ object AxisTooltip {
 
     val colorOffset = if (color == None) 0 else 12;
 
+    //TODO combine code
     a match {
       case X => {
         AxisTooltip.vertTabPainter.paint(canvas, start + Vec2(-16, -4 - 23 - size.x - colorOffset), Vec2(16, size.x + 23 + colorOffset))

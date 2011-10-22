@@ -31,6 +31,7 @@ object BoxesDemo {
     val phase = Var(0d)
     val amplitude = Var(1d)
     val enabled = Var(true)
+    val points = Var(false)
     val description = Var("Default Description\nCan have multiple lines")
   }
 
