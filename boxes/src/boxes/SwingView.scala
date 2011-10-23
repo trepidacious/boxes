@@ -123,6 +123,7 @@ object SwingView {
   val selectedTextColor = Color.white
   val textColor = Color.black
   val textUnderlightColor = new Color(255, 255, 255, 160)
+  val shadedBoxColor = new Color(0,0,0,0.6f)
 
   def clip(value:Int, min:Int, max:Int) = {
     if (value < min) min

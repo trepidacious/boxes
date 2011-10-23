@@ -24,6 +24,7 @@ case class Vec2(x:Double = 0, y:Double = 0) {
   def *(b:Vec2) = Vec2(x * b.x, y * b.y)
   def /(b:Vec2) = Vec2(x / b.x, y / b.y)
   def *(d:Double) = Vec2(d * x, d * y)
+  def /(d:Double) = Vec2(x / d, y / d)
   def dot(b:Vec2) = x * b.x + y * b.y
   def transpose = Vec2(y, x)
   def withX(newX:Double) = Vec2(newX, y)
@@ -44,6 +45,8 @@ case class Vec2(x:Double = 0, y:Double = 0) {
     case X => x
     case Y => y
   }
+  def squaredLength = x * x + y * y
+  def length = math.sqrt(squaredLength)
 }
 
 object Vec2 {
@@ -59,7 +62,9 @@ trait SeriesPainter{
   def linesDrawn(series:Series[_]):Boolean
 }
 
-case class Series[K](key:K, curve:List[Vec2], color:Color = Color.black, width:Double = 1, painter:SeriesPainter = SeriesStyles.line)
+case class Series[K](key:K, curve:List[Vec2], color:Color = Color.black, width:Double = 1, painter:SeriesPainter = SeriesStyles.line) {
+  def pixelCurve(spaces:GraphSpaces) = curve.map(p => spaces.toPixel(p))
+}
 
 class LineSeriesPainter extends SeriesPainter {
   def paint(canvas:GraphCanvas, s:Series[_], shadow:Boolean = false) {
@@ -288,6 +293,18 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
     Area(o, s)
   }
 
+  def sizeAtLeast(minSize:Vec2) = normalise.rawSizeAtLeast(minSize)
+  def rawSizeAtLeast(minSize:Vec2) = {
+    if (size.x >= minSize.x && size.y >= minSize.y) {
+      this
+    } else {
+      val newSize = Vec2(math.max(size.x, minSize.x), math.max(size.y, minSize.y))
+      val newOrigin = origin - (newSize - size) / 2
+      Area(newOrigin, newSize)
+    }
+  }
+
+
 }
 
 trait Graph {
@@ -314,7 +331,7 @@ case class GraphSpaces(val dataArea:Area, val pixelArea:Area, val componentArea:
 
 object GraphMouseEventType extends Enumeration {
    type GraphMouseEventType = Value
-   val PRESS, RELEASE, DRAG, MOVE, CLICK, ENTER, EXIT = Value
+   val PRESS, RELEASE, DRAG, MOVE, CLICK, ENTER, EXIT, CONSUMED = Value
 }
 import GraphMouseEventType._
 
@@ -626,7 +643,6 @@ class GraphGrab(enabled:RefGeneral[Boolean, _] = Val(true), manualDataArea:VarGe
           case _ => false
         }
       }
-      true
     } else {
       false
     }
@@ -682,7 +698,7 @@ object AxisTooltip {
   def apply(axis:Axis, enabled:RefGeneral[Boolean, _] = Val(true)) = new AxisTooltip(axis, enabled)
   val horizTabPainter = new GraphThreePartPainter(new ImageIcon(classOf[AxisTooltip].getResource("/boxes/swing/HorizontalLineLabel.png")).getImage)
   val vertTabPainter = new GraphThreePartPainterVertical(new ImageIcon(classOf[AxisTooltip].getResource("/boxes/swing/VerticalLineLabel.png")).getImage)
-  val lineColor = new Color(0,0,0,0.6f)
+  val lineColor = SwingView.shadedBoxColor
 
   def drawAxisLine(canvas:GraphCanvas, v:Double, a:Axis, label:String, color:Option[Color]) = {
     canvas.clipToData()
@@ -766,10 +782,7 @@ class AxisTooltip(axis:Axis, enabled:RefGeneral[Boolean, _] = Val(true)) extends
             value() = None
           }
         }
-        case EXIT => {
-          value() = None
-        }
-        case _ => {}
+        case _ => value() = None
       }
       false
     } else {
@@ -845,7 +858,8 @@ class GraphBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], enabled:
 
 case class GraphZoomerAxis(
     requiredRange:Ref[Option[(Int, Int)]] = Var(None),
-    padding:Ref[Double] = Var(0.05)
+    padding:Ref[Double] = Var(0.05),
+    minSize:Ref[Double] = Var(0.01)
 )
 
 class GraphZoomer(
@@ -877,7 +891,9 @@ class GraphZoomer(
 
   val dataArea = Cal{
     //Use manual bounds if specified, automatic area from data bounds etc.
-    manualBounds().getOrElse(autoArea)
+    //Make sure that size is at least the minimum for each axis
+    val a = manualBounds().getOrElse(autoArea)
+    a.sizeAtLeast(Vec2(xAxis().minSize(), yAxis().minSize()))
   }
 }
 
@@ -931,12 +947,13 @@ object GraphBasic {
     val zoomer = new GraphZoomer(dataBounds, manualBounds, xAxis, yAxis)
 
     val overlayers = ListVal[GraphLayer](
-      extraOverLayers ::: List(
+      List(SeriesTooltips.highlight(series, Val(true))) ::: extraOverLayers ::: List(
         GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), manualBounds, zoomEnabled),
         GraphSelectBox(series, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100)), selection, selectEnabled),
         GraphGrab(grabEnabled, manualBounds, zoomer.dataArea),
         AxisTooltip(X, Val(true)),
-        AxisTooltip(Y, Val(true))
+        AxisTooltip(Y, Val(true)),
+        SeriesTooltips.string(series, Val(true))
       )
     )
 

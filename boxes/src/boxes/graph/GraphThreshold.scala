@@ -4,7 +4,8 @@ import boxes.graph.Axis._
 import boxes.graph.GraphMouseEventType._
 import java.awt.Color
 import java.text.DecimalFormat
-import boxes.{Var, VarGeneral, SwingView, Val, RefGeneral}
+import boxes.{VarGeneral, Val, RefGeneral}
+import java.util.concurrent.atomic.AtomicReference
 
 object GraphThreshold {
   val format = new DecimalFormat("0.00")
@@ -15,7 +16,7 @@ object GraphThreshold {
 
 class GraphThreshold(axis:RefGeneral[Axis, _], value:VarGeneral[Double, _], color:RefGeneral[Color, _], name:RefGeneral[String, _], enabled:RefGeneral[Boolean, _]) extends GraphLayer {
 
-  private var labelWidth = 0d
+  private val labelWidth = new AtomicReference[Double](0d)
 
   def paint() = {
     val c = color()
@@ -25,31 +26,8 @@ class GraphThreshold(axis:RefGeneral[Axis, _], value:VarGeneral[Double, _], colo
 
     (canvas:GraphCanvas) => {
       val label = n + ": " + GraphThreshold.format.format(v)
+      labelWidth.set(AxisTooltip.drawAxisLine(canvas, v, a, label, Some(c)))
 
-
-      labelWidth = AxisTooltip.drawAxisLine(canvas, v, a, label, Some(c))
-
-//      canvas.clipToData()
-//      val dataArea = canvas.spaces.dataArea
-//      val start = canvas.spaces.toPixel(dataArea.axisPosition(a, v))
-//      val end = start + canvas.spaces.pixelArea.axisPerpVec2(a)
-//
-//      if (e) {
-//        canvas.color = SwingView.transparentColor(c, 0.1)
-//        canvas.lineWidth = GraphThreshold.handleRadius * 2 + 1
-//        canvas.line(start, end)
-//      }
-//
-//      canvas.color = c
-//      canvas.lineWidth = 1
-//      canvas.line(start, end)
-//
-//      val label = n + " = " + GraphThreshold.format.format(v)
-//
-//      a match {
-//        case X => canvas.string(label, start + Vec2(-6, -6), Vec2(0, 0), -1)
-//        case Y => canvas.string(label, start + Vec2(6, -6), Vec2(0, 0), 0)
-//      }
     }
   }
 
@@ -68,7 +46,7 @@ class GraphThreshold(axis:RefGeneral[Axis, _], value:VarGeneral[Double, _], colo
       val pixelDistance = (valuePoint - pixelPoint).onAxis(Axis.other(axis())) * (if (axis() == X) 1 else -1)
       e.eventType match {
         case PRESS => {
-          if ((pixelPerpDistance > -2 && pixelPerpDistance < 18 && pixelDistance > 0 && pixelDistance < labelWidth) || math.abs(pixelPerpDistance) < GraphThreshold.handleRadius) {
+          if ((pixelPerpDistance > -2 && pixelPerpDistance < 18 && pixelDistance > 0 && pixelDistance < labelWidth.get()) || math.abs(pixelPerpDistance) < GraphThreshold.handleRadius) {
             pressOffset = Some(value() - dataPointValue(e.dataPoint))
             true
           } else {

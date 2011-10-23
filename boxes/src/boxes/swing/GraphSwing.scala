@@ -305,9 +305,10 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
 
       val dataPoint = s.toData(Vec2(x, y))
       val gme = GraphMouseEvent(s, dataPoint, eventType, b)
+      val consumedGME = GraphMouseEvent(s, dataPoint, CONSUMED, b)
 
-      val consumed = graph().overlayers().foldLeft(false)((consumed, layer) => if(!consumed) layer.onMouse(gme) else true)
-      graph().layers().foldLeft(consumed)((consumed, layer) => if(!consumed) layer.onMouse(gme) else true)
+      val consumed = graph().overlayers().foldLeft(false)((consumed, layer) => if(!consumed) layer.onMouse(gme) else {layer.onMouse(consumedGME); true})
+      graph().layers().foldLeft(consumed)((consumed, layer) => if(!consumed) layer.onMouse(gme) else {layer.onMouse(consumedGME); true})
 
     }
 
@@ -469,9 +470,10 @@ class GraphSwingBGView(graph:Ref[_ <: Graph]) extends SwingView {
 
       val dataPoint = s.toData(Vec2(x, y))
       val gme = GraphMouseEvent(s, dataPoint, eventType, b)
+      val consumedGME = GraphMouseEvent(s, dataPoint, CONSUMED, b)
 
-      val consumed = graph().overlayers().foldLeft(false)((consumed, layer) => if(!consumed) layer.onMouse(gme) else true)
-      graph().layers().foldLeft(consumed)((consumed, layer) => if(!consumed) layer.onMouse(gme) else true)
+      val consumed = graph().overlayers().foldLeft(false)((consumed, layer) => if(!consumed) layer.onMouse(gme) else {layer.onMouse(consumedGME); true})
+      graph().layers().foldLeft(consumed)((consumed, layer) => if(!consumed) layer.onMouse(gme) else {layer.onMouse(consumedGME); true})
     }
 
     this.addMouseMotionListener(new MouseMotionListener() {
