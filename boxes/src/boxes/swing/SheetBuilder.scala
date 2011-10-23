@@ -3,8 +3,8 @@ package boxes.swing
 import com.jgoodies.forms.builder.DefaultFormBuilder
 import com.jgoodies.forms.layout.{ConstantSize, CellConstraints, FormLayout}
 import java.awt.{Dimension}
-import javax.swing.{SwingConstants, JLabel, JComponent}
 import boxes.{BoxesScrollPane, Label, SwingView}
+import javax.swing.{JLabel, SwingConstants, JComponent}
 
 object SheetBuilder {
   def apply() = new SheetBuilder()
@@ -12,7 +12,7 @@ object SheetBuilder {
 
 class SheetBuilder {
 
-  val layout = new FormLayout("4px, 0px, right:60px:grow(0.25), 6px, fill:60px:grow(0.75), 8px", "")
+  val layout = new FormLayout("4px, 0px, right:100px:grow(0.25), 6px, fill:100px:grow(0.75), 8px", "")
   val cc = new CellConstraints()
   val builder = new DefaultFormBuilder(layout)
 
@@ -20,6 +20,13 @@ class SheetBuilder {
 
   def separator(text:String) = {
     val label = HeaderLabel(text)
+    builder.append(label, 6)
+    this
+  }
+
+  def blankTop() = {
+    val label = new JLabel("")
+    label.setPreferredSize(new Dimension(10, 9))
     builder.append(label, 6)
     this
   }

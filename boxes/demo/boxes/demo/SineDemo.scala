@@ -5,10 +5,10 @@ import general.{RadioReaction, SetOp}
 import graph._
 import list._
 import java.awt.{Dimension, BorderLayout, GridLayout, Color}
+import boxes.VarLens.apply
+import swing.{BoxesPopupView, EmbossedLabel, TabBuilder, SheetBuilder, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
 import javax.swing._
 import boxes.BoxImplicits._
-import swing.{EmbossedLabel, TabBuilder, SheetBuilder, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
-import boxes.VarLens.apply
 
 object SineDemo {
 
@@ -53,8 +53,6 @@ object SineDemo {
 
     val down = new ListMultiMoveOp[Sine](list, indices, false)
 
-    val buttons = SwingButtonBar().add(add).add(delete).add(up).add(down).buildWithListStyleComponent(EmbossedLabel("Sine Table"))
-
     val firstSelected = Cal{
       val is = indices()
       if (is.isEmpty) {
@@ -68,6 +66,10 @@ object SineDemo {
         }
       }
     }
+
+    val popup = BoxesPopupView(controlType = BooleanControlType.TOOLBARBUTTON, icon = Some(GraphSwingView.zoomIn), popupContents = properties(firstSelected))
+
+    val buttons = SwingButtonBar().add(add).add(delete).add(up).add(down).add(popup).buildWithListStyleComponent(EmbossedLabel("Sine Table"))
 
     val mainPanel = new JPanel(new BorderLayout())
     mainPanel.add(ledgerView.component, BorderLayout.CENTER)
@@ -149,6 +151,19 @@ object SineDemo {
     SwingUtilities.invokeLater(new Runnable(){
       override def run = r
     })
+  }
+
+  def properties(sine:Ref[Option[Sine]]) = {
+    val nameView = StringOptionView(for (s <- sine()) yield s.name)
+    val amplitudeView = NumberOptionView(for (s <- sine()) yield s.amplitude)
+    val phaseView = NumberOptionView(for (s <- sine()) yield s.phase)
+
+    SheetBuilder()
+      .blankTop()
+      .view("Name", nameView)
+      .view("Amplitude", amplitudeView)
+      .view("Phase", phaseView)
+    .panel()
   }
 
   def tabs() {

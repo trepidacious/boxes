@@ -721,7 +721,6 @@ class EmbossedLabelUI extends BasicLabelUI {
     g.setFont(label.getFont());
     g.setColor(SwingView.textUnderlightColor)
     BasicGraphicsUtils.drawStringUnderlineCharAt(g, s, -1, textX, textY + 1);
-//    g.setColor(WindowUtils.isParentWindowFocused(label)
     g.setColor(label.getForeground)
     BasicGraphicsUtils.drawStringUnderlineCharAt(g, s, -1, textX, textY);
   }

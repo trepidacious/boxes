@@ -1178,6 +1178,18 @@
        y1="13"
        x2="21"
        y2="13" />
+    <filter
+       inkscape:collect="always"
+       id="filter4487"
+       x="-0.15"
+       width="1.3"
+       y="-0.3"
+       height="1.6">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="1.625"
+         id="feGaussianBlur4489" />
+    </filter>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -1186,15 +1198,15 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="11.313709"
-     inkscape:cx="5.146327"
-     inkscape:cy="2.7044003"
+     inkscape:zoom="1"
+     inkscape:cx="3.4512298"
+     inkscape:cy="35.789978"
      inkscape:document-units="px"
-     inkscape:current-layer="g4413"
-     showgrid="true"
+     inkscape:current-layer="g3651"
+     showgrid="false"
      inkscape:snap-global="true"
-     inkscape:window-width="1920"
-     inkscape:window-height="1156"
+     inkscape:window-width="1366"
+     inkscape:window-height="720"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -1221,7 +1233,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -1386,7 +1398,7 @@
      inkscape:groupmode="layer"
      id="layer10"
      inkscape:label="Button"
-     style="display:none"
+     style="display:inline"
      transform="translate(0,4)">
     <rect
        ry="0"
@@ -1396,6 +1408,50 @@
        height="26"
        x="0"
        y="-2" />
+  </g>
+  <g
+     style="display:inline"
+     inkscape:label="PopupIndicator"
+     id="g3651"
+     inkscape:groupmode="layer">
+    <path
+       style="opacity:0.44360902;fill:#000000;fill-opacity:1;stroke:none;display:inline;filter:url(#filter4487);enable-background:new"
+       d="M 0,-1 13,12 26,-1 z"
+       id="path3653"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc" />
+    <path
+       sodipodi:nodetypes="cccc"
+       inkscape:connector-curvature="0"
+       id="path3655"
+       d="M 3,1 13,11 23,1 z"
+       style="fill:#f0f0f0;fill-opacity:1;stroke:none;display:inline;enable-background:new" />
+    <path
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0"
+       id="path3657"
+       d="M 4.5,2 13,10.5"
+       style="fill:none;stroke:#ffffff;stroke-width:0.72100002;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;enable-background:new" />
+    <rect
+       y="-4"
+       x="-2"
+       height="36"
+       width="20"
+       id="rect3659"
+       style="fill:#f0f0f0;fill-opacity:1;stroke:none;display:inline;enable-background:new"
+       transform="matrix(0,-1,1,0,0,0)" />
+    <path
+       sodipodi:nodetypes="cccccccc"
+       inkscape:connector-curvature="0"
+       id="path4491"
+       d="M 4.4419417,0.5 -2.5,0.5 l 0,-17 33,0 0,17 -8.919845,0 L 13,9.0359612 z"
+       style="fill:none;stroke:#ffffff;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:0.64864861" />
+    <path
+       style="fill:none;stroke:#828282;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 4,1.5 -7.5,0 0,-19 35,0 0,19 -9.5,0 -9,9 z"
+       id="path4449"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccccc" />
   </g>
   <g
      inkscape:groupmode="layer"
@@ -4619,7 +4675,7 @@
          id="tspan5125">23, 0 to 39, 16</tspan></text>
   </g>
   <g
-     style="display:inline"
+     style="display:none"
      inkscape:label="VerticalLineLabel"
      id="g4413"
      inkscape:groupmode="layer">

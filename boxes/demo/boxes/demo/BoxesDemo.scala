@@ -10,11 +10,10 @@ import persistence._
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, StringWriter}
 import java.util.concurrent.atomic.AtomicBoolean
 import java.awt.{Dimension, BorderLayout, GridLayout, Color}
-import com.jgoodies.forms.layout.{CellConstraints, FormLayout}
 import javax.swing._
 import border.EmptyBorder
 import boxes.BoxImplicits._
-import swing.{EmbossedLabel, TabBuilder, TabSpacer, SheetBuilder, BoxesDropdownView, SwingButton, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
+import boxes.swing.{EmbossedLabel, TabBuilder, TabSpacer, SheetBuilder, BoxesDropdownView, SwingButton, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
 
 object BoxesDemo {
 
@@ -1092,10 +1091,11 @@ object BoxesDemo {
 //      backgroundReaction
 //      textViews
 //      ledgerMulti
-//      ledgerAndSelected
+
+      ledgerAndSelected
 
 //      sheetBuilder
-      tabs
+//      tabs
 //      textArea()
     }
 //    axis
