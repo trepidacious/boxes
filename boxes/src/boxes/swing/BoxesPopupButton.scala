@@ -7,6 +7,7 @@ import javax.swing.border.{EmptyBorder}
 import java.awt.{Graphics, Graphics2D, BorderLayout, Component}
 import javax.swing.{Icon, JComponent, SwingUtilities, JPopupMenu}
 import boxes.{SwingView, Val, RefGeneral, View}
+import java.lang.ref.PhantomReference
 
 private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:Component, invoker:Component) extends PopupMenuListener {
 
@@ -26,9 +27,13 @@ private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:C
   }
 
   def show() = {
+    //Use size of component and add on the border ourselves - the JPopupMenu has size 0,0 until shown for first time
+//    val ph = popup.getHeight
+    val ph = popupComponent.getPreferredSize.height + 2
+
     //Find position relative to invoker - if we would appear (partially) off screen top, display below
     //instead of above
-    var y = - popup.getHeight + 1;
+    var y = - ph + 1;
     var top = false;
     if (invoker.getLocationOnScreen.getY + y < 0) {
       y = invoker.getHeight;
@@ -52,7 +57,9 @@ private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:C
     top
   }
 
-  override def popupMenuWillBecomeVisible(e:PopupMenuEvent) {}
+  override def popupMenuWillBecomeVisible(e:PopupMenuEvent) {
+    //Note - height still not known here, so no chance to reposition
+  }
 
   override def popupMenuWillBecomeInvisible(e:PopupMenuEvent) {
     invoker match {
@@ -102,6 +109,7 @@ class BoxesPopupView(n:RefGeneral[String,_] = Val(""), icon:RefGeneral[Option[Ic
     def actionPerformed(e: ActionEvent) {
       if (component.isSelected) {
         val top = handler.show()
+        //Handle the direction of the popup indicator (to link with popup above or below)
         component.indicator(if (top) 1 else -1)
       }
     }
