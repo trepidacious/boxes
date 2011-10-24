@@ -1,22 +1,19 @@
 package boxes.swing
 
-import java.awt.{Toolkit, BorderLayout, Component}
 import javax.swing.event.{PopupMenuEvent, PopupMenuListener}
-import javax.swing.border.{MatteBorder}
 import java.awt.event.{ActionEvent, ActionListener}
-import javax.swing.{Icon, JComponent, JToggleButton, SwingUtilities, JPopupMenu}
-import boxes.BooleanControlType._
-import boxes.{LinkingToolbarToggleButton, LinkingJToggleButton, Val, RefGeneral, SwingView}
-import boxes.View
+import com.explodingpixels.swingx.EPToggleButton
+import javax.swing.border.{EmptyBorder}
+import java.awt.{Graphics, Graphics2D, BorderLayout, Component}
+import javax.swing.{Icon, JComponent, SwingUtilities, JPopupMenu}
+import boxes.{SwingView, Val, RefGeneral, View}
 
 private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:Component, invoker:Component) extends PopupMenuListener {
 
-  private val xOffset = -1
-  private val yOffsetSize = -1
+  private val xOffset = -16
 
   val popup = new JPopupMenu();
   popup.removeAll()
-  popup.setBorder(new MatteBorder(1, 1, 1, 1, SwingView.dividingColor))
   popup.setLayout(new BorderLayout())
   popup.add(popupComponent, BorderLayout.CENTER)
   popup.addPopupMenuListener(this)
@@ -28,16 +25,19 @@ private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:C
     popup.setVisible(false)
   }
 
-  def show() {
-    popup.pack();
-
+  def show() = {
     //Find position relative to invoker - if we would appear (partially) off screen top, display below
     //instead of above
-    var y = - popup.getHeight - yOffsetSize;
+    var y = - popup.getHeight + 1;
+    var top = false;
     if (invoker.getLocationOnScreen.getY + y < 0) {
-      y = invoker.getHeight + yOffsetSize;
+      y = invoker.getHeight;
+      top = true;
     }
-    popup.setLocation(xOffset, y)
+
+    popup.setBorder(new PopupBorder(4 - xOffset, top))
+    popup.pack();
+
     popup.show(invoker, xOffset, y);
 
     //Start with correct component focused
@@ -48,13 +48,18 @@ private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:C
         }
       }
     })
+
+    top
   }
 
   override def popupMenuWillBecomeVisible(e:PopupMenuEvent) {}
 
   override def popupMenuWillBecomeInvisible(e:PopupMenuEvent) {
     invoker match {
-      case button:JToggleButton => button.setSelected(false)
+      case button:ToolbarPopupButton => {
+        button.setSelected(false)
+        button.indicator(0)
+      }
     }
   }
 
@@ -62,18 +67,15 @@ private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:C
 }
 
 object BoxesPopupView {
-  def apply(n:RefGeneral[String,_] = Val(""), controlType:BooleanControlType = TOGGLEBUTTON, icon:RefGeneral[Option[Icon], _] = Val(None), popupContents:JComponent) = {
-    new BoxesPopupView(n, controlType, icon, popupContents)
+  def apply(n:RefGeneral[String,_] = Val(""), icon:RefGeneral[Option[Icon], _] = Val(None), popupContents:JComponent) = {
+    new BoxesPopupView(n, icon, popupContents)
   }
 }
 
-class BoxesPopupView(n:RefGeneral[String,_] = Val(""), controlType:BooleanControlType = TOGGLEBUTTON, icon:RefGeneral[Option[Icon], _] = Val(None), popupContents:JComponent) extends SwingView {
+class BoxesPopupView(n:RefGeneral[String,_] = Val(""), icon:RefGeneral[Option[Icon], _] = Val(None), popupContents:JComponent) extends SwingView {
 
   //Only support types that make sense, otherwise default to a plain toggle button
-  val component = controlType match {
-    case TOOLBARBUTTON => new LinkingToolbarToggleButton(this)
-    case _ => new LinkingJToggleButton(this)
-  }
+  val component = new ToolbarPopupButton(this)
 
   val view = View {
     //Store the values for later use on Swing Thread
@@ -98,8 +100,66 @@ class BoxesPopupView(n:RefGeneral[String,_] = Val(""), controlType:BooleanContro
 
   component.addActionListener(new ActionListener {
     def actionPerformed(e: ActionEvent) {
-      if (component.isSelected) handler.show()
+      if (component.isSelected) {
+        val top = handler.show()
+        component.indicator(if (top) 1 else -1)
+      }
     }
   })
 
 }
+
+object ToolbarPopupButton {
+  val popupIndicator = SwingView.icon("PopupIndicator").getImage
+  val popupBorderCutout = SwingView.icon("PopupBorderCutout").getImage
+}
+
+class ToolbarPopupButton(val sv:SwingView) extends EPToggleButton{
+  {
+    setBorder(new EmptyBorder(4,2,3,2))
+    setContentAreaFilled(false)
+    setBackgroundPainter(new BarStyleToggleButtonPainter())
+  }
+
+  var indicator = 0
+
+  def indicator(i:Int) {
+    indicator = i
+    repaint()
+  }
+
+  override def paintComponent(g:Graphics) {
+    super.paintComponent(g)
+    val g2 = g.asInstanceOf[Graphics2D]
+    if (getModel.isSelected || getModel.isPressed) {
+      val i = ToolbarPopupButton.popupIndicator
+      if (indicator > 0) {
+        g2.drawImage(i, 0, getHeight, i.getWidth(null), -i.getHeight(null), null)
+      } else if (indicator < 0) {
+        g2.drawImage(i, 0, 1, null)
+      }
+    }
+  }
+}
+
+
+class PopupButton(val sv:SwingView) extends SwingToggleButton
+
+class PopupBorder(val xOffset:Int, val topGap:Boolean) extends EmptyBorder(1,1,1,1) {
+
+  override def paintBorder(c: Component, g: Graphics, x: Int, y: Int, width: Int, height: Int): Unit = {
+    val oldColor = g.getColor
+    g.setColor(SwingView.dividingColor)
+    g.drawRect(x, y, width-1, height-1)
+    g.setColor(oldColor)
+    if (topGap) {
+      g.drawImage(ToolbarPopupButton.popupBorderCutout, x + xOffset, 0, null)
+    } else {
+      g.drawImage(ToolbarPopupButton.popupBorderCutout, x + xOffset, y + height - 1, null)
+    }
+  }
+
+  override def isBorderOpaque = true
+}
+
+

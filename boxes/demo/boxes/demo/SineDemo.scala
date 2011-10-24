@@ -7,8 +7,8 @@ import list._
 import java.awt.{Dimension, BorderLayout, GridLayout, Color}
 import boxes.VarLens.apply
 import swing.{BoxesPopupView, EmbossedLabel, TabBuilder, SheetBuilder, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
-import javax.swing._
 import boxes.BoxImplicits._
+import javax.swing._
 
 object SineDemo {
 
@@ -67,7 +67,7 @@ object SineDemo {
       }
     }
 
-    val popup = BoxesPopupView(controlType = BooleanControlType.TOOLBARBUTTON, icon = Some(GraphSwingView.zoomIn), popupContents = properties(firstSelected))
+    val popup = BoxesPopupView(icon = Some(GraphSwingView.zoom), popupContents = properties(firstSelected))
 
     val buttons = SwingButtonBar().add(add).add(delete).add(up).add(down).add(popup).buildWithListStyleComponent(EmbossedLabel("Sine Table"))
 
@@ -132,11 +132,14 @@ object SineDemo {
 
     val grabEnabledView = BooleanView(grabEnabled, "", BooleanControlType.TOOLBARBUTTON, Some(GraphSwingView.move), false)
 
+    val settingsPopup = BoxesPopupView(icon = Some(SwingView.wrench), popupContents = new JLabel(" Settings "))
+
     val buttons = SwingButtonBar()
                     .add(selectEnabledView)
                     .add(grabEnabledView)
                     .add(zoomEnabledView)
                     .add(zoomOutButton)
+                    .add(settingsPopup)
                   .buildWithListStyleComponent(EmbossedLabel("Demo Graph"))
 
     val panel = new JPanel(new BorderLayout())

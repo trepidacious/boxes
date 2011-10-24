@@ -13,7 +13,7 @@ import javax.swing.plaf.metal.MetalLookAndFeel
 import javax.swing.border.{EmptyBorder, MatteBorder}
 import javax.swing.table.{TableModel, TableCellRenderer, TableCellEditor, AbstractTableModel}
 import javax.swing.event.{TableModelEvent, ChangeEvent, TableColumnModelEvent}
-import swing.{TextComponentPainter, WhitePainter, TabButton, BoxesRadioButton, BoxesProgressUI, BoxesSliderUI, BooleanCellRenderer, SelectingTextCellEditor, NumberCellRenderer, NumberCellEditor, BoxesTableCellRenderer, BoxesTableCellHeaderRenderer, BoxesScrollBarUI, DotModel, ListSelectionIndicesModel, ListSelectionIndexModel, BoxesSpinnerUI, SwingBarToggleButton, SwingToggleButton, BoxesCheckBox, SlideCheckButton, BoxesTextAreaUI, BoxesTextFieldUI}
+import swing.{GraphSwingView, TextComponentPainter, WhitePainter, TabButton, BoxesRadioButton, BoxesProgressUI, BoxesSliderUI, BooleanCellRenderer, SelectingTextCellEditor, NumberCellRenderer, NumberCellEditor, BoxesTableCellRenderer, BoxesTableCellHeaderRenderer, BoxesScrollBarUI, DotModel, ListSelectionIndicesModel, ListSelectionIndexModel, BoxesSpinnerUI, SwingBarToggleButton, SwingToggleButton, BoxesCheckBox, SlideCheckButton, BoxesTextAreaUI, BoxesTextFieldUI}
 import util.{NumericClass, GConverter, OptionTConverter, TConverter, CoalescingResponder, Sequence}
 import javax.swing.{ScrollPaneConstants, JTable, JSpinner, SpinnerModel, SpinnerNumberModel, JProgressBar, JSlider, BoundedRangeModel, DefaultBoundedRangeModel, SwingConstants, Icon, JTextArea, JScrollPane, JTextField, JLabel, JComponent, ImageIcon, UIManager, SwingUtilities}
 import com.explodingpixels.swingx.EPPanel
@@ -24,6 +24,10 @@ object SwingView {
   val viewToUpdates = new mutable.WeakHashMap[Any, mutable.ListBuffer[() => Unit]]()
   val responder = new CoalescingResponder(respond)
   val lock = new Object()
+
+  def icon(name:String) = new ImageIcon(classOf[SwingView].getResource("/boxes/swing/" + name + ".png"))
+
+  val wrench = icon("Wrench")
 
   def addUpdate(v:Any, update: => Unit) = {
     lock.synchronized{
@@ -116,7 +120,7 @@ object SwingView {
   }
 
   val background = new Color(240, 240, 240)
-  val dividingColor = new Color(130, 130, 130)
+  val dividingColor = new Color(150, 150, 150)
   val unimportantTextColor = new Color(150, 150, 150)
   val alternateBackgroundColor = new Color(240, 240, 240)
   val selectionColor = new Color(120, 144, 161)
