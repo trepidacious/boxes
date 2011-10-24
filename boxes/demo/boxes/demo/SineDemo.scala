@@ -7,8 +7,8 @@ import list._
 import java.awt.{Dimension, BorderLayout, GridLayout, Color}
 import boxes.VarLens.apply
 import swing.{BoxesPopupView, EmbossedLabel, TabBuilder, SheetBuilder, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
-import boxes.BoxImplicits._
 import javax.swing._
+import boxes.BoxImplicits._
 
 object SineDemo {
 
@@ -83,6 +83,8 @@ object SineDemo {
     val selectEnabled = Var(false)
     val zoomEnabled = Var(true)
     val grabEnabled = Var(false)
+    val axisTooltipsEnabled = Var(true)
+    val seriesTooltipsEnabled = Var(true)
     val manualBounds = Var(None:Option[Area])
     RadioReaction(selectEnabled, zoomEnabled, grabEnabled)
 
@@ -118,6 +120,8 @@ object SineDemo {
         selectEnabled = selectEnabled,
         selection = indices,
         grabEnabled = grabEnabled,
+        seriesTooltipsEnabled = seriesTooltipsEnabled,
+        axisTooltipsEnabled = axisTooltipsEnabled,
         extraOverLayers = List(xThreshold, yThreshold)
       )
     )
@@ -132,7 +136,14 @@ object SineDemo {
 
     val grabEnabledView = BooleanView(grabEnabled, "", BooleanControlType.TOOLBARBUTTON, Some(GraphSwingView.move), false)
 
-    val settingsPopup = BoxesPopupView(icon = Some(SwingView.wrench), popupContents = new JLabel(" Settings "))
+    val graphProperties = SheetBuilder()
+      .blankTop()
+      .view("Axis Tooltips", BooleanView(axisTooltipsEnabled))
+      .view("Series Tooltips", BooleanView(seriesTooltipsEnabled))
+    .panel()
+
+
+    val settingsPopup = BoxesPopupView(icon = Some(SwingView.wrench), popupContents = graphProperties)
 
     val buttons = SwingButtonBar()
                     .add(selectEnabledView)

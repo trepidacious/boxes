@@ -912,6 +912,8 @@ object GraphBasic {
       selectEnabled:RefGeneral[Boolean, _] = Val(false),
       selection:VarGeneral[Set[K], _] = Var(Set[K]()),
       grabEnabled:RefGeneral[Boolean, _] = Val(false),
+      seriesTooltipsEnabled:RefGeneral[Boolean, _] = Val(true),
+      axisTooltipsEnabled:RefGeneral[Boolean, _] = Val(true),
       extraMainLayers:List[GraphLayer] = List[GraphLayer](),
       extraOverLayers:List[GraphLayer] = List[GraphLayer]()
       ) = {
@@ -947,13 +949,13 @@ object GraphBasic {
     val zoomer = new GraphZoomer(dataBounds, manualBounds, xAxis, yAxis)
 
     val overlayers = ListVal[GraphLayer](
-      List(SeriesTooltips.highlight(series, Val(true))) ::: extraOverLayers ::: List(
+      List(SeriesTooltips.highlight(series, seriesTooltipsEnabled)) ::: extraOverLayers ::: List(
         GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), manualBounds, zoomEnabled),
         GraphSelectBox(series, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100)), selection, selectEnabled),
         GraphGrab(grabEnabled, manualBounds, zoomer.dataArea),
-        AxisTooltip(X, Val(true)),
-        AxisTooltip(Y, Val(true)),
-        SeriesTooltips.string(series, Val(true))
+        AxisTooltip(X, axisTooltipsEnabled),
+        AxisTooltip(Y, axisTooltipsEnabled),
+        SeriesTooltips.string(series, seriesTooltipsEnabled)
       )
     )
 
