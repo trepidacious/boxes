@@ -7,8 +7,9 @@ import list._
 import java.awt.{Dimension, BorderLayout, GridLayout, Color}
 import boxes.VarLens.apply
 import swing.{BoxesPopupView, EmbossedLabel, TabBuilder, SheetBuilder, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
-import javax.swing._
 import boxes.BoxImplicits._
+import javax.swing._
+import com.explodingpixels.macwidgets.{SourceList, SourceListItem, SourceListCategory, SourceListModel}
 
 object SineDemo {
 
@@ -186,7 +187,7 @@ object SineDemo {
     val tableIcon = new ImageIcon(classOf[SwingView].getResource("/boxes/swing/TableTab.png"))
     val propertiesIcon = new ImageIcon(classOf[SwingView].getResource("/boxes/swing/PropertiesTab.png"))
 
-    val frame = new JFrame()
+    val frame = new JFrame("Boxes UI Sine Demo")
 
     val stuff = buildLedgerMulti()
     val table = stuff._1
@@ -228,10 +229,29 @@ object SineDemo {
 
   }
 
+  def source() {
+    val model = new SourceListModel()
+    val category = new SourceListCategory("Category")
+    model.addCategory(category)
+    model.addItemToCategory(new SourceListItem("Item"), category)
+    val sourceList = new SourceList(model)
+
+    val frame = new JFrame()
+
+    frame.add(sourceList.getComponent)
+
+    frame.pack
+    frame.setMinimumSize(new Dimension(50, 50))
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+    frame.setVisible(true)
+
+  }
+
   def main(args: Array[String]) {
     swingRun{
       SwingView.nimbus()
       tabs
+      source
     }
   }
 

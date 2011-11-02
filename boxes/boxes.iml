@@ -34,6 +34,7 @@
         <JAVADOC />
         <SOURCES>
           <root url="file://$USER_HOME$/macwidgets-read-only/source" />
+          <root url="jar://$MODULE_DIR$/libsrc/mac_widgets-svn-src.zip!/source" />
         </SOURCES>
       </library>
     </orderEntry>

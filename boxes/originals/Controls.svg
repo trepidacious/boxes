@@ -1220,16 +1220,16 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="11.313708"
-     inkscape:cx="10.708038"
+     inkscape:cx="-7.1704565"
      inkscape:cy="11.951143"
      inkscape:document-units="px"
-     inkscape:current-layer="g4523"
-     showgrid="true"
+     inkscape:current-layer="svg2"
+     showgrid="false"
      inkscape:snap-global="true"
-     inkscape:window-width="1471"
-     inkscape:window-height="966"
-     inkscape:window-x="1502"
-     inkscape:window-y="74"
+     inkscape:window-width="1920"
+     inkscape:window-height="1152"
+     inkscape:window-x="1366"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:snap-grids="true"
      showguides="true"
@@ -3426,7 +3426,7 @@
      inkscape:groupmode="layer"
      id="layer43"
      inkscape:label="SlideCheckBG"
-     style="display:none">
+     style="display:inline">
     <rect
        transform="translate(0,4)"
        style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline;enable-background:new"
@@ -3438,7 +3438,7 @@
        ry="4" />
     <path
        style="fill:#000000;fill-opacity:0.30222222;stroke:none;display:inline;enable-background:new"
-       d="M 30,3 54.5,3 C 55.885,3 57,4.115 57,5.5 l 0,17 C 57,23.885 55.885,25 54.5,25 L 30,25 C 30,21 30,8 30,3 z"
+       d="M 30,3 55.5,3 C 56.885,3 57,3.115 57,4.5 l 0,19 C 57,24.885 56.885,25 55.5,25 L 30,25 C 30,21 30,8 30,3 z"
        id="rect3372"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="csssscc" />
@@ -3455,7 +3455,7 @@
          y="18">On</tspan></text>
     <path
        style="fill:#7aab81;fill-opacity:1;stroke:none;display:inline;enable-background:new"
-       d="M 5.5,3 30,3 c 0,4 0,18 0,22 L 5.5,25 C 4.115,25 3,23.885 3,22.5 L 3,5.5 C 3,4.115 4.115,3 5.5,3 z"
+       d="M 4.5,3 30,3 c 0,4 0,18 0,22 L 4.5,25 C 3.115,25 3,24.885 3,23.5 L 3,4.5 C 3,3.115 3.115,3 4.5,3 z"
        id="rect4175"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="sccssss" />
@@ -3520,7 +3520,7 @@
      inkscape:groupmode="layer"
      id="layer44"
      inkscape:label="SlideCheck"
-     style="display:none">
+     style="display:inline">
     <rect
        ry="3"
        style="fill:none;stroke:#8c8c8c;stroke-opacity:1;display:inline;enable-background:new"
@@ -3535,7 +3535,7 @@
      inkscape:groupmode="layer"
      id="g4296"
      inkscape:label="SlideCheckShadow"
-     style="display:none">
+     style="display:inline">
     <rect
        y="3"
        x="3"
@@ -3568,13 +3568,13 @@
      inkscape:label="SlideCheckCoverOn"
      style="display:none">
     <rect
-       ry="5"
+       ry="3"
        style="fill:url(#linearGradient4294);fill-opacity:1;stroke:none;display:inline;enable-background:new"
        id="rect4288"
-       width="30"
-       height="24"
-       x="28"
-       y="2" />
+       width="29"
+       height="23"
+       x="28.5"
+       y="2.5" />
     <rect
        ry="3"
        style="fill:none;stroke:#8c8c8c;stroke-opacity:1;display:inline;enable-background:new"
@@ -3605,18 +3605,18 @@
        style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:square;stroke-linejoin:miter;stroke-opacity:0.10666665" />
   </g>
   <g
-     style="display:none"
+     style="display:inline"
      inkscape:label="SlideCheckCoverOff"
      id="g4318"
      inkscape:groupmode="layer">
     <rect
-       y="2"
-       x="2"
-       height="24"
-       width="30"
+       y="2.5"
+       x="2.5"
+       height="23"
+       width="29"
        id="rect4320"
        style="fill:url(#linearGradient4332);fill-opacity:1;stroke:none;display:inline;enable-background:new"
-       ry="5" />
+       ry="3.5" />
     <rect
        y="2.5"
        x="2.5"
@@ -4037,7 +4037,7 @@
   </g>
   <g
      transform="translate(0,4)"
-     style="display:inline"
+     style="display:none"
      inkscape:label="Wrench"
      id="g4523"
      inkscape:groupmode="layer">
