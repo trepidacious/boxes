@@ -127,6 +127,35 @@ class GraphCanvasFromGraphics2D(g:Graphics2D, val spaces:GraphSpaces) extends Gr
     rect(origin, size, false)
   }
 
+
+  def roundRect(origin: Vec2, size: Vec2, fill: Boolean, radius: Double) {
+    val df = toDumbFormat(origin, size)
+    val r = radius.asInstanceOf[Int]
+    if (fill) {
+      g.fillRoundRect(df._1, df._2, df._3, df._4, r, r)
+    } else {
+      g.drawRoundRect(df._1, df._2, df._3, df._4, r, r)
+    }
+  }
+
+  def roundRect(area: Area, fill: Boolean, radius: Double) {
+    roundRect(area.origin, area.size, fill, radius)
+  }
+
+  def fillRoundRect(origin: Vec2, size: Vec2, radius: Double) {
+    roundRect(origin, size, true, radius)
+  }
+  def fillRoundRect(area: Area, radius: Double) {
+    roundRect(area, true, radius)
+  }
+  def drawRoundRect(origin: Vec2, size: Vec2, radius: Double){
+    roundRect(origin, size, false, radius)
+  }
+  def drawRoundRect(area: Area, radius: Double){
+    roundRect(area, false, radius)
+  }
+
+
   def clipToRect(origin:Vec2, size:Vec2) {
     val df = toDumbFormat(origin, size)
     g.setClip(df._1, df._2, df._3, df._4)

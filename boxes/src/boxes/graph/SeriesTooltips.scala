@@ -14,7 +14,7 @@ class StringSeriesTooltipRenderer[K] extends SeriesTooltipRenderer[K]{
     val size = canvas.stringSize(s)
 
     canvas.color = SwingView.shadedBoxColor
-    canvas.fillRect(pixelPos - Vec2(-8, 4 + size.y + 8), size + Vec2(8, 8))
+    canvas.fillRoundRect(pixelPos - Vec2(-8, 4 + size.y + 8), size + Vec2(8, 8), 6)
 
     canvas.color = SwingView.selectedTextColor
     canvas.string(s, pixelPos + Vec2(12, -12))

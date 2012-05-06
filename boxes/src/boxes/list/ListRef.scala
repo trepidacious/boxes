@@ -37,6 +37,7 @@ trait ListVar[T] extends ListRef[T] with VarGeneral[List[T], ListChange] {
   def update(i:Int, e:T)
   def insert(i:Int, e:T*)
   def remove(i:Int, c:Int)
+  def <<(c: =>List[T]) = Reaction(this, c)
 }
 
 trait ListVal[T] extends ListRef[T] with ValGeneral[List[T], ListChange]

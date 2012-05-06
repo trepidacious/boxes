@@ -149,7 +149,11 @@ object BoxesDemo {
     println("x = " + x() + ", doubleX = " + doubleX())
 
     println("About to create reaction doubleX = 2 * x")
-    Reaction(doubleX, x()*2d, "doubleX = 2 * x")
+
+    //Reaction(doubleX, x() *2d, "doubleX = 2 * x")
+
+    doubleX << x() *2d
+
     println("Created reaction doubleX = 2 * x")
     println("x = " + x() + ", doubleX = " + doubleX())
     println("About to create reaction x = doubleX / 2")
@@ -1056,7 +1060,7 @@ object BoxesDemo {
   def main(args: Array[String]) {
 //    simpleCalc
 //    simplePath
-//    separateBIDIReactions
+    separateBIDIReactions
 //    nonConflictingReactions
 //
 //    bidiPath
@@ -1087,12 +1091,12 @@ object BoxesDemo {
 //    println(l2)
 
     swingRun{
-      SwingView.nimbus()
+//      SwingView.nimbus()
 //      backgroundReaction
 //      textViews
-//      ledgerMulti
+      ledgerMulti
 
-      ledgerAndSelected
+//      ledgerAndSelected
 
 //      sheetBuilder
 //      tabs
