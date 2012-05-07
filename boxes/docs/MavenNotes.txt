@@ -1,0 +1,20 @@
+We can avoid the need to mess too much with maven by installing any extra required jars to a local repository directly in the project.
+We do this by setting up the local repo (see repositories in the pom.xml - note that building after adding this will create the folder, this can be confusing!), 
+and then installing jar files to this from the command line, using the following commands 
+(for more details see http://stackoverflow.com/questions/2229757/maven-add-a-dependency-to-a-jar-by-relative-path):
+
+Examples for macwidgets and forms - note that you can get the local repository path from eclipse by viewing properties of the lifttest-local-repo folder in package explorer:
+
+mvn org.apache.maven.plugins:maven-install-plugin:2.3.1:install-file -Dfile=lib/mac_widgets-0.9.5.jar -DgroupId=macwidgets -DartifactId=macwidgets -Dversion=0.9.5 -Dpackaging=jar -DlocalRepositoryPath=/Users/trepidacious/Documents/mavenboxes/boxes/boxes-local-repo
+mvn org.apache.maven.plugins:maven-install-plugin:2.3.1:install-file -Dfile=lib/forms-1.2.1.jar -DgroupId=forms -DartifactId=forms -Dversion=1.2.1 -Dpackaging=jar -DlocalRepositoryPath=/Users/trepidacious/Documents/mavenboxes/boxes/boxes-local-repo
+                         
+Blank example:                         
+                         
+mvn org.apache.maven.plugins:maven-install-plugin:2.3.1:install-file -Dfile=<path-to-file> -DgroupId=<myGroup> -DartifactId=<myArtifactId> -Dversion=<myVersion> -Dpackaging=<myPackaging> -DlocalRepositoryPath=<path>
+
+Then reference the libraries as normal in the pom file. Note that if they have any dependencies, you will need to add these separately to the pom.xml, since
+our local jar files don't have their own onward dependencies. A good place to start is any existing pom file for an older version of the jar, etc.
+
+Finally, if having trouble with maven complaining about things being out of date/not available, and waiting for a timeout, try running the mvn commandline with an added "-U" at the start, to force an update.
+
+
