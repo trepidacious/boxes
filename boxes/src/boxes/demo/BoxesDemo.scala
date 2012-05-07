@@ -15,6 +15,8 @@ import border.EmptyBorder
 import boxes.BoxImplicits._
 import boxes.swing.{EmbossedLabel, TabBuilder, TabSpacer, SheetBuilder, BoxesDropdownView, SwingButton, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
 
+import com.mongodb.casbah.Imports._
+
 object BoxesDemo {
 
   class Person extends Node {
