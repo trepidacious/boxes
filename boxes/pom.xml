@@ -86,7 +86,12 @@
       <type>pom</type>
 	</dependency>
 
-
+	<dependency>
+      <groupId>org.scalatest</groupId>
+	  <artifactId>scalatest_${scala.version}</artifactId>
+      <version>1.7.1</version>
+	</dependency>
+	
 	<!--Local additional libs-->
     <dependency>
       <groupId>macwidgets</groupId>
