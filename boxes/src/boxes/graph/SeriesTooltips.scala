@@ -95,7 +95,7 @@ class SeriesTooltips[K](enabled:RefGeneral[Boolean, _], series:RefGeneral[List[S
 
       e.eventType match {
         case MOVE => {
-          //TODO search for nearest series line/point, and if it is within maxRadius, and mouse is in data area,
+          //Search for nearest series line/point, and if it is within maxRadius, and mouse is in data area,
           //set its key and our pixel point to toPaint
           if (e.spaces.dataArea.contains(dataPoint)) {
             val currentSeries = series()

@@ -6,10 +6,11 @@ import javax.swing._
 import java.awt._
 import com.explodingpixels.painter.Painter
 import boxes.SwingView
+import boxes.swing.icons.IconFactory
 
 object HeaderPainter {
   val dividerColor = new Color(0, 0, 0, 51)
-  val image = new ImageIcon(classOf[BoxesTableCellHeaderRenderer].getResource("/boxes/swing/Header.png")).getImage
+  val image = IconFactory.image("Header")
 }
 
 class HeaderPainter(paintLeft:Boolean = false, paintRight:Boolean = true, paintImage:Boolean = true) extends Painter[Component] {

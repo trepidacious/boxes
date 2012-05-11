@@ -7,6 +7,7 @@ import java.awt.{Image, Graphics2D, Dimension, Container, Component, LayoutManag
 import com.explodingpixels.widgets.ImageUtils
 import javax.swing.{AbstractButton, ImageIcon, JSpinner, JComponent}
 import com.explodingpixels.swingx.EPButton
+import boxes.swing.icons.IconFactory
 
 object BoxesSpinnerLayout {
   val spinnerButtonWidth = 19
@@ -118,11 +119,11 @@ class ArrowPartPainter(image:Image, up:Boolean) {
 }
 
 class ArrowPartPainters(up:Boolean) {
-  def partPainter(resource:String, up:Boolean) = new ArrowPartPainter(new ImageIcon(classOf[ButtonPainter].getResource(resource)).getImage, up)
-  val plain = partPainter("/boxes/swing/SpinnerButtons.png", up)
-  val disabled = partPainter("/boxes/swing/SpinnerButtonsDisabled.png", up)
-  val focus = partPainter("/boxes/swing/SpinnerButtonsFocusOverlay.png", up)
-  val pressed = partPainter("/boxes/swing/SpinnerButtonsPressed.png", up)
+  def partPainter(resource:String, up:Boolean) = new ArrowPartPainter(IconFactory.image(resource), up)
+  val plain = partPainter("SpinnerButtons", up)
+  val disabled = partPainter("SpinnerButtonsDisabled", up)
+  val focus = partPainter("SpinnerButtonsFocusOverlay", up)
+  val pressed = partPainter("SpinnerButtonsPressed", up)
 }
 
 object ArrowPainter {

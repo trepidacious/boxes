@@ -7,6 +7,7 @@ import javax.swing._
 import border.EmptyBorder
 import com.explodingpixels.swingx.EPPanel
 import java.awt.{BorderLayout, Component}
+import boxes.swing.icons.IconFactory
 
 //TODO should make an ExtendedOp that has a name:Ref[String] and icon:Ref[Icon] (not sure about
 //icon, maybe make return an image?, and an Action that is a view of these.
@@ -27,10 +28,10 @@ class SwingOpAction(name:String, icon:Option[Icon], op:Op) extends AbstractActio
 
 object SwingOp {
 
-  val add = Some(new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/Plus.png")))
-  val delete = Some(new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/Minus.png")))
-  val up = Some(new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/Up.png")))
-  val down = Some(new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/Down.png")))
+  val add = Some(IconFactory.icon("Plus"))
+  val delete = Some(IconFactory.icon("Minus"))
+  val up = Some(IconFactory.icon("Up"))
+  val down = Some(IconFactory.icon("Down"))
 
   def apply(name:String = "", icon:Option[Icon] = None, op:Op):SwingOpAction = new SwingOpAction(name, icon, op)
 

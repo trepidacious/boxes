@@ -5,9 +5,10 @@ import javax.swing.{ImageIcon, JComponent}
 import sun.swing.SwingUtilities2
 import java.awt.{Color, Rectangle, Graphics, Graphics2D}
 import boxes.SwingView
+import boxes.swing.icons.IconFactory
 
 object BoxesProgressUI {
-  val barPainter = new ThreePartPainter(new ImageIcon(classOf[ButtonPainter].getResource("/boxes/swing/Progress.png")).getImage)
+  val barPainter = new ThreePartPainter(IconFactory.image("Progress"))
 }
 
 class BoxesProgressUI extends BasicProgressBarUI {

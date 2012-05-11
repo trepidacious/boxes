@@ -4,13 +4,14 @@ import javax.swing.plaf.basic.BasicSliderUI
 import javax.swing.{JComponent, ImageIcon, JSlider}
 import boxes.SwingView
 import java.awt.{Graphics2D, Graphics, Dimension}
+import boxes.swing.icons.IconFactory
 
 object BoxesSliderUI {
-  val trackImage = new ImageIcon(classOf[BoxesSliderUI].getResource("/boxes/swing/Slider.png")).getImage
+  val trackImage = IconFactory.image("Slider")
   val trackHeight = trackImage.getHeight(null)
   val trackPainter = new ThreePartPainter(trackImage)
-  val handleImage = new ImageIcon(classOf[BoxesSliderUI].getResource("/boxes/swing/SliderHandle.png")).getImage
-  val handleSelectImage = new ImageIcon(classOf[BoxesSliderUI].getResource("/boxes/swing/SliderHandleSelect.png")).getImage
+  val handleImage = IconFactory.image("SliderHandle")
+  val handleSelectImage = IconFactory.image("SliderHandleSelect")
 }
 
 class BoxesSliderUI(b:JSlider) extends BasicSliderUI(b) {

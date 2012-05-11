@@ -11,14 +11,15 @@ import sun.swing.SwingUtilities2
 import javax.swing.text.{JTextComponent}
 import javax.swing.plaf.basic.{BasicButtonUI, BasicLabelUI, BasicGraphicsUtils, BasicCheckBoxUI, BasicFormattedTextFieldUI, BasicTextAreaUI, BasicTextFieldUI}
 import java.awt.{Rectangle, Dimension, Component, Image, Graphics2D, RenderingHints, Graphics, Color}
-import javax.swing.{JToggleButton, SwingConstants, JLabel, ImageIcon, Action, Icon, JCheckBox, JTextArea, JTextField, AbstractButton, JComponent}
+import javax.swing.{JToggleButton, SwingConstants, JLabel, Action, Icon, JCheckBox, JTextArea, JTextField, AbstractButton, JComponent}
+import boxes.swing.icons.IconFactory
 
 object BarStylePainter {
   val dividerColor = new Color(0, 0, 0, 51)
   val pressedColor = new Color(0, 0, 0, 25)
   val dividerBright = new Color(1f, 1f, 1f, 0.4f)
   val topColor = new Color(0xaaaaaa)
-  val image = new ImageIcon(classOf[SwingOpAction].getResource("/boxes/swing/ListButton.png")).getImage
+  val image = IconFactory.image("ListButton")
 
   def apply[T](paintLeft:Boolean = false, paintRight:Boolean = true) = new BarStylePainter[T](paintLeft, paintRight)
 }
@@ -234,10 +235,10 @@ class TabButton(paintBottom:Boolean = true) extends JToggleButton {
 
 
 object TabButtonPainter {
-  def painter(resource:String) = new TabPainter(new ImageIcon(classOf[SlideCheckPainter].getResource(resource)).getImage)
-  val off = painter("/boxes/swing/Tab.png")
-  val on = painter("/boxes/swing/TabPressed.png")
-//  val focus = painter("/boxes/swing/SlideCheckFocusOverlay.png")
+  def painter(resource:String) = new TabPainter(IconFactory.image(resource))
+  val off = painter("Tab")
+  val on = painter("TabPressed")
+//  val focus = painter("SlideCheckFocusOverlay")
 }
 
 class TabButtonPainter(paintBottom:Boolean = true) extends Painter[AbstractButton] {
@@ -324,10 +325,10 @@ class SlideCheckButton extends EPToggleButton{
 }
 
 object SlideCheckPainter {
-  def painter(resource:String) = new ImageIcon(classOf[SlideCheckPainter].getResource(resource)).getImage
-  val off = painter("/boxes/swing/SlideCheckOff.png")
-  val on = painter("/boxes/swing/SlideCheckOn.png")
-  val focus = painter("/boxes/swing/SlideCheckFocusOverlay.png")
+  def painter(resource:String) = IconFactory.image(resource)
+  val off = painter("SlideCheckOff")
+  val on = painter("SlideCheckOn")
+  val focus = painter("SlideCheckFocusOverlay")
 }
 
 class SlideCheckPainter() extends Painter[AbstractButton] {
@@ -352,11 +353,11 @@ class SlideCheckPainter() extends Painter[AbstractButton] {
 
 
 object ButtonPainter {
-  def threePartPainter(resource:String) = new ThreePartPainter(new ImageIcon(classOf[ButtonPainter].getResource(resource)).getImage)
-  val plain = threePartPainter("/boxes/swing/StandaloneButton.png")
-  val focus = threePartPainter("/boxes/swing/StandaloneButtonFocusOverlay.png")
-  val pressed = threePartPainter("/boxes/swing/StandaloneButtonPressed.png")
-  val comboArrow = new ImageIcon(classOf[ButtonPainter].getResource("/boxes/swing/ComboArrow.png")).getImage
+  def threePartPainter(resource:String) = new ThreePartPainter(IconFactory.image(resource))
+  val plain = threePartPainter("StandaloneButton")
+  val focus = threePartPainter("StandaloneButtonFocusOverlay")
+  val pressed = threePartPainter("StandaloneButtonPressed")
+  val comboArrow = IconFactory.image("ComboArrow")
   val comboArrowWidth = comboArrow.getWidth(null)
 }
 
@@ -446,10 +447,10 @@ class SwingButton(a:Action) extends EPButton(a) {
 
 object TextComponentPainter {
   val instance = new TextComponentPainter()
-  def painter(resource:String) = new ThreePartVariableHeightPainter(new ImageIcon(classOf[ButtonPainter].getResource(resource)).getImage)
-  val plain = painter("/boxes/swing/Text.png")
-  val disabled = painter("/boxes/swing/TextDisabled.png")
-  val focus = painter("/boxes/swing/TextFocusOverlay.png")
+  def painter(resource:String) = new ThreePartVariableHeightPainter(IconFactory.image(resource))
+  val plain = painter("Text")
+  val disabled = painter("TextDisabled")
+  val focus = painter("TextFocusOverlay")
 }
 
 class TextComponentPainter() extends Painter[Component] {
@@ -582,14 +583,14 @@ class SpinnerTextFieldUI extends BasicFormattedTextFieldUI {
 
 object BoxesCheckBox {
   val checkboxIcons = (
-    new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/Checkbox.png")),
-    new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/CheckboxPressed.png")),
-    new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/CheckboxFocusOverlay.png"))
+    IconFactory.icon("Checkbox"),
+    IconFactory.icon("CheckboxPressed"),
+    IconFactory.icon("CheckboxFocusOverlay")
   )
   val radioIcons = (
-    new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/Radio.png")),
-    new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/RadioPressed.png")),
-    new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/RadioFocusOverlay.png"))
+    IconFactory.icon("Radio"),
+    IconFactory.icon("RadioPressed"),
+    IconFactory.icon("RadioFocusOverlay")
   )
 }
 
@@ -691,7 +692,7 @@ class HeaderLabelUI extends BasicLabelUI {
 
 object HeaderLabel {
   val height = 22
-  val shadow = new ImageIcon(classOf[HeaderLabelUI].getResource("/boxes/swing/Shadow.png")).getImage
+  val shadow = IconFactory.image("Shadow")
   def apply(text:String, icon:Option[Icon] = None, horizontalAlignment:Int = SwingConstants.LEFT) = {
     val label = new JLabel(text, icon.getOrElse(null), horizontalAlignment)
     label.setUI(new HeaderLabelUI())

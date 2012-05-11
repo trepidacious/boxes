@@ -10,6 +10,7 @@ import java.awt.{AlphaComposite, Graphics, Image, Color, RenderingHints, BasicSt
 import boxes.{BackgroundReaction, Box, Ref, View, SwingView, Var}
 import java.util.concurrent.atomic.AtomicBoolean
 import boxes.graph.{GraphBusy, GraphLayer, Graph, GraphMouseEvent, Area, Vec2, GraphCanvas, GraphSpaces}
+import boxes.swing.icons.IconFactory
 
 class GraphCanvasFromGraphics2D(g:Graphics2D, val spaces:GraphSpaces) extends GraphCanvas {
 
@@ -256,7 +257,7 @@ class GraphBuffer(var image:BufferedImage = new BufferedImage(10, 10, BufferedIm
 
 object GraphSwingView {
 
-  def icon(name:String) = new ImageIcon(classOf[GraphSwingView].getResource("/boxes/swing/" + name + ".png"))
+  def icon(name:String) = IconFactory.icon(name)
 
   val zoom = icon("Zoom")
   val zoomIn = icon("ZoomIn")

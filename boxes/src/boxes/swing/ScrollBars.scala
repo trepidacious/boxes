@@ -11,6 +11,7 @@ import com.explodingpixels.widgets.plaf.{ScrollThumbImagePainter, ScrollBarOrien
 import com.explodingpixels.macwidgets.plaf.{ArtworkUtils, IAppScrollBarArtworkUtils}
 import com.explodingpixels.widgets.{ImageUtils, ImageBasedJComponent}
 import java.awt.{Graphics2D, Component, Dimension, Image, Rectangle, Point, Color}
+import boxes.swing.icons.IconFactory
 
 class BoxesScrollBarUI(dotModel:DotModel, plain:Boolean = false) extends SkinnableScrollBarUI(BoxesScrollBarUI.createScrollBarSkinProvider(dotModel, plain))
 
@@ -36,7 +37,7 @@ object BoxesScrollBarUI {
   }
 
   def createHorizontalScrollerThumb():ScrollThumbImagePainter = {
-    val images = ArtworkUtils.getImageSet(classOf[BoxesScrollBarUI].getResource("/boxes/swing/HorizontalThumb.png"))
+    val images = ArtworkUtils.getImageSet(classOf[BoxesScrollBarUI].getResource("/boxes/swing/icons/HorizontalThumb.png"))
 
     val disabled = horizontalScrollBarPieces(images.getInactiveImage.getImage)
     val inactive = horizontalScrollBarPieces(images.getActiveImage.getImage)
@@ -49,7 +50,7 @@ object BoxesScrollBarUI {
   }
 
   def createVerticalScrollerThumb():ScrollThumbImagePainter = {
-    val images = ArtworkUtils.getImageSet(classOf[BoxesScrollBarUI].getResource("/boxes/swing/VerticalThumb.png"))
+    val images = ArtworkUtils.getImageSet(classOf[BoxesScrollBarUI].getResource("/boxes/swing/icons/VerticalThumb.png"))
 
     val disabled = verticalScrollBarPieces(images.getInactiveImage.getImage)
     val inactive = verticalScrollBarPieces(images.getActiveImage.getImage)
@@ -100,7 +101,7 @@ object BoxesScrollBarUI {
 
   def horizontalSkin(dotModel:DotModel, plain:Boolean):ScrollBarSkin = {
     val minimumThumbSize = IAppScrollBarArtworkUtils.getHorizontalScrollBarMinimumSize()
-    val trackPainter = if(plain) new WhitePainter() else new ImagePainter(new ImageIcon(classOf[BoxesScrollBarUI].getResource("/boxes/swing/HorizontalTrack.png")).getImage)
+    val trackPainter = if(plain) new WhitePainter() else new ImagePainter(IconFactory.image("HorizontalTrack"))
     val scrollerThumb = createHorizontalScrollerThumb
     val preferredSize = new Dimension(100, defaultThickness)
 
@@ -109,7 +110,7 @@ object BoxesScrollBarUI {
 
   def verticalSkin(dotModel:DotModel, plain:Boolean):ScrollBarSkin = {
     val minimumThumbSize = IAppScrollBarArtworkUtils.getVerticalScrollBarMinimumSize()
-    val trackPainter = if (plain) new WhitePainter() else new ImagePainter(new ImageIcon(classOf[BoxesScrollBarUI].getResource("/boxes/swing/VerticalTrack.png")).getImage)
+    val trackPainter = if (plain) new WhitePainter() else new ImagePainter(IconFactory.image("VerticalTrack"))
     val scrollerThumb = createVerticalScrollerThumb()
     val preferredSize = new Dimension(defaultThickness, 100)
 
@@ -132,8 +133,8 @@ class DotModel {
 
 class DotPainter(val model:DotModel) extends Painter[Component] {
 
-  val dot = new ImageIcon(classOf[BoxesScrollBarUI].getResource("/boxes/swing/Dot.png")).getImage
-  val dotCenter = new ImageIcon(classOf[BoxesScrollBarUI].getResource("/boxes/swing/DotCenter.png")).getImage
+  val dot = IconFactory.image("Dot")
+  val dotCenter = IconFactory.image("DotCenter")
   val dotColour = new Color(222, 222, 222)
   val dotCenterColour = new Color(148, 167, 178)
 

@@ -1,4 +1,4 @@
-package boxes.swing
+package boxes.swing.icons
 
 import javax.swing.{ImageIcon, Icon}
 import javax.imageio.ImageIO
@@ -30,16 +30,16 @@ trait IconFactory {
  * in a standard directory structure and retrieved as resources
  * relative to a given class
  */
-class ResourceIconFactory(val resourceClass:Class[_], val sizeStrings:Map[IconSize, String] = Map(Small -> "small", Medium -> "medium", Large -> "large")) extends IconFactory {
-
-  override def icon(size:IconSize, category:String, name:String) = new ImageIcon(image(size, category, name))
-
-  override def image(size:IconSize, category:String, name:String) = {
-    val sizeString = sizeStrings(size)
-		val location = sizeString + "/" + category + "/" + name + ".png";
-    IconFactory.image(resourceClass, location)
-  }
-}
+//class ResourceIconFactory(val resourceClass:Class[_], val sizeStrings:Map[IconSize, String] = Map(Small -> "small", Medium -> "medium", Large -> "large")) extends IconFactory {
+//
+//  override def icon(size:IconSize, category:String, name:String) = new ImageIcon(image(size, category, name))
+//
+//  override def image(size:IconSize, category:String, name:String) = {
+//    val sizeString = sizeStrings(size)
+//		val location = sizeString + "/" + category + "/" + name + ".png";
+//    IconFactory.image(location, resourceClass)
+//  }
+//}
 
 object IconFactory {
 
@@ -54,8 +54,8 @@ object IconFactory {
     image
   }
 
-  def image(resourceClass:Class[_], location:String):Image = {
-    val resource:URL = resourceClass.getResource(location)
+  def image(name:String, resourceClass:Class[_] = classOf[IconFactory], path: String = "/boxes/swing/icons/", extension:String = ".png"):Image = {
+    val resource:URL = resourceClass.getResource(path + name + extension)
 		if (resource != null) {
 			try {
 				return ImageIO.read(resource)
@@ -66,5 +66,6 @@ object IconFactory {
       defaultImage
     }
   }
-  def icon(resourceClass:Class[_], s:String) = new ImageIcon(image(resourceClass, s))
+  
+  def icon(name:String, resourceClass:Class[_] = classOf[IconFactory], path: String = "/boxes/swing/icons/", extension:String = ".png"):Icon = new ImageIcon(image(name, resourceClass, path, extension))
 }

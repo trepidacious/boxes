@@ -10,6 +10,7 @@ import swing.{BoxesPopupView, EmbossedLabel, TabBuilder, SheetBuilder, GraphSwin
 import boxes.BoxImplicits._
 import javax.swing._
 import com.explodingpixels.macwidgets.{SourceList, SourceListItem, SourceListCategory, SourceListModel}
+import boxes.swing.icons.IconFactory
 
 object SineDemo {
 
@@ -90,20 +91,17 @@ object SineDemo {
     RadioReaction(selectEnabled, zoomEnabled, grabEnabled)
 
     val series = Cal{
-      sines().zipWithIndex.map(v => {
-        val s = v._1
-        val i = v._2
+      sines().zipWithIndex.map{case (s, i) => 
         Series(i,
           if (s.enabled()) Range(0, 100).map(x => x/100d).map(x => Vec2(x, math.sin((x + s.phase()) * 2 * 3.1415) * s.amplitude())).toList else List[Vec2](),
           Color.getHSBColor((9-i)/14f, 1f, 1f),
           2,
           if (s.points()) SeriesStyles.cross else SeriesStyles.line
         )
-      }).toList
+      }
     }
 
     import boxes.graph.Axis._
-
 
     val x = Var(0.5d)
     val xThreshold = GraphThreshold(X, x, Color.blue, "X Threshold", true)
@@ -142,7 +140,6 @@ object SineDemo {
       .view("Axis Tooltips", BooleanView(axisTooltipsEnabled))
       .view("Series Tooltips", BooleanView(seriesTooltipsEnabled))
     .panel()
-
 
     val settingsPopup = BoxesPopupView(icon = Some(SwingView.wrench), popupContents = graphProperties)
 
@@ -183,9 +180,9 @@ object SineDemo {
 
   def tabs() {
 
-    val graphIcon = new ImageIcon(classOf[SwingView].getResource("/boxes/swing/GraphTab.png"))
-    val tableIcon = new ImageIcon(classOf[SwingView].getResource("/boxes/swing/TableTab.png"))
-    val propertiesIcon = new ImageIcon(classOf[SwingView].getResource("/boxes/swing/PropertiesTab.png"))
+    val graphIcon = IconFactory.icon("GraphTab")
+    val tableIcon = IconFactory.icon("TableTab")
+    val propertiesIcon = IconFactory.icon("PropertiesTab")
 
     val frame = new JFrame("Boxes UI Sine Demo")
 

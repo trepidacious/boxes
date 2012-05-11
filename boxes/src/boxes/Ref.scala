@@ -8,12 +8,11 @@ trait ValGeneral[T, C] extends RefGeneral[T, C]
 
 trait VarGeneral[T, C] extends RefGeneral[T, C]{
   def update(newT:T)
+  def <<(c: =>T) = Reaction(this, c)
 }
 
 trait Ref[T] extends RefGeneral[T, SingleChange[T]]
-trait Var[T] extends VarGeneral[T, SingleChange[T]] with Ref[T] {
-  def <<(c: =>T) = Reaction(this, c)
-}
+trait Var[T] extends VarGeneral[T, SingleChange[T]] with Ref[T]
 trait Val[T] extends ValGeneral[T, SingleChange[T]] with Ref[T]
 
 case class SingleChange[T] (newValue:T)

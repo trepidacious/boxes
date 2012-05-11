@@ -8,6 +8,7 @@ import java.awt.{Graphics, Graphics2D, BorderLayout, Component}
 import javax.swing.{Icon, JComponent, SwingUtilities, JPopupMenu}
 import boxes.{SwingView, Val, RefGeneral, View}
 import java.lang.ref.PhantomReference
+import boxes.swing.icons.IconFactory
 
 private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:Component, invoker:Component) extends PopupMenuListener {
 
@@ -118,8 +119,8 @@ class BoxesPopupView(n:RefGeneral[String,_] = Val(""), icon:RefGeneral[Option[Ic
 }
 
 object ToolbarPopupButton {
-  val popupIndicator = SwingView.icon("PopupIndicator").getImage
-  val popupBorderCutout = SwingView.icon("PopupBorderCutout").getImage
+  val popupIndicator = IconFactory.image("PopupIndicator")
+  val popupBorderCutout = IconFactory.image("PopupBorderCutout")
 }
 
 class ToolbarPopupButton(val sv:SwingView) extends EPToggleButton{

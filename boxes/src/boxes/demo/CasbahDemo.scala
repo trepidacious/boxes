@@ -15,6 +15,10 @@ import com.mongodb.casbah.Imports._
 object CasbahDemo {
 
   def main(args: Array[String]) {
+    val mongoConn = MongoConnection()
+    val nanos = mongoConn("nanos")
+    val plates = nanos("plates")
+    plates.foreach(println(_))
   }
 
 }

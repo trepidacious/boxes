@@ -14,6 +14,7 @@ import java.awt.{Graphics2D, Graphics, Color, Component}
 import table.{DefaultTableCellRenderer, TableCellEditor}
 import java.awt.event.{MouseEvent, MouseAdapter, ActionEvent, KeyEvent}
 import java.util.EventObject
+import boxes.swing.icons.IconFactory
 
 /**
  * Implements a {@link CellEditor} that uses a {@link JFormattedTextField}
@@ -220,8 +221,8 @@ class BoxesTableCellRenderer extends DefaultTableCellRenderer {
 }
 
 object BooleanCellRenderer {
-  val tick = new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/CheckboxPressed.png"))
-  val untick = new ImageIcon(classOf[BoxesCheckBox].getResource("/boxes/swing/Checkbox.png"))
+  val tick = IconFactory.icon("CheckboxPressed")
+  val untick = IconFactory.icon("Checkbox")
   val opaque = new BooleanCellRenderer(true)
   val transparent = new BooleanCellRenderer(false)
 }

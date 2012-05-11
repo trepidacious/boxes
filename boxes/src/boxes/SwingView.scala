@@ -18,6 +18,7 @@ import util.{NumericClass, GConverter, OptionTConverter, TConverter, CoalescingR
 import javax.swing.{ScrollPaneConstants, JTable, JSpinner, SpinnerModel, SpinnerNumberModel, JProgressBar, JSlider, BoundedRangeModel, DefaultBoundedRangeModel, SwingConstants, Icon, JTextArea, JScrollPane, JTextField, JLabel, JComponent, ImageIcon, UIManager, SwingUtilities}
 import com.explodingpixels.swingx.EPPanel
 import java.awt.{BorderLayout, AlphaComposite, Dimension, BasicStroke, RenderingHints, Graphics2D, Color, Component}
+import boxes.swing.icons.IconFactory
 
 object SwingView {
 
@@ -25,7 +26,7 @@ object SwingView {
   val responder = new CoalescingResponder(respond)
   val lock = new Object()
 
-  def icon(name:String) = new ImageIcon(classOf[SwingView].getResource("/boxes/swing/" + name + ".png"))
+  def icon(name:String) = IconFactory.icon(name)
 
   val wrench = icon("Wrench")
 
@@ -96,8 +97,7 @@ object SwingView {
           UIManager.put("Table.selectionForeground", selectedTextColor)
           UIManager.put("Table.selectionBackground", selectionColor)
           UIManager.put("Table.focusCellHighlightBorder", new MatteBorder(1, 1, 1, 1, selectionColor.darker.darker))
-          UIManager.put("CheckBox.icon", new ImageIcon(classOf[SwingView].getResource("/boxes/swing/Checkbox.png")))
-
+          UIManager.put("CheckBox.icon", IconFactory.icon("Checkbox"))
         }
       }
     } catch {

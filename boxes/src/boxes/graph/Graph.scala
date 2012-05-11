@@ -7,6 +7,7 @@ import list.ListVal
 import java.awt.geom.Rectangle2D
 import com.explodingpixels.widgets.ImageUtils
 import java.awt.{Color, Image}
+import boxes.swing.icons.IconFactory
 
 object Axis extends Enumeration {
   type Axis = Value
@@ -423,7 +424,7 @@ class GraphHighlight extends UnboundedGraphDisplayLayer {
 }
 
 object GraphBusy {
-  val pencil = new ImageIcon(classOf[GraphShadow].getResource("/boxes/swing/GraphPencil.png")).getImage
+  val pencil = IconFactory.image("GraphPencil")
 }
 
 class GraphBusy(val alpha:Var[Double]) extends UnboundedGraphDisplayLayer {
@@ -440,9 +441,9 @@ class GraphBusy(val alpha:Var[Double]) extends UnboundedGraphDisplayLayer {
 }
 
 object GraphShadow {
-  val topLeft = new ImageIcon(classOf[GraphShadow].getResource("/boxes/swing/GraphShadowTopLeft.png")).getImage
-  val top = new ImageIcon(classOf[GraphShadow].getResource("/boxes/swing/GraphShadowTop.png")).getImage
-  val left = new ImageIcon(classOf[GraphShadow].getResource("/boxes/swing/GraphShadowLeft.png")).getImage
+  val topLeft = IconFactory.image("GraphShadowTopLeft")
+  val top = IconFactory.image("GraphShadowTop")
+  val left = IconFactory.image("GraphShadowLeft")
 }
 
 class GraphShadow extends UnboundedGraphDisplayLayer {
@@ -602,6 +603,36 @@ object GraphZoomBox {
   }
 }
 
+object GraphClick{
+  def apply[K](enabled:RefGeneral[Boolean, _] = Val(true), selectionOut:VarGeneral[Set[K], _]) = new GraphClick(enabled, selectionOut)
+}
+
+class GraphClick[K](enabled:RefGeneral[Boolean, _] = Val(true), selectionOut:VarGeneral[Set[K], _]) extends GraphLayer {
+
+  def paint() = (canvas:GraphCanvas) => {}
+
+  def onMouse(current:GraphMouseEvent) = {
+    if (enabled()) {
+      Box.transact{
+        current.eventType match {
+          case RELEASE => {
+            //Find closest series, and select it
+            println("Got a release!")
+            true
+          }
+          case _ => false
+        }
+      }
+    } else {
+      false
+    }
+  }
+
+  val dataBounds = Val(None:Option[Area])
+
+}
+
+
 object GraphGrab{
   def apply(enabled:RefGeneral[Boolean, _] = Val(true), manualDataArea:VarGeneral[Option[Area], _], displayedDataArea:RefGeneral[Area, _]) = new GraphGrab(enabled, manualDataArea, displayedDataArea)
 }
@@ -696,8 +727,8 @@ class GraphThreePartPainterVertical(image:Image) {
 object AxisTooltip {
   val format = new DecimalFormat("0.0000")
   def apply(axis:Axis, enabled:RefGeneral[Boolean, _] = Val(true)) = new AxisTooltip(axis, enabled)
-  val horizTabPainter = new GraphThreePartPainter(new ImageIcon(classOf[AxisTooltip].getResource("/boxes/swing/HorizontalLineLabel.png")).getImage)
-  val vertTabPainter = new GraphThreePartPainterVertical(new ImageIcon(classOf[AxisTooltip].getResource("/boxes/swing/VerticalLineLabel.png")).getImage)
+  val horizTabPainter = new GraphThreePartPainter(IconFactory.image("HorizontalLineLabel"))
+  val vertTabPainter = new GraphThreePartPainterVertical(IconFactory.image("VerticalLineLabel"))
   val lineColor = SwingView.shadedBoxColor
 
   def drawAxisLine(canvas:GraphCanvas, v:Double, a:Axis, label:String, color:Option[Color]) = {
@@ -834,6 +865,22 @@ class GraphBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], enabled:
           })
           true
         }
+        
+//        case RELEASE => area() match {
+//          case None => false
+//          case Some(a) => {
+//            area() = None
+//            val dragArea = Area(a.origin, e.dataPoint - a.origin)
+//            val pixelDragArea = e.spaces.toPixel(dragArea)
+//            if (bigEnough(pixelDragArea)) {
+//              action.apply(dragArea, e.spaces)
+//              true
+//            } else {
+//              false
+//            }
+//          }
+//        }
+        
         case RELEASE => {
           area().foreach(a => {
             area() = None
@@ -956,6 +1003,8 @@ object GraphBasic {
         AxisTooltip(X, axisTooltipsEnabled),
         AxisTooltip(Y, axisTooltipsEnabled),
         SeriesTooltips.string(series, seriesTooltipsEnabled)
+                      //TODO is this in the right place?
+        //GraphClick(Val(true), selection)
       )
     )
 

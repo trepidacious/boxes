@@ -14,6 +14,7 @@ import javax.swing._
 import border.EmptyBorder
 import boxes.BoxImplicits._
 import boxes.swing.{EmbossedLabel, TabBuilder, TabSpacer, SheetBuilder, BoxesDropdownView, SwingButton, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
+import boxes.swing.icons.IconFactory
 
 import com.mongodb.casbah.Imports._
 
@@ -990,9 +991,9 @@ object BoxesDemo {
 
   def tabs() {
 
-    val graphIcon = new ImageIcon(classOf[SwingView].getResource("/boxes/swing/GraphTab.png"))
-    val tableIcon = new ImageIcon(classOf[SwingView].getResource("/boxes/swing/TableTab.png"))
-    val propertiesIcon = new ImageIcon(classOf[SwingView].getResource("/boxes/swing/PropertiesTab.png"))
+    val graphIcon = IconFactory.icon("GraphTab")
+    val tableIcon = IconFactory.icon("TableTab")
+    val propertiesIcon = IconFactory.icon("PropertiesTab")
 
     val frame = new JFrame()
 
