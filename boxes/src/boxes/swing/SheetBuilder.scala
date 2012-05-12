@@ -3,7 +3,6 @@ package boxes.swing
 import com.jgoodies.forms.builder.DefaultFormBuilder
 import com.jgoodies.forms.layout.{ConstantSize, CellConstraints, FormLayout}
 import java.awt.{Dimension}
-import boxes.{BoxesScrollPane, Label, SwingView}
 import javax.swing.{JLabel, SwingConstants, JComponent}
 
 object SheetBuilder {

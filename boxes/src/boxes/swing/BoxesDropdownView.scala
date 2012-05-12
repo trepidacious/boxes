@@ -2,7 +2,7 @@ package boxes.swing
 
 import java.awt.{Toolkit, Dimension, Color, BorderLayout, Component}
 import javax.swing.event.{PopupMenuEvent, PopupMenuListener}
-import boxes.{SwingView, Cal, LabelOptionView, LedgerView, VarGeneral, Ledger, RefGeneral}
+import boxes.{Cal, VarGeneral, Ledger, RefGeneral}
 import javax.swing.{JComponent, SwingConstants, KeyStroke, JInternalFrame, AbstractAction, JToggleButton, SwingUtilities, JPopupMenu}
 import javax.swing.border.{EmptyBorder, MatteBorder}
 import java.awt.event.{FocusEvent, FocusAdapter, MouseEvent, MouseAdapter, KeyEvent, KeyAdapter, ActionEvent, ActionListener}

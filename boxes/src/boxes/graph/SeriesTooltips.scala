@@ -1,7 +1,8 @@
 package boxes.graph
 
 import boxes.graph.GraphMouseEventType._
-import boxes.{Var, SwingView, Val, RefGeneral}
+import boxes.{Var, Val, RefGeneral}
+import boxes.swing.SwingView
 import java.awt.geom.{Line2D}
 
 trait SeriesTooltipRenderer[K] {

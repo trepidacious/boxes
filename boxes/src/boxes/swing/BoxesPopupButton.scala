@@ -6,7 +6,7 @@ import com.explodingpixels.swingx.EPToggleButton
 import javax.swing.border.{EmptyBorder}
 import java.awt.{Graphics, Graphics2D, BorderLayout, Component}
 import javax.swing.{Icon, JComponent, SwingUtilities, JPopupMenu}
-import boxes.{SwingView, Val, RefGeneral, View}
+import boxes.{Val, RefGeneral, View}
 import java.lang.ref.PhantomReference
 import boxes.swing.icons.IconFactory
 

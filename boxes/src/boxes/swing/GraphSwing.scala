@@ -7,7 +7,7 @@ import boxes.graph.GraphMouseEventType._
 import boxes.graph.GraphMouseButton._
 import java.awt.geom.{Rectangle2D, PathIterator, Path2D, AffineTransform}
 import java.awt.{AlphaComposite, Graphics, Image, Color, RenderingHints, BasicStroke, Graphics2D}
-import boxes.{BackgroundReaction, Box, Ref, View, SwingView, Var}
+import boxes.{BackgroundReaction, Box, Ref, View, Var}
 import java.util.concurrent.atomic.AtomicBoolean
 import boxes.graph.{GraphBusy, GraphLayer, Graph, GraphMouseEvent, Area, Vec2, GraphCanvas, GraphSpaces}
 import boxes.swing.icons.IconFactory

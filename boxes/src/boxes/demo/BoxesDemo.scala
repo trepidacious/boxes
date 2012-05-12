@@ -15,6 +15,7 @@ import border.EmptyBorder
 import boxes.BoxImplicits._
 import boxes.swing.{EmbossedLabel, TabBuilder, TabSpacer, SheetBuilder, BoxesDropdownView, SwingButton, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
 import boxes.swing.icons.IconFactory
+import boxes.swing._
 
 import com.mongodb.casbah.Imports._
 

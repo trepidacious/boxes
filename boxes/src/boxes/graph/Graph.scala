@@ -8,6 +8,7 @@ import java.awt.geom.Rectangle2D
 import com.explodingpixels.widgets.ImageUtils
 import java.awt.{Color, Image}
 import boxes.swing.icons.IconFactory
+import boxes.swing.SwingView
 
 object Axis extends Enumeration {
   type Axis = Value

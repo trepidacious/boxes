@@ -2,7 +2,6 @@ package boxes.swing
 
 import javax.swing.plaf.basic.BasicSliderUI
 import javax.swing.{JComponent, ImageIcon, JSlider}
-import boxes.SwingView
 import java.awt.{Graphics2D, Graphics, Dimension}
 import boxes.swing.icons.IconFactory
 

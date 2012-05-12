@@ -1,13 +1,13 @@
 package boxes.swing
 
 import java.awt.event.ActionEvent
-import boxes.{SwingView, View, Op}
 import boxes.list.{ListMultiDeleteOp, ListDeleteOp, ListMultiAddOp, ListAddOp, ListMoveOp, ListMultiMoveOp}
 import javax.swing._
 import border.EmptyBorder
 import com.explodingpixels.swingx.EPPanel
 import java.awt.{BorderLayout, Component}
 import boxes.swing.icons.IconFactory
+import boxes._
 
 //TODO should make an ExtendedOp that has a name:Ref[String] and icon:Ref[Icon] (not sure about
 //icon, maybe make return an image?, and an Action that is a view of these.

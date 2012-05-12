@@ -11,6 +11,7 @@ import boxes.BoxImplicits._
 import javax.swing._
 import com.explodingpixels.macwidgets.{SourceList, SourceListItem, SourceListCategory, SourceListModel}
 import boxes.swing.icons.IconFactory
+import boxes.swing._
 
 object SineDemo {
 

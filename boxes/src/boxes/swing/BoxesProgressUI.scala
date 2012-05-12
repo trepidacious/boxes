@@ -4,7 +4,6 @@ import javax.swing.plaf.basic.BasicProgressBarUI
 import javax.swing.{ImageIcon, JComponent}
 import sun.swing.SwingUtilities2
 import java.awt.{Color, Rectangle, Graphics, Graphics2D}
-import boxes.SwingView
 import boxes.swing.icons.IconFactory
 
 object BoxesProgressUI {

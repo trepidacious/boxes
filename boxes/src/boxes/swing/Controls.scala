@@ -5,7 +5,7 @@ import javax.swing.border.EmptyBorder
 import java.awt.event.{FocusEvent, FocusListener}
 import java.beans.{PropertyChangeListener, PropertyChangeEvent}
 import com.explodingpixels.painter.Painter
-import boxes.{Op, SwingView}
+import boxes.Op
 import com.explodingpixels.swingx.{EPPanel, EPToggleButton, EPButton}
 import sun.swing.SwingUtilities2
 import javax.swing.text.{JTextComponent}

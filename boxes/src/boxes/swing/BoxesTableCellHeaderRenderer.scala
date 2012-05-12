@@ -5,7 +5,6 @@ import javax.swing.table.{DefaultTableCellRenderer}
 import javax.swing._
 import java.awt._
 import com.explodingpixels.painter.Painter
-import boxes.SwingView
 import boxes.swing.icons.IconFactory
 
 object HeaderPainter {

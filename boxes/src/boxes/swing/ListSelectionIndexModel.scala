@@ -5,7 +5,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener
-import boxes.{VarGeneral, SwingView, View}
+import boxes.{VarGeneral, View}
 
 /**
  * View/edit a Var[Int] as the selected index of a ListSelectionModel

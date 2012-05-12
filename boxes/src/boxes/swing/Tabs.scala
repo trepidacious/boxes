@@ -3,7 +3,7 @@ package boxes.swing
 import boxes.general.RadioReaction
 import java.awt.{CardLayout, BorderLayout, Dimension, Container, Component, LayoutManager}
 import javax.swing.{JPanel, Icon, JComponent}
-import boxes.{SwingView, View, BooleanControlType, BooleanView, Val, RefGeneral, Var}
+import boxes.{View, Val, RefGeneral, Var}
 
 object VerticalTabLayout {
   def apply(tabWidth:Int = 64, tabHeight:Int = 64) = new VerticalTabLayout(tabWidth, tabHeight)
