@@ -160,12 +160,6 @@ object SineDemo {
     panel
   }
 
-  def swingRun(r : => Unit) {
-    SwingUtilities.invokeLater(new Runnable(){
-      override def run = r
-    })
-  }
-
   def properties(sine:Ref[Option[Sine]]) = {
     val nameView = StringOptionView(for (s <- sine()) yield s.name)
     val amplitudeView = NumberOptionView(for (s <- sine()) yield s.amplitude)
@@ -246,7 +240,7 @@ object SineDemo {
   }
 
   def main(args: Array[String]) {
-    swingRun{
+    SwingView.swingRun{
       SwingView.nimbus()
       tabs
       source

@@ -95,8 +95,9 @@ class BoxesPopupView(n:RefGeneral[String,_] = Val(""), icon:RefGeneral[Option[Ic
 
   //Update display if necessary
   private def display(newN:String, newIcon:Option[Icon]) {
-    if (newN != component.getText) {
-      component.setText(newN)
+    val newNPadded = if (newN == "") "" else newN + " "
+    if (newNPadded != component.getText) {
+      component.setText(newNPadded)
     }
     val iconOrNull = newIcon.getOrElse(null)
     if (iconOrNull != component.getIcon) {
