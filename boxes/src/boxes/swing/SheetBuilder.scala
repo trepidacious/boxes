@@ -18,7 +18,7 @@ class SheetBuilder {
   builder.setLineGapSize(new ConstantSize(2, ConstantSize.PIXEL))
 
   def separator(text:String) = {
-    val label = HeaderLabel(text)
+    val label = HeaderLabel(text, topLine = builder.getRowCount() != 0)
     builder.append(label, 6)
     this
   }
@@ -26,6 +26,13 @@ class SheetBuilder {
   def blankTop() = {
     val label = new JLabel("")
     label.setPreferredSize(new Dimension(10, 9))
+    builder.append(label, 6)
+    this
+  }
+
+  def aboveSeparator() = {
+    val label = new JLabel("")
+    label.setPreferredSize(new Dimension(10, 3))
     builder.append(label, 6)
     this
   }

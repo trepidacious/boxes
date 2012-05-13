@@ -5,48 +5,38 @@ import java.awt.event.{ActionEvent, ActionListener}
 import com.explodingpixels.swingx.EPToggleButton
 import javax.swing.border.{EmptyBorder}
 import java.awt.{Graphics, Graphics2D, BorderLayout, Component}
-import javax.swing.{Icon, JComponent, SwingUtilities, JPopupMenu}
+import javax.swing.{Icon, JComponent, SwingUtilities, JPopupMenu, JDialog}
 import boxes.{Val, RefGeneral, View}
 import java.lang.ref.PhantomReference
 import boxes.swing.icons.IconFactory
+import java.awt.event.{WindowFocusListener, WindowEvent, WindowListener, WindowStateListener, ComponentListener, ComponentEvent}
+import java.awt.Point
 
-private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:Component, invoker:Component) extends PopupMenuListener {
+private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:Component, invoker:Component) extends WindowListener with ComponentListener {
 
-  private val xOffset = -16
+  private val xOffset = 0
 
-  val popup = new JPopupMenu();
-  popup.removeAll()
-  popup.setLayout(new BorderLayout())
-  popup.add(popupComponent, BorderLayout.CENTER)
-  popup.addPopupMenuListener(this)
-
+  val popup = new JDialog()
+  
+  popup.getContentPane().add(popupComponent)
+  popup.setUndecorated(true)
   popup.pack()
-
-
-  def hide() {
+  
+  popup.addWindowListener(this)
+  override def windowOpened(e: WindowEvent) {}
+  override def windowClosing(e: WindowEvent) {}
+  override def windowClosed(e: WindowEvent) {}
+  override def windowIconified(e: WindowEvent) {}
+  override def windowDeiconified(e: WindowEvent) {}
+  override def windowActivated(e: WindowEvent) {}
+  override def windowDeactivated(e: WindowEvent) {
     popup.setVisible(false)
   }
 
-  def show() = {
-    //Use size of component and add on the border ourselves - the JPopupMenu has size 0,0 until shown for first time
-//    val ph = popup.getHeight
-    val ph = popupComponent.getPreferredSize.height + 2
-
-    //Find position relative to invoker - if we would appear (partially) off screen top, display below
-    //instead of above
-    var y = - ph + 1;
-    var top = false;
-    if (invoker.getLocationOnScreen.getY + y < 0) {
-      y = invoker.getHeight;
-      top = true;
-    }
-
-    popup.setBorder(new PopupBorder(4 - xOffset, top))
-    popup.pack();
-
-    popup.show(invoker, xOffset, y);
-
-    //Start with correct component focused
+  popup.addComponentListener(this)
+  override def componentResized(e: ComponentEvent) {}
+  override def componentMoved(e: ComponentEvent) {}
+  override def componentShown(e: ComponentEvent) {
     SwingUtilities.invokeLater(new Runnable() {
       override def run() {
         if (focusComponent != null) {
@@ -54,24 +44,55 @@ private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:C
         }
       }
     })
-
-    top
   }
-
-  override def popupMenuWillBecomeVisible(e:PopupMenuEvent) {
-    //Note - height still not known here, so no chance to reposition
-  }
-
-  override def popupMenuWillBecomeInvisible(e:PopupMenuEvent) {
+  
+  override def componentHidden(e: ComponentEvent) {
     invoker match {
       case button:ToolbarPopupButton => {
         button.setSelected(false)
         button.indicator(0)
+        //TODO make this simpler
+        //This is a little hacky... if the dialog loses focus from a click, and that click
+        //is on the button, we will hide, and then set the button not selected, then the button
+        //can get the click and reselect itself, showing the dialog again. Note that this happens
+        //unpredictably. So to avoid it, we disable the button while we hide the dialog, and then reenable
+        //with invoke later, which will only happen after the click has definitely left the event queue.
+        if (button.isEnabled()) {
+          button.setEnabled(false)
+          SwingUtilities.invokeLater(new Runnable() {
+            override def run() {
+              button.setEnabled(true)
+            }
+          })
+        }        
       }
     }
   }
 
-  override def popupMenuCanceled(e:PopupMenuEvent) {}
+  def show() = {
+    //Use size of component and add on the border ourselves - the JPopupMenu has size 0,0 until shown for first time
+//    val ph = popup.getHeight
+    val ph = popupComponent.getPreferredSize.height + 4
+
+    //Find position relative to invoker - if we would appear (partially) off screen top, display below
+    //instead of above
+    var y = - ph + 1;
+    var top = false;
+    if (invoker.getLocationOnScreen.getY + y < 0) {
+      y = invoker.getHeight + 4;
+      top = true;
+    }
+
+//    popup.setBorder(new PopupBorder(4 - xOffset, top))
+    popup.pack();
+
+//    popup.show(invoker, xOffset, y);
+    //popup.setLocationRelativeTo(invoker)
+    popup.setLocation(new Point(invoker.getLocationOnScreen().x + xOffset, invoker.getLocationOnScreen().y + y))
+    popup.setVisible(true)
+
+    top
+  }
 }
 
 object BoxesPopupView {
@@ -135,21 +156,21 @@ class ToolbarPopupButton(val sv:SwingView) extends EPToggleButton{
 
   def indicator(i:Int) {
     indicator = i
-    repaint()
+//    repaint()
   }
 
-  override def paintComponent(g:Graphics) {
-    super.paintComponent(g)
-    val g2 = g.asInstanceOf[Graphics2D]
-    if (getModel.isSelected || getModel.isPressed) {
-      val i = ToolbarPopupButton.popupIndicator
-      if (indicator > 0) {
-        g2.drawImage(i, 0, getHeight, i.getWidth(null), -i.getHeight(null), null)
-      } else if (indicator < 0) {
-        g2.drawImage(i, 0, 1, null)
-      }
-    }
-  }
+//  override def paintComponent(g:Graphics) {
+//    super.paintComponent(g)
+//    val g2 = g.asInstanceOf[Graphics2D]
+//    if (getModel.isSelected || getModel.isPressed) {
+//      val i = ToolbarPopupButton.popupIndicator
+//      if (indicator > 0) {
+//        g2.drawImage(i, 0, getHeight, i.getWidth(null), -i.getHeight(null), null)
+//      } else if (indicator < 0) {
+//        g2.drawImage(i, 0, 1, null)
+//      }
+//    }
+//  }
 }
 
 

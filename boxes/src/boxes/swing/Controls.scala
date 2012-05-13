@@ -13,6 +13,7 @@ import javax.swing.plaf.basic.{BasicButtonUI, BasicLabelUI, BasicGraphicsUtils, 
 import java.awt.{Rectangle, Dimension, Component, Image, Graphics2D, RenderingHints, Graphics, Color}
 import javax.swing.{JToggleButton, SwingConstants, JLabel, Action, Icon, JCheckBox, JTextArea, JTextField, AbstractButton, JComponent}
 import boxes.swing.icons.IconFactory
+import javax.swing.border.{CompoundBorder, MatteBorder}
 
 object BarStylePainter {
   val dividerColor = new Color(0, 0, 0, 51)
@@ -693,10 +694,14 @@ class HeaderLabelUI extends BasicLabelUI {
 object HeaderLabel {
   val height = 22
   val shadow = IconFactory.image("Shadow")
-  def apply(text:String, icon:Option[Icon] = None, horizontalAlignment:Int = SwingConstants.LEFT) = {
+  def apply(text:String, icon:Option[Icon] = None, horizontalAlignment:Int = SwingConstants.LEFT, topLine:Boolean = false) = {
     val label = new JLabel(text, icon.getOrElse(null), horizontalAlignment)
     label.setUI(new HeaderLabelUI())
-    label.setBorder(new EmptyBorder(7, 8, 16, 8))
+    if (topLine) {
+      label.setBorder(new CompoundBorder(new MatteBorder(1, 0, 0, 0, SwingView.dividingColor), new EmptyBorder(7, 8, 16, 8)))
+    } else {
+      label.setBorder(new EmptyBorder(7, 8, 16, 8))      
+    }
     label.setPreferredSize(new Dimension(26, height + 10))
     label
   }

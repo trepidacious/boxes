@@ -3,7 +3,7 @@ package boxes.swing
 import java.awt.{Toolkit, Dimension, Color, BorderLayout, Component}
 import javax.swing.event.{PopupMenuEvent, PopupMenuListener}
 import boxes.{Cal, VarGeneral, Ledger, RefGeneral}
-import javax.swing.{JComponent, SwingConstants, KeyStroke, JInternalFrame, AbstractAction, JToggleButton, SwingUtilities, JPopupMenu}
+import javax.swing.{JComponent, SwingConstants, KeyStroke, JInternalFrame, AbstractAction, JToggleButton, SwingUtilities, JPopupMenu, JComboBox}
 import javax.swing.border.{EmptyBorder, MatteBorder}
 import java.awt.event.{FocusEvent, FocusAdapter, MouseEvent, MouseAdapter, KeyEvent, KeyAdapter, ActionEvent, ActionListener}
 
@@ -12,6 +12,9 @@ class BoxesDropdownView(v:RefGeneral[_<:Ledger,_], i:VarGeneral[Option[Int], _],
   val component = new DropdownButton()
 
   private val button = component
+  
+//  val preventHide = new JComboBox().getClientProperty("doNotCancelPopup");
+//  button.putClientProperty("doNotCancelPopup", preventHide);
 
   private val ledgerScrollView = LedgerView.singleSelectionScroll(v, i, sorting)
 
@@ -20,10 +23,11 @@ class BoxesDropdownView(v:RefGeneral[_<:Ledger,_], i:VarGeneral[Option[Int], _],
   //In any case, in the long term, when we have a LAbelView that accepts an arbitrary data type and associated renderer,
   //we can get rid of the to toString.
   private val selectedString = Cal{
-    for (index <- i() if (index >= 0 && index < v().recordCount)) yield v().apply(index, 0).toString
+    val str = for (index <- i() if (index >= 0 && index < v().recordCount)) yield v().apply(index, 0).toString
+    str.getOrElse("No Selection")
   }
 
-  private val labelView = LabelOptionView(selectedString)
+  private val labelView = LabelView(selectedString)
   labelView.component.setBorder(new EmptyBorder(0, 0, 0, 0))
 
   button.add(labelView.component)

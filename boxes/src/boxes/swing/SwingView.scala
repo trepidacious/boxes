@@ -19,12 +19,16 @@ import com.explodingpixels.swingx.EPPanel
 import java.awt.{BorderLayout, AlphaComposite, Dimension, BasicStroke, RenderingHints, Graphics2D, Color, Component}
 import boxes.swing.icons.IconFactory
 import boxes._
+import java.text.DecimalFormat
 
 object SwingView {
 
+  val defaultDecimalFormat = new DecimalFormat("0.#")
   val viewToUpdates = new mutable.WeakHashMap[Any, mutable.ListBuffer[() => Unit]]()
   val responder = new CoalescingResponder(respond)
   val lock = new Object()
+  
+  def format(d:Double) = defaultDecimalFormat.format(d)
 
   def icon(name:String) = IconFactory.icon(name)
 
