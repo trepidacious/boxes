@@ -4,7 +4,7 @@ import scala.collection.mutable._
 
 object Reaction {
 
-  class SingleTargetReaction[T](v:VarGeneral[T, _], result: =>T, name:String = "Unnamed Reaction") extends Reaction {
+  class SingleTargetReaction[T](v:VarGeneral[T, _], result: =>T) extends Reaction {
 
     def respond : (()=>Unit) = {
       //First apply the function, so that any reads are performed now
@@ -16,12 +16,36 @@ object Reaction {
 
     def isView = false
 
-    override def toString = "STR: " + name
+  }
+
+  def apply[T](v:VarGeneral[T, _], result: =>T) = {
+    val r = new SingleTargetReaction(v, result)
+    Box.registerReaction(r)
+    v.retainReaction(r)
+    r
+  }
+}
+
+object OptionalReaction {
+  
+  class OptionalSingleTargetReaction[T](v:VarGeneral[T, _], result: =>Option[T]) extends Reaction {
+
+    def respond : (()=>Unit) = {
+      //First apply the function, so that any reads are performed now
+      val r = result
+
+      //If there is a result, apply it later, otherwise do nothing
+      result.map{ rVal => 
+        {() => (v() = rVal)}
+      }.getOrElse({() => ()})
+    }
+
+    def isView = false
 
   }
 
-  def apply[T](v:VarGeneral[T, _], result: =>T, name:String = "Unnamed Reaction") = {
-    val r = new SingleTargetReaction(v, result, name)
+  def apply[T](v:VarGeneral[T, _], result: =>Option[T]) = {
+    val r = new OptionalSingleTargetReaction(v, result)
     Box.registerReaction(r)
     v.retainReaction(r)
     r

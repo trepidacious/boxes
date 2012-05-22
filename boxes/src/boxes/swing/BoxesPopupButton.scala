@@ -50,7 +50,6 @@ private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:C
     invoker match {
       case button:ToolbarPopupButton => {
         button.setSelected(false)
-        button.indicator(0)
         //TODO make this simpler
         //This is a little hacky... if the dialog loses focus from a click, and that click
         //is on the button, we will hide, and then set the button not selected, then the button
@@ -132,8 +131,6 @@ class BoxesPopupView(n:RefGeneral[String,_] = Val(""), icon:RefGeneral[Option[Ic
     def actionPerformed(e: ActionEvent) {
       if (component.isSelected) {
         val top = handler.show()
-        //Handle the direction of the popup indicator (to link with popup above or below)
-        component.indicator(if (top) 1 else -1)
       }
     }
   })
@@ -151,26 +148,6 @@ class ToolbarPopupButton(val sv:SwingView) extends EPToggleButton{
     setContentAreaFilled(false)
     setBackgroundPainter(new BarStyleToggleButtonPainter())
   }
-
-  var indicator = 0
-
-  def indicator(i:Int) {
-    indicator = i
-//    repaint()
-  }
-
-//  override def paintComponent(g:Graphics) {
-//    super.paintComponent(g)
-//    val g2 = g.asInstanceOf[Graphics2D]
-//    if (getModel.isSelected || getModel.isPressed) {
-//      val i = ToolbarPopupButton.popupIndicator
-//      if (indicator > 0) {
-//        g2.drawImage(i, 0, getHeight, i.getWidth(null), -i.getHeight(null), null)
-//      } else if (indicator < 0) {
-//        g2.drawImage(i, 0, 1, null)
-//      }
-//    }
-//  }
 }
 
 

@@ -99,11 +99,11 @@ class BoxSpec extends WordSpec {
       val x = Var(2d)
       val doubleX = Var(0d)
 
-      Reaction(doubleX, x()*2d, "doubleX = 2 * x")
+      Reaction(doubleX, x()*2d)
       assert(x() === 2d)
       assert(doubleX() === 4d)
 
-      Reaction(x, doubleX()/2d, "x = doubleX / 2")
+      Reaction(x, doubleX()/2d)
       assert(x() === 2d)
       assert(doubleX() === 4d)
 
@@ -124,11 +124,11 @@ class BoxSpec extends WordSpec {
       val x = Var(2d)
       val y = Var(0d)
 
-      Reaction(y, x() * 2, "double")
+      Reaction(y, x() * 2)
       assert(x() === 2d)
       assert(y() === 4d)
 
-      Reaction(y, x() * 2, "also double")
+      Reaction(y, x() * 2)
       assert(x() === 2d)
       assert(y() === 4d)
     }
@@ -137,10 +137,10 @@ class BoxSpec extends WordSpec {
       val x = Var(2d)
       val y = Var(0d)
 
-      Reaction(y, x() * 2, "double")
+      Reaction(y, x() * 2)
 
       intercept[FailedReactionsException] {
-        Reaction(y, x() * 4, "quadruple")
+        Reaction(y, x() * 4)
       }
 
     }

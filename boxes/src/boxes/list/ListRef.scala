@@ -38,6 +38,7 @@ trait ListVar[T] extends ListRef[T] with VarGeneral[List[T], ListChange] {
   def insert(i:Int, e:T*)
   def remove(i:Int, c:Int)
   override def <<(c: =>List[T]) = Reaction(this, c)
+  override def <<?(c: =>Option[List[T]]) = OptionalReaction(this, c)
 }
 
 trait ListVal[T] extends ListRef[T] with ValGeneral[List[T], ListChange]

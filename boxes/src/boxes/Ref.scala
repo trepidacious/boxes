@@ -1,14 +1,15 @@
 package boxes
 
-trait RefGeneral[T, C] extends Box[C] {
+trait RefGeneral[+T, C] extends Box[C] {
   def apply():T
 }
 
-trait ValGeneral[T, C] extends RefGeneral[T, C]
+trait ValGeneral[+T, C] extends RefGeneral[T, C]
 
 trait VarGeneral[T, C] extends RefGeneral[T, C]{
   def update(newT:T)
   def <<(c: =>T) = Reaction(this, c)
+  def <<?(c: =>Option[T]) = OptionalReaction(this, c)
 }
 
 trait Ref[T] extends RefGeneral[T, SingleChange[T]]

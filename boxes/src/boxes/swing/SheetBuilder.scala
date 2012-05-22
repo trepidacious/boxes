@@ -6,12 +6,12 @@ import java.awt.{Dimension}
 import javax.swing.{JLabel, SwingConstants, JComponent}
 
 object SheetBuilder {
-  def apply() = new SheetBuilder()
+  def apply(minContentsWidth: Int = 100) = new SheetBuilder(minContentsWidth)
 }
 
-class SheetBuilder {
+class SheetBuilder(minContentsWidth: Int = 100) {
 
-  val layout = new FormLayout("4px, 0px, right:100px:grow(0.25), 6px, fill:100px:grow(0.75), 8px", "")
+  val layout = new FormLayout("4px, 0px, right:100px:grow(0.25), 6px, fill:" + minContentsWidth + "px:grow(0.75), 8px", "")
   val cc = new CellConstraints()
   val builder = new DefaultFormBuilder(layout)
 

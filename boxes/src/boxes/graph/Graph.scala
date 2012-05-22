@@ -905,7 +905,7 @@ class GraphBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], enabled:
 }
 
 case class GraphZoomerAxis(
-    requiredRange:Ref[Option[(Int, Int)]] = Var(None),
+    requiredRange:Ref[Option[(Double, Double)]] = Var(None),
     padding:Ref[Double] = Var(0.05),
     minSize:Ref[Double] = Var(0.01)
 )
@@ -921,8 +921,8 @@ class GraphZoomer(
       case None => {
         //We have no data bounds, so use the axes required ranges,
         //or 0 to 1 in each axis if there are none.
-        val xRange = xAxis().requiredRange().getOrElse((0, 1))
-        val yRange = yAxis().requiredRange().getOrElse((0, 1))
+        val xRange = xAxis().requiredRange().getOrElse((0d, 1d))
+        val yRange = yAxis().requiredRange().getOrElse((0d, 1d))
         Area(Vec2(xRange._1, yRange._1), Vec2(xRange._2, yRange._2)).normalise
       }
       case Some(area) => {

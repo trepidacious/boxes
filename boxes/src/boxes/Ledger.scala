@@ -118,6 +118,20 @@ trait RecordView[T] extends Box[RecordViewChange] {
   def fieldCount():Int
 }
 
+object DirectRecordView{
+  def apply[T](fieldName: String)(implicit valueManifest:Manifest[T]) = new DirectRecordView(fieldName)(valueManifest)
+}
+
+class DirectRecordView[T](fieldName: String)(implicit valueManifest:Manifest[T]) extends RecordView[T] {
+  def editable(record:Int, field:Int, recordValue:T) = false
+  def apply(record:Int, field:Int, recordValue:T) = recordValue
+  def update(record:Int, field:Int, recordValue:T, fieldValue:Any) {}
+  def fieldName(field:Int):String = fieldName
+  def fieldClass(field:Int):Class[_] = valueManifest.erasure
+  def fieldCount() = 1
+}
+
+
 object ListLedger {
   def apply[T](list:ListRef[T], rView:RecordView[T]) = new ListLedger(list, rView)
 }

@@ -161,7 +161,7 @@ object BoxesDemo {
     println("Created reaction doubleX = 2 * x")
     println("x = " + x() + ", doubleX = " + doubleX())
     println("About to create reaction x = doubleX / 2")
-    Reaction(x, doubleX()/2d, "x = doubleX / 2")
+    Reaction(x, doubleX()/2d)
     println("Created both reactions")
 
     println("x = " + x() + ", doubleX = " + doubleX())
@@ -187,11 +187,11 @@ object BoxesDemo {
     val x = Var(2d)
     val y = Var(0d)
 
-    Reaction(y, x() * 2, "double")
+    Reaction(y, x() * 2)
 
     println("Applied first constraint")
 
-    Reaction(y, x() * 4, "quadruple")
+    Reaction(y, x() * 4)
 
     println("Applied second constraint - should not get here...")
   }
@@ -204,11 +204,11 @@ object BoxesDemo {
     val x = Var(2d)
     val y = Var(0d)
 
-    Reaction(y, x() * 2, "double")
+    Reaction(y, x() * 2)
 
     println("Applied first constraint")
 
-    Reaction(y, x() * 2, "also double")
+    Reaction(y, x() * 2)
 
     println("Applied second constraint - should get here fine...")
   }
