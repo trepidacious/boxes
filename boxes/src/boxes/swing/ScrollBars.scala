@@ -1,7 +1,7 @@
 package boxes.swing
 
 import com.explodingpixels.painter.ImagePainter
-import com.explodingpixels.painter.Painter
+import com.explodingpixels.painter.MacWidgetsPainter
 import com.explodingpixels.swingx.EPPanel
 import com.explodingpixels.widgets.plaf.SkinnableScrollBarUI.ScrollBarSkinProvider
 import com.explodingpixels.macwidgets.IAppWidgetFactory
@@ -13,9 +13,9 @@ import com.explodingpixels.widgets.{ImageUtils, ImageBasedJComponent}
 import java.awt.{Graphics2D, Component, Dimension, Image, Rectangle, Point, Color}
 import boxes.swing.icons.IconFactory
 
-class BoxesScrollBarUI(dotModel:DotModel, plain:Boolean = false) extends SkinnableScrollBarUI(BoxesScrollBarUI.createScrollBarSkinProvider(dotModel, plain))
+class BoxesScrollBarUI(dotModel:DotModel, plain:Boolean = false) extends SkinnableScrollBarUI(BoxesScrollBarUI.createScrollBarSkinProvider(dotModel, plain)) 
 
-class WhitePainter extends Painter[Component] {
+class WhitePainter extends MacWidgetsPainter[Component] {
   def paint(g:Graphics2D, t:Component, w:Int, h:Int) {
     g.setColor(Color.white)
     g.fillRect(0, 0, w, h)
@@ -131,7 +131,7 @@ class DotModel {
   private[swing] var scrollBar:Option[JScrollBar] = None
 }
 
-class DotPainter(val model:DotModel) extends Painter[Component] {
+class DotPainter(val model:DotModel) extends MacWidgetsPainter[Component] {
 
   val dot = IconFactory.image("Dot")
   val dotCenter = IconFactory.image("DotCenter")
@@ -161,8 +161,8 @@ class DotPainter(val model:DotModel) extends Painter[Component] {
 }
 
 class BoxesScrollBarSkin(
-  trackPainter:Painter[Component],
-  scrollThumbPainter:Painter[Component],
+  trackPainter:MacWidgetsPainter[Component],
+  scrollThumbPainter:MacWidgetsPainter[Component],
   val minimumThumbSize:Dimension,
   val preferredSize:Dimension,
   val dotModel:DotModel) extends ScrollBarSkin {

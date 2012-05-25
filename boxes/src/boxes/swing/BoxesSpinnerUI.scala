@@ -2,7 +2,7 @@ package boxes.swing
 
 import collection._
 import javax.swing.plaf.basic.BasicSpinnerUI
-import com.explodingpixels.painter.Painter
+import com.explodingpixels.painter.MacWidgetsPainter
 import java.awt.{Image, Graphics2D, Dimension, Container, Component, LayoutManager}
 import com.explodingpixels.widgets.ImageUtils
 import javax.swing.{AbstractButton, ImageIcon, JSpinner, JComponent}
@@ -132,7 +132,7 @@ object ArrowPainter {
   def direction(isUp:Boolean) = if (isUp) up else down
 }
 
-class SpinnerButtonPainter(val up:Boolean) extends Painter[AbstractButton] {
+class SpinnerButtonPainter(val up:Boolean) extends MacWidgetsPainter[AbstractButton] {
 
   val painter = ArrowPainter.direction(up)
 

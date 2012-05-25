@@ -4,7 +4,7 @@ import com.explodingpixels.widgets.ImageUtils
 import javax.swing.border.EmptyBorder
 import java.awt.event.{FocusEvent, FocusListener}
 import java.beans.{PropertyChangeListener, PropertyChangeEvent}
-import com.explodingpixels.painter.Painter
+import com.explodingpixels.painter.MacWidgetsPainter
 import boxes.Op
 import com.explodingpixels.swingx.{EPPanel, EPToggleButton, EPButton}
 import sun.swing.SwingUtilities2
@@ -25,7 +25,7 @@ object BarStylePainter {
   def apply[T](paintLeft:Boolean = false, paintRight:Boolean = true) = new BarStylePainter[T](paintLeft, paintRight)
 }
 
-class BarStylePainter[T](paintLeft:Boolean = false, paintRight:Boolean = true) extends Painter[T] {
+class BarStylePainter[T](paintLeft:Boolean = false, paintRight:Boolean = true) extends MacWidgetsPainter[T] {
   override def paint(g:Graphics2D, t:T, w:Int, h:Int) {
     g.drawImage(BarStylePainter.image, 0, 0, w, h, null)
 
@@ -242,7 +242,7 @@ object TabButtonPainter {
 //  val focus = painter("SlideCheckFocusOverlay")
 }
 
-class TabButtonPainter(paintBottom:Boolean = true) extends Painter[AbstractButton] {
+class TabButtonPainter(paintBottom:Boolean = true) extends MacWidgetsPainter[AbstractButton] {
   override def paint(g:Graphics2D, b:AbstractButton, w:Int, h:Int) {
 
     val oldComposite = g.getComposite
@@ -262,7 +262,7 @@ class TabButtonPainter(paintBottom:Boolean = true) extends Painter[AbstractButto
   }
 }
 
-class TabSpacerPainter(paintBottom:Boolean = true) extends Painter[Component] {
+class TabSpacerPainter(paintBottom:Boolean = true) extends MacWidgetsPainter[Component] {
   override def paint(g:Graphics2D, b:Component, w:Int, h:Int) {
     TabButtonPainter.off.paint(g, w, h, paintBottom)
   }
@@ -332,7 +332,7 @@ object SlideCheckPainter {
   val focus = painter("SlideCheckFocusOverlay")
 }
 
-class SlideCheckPainter() extends Painter[AbstractButton] {
+class SlideCheckPainter() extends MacWidgetsPainter[AbstractButton] {
   override def paint(g:Graphics2D, b:AbstractButton, w:Int, h:Int) {
 
     val oldComposite = g.getComposite
@@ -362,7 +362,7 @@ object ButtonPainter {
   val comboArrowWidth = comboArrow.getWidth(null)
 }
 
-class ButtonPainter(combo:Boolean = false) extends Painter[AbstractButton] {
+class ButtonPainter(combo:Boolean = false) extends MacWidgetsPainter[AbstractButton] {
   override def paint(g:Graphics2D, b:AbstractButton, w:Int, h:Int) {
 
     val oldComp = g.getComposite
@@ -454,7 +454,7 @@ object TextComponentPainter {
   val focus = painter("TextFocusOverlay")
 }
 
-class TextComponentPainter() extends Painter[Component] {
+class TextComponentPainter() extends MacWidgetsPainter[Component] {
   override def paint(g:Graphics2D, t:Component, w:Int, h:Int) {
 
     if (t.isEnabled) {
@@ -473,7 +473,7 @@ object SpinnerTextComponentPainter {
   val instance = new SpinnerTextComponentPainter()
 }
 
-class SpinnerTextComponentPainter() extends Painter[Component] {
+class SpinnerTextComponentPainter() extends MacWidgetsPainter[Component] {
   override def paint(g:Graphics2D, t:Component, w:Int, h:Int) {
 
     if (t.isEnabled) {

@@ -39,6 +39,8 @@ class MultiSwingView[M](model: RefGeneral[Option[M], _], viewSource: RefGeneral[
       component.revalidate();
       component.repaint();
       
+      subview.foreach(_.component().revalidate())
+      
       subview = newView
     }
   }
@@ -52,34 +54,6 @@ object ManifestFilterCal {
       for (o <- of if manifest.typeArguments.isEmpty && manifest.erasure.isInstance(o)) yield o.asInstanceOf[T]
     }
     Cal{println(filter(source()));filter(source()).getOrElse(default)}
-  }
-}
-
-//A (very) specialised Cal, intended for use with view sources.
-//In the case where we want to have a new view per viewed instance, we want to adapt a source
-//RefGeneral of a type F into a Ref of a subclass T, for display by a specific SwingView implementation.
-//However the resulting Ref[T] should NOT be just a Val(instance), since this would create a strong reference
-//to instance. So instead, we accept a default value, and we create a Ref[T] that will contain instance when
-//source contains the instance, and contain default otherwise. Hence it does not have a strong link to instance
-//except when source does. The final part of this is to remember what the instance is - this is done via a
-//WeakReference which will only survive as long as instance would be otherwise retained.
-object WeakInstanceFilterCal {
-  def apply[T <: AnyRef](source:RefGeneral[Option[_], _], default: T, instance: T)(implicit manifest: Manifest[T]) = {
-    
-    //Store the instance as a weak reference, since we don't want to retain
-    //it if nothing else does
-    val instanceWeak = new WeakReference(instance)
-    Cal{
-      
-      //Some(instance) if instance weak reference and source both have values, and they are the same
-      val instanceIfPossible = for {
-        o <- source()
-        i <- instanceWeak.get if o == i
-        } yield i
-      println(instanceIfPossible)
-      //Use instance if possible, otherwise the default
-      instanceIfPossible.getOrElse(default)
-    }
   }
 }
 
@@ -190,6 +164,34 @@ class ViewSourceByInstance() extends Function1[RefGeneral[Option[AnyRef], _], Op
   }
   
   def viewOf(model: RefGeneral[Option[AnyRef], _]) = new MultiSwingView(model, this): SwingView
+}
+
+//A (very) specialised Cal, intended for use with view sources.
+//In the case where we want to have a new view per viewed instance, we want to adapt a source
+//RefGeneral of a type F into a Ref of a subclass T, for display by a specific SwingView implementation.
+//However the resulting Ref[T] should NOT be just a Val(instance), since this would create a strong reference
+//to instance. So instead, we accept a default value, and we create a Ref[T] that will contain instance when
+//source contains the instance, and contain default otherwise. Hence it does not have a strong link to instance
+//except when source does. The final part of this is to remember what the instance is - this is done via a
+//WeakReference which will only survive as long as instance would be otherwise retained.
+object WeakInstanceFilterCal {
+  def apply[T <: AnyRef](source:RefGeneral[Option[_], _], default: T, instance: T)(implicit manifest: Manifest[T]) = {
+    
+    //Store the instance as a weak reference, since we don't want to retain
+    //it if nothing else does
+    val instanceWeak = new WeakReference(instance)
+    Cal{
+      
+      //Some(instance) if instance weak reference and source both have values, and they are the same
+      val instanceIfPossible = for {
+        o <- source()
+        i <- instanceWeak.get if o == i
+        } yield i
+      println(instanceIfPossible)
+      //Use instance if possible, otherwise the default
+      instanceIfPossible.getOrElse(default)
+    }
+  }
 }
 
 private class InstanceViewSource[T <: AnyRef](source: Ref[T] => SwingView, default: T)(implicit val manifest:Manifest[T]) {

@@ -4,12 +4,26 @@ import collection._
 import mutable.MultiMap
 import util.WeakHashSet
 import actors.threadpool.locks.ReentrantLock
+import scala.math.Numeric._
+import Numeric.Implicits._
 
 object BoxImplicits {
   implicit def closureToPathViaOption[T](path : => Option[Var[T]]) = PathViaOption(path)
   implicit def closureToPath[T](path : =>Var[T]) = Path(path)
   implicit def closureToPathToOption[T](path : => Option[Var[Option[T]]]) = PathToOption(path)
   implicit def valueToVal[T](t:T) = Val(t)
+}
+
+class NumericVar[N](v: Var[N])(implicit n: Numeric[N]) {
+  
+  def from(min: N) = {v << n.max(min, v()); v}
+  def to(max: N) = {v << n.min(max, v()); v}
+  def from(min: RefGeneral[N, _]) = {v << n.max(min(), v()); v}
+  def to(max: RefGeneral[N, _]) = {v << n.min(max(), v()); v}
+}
+
+object NumericVarImplicits {
+  implicit def var2NumericVar[N: Numeric](v: Var[N]): NumericVar[N] = new NumericVar[N](v)
 }
 
 object Box {
@@ -443,7 +457,9 @@ object Box {
 trait Box[C] {
 
   private[boxes] val sourcingReactions = new WeakHashSet[Reaction]()
-  private[boxes] val targetingReactions = mutable.Set[Reaction]()
+  
+  //FIXME this used to be non-weak, and probably can be without problems, but need to work out what is best
+  private[boxes] val targetingReactions = new WeakHashSet[Reaction]()
 
   private[boxes] val retainedReactions = mutable.Set[Reaction]()
 

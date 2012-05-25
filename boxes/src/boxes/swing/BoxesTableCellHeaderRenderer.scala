@@ -4,7 +4,7 @@ import javax.swing.plaf.UIResource
 import javax.swing.table.{DefaultTableCellRenderer}
 import javax.swing._
 import java.awt._
-import com.explodingpixels.painter.Painter
+import com.explodingpixels.painter.MacWidgetsPainter
 import boxes.swing.icons.IconFactory
 
 object HeaderPainter {
@@ -12,7 +12,7 @@ object HeaderPainter {
   val image = IconFactory.image("Header")
 }
 
-class HeaderPainter(paintLeft:Boolean = false, paintRight:Boolean = true, paintImage:Boolean = true) extends Painter[Component] {
+class HeaderPainter(paintLeft:Boolean = false, paintRight:Boolean = true, paintImage:Boolean = true) extends MacWidgetsPainter[Component] {
   override def paint(g:Graphics2D, t:Component, w:Int, h:Int) {
     if (paintImage) {
       g.drawImage(HeaderPainter.image, 0, 0, w, h, null)

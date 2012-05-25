@@ -5,7 +5,7 @@ import java.awt.event.{FocusEvent, FocusListener, ActionEvent, ActionListener}
 import javax.swing.JToggleButton.ToggleButtonModel
 import math.Numeric
 import java.util.concurrent.atomic.AtomicBoolean
-import com.explodingpixels.painter.Painter
+import com.explodingpixels.painter.MacWidgetsPainter
 import java.awt.geom.Arc2D
 import javax.swing.JSpinner.DefaultEditor
 import java.text.ParseException
@@ -546,7 +546,7 @@ private class PieOptionView[G, H](n:RefGeneral[G,_], c:GConverter[G, Double], a:
   val component:LinkingEPPanel = new LinkingEPPanel(this);
 
   {
-    component.setBackgroundPainter(new Painter[Component] {
+    component.setBackgroundPainter(new MacWidgetsPainter[Component] {
       override def paint(g:Graphics2D, t:Component, w:Int, h:Int) {
         pie.paint(g, nDisplay, w, h, aDisplay)
       }
