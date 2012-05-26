@@ -5,7 +5,7 @@ import java.awt.event.{ActionEvent, ActionListener}
 import com.explodingpixels.swingx.EPToggleButton
 import javax.swing.border.{EmptyBorder}
 import java.awt.{Graphics, Graphics2D, BorderLayout, Component}
-import javax.swing.{Icon, JComponent, SwingUtilities, JPopupMenu, JDialog}
+import javax.swing.{Icon, JComponent, SwingUtilities, JPopupMenu, JDialog, JPanel}
 import boxes.{Val, RefGeneral, View}
 import java.lang.ref.PhantomReference
 import boxes.swing.icons.IconFactory
@@ -18,11 +18,12 @@ private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:C
 
   val popup = new JDialog()
   
-  popup.getContentPane().add(popupComponent)
   popup.setUndecorated(true)
+
+  val popupPanel = new JPanel(new BorderLayout())
+  popup.getContentPane().add(popupPanel)
   popup.pack()
-  
-  popup.addWindowListener(this)
+
   override def windowOpened(e: WindowEvent) {}
   override def windowClosing(e: WindowEvent) {}
   override def windowClosed(e: WindowEvent) {}
@@ -31,9 +32,12 @@ private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:C
   override def windowActivated(e: WindowEvent) {}
   override def windowDeactivated(e: WindowEvent) {
     popup.setVisible(false)
+    
+    //Pull the contents from the popup so it doesn't retain them and prevent GC of unused views
+    popupPanel.removeAll();
+    popupPanel.revalidate();
   }
 
-  popup.addComponentListener(this)
   override def componentResized(e: ComponentEvent) {}
   override def componentMoved(e: ComponentEvent) {}
   override def componentShown(e: ComponentEvent) {
@@ -61,6 +65,11 @@ private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:C
           SwingUtilities.invokeLater(new Runnable() {
             override def run() {
               button.setEnabled(true)
+              
+              //Also... don't listen to the dialog while it is hidden - it doesn't do anything,
+              //but will strongly reference us and prevent GC of unused views.
+              popup.removeWindowListener(BoxesPopupButtonHandler.this)
+              popup.removeComponentListener(BoxesPopupButtonHandler.this)
             }
           })
         }        
@@ -69,6 +78,10 @@ private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:C
   }
 
   def show() = {
+    
+    popup.addWindowListener(this)
+    popup.addComponentListener(this)
+
     //Use size of component and add on the border ourselves - the JPopupMenu has size 0,0 until shown for first time
 //    val ph = popup.getHeight
     val ph = popupComponent.getPreferredSize.height + 4
@@ -81,6 +94,9 @@ private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:C
       y = invoker.getHeight + 4;
       top = true;
     }
+
+    popupPanel.add(popupComponent)
+    popupPanel.revalidate();
 
 //    popup.setBorder(new PopupBorder(4 - xOffset, top))
     popup.pack();
