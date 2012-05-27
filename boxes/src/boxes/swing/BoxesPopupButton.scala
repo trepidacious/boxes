@@ -153,11 +153,6 @@ class BoxesPopupView(n:RefGeneral[String,_] = Val(""), icon:RefGeneral[Option[Ic
 
 }
 
-object ToolbarPopupButton {
-  val popupIndicator = IconFactory.image("PopupIndicator")
-  val popupBorderCutout = IconFactory.image("PopupBorderCutout")
-}
-
 class ToolbarPopupButton(val sv:SwingView) extends EPToggleButton{
   {
     setBorder(new EmptyBorder(4,2,3,2))
@@ -168,22 +163,3 @@ class ToolbarPopupButton(val sv:SwingView) extends EPToggleButton{
 
 
 class PopupButton(val sv:SwingView) extends SwingToggleButton
-
-class PopupBorder(val xOffset:Int, val topGap:Boolean) extends EmptyBorder(1,1,1,1) {
-
-  override def paintBorder(c: Component, g: Graphics, x: Int, y: Int, width: Int, height: Int): Unit = {
-    val oldColor = g.getColor
-    g.setColor(SwingView.dividingColor)
-    g.drawRect(x, y, width-1, height-1)
-    g.setColor(oldColor)
-    if (topGap) {
-      g.drawImage(ToolbarPopupButton.popupBorderCutout, x + xOffset, 0, null)
-    } else {
-      g.drawImage(ToolbarPopupButton.popupBorderCutout, x + xOffset, y + height - 1, null)
-    }
-  }
-
-  override def isBorderOpaque = true
-}
-
-
