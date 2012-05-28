@@ -3,14 +3,17 @@ package boxes.swing
 import javax.swing.{JPanel, ImageIcon}
 import java.awt.image.BufferedImage
 import java.awt.event.{MouseListener, MouseMotionListener, MouseEvent, ComponentListener, ComponentEvent}
+import boxes.graph._
 import boxes.graph.GraphMouseEventType._
 import boxes.graph.GraphMouseButton._
 import java.awt.geom.{Rectangle2D, PathIterator, Path2D, AffineTransform}
-import java.awt.{AlphaComposite, Graphics, Image, Color, RenderingHints, BasicStroke, Graphics2D}
-import boxes.{BackgroundReaction, Box, Ref, View, Var}
+import java.awt.{AlphaComposite, Graphics, Image, Color, RenderingHints, BasicStroke, Graphics2D, BorderLayout}
+import boxes._
+import boxes.general._
 import java.util.concurrent.atomic.AtomicBoolean
-import boxes.graph.{GraphBusy, GraphLayer, Graph, GraphMouseEvent, Area, Vec2, GraphCanvas, GraphSpaces}
 import boxes.swing.icons.IconFactory
+import boxes.BoxImplicits._
+
 
 class GraphCanvasFromGraphics2D(g:Graphics2D, val spaces:GraphSpaces) extends GraphCanvas {
 
@@ -268,6 +271,33 @@ object GraphSwingView {
   val move = icon("Move")
 
   def apply(graph:Ref[_ <: Graph]) = new GraphSwingView(graph)
+
+  //TODO can this be done with currying?
+  //Make a panel with series, using normal view
+  def panelWithSeries[K](
+    series:RefGeneral[List[Series[K]], _],
+    selection:VarGeneral[Set[K], _] = Var(Set[K]()),
+
+    xName:RefGeneral[String, _] = Val("x"),
+    yName:RefGeneral[String, _] = Val("y"),
+    
+    xAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
+    yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
+
+    graphName: RefGeneral[String, _] = Val(""),
+    
+    zoom:Boolean = true,
+    select:Boolean = false,
+    grab:Boolean = false,
+    
+    seriesTooltips:Boolean = false,
+    axisTooltips:Boolean = true,
+    
+    borders:RefGeneral[Borders, _] = Val(Borders(16, 74, 53, 16)),
+    extraMainLayers:List[GraphLayer] = List[GraphLayer](),
+    extraOverLayers:List[GraphLayer] = List[GraphLayer]()
+  ) = GraphSwing.panelWithSeries(g => GraphSwingView(g))(series, selection, xName, yName, xAxis, yAxis, graphName, zoom, select, grab, seriesTooltips, axisTooltips, borders, extraMainLayers, extraOverLayers)
+
 }
 
 
@@ -436,7 +466,128 @@ class GraphSwingView(graph:Ref[_ <: Graph]) extends SwingView {
 
 object GraphSwingBGView {
   def apply(graph:Ref[_ <: Graph]) = new GraphSwingBGView(graph)
+  
+  //Make a panel with series, using bg view
+  def panelWithSeries[K](
+    series:RefGeneral[List[Series[K]], _],
+    selection:VarGeneral[Set[K], _] = Var(Set[K]()),
+
+    xName:RefGeneral[String, _] = Val("x"),
+    yName:RefGeneral[String, _] = Val("y"),
+    
+    xAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
+    yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
+
+    graphName: RefGeneral[String, _] = Val(""),
+    
+    zoom:Boolean = true,
+    select:Boolean = false,
+    grab:Boolean = false,
+    
+    seriesTooltips:Boolean = false,
+    axisTooltips:Boolean = true,
+    
+    borders:RefGeneral[Borders, _] = Val(Borders(16, 74, 53, 16)),
+    extraMainLayers:List[GraphLayer] = List[GraphLayer](),
+    extraOverLayers:List[GraphLayer] = List[GraphLayer]()
+  ) = GraphSwing.panelWithSeries(g => GraphSwingBGView(g))(series, selection, xName, yName, xAxis, yAxis, graphName, zoom, select, grab, seriesTooltips, axisTooltips, borders, extraMainLayers, extraOverLayers)
 }
+
+object GraphSwing {
+  
+  def panelWithSeries[K](makeView: Ref[_ <: Graph] => SwingView)(
+    
+    series:RefGeneral[List[Series[K]], _],
+    selection:VarGeneral[Set[K], _] = Var(Set[K]()),
+
+    xName:RefGeneral[String, _] = Val("x"),
+    yName:RefGeneral[String, _] = Val("y"),
+    
+    xAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
+    yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
+
+    graphName: RefGeneral[String, _] = Val(""),
+    
+    zoom:Boolean = true,
+    select:Boolean = false,
+    grab:Boolean = false,
+    
+    seriesTooltips:Boolean = false,
+    axisTooltips:Boolean = true,
+    
+    borders:RefGeneral[Borders, _] = Val(Borders(16, 74, 53, 16)),
+    extraMainLayers:List[GraphLayer] = List[GraphLayer](),
+    extraOverLayers:List[GraphLayer] = List[GraphLayer]()
+  ) = {
+        
+    val zoomEnabled = if (zoom) Some(Var(true)) else None
+    val selectEnabled = if (select) Some(Var(false)) else None
+    val grabEnabled = if (grab) Some(Var(false)) else None
+
+    val modes = List(zoomEnabled, selectEnabled, grabEnabled).collect{case Some(v) => v}
+    if (!modes.isEmpty) RadioReaction(modes:_*)
+    
+    val axisTooltipsEnabled = if (axisTooltips) Some(Var(true)) else None
+    val seriesTooltipsEnabled = if (seriesTooltips) Some(Var(true)) else None
+
+    val manualBounds = Var(None:Option[Area])
+
+    import boxes.graph.Axis._
+
+    val graph = Var (
+      GraphBasic.withSeries (
+        ColorSeriesBySelection(series, selection),
+        xName = xName,
+        yName = yName,
+        zoomEnabled = zoomEnabled.getOrElse(Val(false)),
+        manualBounds = manualBounds,
+        xAxis = xAxis,
+        yAxis = yAxis,
+        selectEnabled = selectEnabled.getOrElse(Val(false)),
+        selection = selection,
+        grabEnabled = grabEnabled.getOrElse(Val(false)),
+        seriesTooltipsEnabled = seriesTooltipsEnabled.getOrElse(Val(false)),
+        axisTooltipsEnabled = axisTooltipsEnabled.getOrElse(Val(false))
+       // extraOverLayers = List(xThreshold, yThreshold)
+      )
+    )
+
+    val v = makeView(graph)
+
+    //Zoom out by clearing manual bounds to None
+    val zoomOutButton = if(zoom) Some(SwingBarButton(SwingOp("", Some(GraphSwingView.zoomOut), SetOp(manualBounds, None:Option[Area])))) else None
+
+    val zoomEnabledView = zoomEnabled.map(BooleanView(_, "", BooleanControlType.TOOLBARBUTTON, Some(GraphSwingView.zoomSelect), false))
+
+    val selectEnabledView = selectEnabled.map(BooleanView(_, "", BooleanControlType.TOOLBARBUTTON, Some(GraphSwingView.boxSelect), false))
+
+    val grabEnabledView = grabEnabled.map(BooleanView(_, "", BooleanControlType.TOOLBARBUTTON, Some(GraphSwingView.move), false))
+
+    val properties = List(("Axis Tooltips", axisTooltipsEnabled), ("Series Tooltips", seriesTooltipsEnabled)).collect{case (k,Some(v)) => (k, v)}
+    
+    val graphProperties = if (properties.isEmpty) None else {
+      Some(properties.foldLeft(SheetBuilder().blankTop()){case (b, (s, v)) => b.view(s, BooleanView(v))}.panel())
+    } 
+
+    val settingsPopup = graphProperties.map(panel => BoxesPopupView(icon = Some(SwingView.wrench), popupContents = panel))
+
+    val buttons = SwingButtonBar()
+                    .addSwingView(selectEnabledView)
+                    .addSwingView(grabEnabledView)
+                    .addSwingView(zoomEnabledView)
+                    .addComponent(zoomOutButton)
+                    .addSwingView(settingsPopup)
+                  .buildWithListStyleComponent(EmbossedLabelView(graphName).component())
+
+    val panel = new JPanel(new BorderLayout())
+    panel.add(v.component, BorderLayout.CENTER)
+
+    panel.add(buttons, BorderLayout.SOUTH)
+
+    panel
+  }
+}
+
 
 class GraphSwingBGView(graph:Ref[_ <: Graph]) extends SwingView {
 

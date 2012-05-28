@@ -79,6 +79,10 @@ class SwingButtonBarBuilder(val components:List[JComponent]) {
   def add(op:Op):SwingButtonBarBuilder = add(SwingBarButton(op))
   def add(v:SwingView) = new SwingButtonBarBuilder(components ::: List(v.component))
 
+  def addComponent(c:Option[JComponent]) = c.map(cv => new SwingButtonBarBuilder(components ::: List(cv))).getOrElse(this)
+  def addOp(op:Option[Op]):SwingButtonBarBuilder = addComponent(op.map(SwingBarButton(_)))
+  def addSwingView(v:Option[SwingView]): SwingButtonBarBuilder = addComponent(v.map(_.component))
+
   def buildWithListStyleComponent(c:JComponent) = {
     val padding = SwingBarPadding()
     padding.setBorder(new EmptyBorder(0, 5, 0, 5))

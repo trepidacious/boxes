@@ -1,6 +1,7 @@
 package boxes.graph
 
 import boxes._
+import boxes.general._
 import java.text.DecimalFormat
 import javax.swing.{ImageIcon}
 import list.ListVal
@@ -948,6 +949,7 @@ class GraphZoomer(
 case class GraphBasic(layers:RefGeneral[List[GraphLayer], _], overlayers:RefGeneral[List[GraphLayer], _], dataArea:RefGeneral[Area, _], borders:RefGeneral[Borders, _]) extends Graph {}
 
 object GraphBasic {
+  
   def withSeries[K](
       series:RefGeneral[List[Series[K]], _],
       xName:RefGeneral[String, _] = Val("x"),
