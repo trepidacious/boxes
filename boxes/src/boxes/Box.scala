@@ -468,5 +468,13 @@ trait Box[C] {
 
   def retainReaction(r:Reaction) = retainedReactions.add(r)
   def releaseReaction(r:Reaction) = retainedReactions.remove(r)
+  
+  def react (r:Reaction) = {
+    Box.registerReaction(r)
+    retainReaction(r)
+    r
+  }
 
+  def react (r: =>(()=>Unit)) = Reaction(this, r)
+  
 }

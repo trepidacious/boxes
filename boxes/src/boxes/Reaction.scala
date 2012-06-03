@@ -1,6 +1,6 @@
 package boxes
 
-import scala.collection.mutable._
+import scala.collection.mutable.Set
 
 object Reaction {
 
@@ -24,6 +24,19 @@ object Reaction {
     v.retainReaction(r)
     r
   }
+  
+  class DefaultReaction(result: =>(()=>Unit)) extends Reaction {
+    def respond : (()=>Unit) = result
+    def isView = false
+  }
+
+  def apply(b: Box[_], result: =>(()=>Unit)) = {
+    val r = new DefaultReaction(result)
+    Box.registerReaction(r)
+    b.retainReaction(r)
+    r
+  }
+
 }
 
 object OptionalReaction {

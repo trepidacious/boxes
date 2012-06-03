@@ -53,7 +53,7 @@ object ManifestFilterCal {
       //special behaviour for e.g. Option, so that we can produce a Ref[T] where T is Option[V] ?
       for (o <- of if manifest.typeArguments.isEmpty && manifest.erasure.isInstance(o)) yield o.asInstanceOf[T]
     }
-    Cal{println(filter(source()));filter(source()).getOrElse(default)}
+    Cal{filter(source()).getOrElse(default)}
   }
 }
 
@@ -95,7 +95,6 @@ class ViewSourceByManifest() extends Function1[RefGeneral[Option[AnyRef], _], Op
             makeView(ref) match {
               case Some(view) => {
                 cachedViews.put(v.getClass(), view)
-                println("Made a new view for " + v.getClass())
                 Some(view)
               }
               case None => None
@@ -145,7 +144,6 @@ class ViewSourceByInstance() extends Function1[RefGeneral[Option[AnyRef], _], Op
             makeView(ref) match {
               case Some(view) => {
                 cachedViews.put(v, view)
-                println("Made a new view for instance " + v)
                 Some(view)
               }
               case None => None
@@ -187,7 +185,6 @@ object WeakInstanceFilterCal {
         o <- source()
         i <- instanceWeak.get if o == i
         } yield i
-      println(instanceIfPossible)
       //Use instance if possible, otherwise the default
       instanceIfPossible.getOrElse(default)
     }
