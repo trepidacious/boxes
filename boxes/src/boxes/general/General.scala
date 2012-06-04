@@ -48,6 +48,7 @@ class RadioReaction(options:Var[Boolean]*) extends Reaction {
     }
   }
   def isView = false
+  def react {respond.apply()}
 }
 
 object TrueOp {

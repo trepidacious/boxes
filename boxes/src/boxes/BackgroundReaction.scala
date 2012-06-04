@@ -23,6 +23,7 @@ class BackgroundReaction(responseSource: => (AtomicBoolean => Unit)) extends Rea
   }
 
   def isView = true
+  def react {respond.apply()}
 
 }
 

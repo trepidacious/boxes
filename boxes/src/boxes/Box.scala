@@ -63,7 +63,6 @@ object Box {
   private var checkingConflicts = false
 
   private var cycling = false
-  private var applyingReaction = false
 
   private val lock = new ReentrantLock()
 
@@ -145,13 +144,12 @@ object Box {
    * there is a reaction being applied, which can be used by Boxes
    * to reject writes. E.g. Cal will only accept writes from Reactions.
    */
-  def beforeWrite[C](b:Box[C]) = {
+  def beforeWrite[C](b:Box[C]) {
     lock.lock
     if (!canWrite) throw new InvalidWriteException(b)
 
     //This box is a source of any active reaction
     activeReaction.foreach(r => associateReactionTarget(r, b))
-    applyingReaction
   }
 
   /**
@@ -422,19 +420,21 @@ object Box {
     activeReaction = Some(r)
     try {
 
-      canWrite = false
-      val response = r.respond
-      canWrite = true
-
-      if (!r.isView) {
-        canRead = false
-        applyingReaction = true
-        response.apply
-      }
-
+//      canWrite = false
+//      val response = r.respond
+//      canWrite = true
+//
+//      if (!r.isView) {
+//        canRead = false
+//        response.apply
+//      }
+     
+      canWrite = !r.isView
+      //r.respond.apply()
+      r.react()
+      
     } finally {
       activeReaction = None
-      applyingReaction = false
       canRead = true
       canWrite = true
     }

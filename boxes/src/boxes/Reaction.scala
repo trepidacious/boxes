@@ -15,6 +15,7 @@ object Reaction {
     }
 
     def isView = false
+    def react {respond.apply()}
 
   }
 
@@ -28,6 +29,7 @@ object Reaction {
   class DefaultReaction(result: =>(()=>Unit)) extends Reaction {
     def respond : (()=>Unit) = result
     def isView = false
+    def react {respond.apply()}
   }
 
   def apply(b: Box[_], result: =>(()=>Unit)) = {
@@ -54,6 +56,7 @@ object OptionalReaction {
     }
 
     def isView = false
+    def react {respond.apply()}
 
   }
 
@@ -75,7 +78,10 @@ object OptionalReaction {
  */
 trait Reaction {
 
-  def respond : (()=>Unit)
+//  def respond : (()=>Unit)
+  
+  def react()
+
   def isView : Boolean
 
   private[boxes] val sources = Set[Box[_]]()

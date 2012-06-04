@@ -41,7 +41,7 @@ class FieldCompositeLedger(val ledgers:Ledger*) extends Ledger {
   //When a component ledger changes, register a change
   //that covers all component ledgers' changes
   private val ledgersReaction = new Reaction() {
-    override def respond() = {
+    def respond() = {
 
       val allChanges = for {
         ledger <- ledgers
@@ -61,6 +61,7 @@ class FieldCompositeLedger(val ledgers:Ledger*) extends Ledger {
 
     }
     override def isView = false
+    override def react {respond.apply()}
   }
   Box.registerReaction(ledgersReaction)
 
@@ -142,7 +143,7 @@ class ListLedger[T](list:ListRef[T], rView:RecordView[T]) extends Ledger {
   //to our list
   private val listChangeReaction = new Reaction() {
     private var lastProcessedChangeIndex = -1L
-    override def respond() = {
+    def respond() = {
       var rowCountChanged = false;
       var changed = false;
       for {
@@ -168,13 +169,14 @@ class ListLedger[T](list:ListRef[T], rView:RecordView[T]) extends Ledger {
       }
     }
     override def isView = false
+    override def react {respond.apply()}
   }
   Box.registerReaction(listChangeReaction)
 
   //This reaction allows us to change correctly when we see a change
   //to our RecordView
   private val recordViewChangeReaction = new Reaction() {
-    override def respond() = {
+    def respond() = {
       val changed = (!rView.changes.isEmpty)
       if (changed) {
         {()=>commitChange(LedgerChange(true, false))}
@@ -183,6 +185,7 @@ class ListLedger[T](list:ListRef[T], rView:RecordView[T]) extends Ledger {
       }
     }
     override def isView = false
+    override def react {respond.apply()}
   }
   Box.registerReaction(recordViewChangeReaction)
 

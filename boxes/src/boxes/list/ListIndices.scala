@@ -99,6 +99,8 @@ class ListIndexReaction[T](list:ListRef[T], i:Var[Option[Int]], loseIndexOnDelet
   }
 
   def isView = false
+  def react {respond.apply()}
+
 }
 
 
@@ -218,6 +220,7 @@ class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], loseIndexOn
   }
 
   def isView = false
+  def react {respond.apply()}
 }
 
 object ListIndices {

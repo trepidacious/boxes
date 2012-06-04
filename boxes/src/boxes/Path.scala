@@ -74,6 +74,7 @@ class PathReaction[T, G, CT, CG](v:VarGeneral[G, CG], path : => Option[VarGenera
     }
   }
   def isView = false
+  def react {respond.apply()}
 }
 
 object Path {
@@ -219,6 +220,7 @@ class ListPathReaction[T](v:ListVar[T], path : => Option[ListVar[T]]) extends Re
     }
   }
   def isView = false
+  def react {respond.apply()}
 }
 
 /**

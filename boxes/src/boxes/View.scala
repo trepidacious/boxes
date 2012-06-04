@@ -9,6 +9,7 @@ object View {
       }
 
       def isView = true
+      def react {respond.apply()}
     }
     Box.registerReaction(r)
     r
