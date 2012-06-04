@@ -1,9 +1,13 @@
 package boxes.test
 
 import org.scalatest.WordSpec
+import org.scalatest.junit.JUnitRunner
+import org.junit.runner.RunWith
 import boxes._
 import list._
 import scala.collection.immutable.Queue
+
+@RunWith(classOf[JUnitRunner])
 class BoxSpec extends WordSpec {
 
   //FIXME we should try to test effect of GC - make sure that reactions
@@ -440,9 +444,9 @@ class BoxSpec extends WordSpec {
 
       assert(i() === Set(0))
 
-      //Can't select past end of list - just selects 0
+      //Can't select past end of list - just selects last element
       i() = Set(10)
-      assert(i() === Set(0))
+      assert(i() === Set(7))
 
       i() = Set(4)
       assert(i() === Set(4))
