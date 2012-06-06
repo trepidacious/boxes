@@ -21,6 +21,16 @@ import boxes.swing.icons.IconFactory
 import boxes._
 import java.text.DecimalFormat
 
+object SwingViewImplicits {
+  implicit def varToBooleanView(v : Var[Boolean]) = BooleanView(v)
+  implicit def varToNumberView[N](v : Var[N])(implicit n:Numeric[N], nc:NumericClass[N]) = NumberView[N](v)
+  implicit def varToStringView(v : Var[String]) = StringView(v)
+
+  implicit def optionVarToBooleanView(v : Var[Option[Boolean]]) = BooleanOptionView(v)
+  implicit def optionVarToNumberView[N](v : Var[Option[N]])(implicit n:Numeric[N], nc:NumericClass[N]) = NumberOptionView[N](v)
+  implicit def optionVarToStringView(v : Var[Option[String]]) = StringOptionView(v)
+}
+
 object SwingView {
 
   val defaultDecimalFormat = new DecimalFormat("0.#")
