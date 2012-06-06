@@ -34,6 +34,8 @@ case class TabBuilder(toggles:List[Var[Boolean]] = List(), tabComponents:List[JC
     TabBuilder(toggles:::List(v), tabComponents:::List(view.component), contentComponents:::List(contents))
   }
 
+  def addView(contents:SwingView, name:RefGeneral[String,_] = Val(""), icon:RefGeneral[Option[Icon], _] = Val(None), v:Var[Boolean] = Var(toggles.isEmpty)):TabBuilder = add(contents.component, name, icon, v)
+
   def panel(width:Int = 64, height:Int = 64) = {
     RadioReaction(toggles:_*)
     val tabPanel = new JPanel(VerticalTabLayout(width, height))

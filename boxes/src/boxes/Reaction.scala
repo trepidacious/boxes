@@ -26,13 +26,18 @@ object Reaction {
     r
   }
   
-  class DefaultReaction(result: =>(()=>Unit)) extends Reaction {
-    def respond : (()=>Unit) = result
+  class DefaultReaction(result: =>Unit) extends Reaction {
     def isView = false
-    def react {respond.apply()}
+    def react {result}
   }
 
-  def apply(b: Box[_], result: =>(()=>Unit)) = {
+  def apply(result: =>Unit) = {
+    val r = new DefaultReaction(result)
+    Box.registerReaction(r)
+    r
+  }
+
+  def apply(b: Box[_], result: =>Unit) = {
     val r = new DefaultReaction(result)
     Box.registerReaction(r)
     b.retainReaction(r)

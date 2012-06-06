@@ -136,7 +136,7 @@ object SwingView {
   val alternateBackgroundColor = new Color(240, 240, 240)
   val selectionColor = new Color(120, 144, 161)
   val selectedTextColor = Color.white
-  val textColor = Color.black
+  val textColor = new Color(50, 50, 50)
   val textUnderlightColor = new Color(255, 255, 255, 160)
   val shadedBoxColor = new Color(0,0,0,0.6f)
 

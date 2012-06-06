@@ -475,6 +475,6 @@ trait Box[C] {
     r
   }
 
-  def react (r: =>(()=>Unit)) = Reaction(this, r)
+  def react (r: =>Unit) = Reaction(this, r)
   
 }

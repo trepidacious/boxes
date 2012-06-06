@@ -410,7 +410,7 @@ class GraphBG(val bg:Color, val dataBG:Color) extends UnboundedGraphDisplayLayer
 class GraphOutline extends UnboundedGraphDisplayLayer {
   def paint() = {
     (canvas:GraphCanvas) => {
-      canvas.color = SwingView.dividingColor.brighter
+      canvas.color = GraphAxis.axisColor
       canvas.drawRect(canvas.spaces.pixelArea.origin, canvas.spaces.pixelArea.size)
     }
   }
@@ -420,7 +420,7 @@ class GraphHighlight extends UnboundedGraphDisplayLayer {
   def paint() = {
     (canvas:GraphCanvas) => {
       canvas.color = SwingView.alternateBackgroundColor.brighter
-      canvas.drawRect(canvas.spaces.pixelArea.origin + Vec2(-1, 1), canvas.spaces.pixelArea.size + Vec2(2, -2))
+      canvas.drawRect(canvas.spaces.pixelArea.origin + Vec2(-1, 1), canvas.spaces.pixelArea.size + Vec2(1, -1))
     }
   }
 }
@@ -470,7 +470,11 @@ class GraphShadow extends UnboundedGraphDisplayLayer {
 
 object GraphAxis {
   val fontSize = 10
-  val fontColor = SwingView.dividingColor.darker
+  val fontColor = SwingView.textColor
+  val axisColor = SwingView.dividingColor
+  val axisHighlightColor = SwingView.alternateBackgroundColor.brighter
+  val gridMajorColor = new Color(0f, 0f, 0f, 0.08f)
+  val gridMinorColor = new Color(0f, 0f, 0f, 0.03f)
   val defaultFormat = new DecimalFormat("0.###")
 
   def apply(axis:Axis, pixelsPerMajor:Int = 100, format:DecimalFormat = GraphAxis.defaultFormat) = new GraphAxis(axis, pixelsPerMajor, format)
@@ -488,12 +492,12 @@ class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalF
         val (p, major) = t
         val start = canvas.spaces.toPixel(dataArea.axisPosition(axis, p))
 
-        canvas.color = SwingView.dividingColor.brighter
+        canvas.color = GraphAxis.axisColor
         axis match {
           case X => canvas.line(start, start + Vec2(0, if (major) 8 else 4))
           case Y => canvas.line(start, start + Vec2(if (major) -8 else -4, 0))
         }
-        canvas.color = SwingView.alternateBackgroundColor.brighter
+        canvas.color = GraphAxis.axisHighlightColor
         axis match {
           case X => canvas.line(start + Vec2(1, 0), start + Vec2(1, if (major) 8 else 4))
           case Y => canvas.line(start + Vec2(0, 1), start + Vec2(if (major) -8 else -4, 1))
@@ -507,11 +511,13 @@ class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalF
             case X => canvas.string(format.format(p), start + Vec2(0, 10), Vec2(0.5, 1))
             case Y => canvas.string(format.format(p), start + Vec2(-10, 0), Vec2(1, 0.5))
           }
-          canvas.color = new Color(0f, 0f, 0f, 0.1f)
-        } else {
-          canvas.color = new Color(0f, 0f, 0f, 0.05f)
+          canvas.color = GraphAxis.gridMajorColor
+          canvas.line(start, start + canvas.spaces.pixelArea.axisPerpVec2(axis))
         }
-        canvas.line(start, start + canvas.spaces.pixelArea.axisPerpVec2(axis))
+//        } else {
+//          canvas.color = GraphAxis.gridMinorColor
+//          canvas.line(start, start + canvas.spaces.pixelArea.axisPerpVec2(axis))
+//        }
       })
     }
   }
@@ -526,7 +532,7 @@ class GraphAxisTitle(val axis:Axis, name:RefGeneral[String, _]) extends Unbounde
       val tl = a.origin + a.size.withX(0)
       val br = a.origin + a.size.withY(0)
 
-      canvas.color = SwingView.dividingColor.darker
+      canvas.color = GraphAxis.fontColor
       canvas.fontSize = 12
       axis match {
         case X => canvas.string(currentName, br + Vec2(-10, 28), Vec2(1, 1))
