@@ -9,6 +9,7 @@ import boxes.graph.GraphMouseButton._
 import java.awt.geom.{Rectangle2D, PathIterator, Path2D, AffineTransform}
 import java.awt.{AlphaComposite, Graphics, Image, Color, RenderingHints, BasicStroke, Graphics2D, BorderLayout}
 import boxes._
+import boxes.list._
 import boxes.general._
 import java.util.concurrent.atomic.AtomicBoolean
 import boxes.swing.icons.IconFactory
@@ -275,16 +276,16 @@ object GraphSwingView {
   //TODO can this be done with currying?
   //Make a panel with series, using normal view
   def panelWithSeries[K](
-    series:Box[List[Series[K]], _],
-    selection:VarBox[Set[K], _] = Var(Set[K]()),
+    series:ListRef[Series[K]],
+    selection:Var[Set[K]] = Var(Set[K]()),
 
-    xName:Box[String, _] = Val("x"),
-    yName:Box[String, _] = Val("y"),
+    xName:Ref[String] = Val("x"),
+    yName:Ref[String] = Val("y"),
     
     xAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
     yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
 
-    graphName: Box[String, _] = Val(""),
+    graphName: Ref[String] = Val(""),
     
     zoom:Boolean = true,
     select:Boolean = false,
@@ -293,7 +294,7 @@ object GraphSwingView {
     seriesTooltips:Boolean = false,
     axisTooltips:Boolean = true,
     
-    borders:Box[Borders, _] = Val(Borders(16, 74, 53, 16)),
+    borders:Ref[Borders] = Val(Borders(16, 74, 53, 16)),
     extraMainLayers:List[GraphLayer] = List[GraphLayer](),
     extraOverLayers:List[GraphLayer] = List[GraphLayer]()
   ) = GraphSwing.panelWithSeries(g => GraphSwingView(g))(series, selection, xName, yName, xAxis, yAxis, graphName, zoom, select, grab, seriesTooltips, axisTooltips, borders, extraMainLayers, extraOverLayers)
@@ -469,16 +470,16 @@ object GraphSwingBGView {
   
   //Make a panel with series, using bg view
   def panelWithSeries[K](
-    series:Box[List[Series[K]], _],
-    selection:VarBox[Set[K], _] = Var(Set[K]()),
+    series:ListRef[Series[K]],
+    selection:Var[Set[K]] = Var(Set[K]()),
 
-    xName:Box[String, _] = Val("x"),
-    yName:Box[String, _] = Val("y"),
+    xName:Ref[String] = Val("x"),
+    yName:Ref[String] = Val("y"),
     
     xAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
     yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
 
-    graphName: Box[String, _] = Val(""),
+    graphName: Ref[String] = Val(""),
     
     zoom:Boolean = true,
     select:Boolean = false,
@@ -487,7 +488,7 @@ object GraphSwingBGView {
     seriesTooltips:Boolean = false,
     axisTooltips:Boolean = true,
     
-    borders:Box[Borders, _] = Val(Borders(16, 74, 53, 16)),
+    borders:Ref[Borders] = Val(Borders(16, 74, 53, 16)),
     extraMainLayers:List[GraphLayer] = List[GraphLayer](),
     extraOverLayers:List[GraphLayer] = List[GraphLayer]()
   ) = GraphSwing.panelWithSeries(g => GraphSwingBGView(g))(series, selection, xName, yName, xAxis, yAxis, graphName, zoom, select, grab, seriesTooltips, axisTooltips, borders, extraMainLayers, extraOverLayers)
@@ -497,16 +498,16 @@ object GraphSwing {
   
   def panelWithSeries[K](makeView: Ref[_ <: Graph] => SwingView)(
     
-    series:Box[List[Series[K]], _],
-    selection:VarBox[Set[K], _] = Var(Set[K]()),
+    series:ListRef[Series[K]],
+    selection:Var[Set[K]] = Var(Set[K]()),
 
-    xName:Box[String, _] = Val("x"),
-    yName:Box[String, _] = Val("y"),
+    xName:Ref[String] = Val("x"),
+    yName:Ref[String] = Val("y"),
     
     xAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
     yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
 
-    graphName: Box[String, _] = Val(""),
+    graphName: Ref[String] = Val(""),
     
     zoom:Boolean = true,
     select:Boolean = false,
@@ -515,7 +516,7 @@ object GraphSwing {
     seriesTooltips:Boolean = false,
     axisTooltips:Boolean = true,
     
-    borders:Box[Borders, _] = Val(Borders(16, 74, 53, 16)),
+    borders:Ref[Borders] = Val(Borders(16, 74, 53, 16)),
     extraMainLayers:List[GraphLayer] = List[GraphLayer](),
     extraOverLayers:List[GraphLayer] = List[GraphLayer]()
   ) = {

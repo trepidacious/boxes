@@ -1,7 +1,7 @@
 package boxes.persistence
 
 import collection._
-import boxes.{VarBox, Var, Node}
+import boxes._
 
 /**
 * Codes objects to a DataTarget, and
@@ -221,7 +221,7 @@ class NodeCodec(delegate:Codec[Any]) extends Codec[Node] {
           val accessorValue = delegate.decode(source)
           accMap.get(accessorName) match {
             case None => {}
-            case Some(m) => m.invoke(n).asInstanceOf[VarBox[Any, Any]].update(accessorValue)
+            case Some(m) => m.invoke(n).asInstanceOf[VarBox[Any, Change[Any]]].update(accessorValue)
           }
           source.getCloseTag
         }

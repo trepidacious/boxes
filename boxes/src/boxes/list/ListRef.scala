@@ -3,14 +3,12 @@ package boxes.list
 import collection._
 import boxes._
 
-//TODO this should have the old and new instances, there is no reason for it not to
-//extend singlechange.
-trait ListChange
+trait ListChange[T] extends Change[List[T]] 
 
 /**
  * Anything in the list may have changed
  */
-case class CompleteListChange extends ListChange
+case class CompleteListChange[T](oldValue: List[T], newValue: List[T]) extends ListChange[T]
 
 /**
  * Elements of the List may have been replaced, starting at firstIndex
@@ -18,27 +16,27 @@ case class CompleteListChange extends ListChange
  * outside this range have NOT changed, elements inside the range may
  * not have changed.
  */
-case class ReplacementListChange(firstIndex:Int, lastIndex:Int) extends ListChange
+case class ReplacementListChange[T](oldValue: List[T], newValue: List[T], firstIndex:Int, lastIndex:Int) extends ListChange[T]
 
 /**
  * Elements have been inserted into the list at a known index.
  */
-case class InsertionListChange(index:Int, count:Int) extends ListChange
+case class InsertionListChange[T](oldValue: List[T], newValue: List[T], index:Int, count:Int) extends ListChange[T]
 
 /**
  * Elements have been removed from the list at a known index
  */
-case class RemovalListChange(index:Int, count:Int) extends ListChange
+case class RemovalListChange[T](oldValue: List[T], newValue: List[T], index:Int, count:Int) extends ListChange[T]
 
-trait ListRef[T] extends Box[List[T], ListChange] {
+trait ListRef[T] extends Box[List[T], ListChange[T]] {
   def apply(i:Int):T
-  def map[U](f:T=>U) = {
-    val u = ListVar(this().map(f))
-    val r = new ListMapReaction(this, u, f)
-    Box.registerReaction(r)
-    u.retainReaction(r)
-    u: ListRef[U]
-  }
+//  def map[U](f:T=>U) = {
+//    val u = ListVar(this().map(f))
+//    val r = new ListMapReaction(this, u, f)
+//    Box.registerReaction(r)
+//    u.retainReaction(r)
+//    u: ListRef[U]
+//  }
   def flatMap[U](f:T=>List[U]) = {
     val u = ListVar(this().flatMap(f))
     val r = new ListFlatMapReaction(this, u, f)
@@ -49,8 +47,8 @@ trait ListRef[T] extends Box[List[T], ListChange] {
 
 }
 
-trait ListVar[T] extends ListRef[T] with VarBox[List[T], ListChange] {
-  def updateWithChanges(newT:List[T], c:ListChange*)
+trait ListVar[T] extends ListRef[T] with VarBox[List[T], ListChange[T]] {
+  def updateWithChanges(newT:List[T], c:ListChange[T]*)
   def update(i:Int, e:T)
   def insert(i:Int, e:T*)
   def remove(i:Int, c:Int)
@@ -58,7 +56,7 @@ trait ListVar[T] extends ListRef[T] with VarBox[List[T], ListChange] {
   override def <<?(c: =>Option[List[T]]) = OptionalReaction(this, c)
 }
 
-trait ListVal[T] extends ListRef[T] with ValBox[List[T], ListChange]
+trait ListVal[T] extends ListRef[T] with ValBox[List[T], ListChange[T]]
 
 object ListUtils {
   def insert[T](l:List[T], i:Int, t:T*):List[T] = {
@@ -112,7 +110,7 @@ object ListVar {
 
 private class ListVarDefault[T] (private var t:List[T]) extends ListVar[T] {
 
-  private def update(u : (List[T] => Option[(List[T], ListChange)])) = {
+  private def update(u : (List[T] => Option[(List[T], ListChange[T])])) = {
     try {
       Box.beforeWrite(this)
       u.apply(t) match {
@@ -127,13 +125,14 @@ private class ListVarDefault[T] (private var t:List[T]) extends ListVar[T] {
     }
   }
 
-  def updateWithChanges(newT:List[T], c:ListChange*) = {
+  def updateWithChanges(newT:List[T], c:ListChange[T]*) = {
     try {
       Box.beforeWrite(this)
+      val oldT = t
       if (newT != t) {
         t = newT
         if (c.isEmpty) {
-          Box.commitWrite(this, CompleteListChange())
+          Box.commitWrite(this, CompleteListChange(oldT, newT))
         } else {
           Box.commitWrite(this, c:_*)
         }
@@ -144,14 +143,24 @@ private class ListVarDefault[T] (private var t:List[T]) extends ListVar[T] {
   }
 
 
-  def insert(i:Int, e:T*) = update(list => Some((ListUtils.insert(list, i, e:_*), InsertionListChange(i, e.size))))
+  def insert(i:Int, e:T*) = {
+    val oldList = t
+    val newList = ListUtils.insert(t, i, e:_*)
+    updateWithChanges(newList, InsertionListChange(oldList, newList, i, e.size))
+  }
 
-  def remove(i:Int, c:Int) = update(list => Some((ListUtils.remove(list, i, c), RemovalListChange(i, c))))
+  def remove(i:Int, c:Int) = {
+    val oldList = t
+    val newList = ListUtils.remove(t, i, c)
+    updateWithChanges(newList, RemovalListChange(oldList, newList, i, c))
+  }
 
   def update(i:Int, e:T) {
     update(list => {
       if (e != list(i)) {
-        Some((t.updated(i, e), ReplacementListChange(i, i)))
+        val oldT = t
+        val newT = t.updated(i, e) 
+        Some((newT, ReplacementListChange(oldT, newT, i, i)))
       } else {
         None
       }
@@ -161,7 +170,8 @@ private class ListVarDefault[T] (private var t:List[T]) extends ListVar[T] {
   def update(newT:List[T]) {
     update(list => {
       if (newT != list) {
-        Some((newT, CompleteListChange()))
+        val oldT = t
+        Some((newT, CompleteListChange(oldT, newT)))
       } else {
         None
       }
@@ -193,9 +203,9 @@ trait ListReactionIncremental extends Reaction {
 
   private var lastProcessedChangeIndex = -1L
 
-  protected def unprocessedChanges(b:Box[_,ListChange]) = {
+  protected def unprocessedChanges[T](b:Box[_,ListChange[T]]) = {
     b.changes match {
-      case None => immutable.Queue[ListChange]()
+      case None => immutable.Queue[ListChange[T]]()
       case Some(q) => q.filter(indexAndChange => {
         if (indexAndChange._1 > lastProcessedChangeIndex) {
           lastProcessedChangeIndex = indexAndChange._1
@@ -209,11 +219,12 @@ trait ListReactionIncremental extends Reaction {
   
 }
 
-class ListMapReaction[S, T](in: ListRef[S], out:ListVar[T], f : S => T) extends ListReactionIncremental {
-  def isView = false
-  //Note that changes can be passed through unaltered - they have the same scope
-  def react() = out.updateWithChanges(in().map(f), unprocessedChanges(in):_*);
-}
+//TODO rewrite to pass through correct old and new lists in changes - requires mapping each one, should avoid doing them twice when they are both and old and new list
+//class ListMapReaction[S, T](in: ListRef[S], out:ListVar[T], f : S => T) extends ListReactionIncremental {
+//  def isView = false
+//  //Note that changes can be passed through unaltered - they have the same scope
+//  def react() = out.updateWithChanges(in().map(f), unprocessedChanges(in).ma:_*);
+//}
 
 class ListFlatMapReaction[S, T](in: ListRef[S], out:ListVar[T], f : S => List[T]) extends ListReactionIncremental {
   def isView = false

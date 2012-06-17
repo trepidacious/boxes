@@ -2,11 +2,11 @@ package boxes
 
 //A box which is known always to produce the same instance
 //from apply()
-trait ValBox[+T, C] extends Box[T, C]
+trait ValBox[T, C <: Change[T]] extends Box[T, C]
 
 //A box which is known to be mutable, with update method to mutate
 //Also has convenience methods for applying reactions
-trait VarBox[T, C] extends Box[T, C]{
+trait VarBox[T, C <: Change[T]] extends Box[T, C]{
   def update(newT:T)
   def <<(c: =>T) = Reaction(this, c)
   def <<?(c: =>Option[T]) = OptionalReaction(this, c)
@@ -16,7 +16,7 @@ trait Ref[T] extends Box[T, SingleChange[T]]
 trait Var[T] extends VarBox[T, SingleChange[T]] with Ref[T]
 trait Val[T] extends ValBox[T, SingleChange[T]] with Ref[T]
 
-case class SingleChange[T] (oldValue: T, newValue: T)
+case class SingleChange[T] (oldValue: T, newValue: T) extends Change[T]
 
 private class ValDefault[T] (private val t:T) extends Val[T] {
   def apply():T = {
@@ -30,7 +30,7 @@ private class ValDefault[T] (private val t:T) extends Val[T] {
   override def toString = "Val(" + t + ")"
 }
 object Val {
-  def apply[T](t:T) = new ValDefault(t).asInstanceOf[Val[T]]
+  def apply[T](t:T) = new ValDefault(t): Val[T]
 }
 
 private class VarDefault[T] (private var t:T) extends Var[T] {

@@ -1,6 +1,7 @@
 package boxes.graph
 
 import boxes._
+import boxes.list._
 import boxes.general._
 import java.text.DecimalFormat
 import javax.swing.{ImageIcon}
@@ -952,24 +953,24 @@ class GraphZoomer(
   }
 }
 
-case class GraphBasic(layers:Box[List[GraphLayer], _], overlayers:Box[List[GraphLayer], _], dataArea:Box[Area, _], borders:Box[Borders, _]) extends Graph {}
+case class GraphBasic(layers:ListRef[GraphLayer], overlayers:ListRef[GraphLayer], dataArea:Ref[Area], borders:Ref[Borders]) extends Graph {}
 
 object GraphBasic {
   
   def withSeries[K](
-      series:Box[List[Series[K]], _],
-      xName:Box[String, _] = Val("x"),
-      yName:Box[String, _] = Val("y"),
-      borders:Box[Borders, _] = Val(Borders(16, 74, 53, 16)),
-      zoomEnabled:Box[Boolean, _] = Val(true),
-      manualBounds:VarBox[Option[Area], _] = Var(None),
+      series:ListRef[Series[K]],
+      xName:Ref[String] = Val("x"),
+      yName:Ref[String] = Val("y"),
+      borders:Ref[Borders] = Val(Borders(16, 74, 53, 16)),
+      zoomEnabled:Ref[Boolean] = Val(true),
+      manualBounds:Var[Option[Area]] = Var(None),
       xAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
       yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
-      selectEnabled:Box[Boolean, _] = Val(false),
-      selection:VarBox[Set[K], _] = Var(Set[K]()),
-      grabEnabled:Box[Boolean, _] = Val(false),
-      seriesTooltipsEnabled:Box[Boolean, _] = Val(true),
-      axisTooltipsEnabled:Box[Boolean, _] = Val(true),
+      selectEnabled:Ref[Boolean] = Val(false),
+      selection:Var[Set[K]] = Var(Set[K]()),
+      grabEnabled:Ref[Boolean] = Val(false),
+      seriesTooltipsEnabled:Ref[Boolean] = Val(true),
+      axisTooltipsEnabled:Ref[Boolean] = Val(true),
       extraMainLayers:List[GraphLayer] = List[GraphLayer](),
       extraOverLayers:List[GraphLayer] = List[GraphLayer]()
       ) = {
@@ -1027,7 +1028,7 @@ object GraphBasic {
 }
 
 object ColorSeriesBySelection {
-  def apply[K](series:Box[List[Series[K]], _], indices:Box[Set[K],_], unselectedColor:Color = new Color(230, 230, 230), unselectedWidth:Option[Double] = Some(1d)) = Cal{
+  def apply[K](series:Box[List[Series[K]], _], indices:Box[Set[K],_], unselectedColor:Color = new Color(230, 230, 230), unselectedWidth:Option[Double] = Some(1d)) = ListCal{
     val unselected = series().collect{
       case s:Series[K] if !indices().contains(s.key) => s.copy(color = unselectedColor, width = unselectedWidth.getOrElse(s.width))
     }

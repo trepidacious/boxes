@@ -72,7 +72,8 @@ object Box {
 
   def cycleIndex = _cycleIndex
 
-  def changedSources(r:Reaction) = immutable.Set(changedSourcesForReaction.get(r).getOrElse(Set[Box[_,_]]()).toList:_*)
+//  def changedSources(r:Reaction) = immutable.Set(changedSourcesForReaction.get(r).getOrElse(Set[Box[_,_]]()).toList:_*)
+  def changedSources(r:Reaction) = immutable.Set[Box[_,_]](changedSourcesForReaction.get(r).getOrElse(Set[Box[_,_]]()).toList:_*)
 
   def decode[T](decode : =>T):T = {
     beforeDecode
@@ -167,7 +168,7 @@ object Box {
    * order. Note that there MUST be at least one change, to allow
    * for reactions to find the order of changes, etc.
    */
-  def commitWrite[C](b:Box[_,C], changes:C*) = {
+  def commitWrite[T, C <: Change[T]](b:Box[T,C], changes:C*) = {
 
     if (checkingConflicts) {
       activeReaction match {
@@ -224,7 +225,7 @@ object Box {
     }
   }
 
-  def boxFirstChangeIndex[C](b:Box[_,C]) : Option[Long] = {
+  def boxFirstChangeIndex[T, C <: Change[T]](b:Box[T, C]) : Option[Long] = {
     //Reading a box's write index counts as reading it, and
     //so for example makes a reaction have the box as a source
     try {
@@ -238,7 +239,7 @@ object Box {
     }
   }
 
-  def boxChanges[C](b:Box[_,C]):Option[immutable.Queue[(Long,C)]] = {
+  def boxChanges[T, C <: Change[T]](b:Box[T, C]):Option[immutable.Queue[(Long,C)]] = {
     //Reading a box's changes counts as reading it, and
     //so for example makes a reaction have the box as a source
     try {
@@ -453,6 +454,14 @@ object Box {
 }
 
 /**
+ * All Box changes give at least the old and new values of the Box
+ */
+trait Change[+T] {
+  def oldValue: T
+  def newValue: T
+}
+
+/**
  * One part of the boxes system. The other part is Reaction.
  *
  * A Box holds a single value, which may change over time, and
@@ -469,7 +478,7 @@ object Box {
  *
  * However it is unlikely that you will need to implement a new Box in any case.
  */
-trait Box[+T, C] {
+trait Box[+T, C <: Change[T]] {
 
   private[boxes] val sourcingReactions = new WeakHashSet[Reaction]()
   

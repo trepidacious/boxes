@@ -38,7 +38,7 @@ import boxes.list.ListReactionIncremental
 //  }
 //}
 
-class PathReaction[T, G, CT, CG](v:VarBox[G, CG], path : => Option[VarBox[T, CT]], defaultValue:G, c:GConverter[G, T]) extends Reaction {
+class PathReaction[T, G, CT <: Change[T], CG <: Change[G]](v:VarBox[G, CG], path : => Option[VarBox[T, CT]], defaultValue:G, c:GConverter[G, T]) extends Reaction {
 
   def respond : (()=>Unit) = {
     path match {

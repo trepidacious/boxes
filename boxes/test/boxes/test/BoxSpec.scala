@@ -410,28 +410,28 @@ class BoxSpec extends WordSpec {
 
     "notify replacement, insertion and removal" in {
       val l = ListVar(0, 1, 2, 3)
-      var changes:Option[Queue[(Long,ListChange)]] = None
+      var changes:Option[Queue[(Long,ListChange[Int])]] = None
       val v = View(changes = l.changes)
       assert(changes == None)
       l(1) = 42
       assert(changes != None)
       changes.foreach(q => {
         assert(q.size === 1)
-        assert(q.head._2 === ReplacementListChange(1, 1))
+        assert(q.head._2 === ReplacementListChange(List(0, 1, 2, 3), List(0, 42, 2, 3), 1, 1))
       })
 
       l.remove(2, 1)
       assert(changes != None)
       changes.foreach(q => {
         assert(q.size === 1)
-        assert(q.head._2 === RemovalListChange(2, 1))
+        assert(q.head._2 === RemovalListChange(List(0, 42, 2, 3), List(0, 42, 3), 2, 1))
       })
 
       l.insert(3, 24, 25)
       assert(changes != None)
       changes.foreach(q => {
         assert(q.size === 1)
-        assert(q.head._2 === InsertionListChange(3, 2))
+        assert(q.head._2 === InsertionListChange(List(0, 42, 3), List(0, 42, 3, 24, 25), 3, 2))
       })
     }
 

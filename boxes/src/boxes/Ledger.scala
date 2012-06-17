@@ -57,7 +57,7 @@ trait LedgerRef extends Box[Ledger, LedgerChange]{
 //If the column count, names or classes have changed, columnsChanged is true, although
 //columnsChanged may be true when these HAVEN'T changed.
 //Similarly rowCountChanged will be true if the number of rows may have changed.
-case class LedgerChange(columnsChanged:Boolean, rowCountChanged:Boolean)
+case class LedgerChange(oldLedger: Ledger, newLedger: Ledger, columnsChanged:Boolean, rowCountChanged:Boolean) extends SingleChange[Ledger](oldLedger, newLedger)
 
 trait LedgerVal extends LedgerRef with ValBox[Ledger, LedgerChange]
 object LedgerVal {
@@ -72,7 +72,11 @@ private class LedgerValDefault (private val t:Ledger) extends LedgerVal {
 trait LedgerVar extends LedgerRef with VarBox[Ledger, LedgerChange] {
   def editable(record:Int, field:Int):Boolean
   def update(record:Int, field:Int, value:Any)
-  def update(u : (Ledger => Option[(Ledger, LedgerChange)]))
+  /**
+   * Update to a new ledger, where the scope of the change is known. The
+   * tuple is (columnsChanged, rowCountChanged)
+   */
+  def update(u : (Ledger => Option[(Ledger, (Boolean, Boolean))]))
 }
 object LedgerVar {
   def apply(l: Ledger) = new LedgerVarDefault(l): LedgerVar
@@ -81,14 +85,15 @@ private class LedgerVarDefault (private var t:Ledger) extends LedgerVar {
   def apply(record:Int, field:Int) = Box.read(this){t.apply(record, field)}
   def apply():Ledger = Box.read(this){t}
 
-  def update(u : (Ledger => Option[(Ledger, LedgerChange)])) = {
+  def update(u : (Ledger => Option[(Ledger, (Boolean, Boolean))])) = {
     try {
       Box.beforeWrite(this)
       u.apply(t) match {
         case None => {}
-        case Some((newT, c)) => {
+        case Some((newT, (columnsChanged, rowCountChanged))) => {
+          val oldT = t
           t = newT
-          Box.commitWrite(this, c)
+          Box.commitWrite(this, LedgerChange(oldT, newT, columnsChanged, rowCountChanged))
         }
       }
     } finally {
@@ -104,7 +109,7 @@ private class LedgerVarDefault (private var t:Ledger) extends LedgerVar {
         t = newT        
         //TODO can we work out whether columns are the same? Is it
         //enough for the names, classes and count to match completely? 
-        Box.commitWrite(this, LedgerChange(true, true))
+        Box.commitWrite(this, LedgerChange(oldT, newT, true, true))
       }
     } finally {
       Box.afterWrite(this)
@@ -180,7 +185,7 @@ object ListLedgerVar {
           if (index > lastProcessedChangeIndex) {
             lastProcessedChangeIndex = index
             change match {
-              case ReplacementListChange(f, i)  => changed = true
+              case ReplacementListChange(_, _, _, _)  => changed = true
               //All changes except replacement may change size
               case _ => {
                 changed = true
@@ -191,7 +196,7 @@ object ListLedgerVar {
         }
         
         if (changed) {
-          v.update{_ => Some((ListLedger(list(), rView()), LedgerChange(false, rowCountChanged)))}
+          v.update{_ => Some((ListLedger(list(), rView()), (false, rowCountChanged)))}
         }
       }
     }
@@ -206,7 +211,7 @@ object ListLedgerVar {
       
       def react {
         if (!rView.changes.isEmpty) {
-          v.update{_ => Some((ListLedger(list(), rView()), LedgerChange(true, false)))}
+          v.update{_ => Some((ListLedger(list(), rView()), (true, false)))}
         }
       }
     }
@@ -296,12 +301,14 @@ object FieldCompositeLedgerVar {
           change <- changeQueue
         } yield (change._2)
   
+        val listChanged = ledgers.changes.map(!_.isEmpty).getOrElse(false)
+        
         //Should we track last processed index?
         //See if any change affected columns, and same for rows.
-        val (columns, rows) = allChanges.foldLeft((false, false)){(cAndR, c) => (cAndR._1 | c.columnsChanged, cAndR._2 | c.rowCountChanged)}
+        val (columns, rows) = allChanges.foldLeft((listChanged, listChanged)){(cAndR, c) => (cAndR._1 | c.columnsChanged, cAndR._2 | c.rowCountChanged)}
   
         if (columns || rows) {
-          v.update{_ => Some(FieldCompositeLedger(ledgers().map(_.apply())), LedgerChange(columns, rows))}
+          v.update{_ => Some(FieldCompositeLedger(ledgers().map(_.apply())), (columns, rows))}
         }  
       }
     }

@@ -6,18 +6,18 @@ class ListIndexReaction[T](list:ListRef[T], i:Var[Option[Int]], loseIndexOnDelet
 
   private var lastProcessedChangeIndex = -1L
 
-  private def updateIndex(optionI:Option[Int], change:ListChange) = optionI match {
+  private def updateIndex(optionI:Option[Int], change:ListChange[T]) = optionI match {
 
     //No selection remains no selection, under all list changes
     case None => None
 
     //Some selection is updated
     case Some(i) => change match {
-      case ReplacementListChange(_,_) => Some(i)
+      case ReplacementListChange(_,_,_,_) => Some(i)
 
-      case InsertionListChange(insertion, count) => if (insertion <= i) Some(i+count) else Some(i)
+      case InsertionListChange(_,_,insertion, count) => if (insertion <= i) Some(i+count) else Some(i)
 
-      case RemovalListChange(removal, count) => {
+      case RemovalListChange(_,_,removal, count) => {
         //Deletion after selected index, no effect
         if (removal > i) {
           Some(i)
@@ -48,7 +48,7 @@ class ListIndexReaction[T](list:ListRef[T], i:Var[Option[Int]], loseIndexOnDelet
       }
 
       //For a complete change, we reset the index
-      case CompleteListChange() => None
+      case CompleteListChange(_,_) => None
     }
 
   }
@@ -129,13 +129,13 @@ class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], loseIndexOn
 
   private var lastProcessedChangeIndex = -1L
 
-  private def updateIndices(is:Set[Int], change:ListChange) = {
+  private def updateIndices(is:Set[Int], change:ListChange[T]) = {
 
     change match {
 
-      case ReplacementListChange(_,_) => is
+      case ReplacementListChange(_,_,_,_) => is
 
-      case InsertionListChange(insertion, count) => is.map{
+      case InsertionListChange(_,_,insertion, count) => is.map{
         i => if (insertion <= i) i+count else i
       }
 
@@ -146,7 +146,7 @@ class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], loseIndexOn
       //be irritating
 
       //filter out any indices in the deleted range, then adjust those after the range to move them back
-      case RemovalListChange(removal, count) => {
+      case RemovalListChange(_,_,removal, count) => {
         val newSet = is.collect {
           //Before deletion, no effect
           case i if removal > i => i
@@ -166,7 +166,7 @@ class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], loseIndexOn
       }
 
       //For a complete change, we lose the selection
-      case CompleteListChange() => Set[Int]()
+      case CompleteListChange(_,_) => Set[Int]()
     }
   }
 
