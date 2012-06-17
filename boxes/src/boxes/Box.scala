@@ -20,6 +20,11 @@ class NumericVar[N](v: Var[N])(implicit n: Numeric[N]) {
   def to(max: N) = {v << n.min(max, v()); v}
   def from(min: Box[N, _]) = {v << n.max(min(), v()); v}
   def to(max: Box[N, _]) = {v << n.min(max(), v()); v}
+  
+  def clip(min: N, max: N) {
+    val value = v()
+    if (n.compare(value, min) < 0) v() = min else if (n.compare(value, max) > 0) v() = max
+  }
 }
 
 object NumericVarImplicits {
