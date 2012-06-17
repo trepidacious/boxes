@@ -5,7 +5,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener
-import boxes.{VarGeneral, View}
+import boxes.{VarBox, View}
 
 /**
 * View/edit a Var[Set[Int]] as the selected indices of a ListSelectionModel
@@ -17,7 +17,7 @@ import boxes.{VarGeneral, View}
 * TODO Check this handles filtering of the table, it should react
 * to selection of rows that have been filtered out by removing those indices.
 */
-class ListSelectionIndicesModel(v:VarGeneral[Set[Int],_], setFilter: =>Boolean, table:JTable) extends ListSelectionModel {
+class ListSelectionIndicesModel(v:VarBox[Set[Int],_], setFilter: =>Boolean, table:JTable) extends ListSelectionModel {
 
 	val delegate = new DefaultListSelectionModel()
   delegate.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION)

@@ -18,8 +18,8 @@ class NumericVar[N](v: Var[N])(implicit n: Numeric[N]) {
   
   def from(min: N) = {v << n.max(min, v()); v}
   def to(max: N) = {v << n.min(max, v()); v}
-  def from(min: RefGeneral[N, _]) = {v << n.max(min(), v()); v}
-  def to(max: RefGeneral[N, _]) = {v << n.min(max(), v()); v}
+  def from(min: Box[N, _]) = {v << n.max(min(), v()); v}
+  def to(max: Box[N, _]) = {v << n.min(max(), v()); v}
 }
 
 object NumericVarImplicits {
@@ -45,7 +45,7 @@ object Box {
   //Actually the values are a pair of change index and change
   //Note that we don't bother with type for the values -
   //they are Queues of (Long, C) where C matches the Box[C] used as a key
-  private val boxToChanges = new mutable.HashMap[Box[_], Object]
+  private val boxToChanges = new mutable.HashMap[Box[_,_], Object]
 
   //Threads that have asked not to be allowed to read
   private val nonReadingThreads = new mutable.HashSet[Thread]
@@ -53,7 +53,7 @@ object Box {
   //For each reaction that has had any source change, maps to the set of boxes that have changed for that reaction. Allows
   //reactions to see why they have been called in any given cycle. Empty outside cycles. Note that from one call to
   //a reaction to the next, may acquire additional entries, etc.
-  private val changedSourcesForReaction = new mutable.HashMap[Reaction, mutable.Set[Box[_]]] with MultiMap[Reaction, Box[_]]
+  private val changedSourcesForReaction = new mutable.HashMap[Reaction, mutable.Set[Box[_,_]]] with MultiMap[Reaction, Box[_,_]]
 
   //The next change index to assign
   private var changeIndex = 0L
@@ -72,7 +72,7 @@ object Box {
 
   def cycleIndex = _cycleIndex
 
-  def changedSources(r:Reaction) = immutable.Set(changedSourcesForReaction.get(r).getOrElse(Set[Box[_]]()).toList:_*)
+  def changedSources(r:Reaction) = immutable.Set(changedSourcesForReaction.get(r).getOrElse(Set[Box[_,_]]()).toList:_*)
 
   def decode[T](decode : =>T):T = {
     beforeDecode
@@ -101,7 +101,7 @@ object Box {
     }
   }
 
-  def read[T](b: Box[_])(readOp: => T): T = {
+  def read[T](b: Box[_,_])(readOp: => T): T = {
     try {
       Box.beforeRead(b)
       readOp
@@ -128,7 +128,7 @@ object Box {
     lock.unlock
   }
 
-  def beforeRead[C](b:Box[C]) = {
+  def beforeRead(b:Box[_,_]) = {
     lock.lock
     if (!canRead) throw new InvalidReadException(b)
 
@@ -142,7 +142,7 @@ object Box {
     }
   }
 
-  def afterRead[C](b:Box[C]) = {
+  def afterRead(b:Box[_,_]) = {
     //This box is a source of any active reaction
     activeReaction.foreach(r => associateReactionSource(r, b))
     lock.unlock
@@ -153,7 +153,7 @@ object Box {
    * there is a reaction being applied, which can be used by Boxes
    * to reject writes. E.g. Cal will only accept writes from Reactions.
    */
-  def beforeWrite[C](b:Box[C]) {
+  def beforeWrite(b:Box[_,_]) {
     lock.lock
     if (!canWrite) throw new InvalidWriteException(b)
 
@@ -167,7 +167,7 @@ object Box {
    * order. Note that there MUST be at least one change, to allow
    * for reactions to find the order of changes, etc.
    */
-  def commitWrite[C](b:Box[C], changes:C*) = {
+  def commitWrite[C](b:Box[_,C], changes:C*) = {
 
     if (checkingConflicts) {
       activeReaction match {
@@ -194,21 +194,21 @@ object Box {
     cycle
   }
 
-  def afterWrite[C](b:Box[C]) = {
+  def afterWrite(b:Box[_,_]) = {
     lock.unlock
   }
 
-  private def associateReactionSource(r:Reaction, b:Box[_]) {
+  private def associateReactionSource(r:Reaction, b:Box[_,_]) {
     r.sources.add(b)
     b.sourcingReactions.add(r)
   }
 
-  private def associateReactionTarget(r:Reaction, b:Box[_]) {
+  private def associateReactionTarget(r:Reaction, b:Box[_,_]) {
     r.targets.add(b)
     b.targetingReactions.add(r)
   }
 
-  private def pendReaction(r:Reaction, sourceBoxes:List[Box[_]] = List()) = {
+  private def pendReaction(r:Reaction, sourceBoxes:List[Box[_,_]] = List()) = {
     sourceBoxes.foreach(b => changedSourcesForReaction.addBinding(r, b))
     r.isView match {
       case false => {
@@ -224,7 +224,7 @@ object Box {
     }
   }
 
-  def boxFirstChangeIndex[C](b:Box[C]) : Option[Long] = {
+  def boxFirstChangeIndex[C](b:Box[_,C]) : Option[Long] = {
     //Reading a box's write index counts as reading it, and
     //so for example makes a reaction have the box as a source
     try {
@@ -238,7 +238,7 @@ object Box {
     }
   }
 
-  def boxChanges[C](b:Box[C]):Option[immutable.Queue[(Long,C)]] = {
+  def boxChanges[C](b:Box[_,C]):Option[immutable.Queue[(Long,C)]] = {
     //Reading a box's changes counts as reading it, and
     //so for example makes a reaction have the box as a source
     try {
@@ -284,7 +284,7 @@ object Box {
       val failedReactions = new mutable.HashSet[Reaction]()
 
       //Which reaction (if any) has written each box, this cycle. Used to detect conflicts.
-      val targetsToCurrentCycleReaction = new mutable.HashMap[Box[_], Reaction]()
+      val targetsToCurrentCycleReaction = new mutable.HashMap[Box[_,_], Reaction]()
 
       val conflictReactions = new mutable.HashSet[Reaction]()
 
@@ -455,6 +455,12 @@ object Box {
 /**
  * One part of the boxes system. The other part is Reaction.
  *
+ * A Box holds a single value, which may change over time, and
+ * allows for reactions to those changes.
+ * 
+ * A Box also has a change type C, giving the type of data given
+ * on each change.
+ *
  * Be VERY careful making Boxes equal each other when they are not the SAME
  * Box (identical). This is because maps and sets are used for storing Boxes,
  * for example which Boxes are affected by a Reaction, and so equal Boxes will
@@ -463,7 +469,7 @@ object Box {
  *
  * However it is unlikely that you will need to implement a new Box in any case.
  */
-trait Box[C] {
+trait Box[+T, C] {
 
   private[boxes] val sourcingReactions = new WeakHashSet[Reaction]()
   
@@ -485,5 +491,7 @@ trait Box[C] {
   }
 
   def react (r: =>Unit) = Reaction(this, r)
+  
+  def apply():T
   
 }

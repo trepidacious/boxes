@@ -305,7 +305,7 @@ class BoxSpec extends WordSpec {
       val alice = new Person()
       alice.name() = "Alice"
 
-      var lastChanges:Option[Queue[(Long, SingleChange[String])]] = Some(Queue((1, SingleChange("MustChange"))))
+      var lastChanges:Option[Queue[(Long, SingleChange[String])]] = Some(Queue((1, SingleChange("MustChange", "MustChange"))))
 
       val v = View{
         lastChanges = alice.name.changes
@@ -319,7 +319,7 @@ class BoxSpec extends WordSpec {
       assert(lastChanges != None)
       lastChanges.foreach(q => {
         assert(q.size === 1)
-        assert(q.head._2 === SingleChange("Alicia"))
+        assert(q.head._2 === SingleChange("Alice", "Alicia"))
       })
 
       alice.name() = "Alucard"
@@ -327,7 +327,7 @@ class BoxSpec extends WordSpec {
       assert(lastChanges != None)
       lastChanges.foreach(q => {
         assert(q.size === 1)
-        assert(q.head._2 === SingleChange("Alucard"))
+        assert(q.head._2 === SingleChange("Alicia", "Alucard"))
       })
     }
   }

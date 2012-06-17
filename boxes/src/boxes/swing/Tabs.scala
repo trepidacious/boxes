@@ -3,7 +3,7 @@ package boxes.swing
 import boxes.general.RadioReaction
 import java.awt.{CardLayout, BorderLayout, Dimension, Container, Component, LayoutManager}
 import javax.swing.{JPanel, Icon, JComponent}
-import boxes.{View, Val, RefGeneral, Var}
+import boxes.{View, Val, Box, Var}
 
 object VerticalTabLayout {
   def apply(tabWidth:Int = 64, tabHeight:Int = 64) = new VerticalTabLayout(tabWidth, tabHeight)
@@ -29,12 +29,12 @@ class VerticalTabLayout(val tabWidth:Int, val tabHeight:Int) extends LayoutManag
 
 case class TabBuilder(toggles:List[Var[Boolean]] = List(), tabComponents:List[JComponent] = List(), contentComponents:List[JComponent] = List()) {
 
-  def add(contents:JComponent, name:RefGeneral[String,_] = Val(""), icon:RefGeneral[Option[Icon], _] = Val(None), v:Var[Boolean] = Var(toggles.isEmpty)):TabBuilder = {
+  def add(contents:JComponent, name:Box[String,_] = Val(""), icon:Box[Option[Icon], _] = Val(None), v:Var[Boolean] = Var(toggles.isEmpty)):TabBuilder = {
     val view = BooleanView(v, name, BooleanControlType.TAB, icon, false)
     TabBuilder(toggles:::List(v), tabComponents:::List(view.component), contentComponents:::List(contents))
   }
 
-  def addView(contents:SwingView, name:RefGeneral[String,_] = Val(""), icon:RefGeneral[Option[Icon], _] = Val(None), v:Var[Boolean] = Var(toggles.isEmpty)):TabBuilder = add(contents.component, name, icon, v)
+  def addView(contents:SwingView, name:Box[String,_] = Val(""), icon:Box[Option[Icon], _] = Val(None), v:Var[Boolean] = Var(toggles.isEmpty)):TabBuilder = add(contents.component, name, icon, v)
 
   def panel(width:Int = 64, height:Int = 64) = {
     RadioReaction(toggles:_*)

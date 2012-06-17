@@ -29,14 +29,14 @@ trait Ledger {
   def update(record:Int, field:Int, value:Any): Ledger
 }
 
-//A RefGeneral containing a Ledger, and showing changes when
+//A Box containing a Ledger, and showing changes when
 //a new Ledger is set. Note that this does NOT necessarily show
 //a change when the data that can be read from the Ledger itself
 //changes, only when a new Ledger instance is present. LedgerChange
 //gives some additional information on the differences between the
 //old and new ledgers, in terms of column definitions and number of
 //rows.
-trait LedgerRef extends RefGeneral[Ledger, LedgerChange]{
+trait LedgerRef extends Box[Ledger, LedgerChange]{
   def apply(record:Int, field:Int):Any
   
   //TODO add these for convenience, delegating to contents? Note that
@@ -59,7 +59,7 @@ trait LedgerRef extends RefGeneral[Ledger, LedgerChange]{
 //Similarly rowCountChanged will be true if the number of rows may have changed.
 case class LedgerChange(columnsChanged:Boolean, rowCountChanged:Boolean)
 
-trait LedgerVal extends LedgerRef with ValGeneral[Ledger, LedgerChange]
+trait LedgerVal extends LedgerRef with ValBox[Ledger, LedgerChange]
 object LedgerVal {
   def apply(l: Ledger) = new LedgerValDefault(l): LedgerVal
 }
@@ -69,7 +69,7 @@ private class LedgerValDefault (private val t:Ledger) extends LedgerVal {
   override def toString = "LedgerVal(" + t + ")"
 }
 
-trait LedgerVar extends LedgerRef with VarGeneral[Ledger, LedgerChange] {
+trait LedgerVar extends LedgerRef with VarBox[Ledger, LedgerChange] {
   def editable(record:Int, field:Int):Boolean
   def update(record:Int, field:Int, value:Any)
   def update(u : (Ledger => Option[(Ledger, LedgerChange)]))
@@ -158,7 +158,7 @@ class ListLedger[T](list:List[T], rView:RecordView[T]) extends Ledger {
 //the LedgerVar shows LedgerChanges accurately but minimally reflecting
 //the changes it shows, to allow for efficient viewing e.g. in a GUI
 object ListLedgerVar {
-  def apply[T](list: ListRef[T], rView:RefGeneral[RecordView[T], _]) = {
+  def apply[T](list: ListRef[T], rView:Box[RecordView[T], _]) = {
     val v = LedgerVar(ListLedger(list(), rView()))
     
     //On list change, update the ledger in the var if necessary,
@@ -357,10 +357,10 @@ object MLens {
 }
 
 /**
- * MLens based on a VarGeneral and an access closure
+ * MLens based on a VarBox and an access closure
  */
 object VarLens {
-  def apply[T, V](name:String, access:(T=>VarGeneral[V,_]))(implicit valueManifest:Manifest[V]) = {
+  def apply[T, V](name:String, access:(T=>VarBox[V,_]))(implicit valueManifest:Manifest[V]) = {
     new MLensDefault[T, V](
       name,
       (t) => access(t).apply,
@@ -370,10 +370,10 @@ object VarLens {
 }
 
 /**
- * MLens based on a RefGeneral and an access closure
+ * MLens based on a Box and an access closure
  */
 object RefLens {
-  def apply[T, V](name:String, access:(T=>RefGeneral[V,_]))(implicit valueManifest:Manifest[V]) = {
+  def apply[T, V](name:String, access:(T=>Box[V,_]))(implicit valueManifest:Manifest[V]) = {
     new LensDefault[T, V](
       name,
       (t) => access(t).apply

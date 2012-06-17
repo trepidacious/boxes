@@ -140,7 +140,7 @@ object GraphSeries {
   val shadowOffset = Vec2(1, 1)
 }
 
-class GraphSeries[K](series:RefGeneral[List[Series[K]], _], shadow:Boolean = false) extends GraphLayer {
+class GraphSeries[K](series:Box[List[Series[K]], _], shadow:Boolean = false) extends GraphLayer {
 
   def paint() = {
     val currentSeries = series()
@@ -311,10 +311,10 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
 }
 
 trait Graph {
-  def layers:RefGeneral[List[GraphLayer], _]
-  def overlayers:RefGeneral[List[GraphLayer], _]
-  def dataArea:RefGeneral[Area, _]
-  def borders:RefGeneral[Borders, _]
+  def layers:Box[List[GraphLayer], _]
+  def overlayers:Box[List[GraphLayer], _]
+  def dataArea:Box[Area, _]
+  def borders:Box[Borders, _]
 }
 
 case class GraphSpaces(val dataArea:Area, val pixelArea:Area, val componentArea:Area) {
@@ -351,7 +351,7 @@ trait GraphLayer {
   def paint():(GraphCanvas => Unit)
   //Handle an event, returns false to allow it to reach other layers, or true to consume it
   def onMouse(event:GraphMouseEvent):Boolean
-  def dataBounds:RefGeneral[Option[Area], _]
+  def dataBounds:Box[Option[Area], _]
 }
 
 trait GraphDisplayLayer extends GraphLayer {
@@ -523,7 +523,7 @@ class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalF
   }
 }
 
-class GraphAxisTitle(val axis:Axis, name:RefGeneral[String, _]) extends UnboundedGraphDisplayLayer {
+class GraphAxisTitle(val axis:Axis, name:Box[String, _]) extends UnboundedGraphDisplayLayer {
   def paint() = {
     val currentName = name()
 
@@ -587,7 +587,7 @@ object GraphSelectBox {
   }
 
 
-  def apply[K](series:RefGeneral[List[Series[K]], _], fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], selectionOut:VarGeneral[Set[K], _], enabled:RefGeneral[Boolean, _] = Val(true)) = {
+  def apply[K](series:Box[List[Series[K]], _], fill:Box[Color, _], outline:Box[Color, _], selectionOut:VarBox[Set[K], _], enabled:Box[Boolean, _] = Val(true)) = {
     new GraphBox(fill, outline, enabled, (area:Area, spaces:GraphSpaces) => {
       val areaN = area.normalise
       val selected = series().collect{
@@ -599,7 +599,7 @@ object GraphSelectBox {
 }
 
 object GraphZoomBox {
-  def apply(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], areaOut:VarGeneral[Option[Area], _], enabled:RefGeneral[Boolean, _] = Val(true)) = {
+  def apply(fill:Box[Color, _], outline:Box[Color, _], areaOut:VarBox[Option[Area], _], enabled:Box[Boolean, _] = Val(true)) = {
     new GraphBox(fill, outline, enabled, (zoomArea:Area, spaces:GraphSpaces) => {
       //Zoom out for second quadrant drag (x negative, y positive)
       if (zoomArea.size.x < 0 && zoomArea.size.y > 0) {
@@ -612,10 +612,10 @@ object GraphZoomBox {
 }
 
 object GraphClick{
-  def apply[K](enabled:RefGeneral[Boolean, _] = Val(true), selectionOut:VarGeneral[Set[K], _]) = new GraphClick(enabled, selectionOut)
+  def apply[K](enabled:Box[Boolean, _] = Val(true), selectionOut:VarBox[Set[K], _]) = new GraphClick(enabled, selectionOut)
 }
 
-class GraphClick[K](enabled:RefGeneral[Boolean, _] = Val(true), selectionOut:VarGeneral[Set[K], _]) extends GraphLayer {
+class GraphClick[K](enabled:Box[Boolean, _] = Val(true), selectionOut:VarBox[Set[K], _]) extends GraphLayer {
 
   def paint() = (canvas:GraphCanvas) => {}
 
@@ -642,10 +642,10 @@ class GraphClick[K](enabled:RefGeneral[Boolean, _] = Val(true), selectionOut:Var
 
 
 object GraphGrab{
-  def apply(enabled:RefGeneral[Boolean, _] = Val(true), manualDataArea:VarGeneral[Option[Area], _], displayedDataArea:RefGeneral[Area, _]) = new GraphGrab(enabled, manualDataArea, displayedDataArea)
+  def apply(enabled:Box[Boolean, _] = Val(true), manualDataArea:VarBox[Option[Area], _], displayedDataArea:Box[Area, _]) = new GraphGrab(enabled, manualDataArea, displayedDataArea)
 }
 
-class GraphGrab(enabled:RefGeneral[Boolean, _] = Val(true), manualDataArea:VarGeneral[Option[Area], _], displayedDataArea:RefGeneral[Area, _]) extends GraphLayer {
+class GraphGrab(enabled:Box[Boolean, _] = Val(true), manualDataArea:VarBox[Option[Area], _], displayedDataArea:Box[Area, _]) extends GraphLayer {
 
   private var maybeInitial:Option[GraphMouseEvent] = None
 
@@ -734,7 +734,7 @@ class GraphThreePartPainterVertical(image:Image) {
 
 object AxisTooltip {
   val format = new DecimalFormat("0.0000")
-  def apply(axis:Axis, enabled:RefGeneral[Boolean, _] = Val(true)) = new AxisTooltip(axis, enabled)
+  def apply(axis:Axis, enabled:Box[Boolean, _] = Val(true)) = new AxisTooltip(axis, enabled)
   val horizTabPainter = new GraphThreePartPainter(IconFactory.image("HorizontalLineLabel"))
   val vertTabPainter = new GraphThreePartPainterVertical(IconFactory.image("VerticalLineLabel"))
   val lineColor = SwingView.shadedBoxColor
@@ -790,7 +790,7 @@ object AxisTooltip {
 
 }
 
-class AxisTooltip(axis:Axis, enabled:RefGeneral[Boolean, _] = Val(true)) extends GraphLayer {
+class AxisTooltip(axis:Axis, enabled:Box[Boolean, _] = Val(true)) extends GraphLayer {
 
   private val value:Var[Option[Double]] = Var(None)
 
@@ -834,7 +834,7 @@ class AxisTooltip(axis:Axis, enabled:RefGeneral[Boolean, _] = Val(true)) extends
 }
 
 
-class GraphBox(fill:RefGeneral[Color, _], outline:RefGeneral[Color, _], enabled:RefGeneral[Boolean, _] = Val(true), action:(Area, GraphSpaces) => Unit, val minSize:Int = 5) extends GraphLayer {
+class GraphBox(fill:Box[Color, _], outline:Box[Color, _], enabled:Box[Boolean, _] = Val(true), action:(Area, GraphSpaces) => Unit, val minSize:Int = 5) extends GraphLayer {
   private val area:Var[Option[Area]] = Var(None)
 
   def bigEnough(a:Area) = (math.abs(a.size.x) > minSize || math.abs(a.size.y) > minSize)
@@ -918,8 +918,8 @@ case class GraphZoomerAxis(
 )
 
 class GraphZoomer(
-    val dataBounds:RefGeneral[Option[Area], _],
-    val manualBounds:RefGeneral[Option[Area], _] = Val(None),
+    val dataBounds:Box[Option[Area], _],
+    val manualBounds:Box[Option[Area], _] = Val(None),
     val xAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
     val yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis())) {
 
@@ -952,24 +952,24 @@ class GraphZoomer(
   }
 }
 
-case class GraphBasic(layers:RefGeneral[List[GraphLayer], _], overlayers:RefGeneral[List[GraphLayer], _], dataArea:RefGeneral[Area, _], borders:RefGeneral[Borders, _]) extends Graph {}
+case class GraphBasic(layers:Box[List[GraphLayer], _], overlayers:Box[List[GraphLayer], _], dataArea:Box[Area, _], borders:Box[Borders, _]) extends Graph {}
 
 object GraphBasic {
   
   def withSeries[K](
-      series:RefGeneral[List[Series[K]], _],
-      xName:RefGeneral[String, _] = Val("x"),
-      yName:RefGeneral[String, _] = Val("y"),
-      borders:RefGeneral[Borders, _] = Val(Borders(16, 74, 53, 16)),
-      zoomEnabled:RefGeneral[Boolean, _] = Val(true),
-      manualBounds:VarGeneral[Option[Area], _] = Var(None),
+      series:Box[List[Series[K]], _],
+      xName:Box[String, _] = Val("x"),
+      yName:Box[String, _] = Val("y"),
+      borders:Box[Borders, _] = Val(Borders(16, 74, 53, 16)),
+      zoomEnabled:Box[Boolean, _] = Val(true),
+      manualBounds:VarBox[Option[Area], _] = Var(None),
       xAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
       yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
-      selectEnabled:RefGeneral[Boolean, _] = Val(false),
-      selection:VarGeneral[Set[K], _] = Var(Set[K]()),
-      grabEnabled:RefGeneral[Boolean, _] = Val(false),
-      seriesTooltipsEnabled:RefGeneral[Boolean, _] = Val(true),
-      axisTooltipsEnabled:RefGeneral[Boolean, _] = Val(true),
+      selectEnabled:Box[Boolean, _] = Val(false),
+      selection:VarBox[Set[K], _] = Var(Set[K]()),
+      grabEnabled:Box[Boolean, _] = Val(false),
+      seriesTooltipsEnabled:Box[Boolean, _] = Val(true),
+      axisTooltipsEnabled:Box[Boolean, _] = Val(true),
       extraMainLayers:List[GraphLayer] = List[GraphLayer](),
       extraOverLayers:List[GraphLayer] = List[GraphLayer]()
       ) = {
@@ -1027,7 +1027,7 @@ object GraphBasic {
 }
 
 object ColorSeriesBySelection {
-  def apply[K](series:RefGeneral[List[Series[K]], _], indices:RefGeneral[Set[K],_], unselectedColor:Color = new Color(230, 230, 230), unselectedWidth:Option[Double] = Some(1d)) = Cal{
+  def apply[K](series:Box[List[Series[K]], _], indices:Box[Set[K],_], unselectedColor:Color = new Color(230, 230, 230), unselectedWidth:Option[Double] = Some(1d)) = Cal{
     val unselected = series().collect{
       case s:Series[K] if !indices().contains(s.key) => s.copy(color = unselectedColor, width = unselectedWidth.getOrElse(s.width))
     }

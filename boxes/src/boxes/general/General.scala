@@ -13,7 +13,7 @@ object RadioReaction {
 
 class RadioReaction(options:Var[Boolean]*) extends Reaction {
 
-  def aBeforeB(a:Box[_], b:Box[_]) = {
+  def aBeforeB(a:Box[_,_], b:Box[_,_]) = {
     val aIndex = a.firstChangeIndex
     val bIndex = b.firstChangeIndex
 
@@ -52,10 +52,10 @@ class RadioReaction(options:Var[Boolean]*) extends Reaction {
 }
 
 object TrueOp {
-  def apply[T](v:VarGeneral[Boolean,_], canApply:RefGeneral[Boolean, _] = Val(true)) = new TrueOp[T](v, canApply)
+  def apply[T](v:VarBox[Boolean,_], canApply:Box[Boolean, _] = Val(true)) = new TrueOp[T](v, canApply)
 }
 
-class TrueOp[T](v:VarGeneral[Boolean,_], val canApply:RefGeneral[Boolean, _] = Val(true)) extends Op {
+class TrueOp[T](v:VarBox[Boolean,_], val canApply:Box[Boolean, _] = Val(true)) extends Op {
   def apply() {
     Box.transact{
       v() = true
@@ -64,10 +64,10 @@ class TrueOp[T](v:VarGeneral[Boolean,_], val canApply:RefGeneral[Boolean, _] = V
 }
 
 object SetOp {
-  def apply[T](v:VarGeneral[T, _], s:RefGeneral[T, _]) = new SetOp[T](v, s)
+  def apply[T](v:VarBox[T, _], s:Box[T, _]) = new SetOp[T](v, s)
 }
 
-class SetOp[T](v:VarGeneral[T, _], s:RefGeneral[T, _]) extends Op {
+class SetOp[T](v:VarBox[T, _], s:Box[T, _]) extends Op {
   def apply() {
     Box.transact{
       v() = s()

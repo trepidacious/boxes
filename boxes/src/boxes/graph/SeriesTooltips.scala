@@ -1,7 +1,7 @@
 package boxes.graph
 
 import boxes.graph.GraphMouseEventType._
-import boxes.{Var, Val, RefGeneral}
+import boxes.{Var, Val, Box}
 import boxes.swing.SwingView
 import java.awt.geom.{Line2D}
 
@@ -34,13 +34,13 @@ class HighlightSeriesTooltipRenderer[K] extends SeriesTooltipRenderer[K]{
 object SeriesTooltips {
   val maxRadius = 10
 
-  def apply[K](series:RefGeneral[List[Series[K]], _], enabled:RefGeneral[Boolean, _] = Val(true), renderer:SeriesTooltipRenderer[K] = new StringSeriesTooltipRenderer[K]()) = new SeriesTooltips[K](enabled, series, renderer)
+  def apply[K](series:Box[List[Series[K]], _], enabled:Box[Boolean, _] = Val(true), renderer:SeriesTooltipRenderer[K] = new StringSeriesTooltipRenderer[K]()) = new SeriesTooltips[K](enabled, series, renderer)
 
-  def string[K](series:RefGeneral[List[Series[K]], _], enabled:RefGeneral[Boolean, _] = Val(true)) = new SeriesTooltips[K](enabled, series, new StringSeriesTooltipRenderer[K]())
-  def highlight[K](series:RefGeneral[List[Series[K]], _], enabled:RefGeneral[Boolean, _] = Val(true)) = new SeriesTooltips[K](enabled, series, new HighlightSeriesTooltipRenderer[K]())
+  def string[K](series:Box[List[Series[K]], _], enabled:Box[Boolean, _] = Val(true)) = new SeriesTooltips[K](enabled, series, new StringSeriesTooltipRenderer[K]())
+  def highlight[K](series:Box[List[Series[K]], _], enabled:Box[Boolean, _] = Val(true)) = new SeriesTooltips[K](enabled, series, new HighlightSeriesTooltipRenderer[K]())
 }
 
-class SeriesTooltips[K](enabled:RefGeneral[Boolean, _], series:RefGeneral[List[Series[K]], _], renderer:SeriesTooltipRenderer[K]) extends GraphLayer {
+class SeriesTooltips[K](enabled:Box[Boolean, _], series:Box[List[Series[K]], _], renderer:SeriesTooltipRenderer[K]) extends GraphLayer {
 
   private val toPaint:Var[Option[(Series[K], Vec2)]] = Var(None)
 

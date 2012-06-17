@@ -6,7 +6,7 @@ import com.explodingpixels.swingx.EPToggleButton
 import javax.swing.border.{EmptyBorder}
 import java.awt.{Graphics, Graphics2D, BorderLayout, Component}
 import javax.swing.{Icon, JComponent, SwingUtilities, JPopupMenu, JDialog, JPanel}
-import boxes.{Val, RefGeneral, View}
+import boxes.{Val, Box, View}
 import java.lang.ref.PhantomReference
 import boxes.swing.icons.IconFactory
 import java.awt.event.{WindowFocusListener, WindowEvent, WindowListener, WindowStateListener, ComponentListener, ComponentEvent}
@@ -111,12 +111,12 @@ private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:O
 }
 
 object BoxesPopupView {
-  def apply(n:RefGeneral[String,_] = Val(""), icon:RefGeneral[Option[Icon], _] = Val(None), popupContents:JComponent) = {
+  def apply(n:Box[String,_] = Val(""), icon:Box[Option[Icon], _] = Val(None), popupContents:JComponent) = {
     new BoxesPopupView(n, icon, popupContents)
   }
 }
 
-class BoxesPopupView(n:RefGeneral[String,_] = Val(""), icon:RefGeneral[Option[Icon], _] = Val(None), popupContents:JComponent) extends SwingView {
+class BoxesPopupView(n:Box[String,_] = Val(""), icon:Box[Option[Icon], _] = Val(None), popupContents:JComponent) extends SwingView {
 
   //Only support types that make sense, otherwise default to a plain toggle button
   val component = new ToolbarPopupButton(this)

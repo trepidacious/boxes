@@ -5,7 +5,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener
-import boxes.{VarGeneral, View}
+import boxes.{VarBox, View}
 
 /**
  * View/edit a Var[Int] as the selected index of a ListSelectionModel
@@ -17,7 +17,7 @@ import boxes.{VarGeneral, View}
  * TODO Check this handles filtering of the table, it should react
  * to selection of rows that have been filtered out by clearing selection.
  */
-class ListSelectionIndexModel(v:VarGeneral[Option[Int],_], setFilter: =>Boolean, table:JTable) extends ListSelectionModel {
+class ListSelectionIndexModel(v:VarBox[Option[Int],_], setFilter: =>Boolean, table:JTable) extends ListSelectionModel {
 
 	val delegate = new DefaultListSelectionModel()
   delegate.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)

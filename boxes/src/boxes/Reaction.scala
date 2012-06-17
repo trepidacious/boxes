@@ -4,7 +4,7 @@ import scala.collection.mutable.Set
 
 object Reaction {
 
-  class SingleTargetReaction[T](v:VarGeneral[T, _], result: =>T) extends Reaction {
+  class SingleTargetReaction[T](v:VarBox[T, _], result: =>T) extends Reaction {
 
     def respond : (()=>Unit) = {
       //First apply the function, so that any reads are performed now
@@ -19,7 +19,7 @@ object Reaction {
 
   }
 
-  def apply[T](v:VarGeneral[T, _], result: =>T) = {
+  def apply[T](v:VarBox[T, _], result: =>T) = {
     val r = new SingleTargetReaction(v, result)
     Box.registerReaction(r)
     v.retainReaction(r)
@@ -37,7 +37,7 @@ object Reaction {
     r
   }
 
-  def apply(b: Box[_], result: =>Unit) = {
+  def apply(b: Box[_,_], result: =>Unit) = {
     val r = new DefaultReaction(result)
     Box.registerReaction(r)
     b.retainReaction(r)
@@ -48,7 +48,7 @@ object Reaction {
 
 object OptionalReaction {
   
-  class OptionalSingleTargetReaction[T](v:VarGeneral[T, _], result: =>Option[T]) extends Reaction {
+  class OptionalSingleTargetReaction[T](v:VarBox[T, _], result: =>Option[T]) extends Reaction {
 
     def respond : (()=>Unit) = {
       //First apply the function, so that any reads are performed now
@@ -65,7 +65,7 @@ object OptionalReaction {
 
   }
 
-  def apply[T](v:VarGeneral[T, _], result: =>Option[T]) = {
+  def apply[T](v:VarBox[T, _], result: =>Option[T]) = {
     val r = new OptionalSingleTargetReaction(v, result)
     Box.registerReaction(r)
     v.retainReaction(r)
@@ -89,8 +89,8 @@ trait Reaction {
 
   def isView : Boolean
 
-  private[boxes] val sources = Set[Box[_]]()
-  private[boxes] val targets = Set[Box[_]]()
+  private[boxes] val sources = Set[Box[_,_]]()
+  private[boxes] val targets = Set[Box[_,_]]()
 
 }
 

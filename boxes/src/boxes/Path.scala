@@ -8,7 +8,7 @@ import boxes.list.ListReactionIncremental
 //trait PathReactionHelp {
 //  private var ignoreCycleIndex = -1
 //
-//  private[boxes] def eToV(e:Box[_], v:Box[_]) = {
+//  private[boxes] def eToV(e:Box[_,_], v:Box[_,_]) = {
 //    val vIndex = v.firstChangeIndex
 //    val eIndex = e.firstChangeIndex
 //
@@ -38,7 +38,7 @@ import boxes.list.ListReactionIncremental
 //  }
 //}
 
-class PathReaction[T, G, CT, CG](v:VarGeneral[G, CG], path : => Option[VarGeneral[T, CT]], defaultValue:G, c:GConverter[G, T]) extends Reaction {
+class PathReaction[T, G, CT, CG](v:VarBox[G, CG], path : => Option[VarBox[T, CT]], defaultValue:G, c:GConverter[G, T]) extends Reaction {
 
   def respond : (()=>Unit) = {
     path match {

@@ -3,7 +3,7 @@ package boxes.list
 import boxes._
 import scala.math.{min, max}
 
-class ListMoveOp[T](l:ListVar[T], i:VarGeneral[Option[Int],_], val up:Boolean) extends Op {
+class ListMoveOp[T](l:ListVar[T], i:VarBox[Option[Int],_], val up:Boolean) extends Op {
 
   def applicable() =
     i() match {
@@ -31,7 +31,7 @@ class ListMoveOp[T](l:ListVar[T], i:VarGeneral[Option[Int],_], val up:Boolean) e
   }
 }
 
-class ListMultiMoveOp[T](l:ListVar[T], i:VarGeneral[Set[Int],_], val up:Boolean) extends Op {
+class ListMultiMoveOp[T](l:ListVar[T], i:VarBox[Set[Int],_], val up:Boolean) extends Op {
 
   def applicable() =
     if (i().size == 1) {
@@ -59,7 +59,7 @@ class ListMultiMoveOp[T](l:ListVar[T], i:VarGeneral[Set[Int],_], val up:Boolean)
   }
 }
 
-class ListAddOp[T](l:ListVar[T], i:VarGeneral[Option[Int],_], source: => Option[T]) extends Op {
+class ListAddOp[T](l:ListVar[T], i:VarBox[Option[Int],_], source: => Option[T]) extends Op {
 
   val canApply = Val(true)
 
@@ -80,7 +80,7 @@ class ListAddOp[T](l:ListVar[T], i:VarGeneral[Option[Int],_], source: => Option[
   }
 }
 
-class ListMultiAddOp[T](l:ListVar[T], i:VarGeneral[Set[Int],_], source: => Option[T]) extends Op {
+class ListMultiAddOp[T](l:ListVar[T], i:VarBox[Set[Int],_], source: => Option[T]) extends Op {
 
   val canApply = Val(true)
 
@@ -102,7 +102,7 @@ class ListMultiAddOp[T](l:ListVar[T], i:VarGeneral[Set[Int],_], source: => Optio
   }
 }
 
-class ListDeleteOp[T](l:ListVar[T], i:VarGeneral[Option[Int],_], target:T => Unit) extends Op {
+class ListDeleteOp[T](l:ListVar[T], i:VarBox[Option[Int],_], target:T => Unit) extends Op {
 
   val canApply = Cal{i() != None}
 
@@ -121,7 +121,7 @@ class ListDeleteOp[T](l:ListVar[T], i:VarGeneral[Option[Int],_], target:T => Uni
   }
 }
 
-class ListMultiDeleteOp[T](l:ListVar[T], i:VarGeneral[Set[Int],_], target:T => Unit) extends Op {
+class ListMultiDeleteOp[T](l:ListVar[T], i:VarBox[Set[Int],_], target:T => Unit) extends Op {
 
   val canApply = Cal{!i().isEmpty}
 

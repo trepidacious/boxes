@@ -23,10 +23,10 @@ object Node {
   }
 
   private def accessorMap(c:Class[_]) = {
-    //We want methods that take no parameters and return a VarGeneral, and are not
+    //We want methods that take no parameters and return a VarBox, and are not
     //static, nor private, nor abstract
     val methods = c.getMethods.toList.filter(m =>
-                      classOf[VarGeneral[_,_]].isAssignableFrom(m.getReturnType)
+                      classOf[VarBox[_,_]].isAssignableFrom(m.getReturnType)
                       && m.getParameterTypes.length == 0
                       && !Modifier.isStatic(m.getModifiers)
                       && !Modifier.isPrivate(m.getModifiers)

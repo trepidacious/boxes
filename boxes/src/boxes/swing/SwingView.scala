@@ -180,7 +180,7 @@ trait SwingView {
 
 
 object EmbossedLabelView {
-  def apply(v:RefGeneral[String,_]) = {
+  def apply(v:Box[String,_]) = {
     val view = new LabelOptionView(v, new TConverter[String])
     view.component.setUI(new EmbossedLabelUI())
     view.asInstanceOf[SwingView]
@@ -188,7 +188,7 @@ object EmbossedLabelView {
 }
 
 object EmbossedLabelOptionView {
-  def apply(v:RefGeneral[Option[String],_]) = {
+  def apply(v:Box[Option[String],_]) = {
     val view = new LabelOptionView(v, new OptionTConverter[String]) 
     view.component.setUI(new EmbossedLabelUI())
     view.asInstanceOf[SwingView]
@@ -196,15 +196,15 @@ object EmbossedLabelOptionView {
 }
 
 object LabelView {
-  def apply(v:RefGeneral[String,_]) = new LabelOptionView(v, new TConverter[String]).asInstanceOf[SwingView]
+  def apply(v:Box[String,_]) = new LabelOptionView(v, new TConverter[String]).asInstanceOf[SwingView]
 }
 
 object LabelOptionView {
-  def apply(v:RefGeneral[Option[String],_]) = new LabelOptionView(v, new OptionTConverter[String]).asInstanceOf[SwingView]
+  def apply(v:Box[Option[String],_]) = new LabelOptionView(v, new OptionTConverter[String]).asInstanceOf[SwingView]
 }
 
 //TODO use a renderer to customise display
-private class LabelOptionView[G](v:RefGeneral[G,_], c:GConverter[G, String]) extends SwingView {
+private class LabelOptionView[G](v:Box[G,_], c:GConverter[G, String]) extends SwingView {
 
   val component = new LinkingJLabel(this)
 
@@ -232,14 +232,14 @@ private class LabelOptionView[G](v:RefGeneral[G,_], c:GConverter[G, String]) ext
 class LinkingJLabel(val sv:SwingView) extends Label {}
 
 object StringView {
-  def apply(v:VarGeneral[String,_], multiline:Boolean = false) = new StringOptionView(v, new TConverter[String], multiline).asInstanceOf[SwingView]
+  def apply(v:VarBox[String,_], multiline:Boolean = false) = new StringOptionView(v, new TConverter[String], multiline).asInstanceOf[SwingView]
 }
 
 object StringOptionView {
-  def apply(v:VarGeneral[Option[String],_], multiline:Boolean = false) = new StringOptionView(v, new OptionTConverter[String], multiline).asInstanceOf[SwingView]
+  def apply(v:VarBox[Option[String],_], multiline:Boolean = false) = new StringOptionView(v, new OptionTConverter[String], multiline).asInstanceOf[SwingView]
 }
 
-private class StringOptionView[G](v:VarGeneral[G,_], c:GConverter[G, String], multiline:Boolean) extends SwingView {
+private class StringOptionView[G](v:VarBox[G,_], c:GConverter[G, String], multiline:Boolean) extends SwingView {
 
   val text = if (multiline) new BoxesJTextArea(1, 1) else new LinkingJTextField(this)
   //TODO need a nice scrollable text area with the minimal scrollbars from ledger view, inside the text area.
@@ -321,11 +321,11 @@ object BooleanControlType extends Enumeration {
 import BooleanControlType._
 
 object BooleanView {
-  def apply(v:VarGeneral[Boolean,_], n:RefGeneral[String,_] = Val(""), controlType:BooleanControlType = SLIDECHECK, icon:RefGeneral[Option[Icon], _] = Val(None), toggle:Boolean = true) = new BooleanOptionView(v, n, new TConverter[Boolean], controlType, icon, toggle).asInstanceOf[SwingView]
+  def apply(v:VarBox[Boolean,_], n:Box[String,_] = Val(""), controlType:BooleanControlType = SLIDECHECK, icon:Box[Option[Icon], _] = Val(None), toggle:Boolean = true) = new BooleanOptionView(v, n, new TConverter[Boolean], controlType, icon, toggle).asInstanceOf[SwingView]
 }
 
 object BooleanOptionView {
-  def apply(v:VarGeneral[Option[Boolean],_], n:RefGeneral[String,_] = Val(""), controlType:BooleanControlType = SLIDECHECK, icon:RefGeneral[Option[Icon], _] = Val(None), toggle:Boolean = true) = new BooleanOptionView(v, n, new OptionTConverter[Boolean], controlType, icon, toggle).asInstanceOf[SwingView]
+  def apply(v:VarBox[Option[Boolean],_], n:Box[String,_] = Val(""), controlType:BooleanControlType = SLIDECHECK, icon:Box[Option[Icon], _] = Val(None), toggle:Boolean = true) = new BooleanOptionView(v, n, new OptionTConverter[Boolean], controlType, icon, toggle).asInstanceOf[SwingView]
 }
 
 object Label {
@@ -338,7 +338,7 @@ class Label(text:String="", icon:Option[Icon] = None, horizontalAlignment:Int = 
   }
 }
 
-private class BooleanOptionView[G](v:VarGeneral[G,_], n:RefGeneral[String,_], c:GConverter[G, Boolean], controlType:BooleanControlType, icon:RefGeneral[Option[Icon], _], toggle:Boolean = true) extends SwingView {
+private class BooleanOptionView[G](v:VarBox[G,_], n:Box[String,_], c:GConverter[G, Boolean], controlType:BooleanControlType, icon:Box[Option[Icon], _], toggle:Boolean = true) extends SwingView {
 
   val component = controlType match {
     case CHECKBOX => new LinkingJCheckBox(this)
@@ -418,14 +418,14 @@ class LinkingJToggleButton(val sv:SwingView) extends SwingToggleButton
 class LinkingToolbarToggleButton(val sv:SwingView) extends SwingBarToggleButton
 
 object RangeView {
-  def apply(v:VarGeneral[Int,_], min:Int, max:Int, progress:Boolean = false) = new RangeOptionView(v, min, max, new TConverter[Int], progress).asInstanceOf[SwingView]
+  def apply(v:VarBox[Int,_], min:Int, max:Int, progress:Boolean = false) = new RangeOptionView(v, min, max, new TConverter[Int], progress).asInstanceOf[SwingView]
 }
 
 object RangeOptionView {
-  def apply(v:VarGeneral[Option[Int],_], min:Int, max:Int, progress:Boolean = false) = new RangeOptionView(v, min, max, new OptionTConverter[Int], progress).asInstanceOf[SwingView]
+  def apply(v:VarBox[Option[Int],_], min:Int, max:Int, progress:Boolean = false) = new RangeOptionView(v, min, max, new OptionTConverter[Int], progress).asInstanceOf[SwingView]
 }
 
-private class RangeOptionView[G](v:VarGeneral[G,_], min:Int, max:Int, c:GConverter[G, Int], progress:Boolean) extends SwingView {
+private class RangeOptionView[G](v:VarBox[G,_], min:Int, max:Int, c:GConverter[G, Int], progress:Boolean) extends SwingView {
 
   private val model = new AutoBoundedRangeModel(min, max)
   val component = if (!progress) new LinkingJSlider(this, model) else new LinkingJProgressBar(this, model)
@@ -542,14 +542,14 @@ class PiePainter(val border:Int, val dotRadius:Int, val fill:Color, val outline:
 }
 
 object PieView {
-  def apply(n:RefGeneral[Double,_], a:RefGeneral[Double,_] = Val(1d)) = new PieOptionView(n, new TConverter[Double], a, new TConverter[Double]).asInstanceOf[SwingView]
+  def apply(n:Box[Double,_], a:Box[Double,_] = Val(1d)) = new PieOptionView(n, new TConverter[Double], a, new TConverter[Double]).asInstanceOf[SwingView]
 }
 
 object PieOptionView {
-  def apply(n:RefGeneral[Option[Double],_], a:RefGeneral[Option[Double],_] = Val(Some(1d))) = new PieOptionView(n, new OptionTConverter[Double], a, new OptionTConverter[Double]).asInstanceOf[SwingView]
+  def apply(n:Box[Option[Double],_], a:Box[Option[Double],_] = Val(Some(1d))) = new PieOptionView(n, new OptionTConverter[Double], a, new OptionTConverter[Double]).asInstanceOf[SwingView]
 }
 
-private class PieOptionView[G, H](n:RefGeneral[G,_], c:GConverter[G, Double], a:RefGeneral[H,_], d:GConverter[H, Double]) extends SwingView {
+private class PieOptionView[G, H](n:Box[G,_], c:GConverter[G, Double], a:Box[H,_], d:GConverter[H, Double]) extends SwingView {
 
   val pie = PiePainter()
 
@@ -583,16 +583,16 @@ private class PieOptionView[G, H](n:RefGeneral[G,_], c:GConverter[G, Double], a:
 class LinkingEPPanel(val sv:SwingView) extends EPPanel {}
 
 object NumberView {
-  def apply[N](v:VarGeneral[N,_])(implicit n:Numeric[N], nc:NumericClass[N]):SwingView = apply(v, nc.defaultSequence)
-  def apply[N](v:VarGeneral[N,_], s:Sequence[N])(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionView(v, s, new TConverter[N], n, nc).asInstanceOf[SwingView]
+  def apply[N](v:VarBox[N,_])(implicit n:Numeric[N], nc:NumericClass[N]):SwingView = apply(v, nc.defaultSequence)
+  def apply[N](v:VarBox[N,_], s:Sequence[N])(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionView(v, s, new TConverter[N], n, nc).asInstanceOf[SwingView]
 }
 
 object NumberOptionView {
-  def apply[N](v:VarGeneral[Option[N],_])(implicit n:Numeric[N], nc:NumericClass[N]):SwingView = apply(v, nc.defaultSequence)
-  def apply[N](v:VarGeneral[Option[N],_], s:Sequence[N])(implicit n:Numeric[N], nc:NumericClass[N]):SwingView = new NumberOptionView(v, s, new OptionTConverter[N], n, nc).asInstanceOf[SwingView]
+  def apply[N](v:VarBox[Option[N],_])(implicit n:Numeric[N], nc:NumericClass[N]):SwingView = apply(v, nc.defaultSequence)
+  def apply[N](v:VarBox[Option[N],_], s:Sequence[N])(implicit n:Numeric[N], nc:NumericClass[N]):SwingView = new NumberOptionView(v, s, new OptionTConverter[N], n, nc).asInstanceOf[SwingView]
 }
 
-private class NumberOptionView[G, N](v:VarGeneral[G,_], s:Sequence[N], c:GConverter[G, N], n:Numeric[N], nc:NumericClass[N]) extends SwingView {
+private class NumberOptionView[G, N](v:VarBox[G,_], s:Sequence[N], c:GConverter[G, N], n:Numeric[N], nc:NumericClass[N]) extends SwingView {
 
   private val model = new AutoSpinnerModel()
   val component = new LinkingJSpinner(this, model)

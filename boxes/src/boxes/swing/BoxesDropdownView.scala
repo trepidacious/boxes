@@ -7,7 +7,7 @@ import javax.swing.{JComponent, SwingConstants, KeyStroke, JInternalFrame, Abstr
 import javax.swing.border.{EmptyBorder, MatteBorder}
 import java.awt.event.{FocusEvent, FocusAdapter, MouseEvent, MouseAdapter, KeyEvent, KeyAdapter, ActionEvent, ActionListener}
 
-class BoxesDropdownView(v:LedgerVar, i:VarGeneral[Option[Int], _], sorting:Boolean = false, minWidth:Int = 250, maxHeight:Int = 300, displayHeader:Boolean = false) extends SwingView {
+class BoxesDropdownView(v:LedgerVar, i:VarBox[Option[Int], _], sorting:Boolean = false, minWidth:Int = 250, maxHeight:Int = 300, displayHeader:Boolean = false) extends SwingView {
 
   val component = new DropdownButton()
 

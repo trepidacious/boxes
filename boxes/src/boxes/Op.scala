@@ -3,26 +3,26 @@ import java.awt.Image
 
 trait Op {
   def apply()
-  def canApply:RefGeneral[Boolean, _]
+  def canApply:Box[Boolean, _]
 }
 
 trait ViewOp extends Op {
-  def icon:RefGeneral[Option[Image], _]
-  def label:RefGeneral[String, _]
+  def icon:Box[Option[Image], _]
+  def label:Box[String, _]
 }
 
-class OpDefault(action: => Unit, val canApply:RefGeneral[Boolean, _]) extends Op {
+class OpDefault(action: => Unit, val canApply:Box[Boolean, _]) extends Op {
   def apply() = action
 }
 
 object Op {
-  def apply(action: => Unit, canApply:RefGeneral[Boolean, _] = Val(true)) = new OpDefault(action, canApply)
+  def apply(action: => Unit, canApply:Box[Boolean, _] = Val(true)) = new OpDefault(action, canApply)
 }
 
-class ViewOpDefault(action: => Unit, val canApply:RefGeneral[Boolean, _], val icon:RefGeneral[Option[Image], _], val label:RefGeneral[String, _]) extends Op {
+class ViewOpDefault(action: => Unit, val canApply:Box[Boolean, _], val icon:Box[Option[Image], _], val label:Box[String, _]) extends Op {
   def apply() = action
 }
 
 object ViewOp {
-  def apply(action: => Unit, canApply:RefGeneral[Boolean, _] = Val(true), icon:RefGeneral[Option[Image], _] = Val(None), label:RefGeneral[String, _] = Val("")) = new ViewOpDefault(action, canApply, icon, label)
+  def apply(action: => Unit, canApply:Box[Boolean, _] = Val(true), icon:Box[Option[Image], _] = Val(None), label:Box[String, _] = Val("")) = new ViewOpDefault(action, canApply, icon, label)
 }

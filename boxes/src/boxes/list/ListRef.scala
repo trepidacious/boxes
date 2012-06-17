@@ -30,7 +30,7 @@ case class InsertionListChange(index:Int, count:Int) extends ListChange
  */
 case class RemovalListChange(index:Int, count:Int) extends ListChange
 
-trait ListRef[T] extends RefGeneral[List[T], ListChange] {
+trait ListRef[T] extends Box[List[T], ListChange] {
   def apply(i:Int):T
   def map[U](f:T=>U) = {
     val u = ListVar(this().map(f))
@@ -49,7 +49,7 @@ trait ListRef[T] extends RefGeneral[List[T], ListChange] {
 
 }
 
-trait ListVar[T] extends ListRef[T] with VarGeneral[List[T], ListChange] {
+trait ListVar[T] extends ListRef[T] with VarBox[List[T], ListChange] {
   def updateWithChanges(newT:List[T], c:ListChange*)
   def update(i:Int, e:T)
   def insert(i:Int, e:T*)
@@ -58,7 +58,7 @@ trait ListVar[T] extends ListRef[T] with VarGeneral[List[T], ListChange] {
   override def <<?(c: =>Option[List[T]]) = OptionalReaction(this, c)
 }
 
-trait ListVal[T] extends ListRef[T] with ValGeneral[List[T], ListChange]
+trait ListVal[T] extends ListRef[T] with ValBox[List[T], ListChange]
 
 object ListUtils {
   def insert[T](l:List[T], i:Int, t:T*):List[T] = {
@@ -193,7 +193,7 @@ trait ListReactionIncremental extends Reaction {
 
   private var lastProcessedChangeIndex = -1L
 
-  protected def unprocessedChanges(b:Box[ListChange]) = {
+  protected def unprocessedChanges(b:Box[_,ListChange]) = {
     b.changes match {
       case None => immutable.Queue[ListChange]()
       case Some(q) => q.filter(indexAndChange => {

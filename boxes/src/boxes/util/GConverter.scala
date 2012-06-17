@@ -1,6 +1,6 @@
 package boxes.util
 
-//TODO Consider using Either[RefGeneral[T], RefGeneral[Option[T]] for the model type, then cases instead of converter
+//TODO Consider using Either[Box[T], Box[Option[T]] for the model type, then cases instead of converter
 
 //Type G may be Option[T] or the bare type T.
 //toOption gets us from G to DEFINITELY an Option[T]

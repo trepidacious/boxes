@@ -4,17 +4,17 @@ import boxes.graph.Axis._
 import boxes.graph.GraphMouseEventType._
 import java.awt.Color
 import java.text.DecimalFormat
-import boxes.{VarGeneral, Val, RefGeneral}
+import boxes.{VarBox, Val, Box}
 import java.util.concurrent.atomic.AtomicReference
 
 object GraphThreshold {
   val format = new DecimalFormat("0.00")
   val handleRadius = 3
 
-  def apply(axis:RefGeneral[Axis, _], value:VarGeneral[Double, _], color:RefGeneral[Color, _], name:RefGeneral[String, _], enabled:RefGeneral[Boolean, _]) = new GraphThreshold(axis, value, color, name, enabled)
+  def apply(axis:Box[Axis, _], value:VarBox[Double, _], color:Box[Color, _], name:Box[String, _], enabled:Box[Boolean, _]) = new GraphThreshold(axis, value, color, name, enabled)
 }
 
-class GraphThreshold(axis:RefGeneral[Axis, _], value:VarGeneral[Double, _], color:RefGeneral[Color, _], name:RefGeneral[String, _], enabled:RefGeneral[Boolean, _]) extends GraphLayer {
+class GraphThreshold(axis:Box[Axis, _], value:VarBox[Double, _], color:Box[Color, _], name:Box[String, _], enabled:Box[Boolean, _]) extends GraphLayer {
 
   private val labelWidth = new AtomicReference[Double](0d)
 

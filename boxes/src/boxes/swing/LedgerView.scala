@@ -23,7 +23,7 @@ object LedgerView {
     lv
   }
 
-  def singleSelection(v:LedgerVar, i:VarGeneral[Option[Int], _], sorting:Boolean = false) = {
+  def singleSelection(v:LedgerVar, i:VarBox[Option[Int], _], sorting:Boolean = false) = {
     val lv = new LedgerView(v)
     //Only allow the selection to be set when the table is NOT responding
     //to a model change.
@@ -35,14 +35,14 @@ object LedgerView {
     if (sorting) lv.component.setAutoCreateRowSorter(true)
     lv
   }
-  def multiSelection(v:LedgerVar, i:VarGeneral[immutable.Set[Int], _], sorting:Boolean = false) = {
+  def multiSelection(v:LedgerVar, i:VarBox[immutable.Set[Int], _], sorting:Boolean = false) = {
     val lv = new LedgerView(v)
     lv.component.setSelectionModel(new ListSelectionIndicesModel(i, !lv.component.isRespondingToChange, lv.component))
     if (sorting) lv.component.setAutoCreateRowSorter(true)
     lv
   }
 
-  def singleSelectionScroll(v:LedgerVar, i:VarGeneral[Option[Int], _], sorting:Boolean = false) = {
+  def singleSelectionScroll(v:LedgerVar, i:VarBox[Option[Int], _], sorting:Boolean = false) = {
     val lv = new LedgerView(v)
     lv.component.setSelectionModel(new ListSelectionIndexModel(i, !lv.component.isRespondingToChange, lv.component))
     //TODO is there a better way to do the match?
@@ -59,7 +59,7 @@ object LedgerView {
     lsv
   }
 
-  def multiSelectionScroll(v:LedgerVar, i:VarGeneral[immutable.Set[Int], _], sorting:Boolean = false) = {
+  def multiSelectionScroll(v:LedgerVar, i:VarBox[immutable.Set[Int], _], sorting:Boolean = false) = {
     val lv = new LedgerView(v)
     lv.component.setSelectionModel(new ListSelectionIndicesModel(i, !lv.component.isRespondingToChange, lv.component))
     val lsv = new LedgerScrollView(lv, v, i)
@@ -67,7 +67,7 @@ object LedgerView {
     lsv
   }
 
-  def list[T](list:ListVar[T], view:RefGeneral[RecordView[T], _], i:VarGeneral[Option[Int], _], sorting:Boolean, source: => Option[T], target:T => Unit, component:JComponent, additionalViews:SwingView*) = {
+  def list[T](list:ListVar[T], view:Box[RecordView[T], _], i:VarBox[Option[Int], _], sorting:Boolean, source: => Option[T], target:T => Unit, component:JComponent, additionalViews:SwingView*) = {
     
     val ledger = ListLedgerVar(list, view)
     val ledgerView = singleSelectionScroll(ledger, i, sorting)
@@ -90,7 +90,7 @@ object LedgerView {
 }
 
 
-class LedgerScrollView(val ledgerView:LedgerView, val ledger:LedgerVar, val indices:RefGeneral[immutable.Set[Int], _]) extends SwingView {
+class LedgerScrollView(val ledgerView:LedgerView, val ledger:LedgerVar, val indices:Box[immutable.Set[Int], _]) extends SwingView {
   val component = new LinkingJScrollPane(this, ledgerView.component)
   val dotModel = new DotModel()
   BoxesScrollBarUI.applyTo(component, new DotModel(), dotModel, false, true)
