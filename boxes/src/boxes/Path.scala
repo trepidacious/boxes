@@ -3,6 +3,7 @@ package boxes
 import list.{ListChange, ListVar}
 import util._
 import collection._
+import boxes.list.ListReactionIncremental
 
 //trait PathReactionHelp {
 //  private var ignoreCycleIndex = -1
@@ -146,24 +147,9 @@ object PathViaOption {
   }
 }
 
-class ListPathReaction[T](v:ListVar[T], path : => Option[ListVar[T]]) extends Reaction {
+class ListPathReaction[T](v:ListVar[T], path : => Option[ListVar[T]]) extends ListReactionIncremental {
 
   private var lastE:Option[ListVar[T]] = None
-  private var lastProcessedChangeIndex = -1L
-
-  private def unprocessedChanges(b:Box[ListChange]) = {
-    b.changes match {
-      case None => immutable.Queue[ListChange]()
-      case Some(q) => q.filter(indexAndChange => {
-        if (indexAndChange._1 > lastProcessedChangeIndex) {
-          lastProcessedChangeIndex = indexAndChange._1
-          true
-        } else {
-          false
-        }
-      }).map(indexAndChange => indexAndChange._2)
-    }
-  }
 
   def respond : (()=>Unit) = {
 

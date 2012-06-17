@@ -101,6 +101,15 @@ object Box {
     }
   }
 
+  def read[T](b: Box[_])(readOp: => T): T = {
+    try {
+      Box.beforeRead(b)
+      readOp
+    } finally {
+      Box.afterRead(b)
+    }    
+  }
+  
   private def beforeDecode() ={
     lock.lock
     decoding = true

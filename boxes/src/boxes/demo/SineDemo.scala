@@ -44,7 +44,7 @@ object SineDemo {
 
     val indices = ListIndices(list, defaultSelection = DefaultSelection.FirstIndex)
 
-    val ledger = Var(ListLedger(list, view))
+    val ledger = ListLedgerVar(list, view)
 
     val ledgerView = LedgerView.multiSelectionScroll(ledger, indices, sorting=true)
 

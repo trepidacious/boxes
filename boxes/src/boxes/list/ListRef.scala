@@ -3,6 +3,8 @@ package boxes.list
 import collection._
 import boxes._
 
+//TODO this should have the old and new instances, there is no reason for it not to
+//extend singlechange.
 trait ListChange
 
 /**
@@ -30,6 +32,21 @@ case class RemovalListChange(index:Int, count:Int) extends ListChange
 
 trait ListRef[T] extends RefGeneral[List[T], ListChange] {
   def apply(i:Int):T
+  def map[U](f:T=>U) = {
+    val u = ListVar(this().map(f))
+    val r = new ListMapReaction(this, u, f)
+    Box.registerReaction(r)
+    u.retainReaction(r)
+    u: ListRef[U]
+  }
+  def flatMap[U](f:T=>List[U]) = {
+    val u = ListVar(this().flatMap(f))
+    val r = new ListFlatMapReaction(this, u, f)
+    Box.registerReaction(r)
+    u.retainReaction(r)
+    u: ListRef[U]
+  }
+
 }
 
 trait ListVar[T] extends ListRef[T] with VarGeneral[List[T], ListChange] {
@@ -54,6 +71,12 @@ object ListUtils {
     lb.remove(i, c)
     lb.toList
   }
+  def replace[T](l:List[T], i:Int, t:T):List[T] = {
+    val lb = mutable.ListBuffer(l:_*)
+    lb.update(i, t)
+    lb.toList
+  }
+
 }
 
 object ListVal {
@@ -164,6 +187,37 @@ private class ListVarDefault[T] (private var t:List[T]) extends ListVar[T] {
   }
 
   override def toString = "ListVar(" + t + ")"
+}
+
+trait ListReactionIncremental extends Reaction {
+
+  private var lastProcessedChangeIndex = -1L
+
+  protected def unprocessedChanges(b:Box[ListChange]) = {
+    b.changes match {
+      case None => immutable.Queue[ListChange]()
+      case Some(q) => q.filter(indexAndChange => {
+        if (indexAndChange._1 > lastProcessedChangeIndex) {
+          lastProcessedChangeIndex = indexAndChange._1
+          true
+        } else {
+          false
+        }
+      }).map(indexAndChange => indexAndChange._2)
+    }
+  }
+  
+}
+
+class ListMapReaction[S, T](in: ListRef[S], out:ListVar[T], f : S => T) extends ListReactionIncremental {
+  def isView = false
+  //Note that changes can be passed through unaltered - they have the same scope
+  def react() = out.updateWithChanges(in().map(f), unprocessedChanges(in):_*);
+}
+
+class ListFlatMapReaction[S, T](in: ListRef[S], out:ListVar[T], f : S => List[T]) extends ListReactionIncremental {
+  def isView = false
+  def react() = out.update(in().flatMap(f));
 }
 
 object ListCal {

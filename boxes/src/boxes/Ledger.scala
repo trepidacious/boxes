@@ -2,115 +2,131 @@ package boxes
 
 import list.{ReplacementListChange, ListRef, ListCal}
 import scala.collection._
+import boxes.list.ListUtils
 
-trait Ledger extends Box[LedgerChange] {
-	def editable(record:Int, field:Int):Boolean
-	def apply(record:Int, field:Int):Any
-	def update(record:Int, field:Int, value:Any)
+//An table like view that has some immutability.
+//Will always return the same results for fieldName,
+//fieldClass, recordCount, fieldCount.
+//apply and editable may return different values, but
+//only if they delegate to state held in Boxes, in much the
+//same way as an immutable List that may hold mutable instances.
+//Update allows for creating a new Ledger with modified contents,
+//much like the copy constructor of a case class.
+//Where the Ledger DOES delegate to mutable Boxes, it may
+//actually perform the update in place, and in this case should
+//return the same Ledger from update.
+//In general this complies with the requirements for data
+//in the Box system, that data is either immutable, or is accessed
+//via a Box and so tracked for reads and writes.
+trait Ledger {
+  def apply(record:Int, field:Int):Any
   def fieldName(field:Int):String
   def fieldClass(field:Int):Class[_]
-	def recordCount():Int
-	def fieldCount():Int
-
-  private[boxes] def boxRead[T](read: =>T):T = {
-    try {
-      Box.beforeRead(this)
-      return read
-    } finally {
-      Box.afterRead(this)
-    }
-  }
-  private[boxes] def commitChange(change:LedgerChange) {
-    try {
-      Box.beforeWrite(this)
-      Box.commitWrite(this, change)
-    } finally {
-      Box.afterWrite(this)
-    }
-  }
+  def recordCount():Int
+  def fieldCount():Int
+  
+  def editable(record:Int, field:Int):Boolean
+  def update(record:Int, field:Int, value:Any): Ledger
 }
 
+//A RefGeneral containing a Ledger, and showing changes when
+//a new Ledger is set. Note that this does NOT necessarily show
+//a change when the data that can be read from the Ledger itself
+//changes, only when a new Ledger instance is present. LedgerChange
+//gives some additional information on the differences between the
+//old and new ledgers, in terms of column definitions and number of
+//rows.
+trait LedgerRef extends RefGeneral[Ledger, LedgerChange]{
+  def apply(record:Int, field:Int):Any
+  
+  //TODO add these for convenience, delegating to contents? Note that
+  //we shouldn't make LedgerRef extend Ledger though
+//    def fieldName(field:Int):String
+//  def fieldClass(field:Int):Class[_]
+//  def recordCount():Int
+//  def fieldCount():Int
+//  
+//  def editable(record:Int, field:Int):Boolean
+//  def update(record:Int, field:Int, value:Any): Ledger
+
+}
+
+//TODO this should extend SingleChange, which will just be Change when we
+//have only Ref-type Boxes and so all Boxes have single old and new values.
 //If a ledger change has occurred, then the contents of any cell may have changed.
 //If the column count, names or classes have changed, columnsChanged is true, although
 //columnsChanged may be true when these HAVEN'T changed.
 //Similarly rowCountChanged will be true if the number of rows may have changed.
 case class LedgerChange(columnsChanged:Boolean, rowCountChanged:Boolean)
 
-class FieldCompositeLedger(val ledgers:Ledger*) extends Ledger {
-
-  //When a component ledger changes, register a change
-  //that covers all component ledgers' changes
-  private val ledgersReaction = new Reaction() {
-    def respond() = {
-
-      val allChanges = for {
-        ledger <- ledgers
-        changeQueue <- ledger.changes.toSeq
-        change <- changeQueue
-      } yield (change._2)
-
-
-      //See if any change affected columns, and same for rows.
-      val (columns, rows) = allChanges.foldLeft((false, false)){(cAndR, c) => (cAndR._1 | c.columnsChanged, cAndR._2 | c.rowCountChanged)}
-
-      if (columns || rows) {
-        {()=>commitChange(LedgerChange(columns, rows))}
-      } else {
-        {()=>()}
-      }
-
-    }
-    override def isView = false
-    override def react {respond.apply()}
-  }
-  Box.registerReaction(ledgersReaction)
-
-  val recordCountCal = Cal{ledgers.foldLeft(ledgers.head.recordCount){(min, l) => math.min(l.recordCount, min)}}
-  def recordCount = recordCountCal()
-
-  val fieldCountCal = Cal{ledgers.foldLeft(0){(sum, l) => sum + l.fieldCount}}
-  def fieldCount = fieldCountCal()
-
-  val cumulativeFieldCount = ListCal{ledgers.scanLeft(0){(c, l) => c + l.fieldCount}.toList} //Make cumulative field count, note starts with 0
-
-  private def ledgerAndField(field:Int):(Ledger,Int) = {
-    //Note that -1 is to allow for leading 0 in cumulativeFieldCount
-    val ledgerIndex = cumulativeFieldCount().findIndexOf(c => c > field) - 1
-
-    //This happens if EITHER findIndexOf fails and returns -1, OR field is negative and so matches first entry in cumulativeFieldCount
-    if (ledgerIndex < 0) throw new IndexOutOfBoundsException("Field " + field + " is not in composite ledger")
-
-    (ledgers(ledgerIndex), field - cumulativeFieldCount(ledgerIndex))
-  }
-
-  def editable(record:Int, field:Int) = boxRead {
-    val (l, f) = ledgerAndField(field)
-    l.editable(record, f)
-  }
-
-  def apply(record:Int, field:Int) = boxRead {
-    val (l, f) = ledgerAndField(field)
-    l.apply(record, f)
-  }
-
-  def update(record:Int, field:Int, value:Any) = boxRead {
-    val (l, f) = ledgerAndField(field)
-    l.update(record, f, value)
-  }
-  def fieldName(field:Int) = boxRead {
-    val (l, f) = ledgerAndField(field)
-    l.fieldName(f)
-  }
-  def fieldClass(field:Int) = boxRead[Class[_]] {
-    val (l, f) = ledgerAndField(field)
-    l.fieldClass(f)
-  }
-
+trait LedgerVal extends LedgerRef with ValGeneral[Ledger, LedgerChange]
+object LedgerVal {
+  def apply(l: Ledger) = new LedgerValDefault(l): LedgerVal
+}
+private class LedgerValDefault (private val t:Ledger) extends LedgerVal {
+  def apply(record:Int, field:Int) = Box.read(this){t.apply(record, field)}
+  def apply():Ledger = Box.read(this){t}
+  override def toString = "LedgerVal(" + t + ")"
 }
 
-case class RecordViewChange
+trait LedgerVar extends LedgerRef with VarGeneral[Ledger, LedgerChange] {
+  def editable(record:Int, field:Int):Boolean
+  def update(record:Int, field:Int, value:Any)
+  def update(u : (Ledger => Option[(Ledger, LedgerChange)]))
+}
+object LedgerVar {
+  def apply(l: Ledger) = new LedgerVarDefault(l): LedgerVar
+}
+private class LedgerVarDefault (private var t:Ledger) extends LedgerVar {
+  def apply(record:Int, field:Int) = Box.read(this){t.apply(record, field)}
+  def apply():Ledger = Box.read(this){t}
 
-trait RecordView[T] extends Box[RecordViewChange] {
+  def update(u : (Ledger => Option[(Ledger, LedgerChange)])) = {
+    try {
+      Box.beforeWrite(this)
+      u.apply(t) match {
+        case None => {}
+        case Some((newT, c)) => {
+          t = newT
+          Box.commitWrite(this, c)
+        }
+      }
+    } finally {
+      Box.afterWrite(this)
+    }
+  }
+  
+  def update(newT: Ledger) = {
+    try {
+      Box.beforeWrite(this)
+      if (newT != t) {
+        val oldT = t
+        t = newT        
+        //TODO can we work out whether columns are the same? Is it
+        //enough for the names, classes and count to match completely? 
+        Box.commitWrite(this, LedgerChange(true, true))
+      }
+    } finally {
+      Box.afterWrite(this)
+    }
+  }
+
+  def editable(record:Int, field:Int) = Box.read(this)(t.editable(record, field))
+  def update(record:Int, field:Int, value:Any) = update(t.update(record, field, value))
+
+  override def toString = "LedgerVar(" + t + ")"
+}
+
+object LedgerCal {
+  def apply[T](c: => Ledger) = {
+    val v = LedgerVar(c)
+    Reaction(v, c)
+    v: LedgerRef
+  }
+}
+
+//An immutable view of records of type T as a list of fields
+trait RecordView[T] {
   def editable(record:Int, field:Int, recordValue:T):Boolean
   def apply(record:Int, field:Int, recordValue:T):Any
   def update(record:Int, field:Int, recordValue:T, fieldValue:Any)
@@ -118,6 +134,185 @@ trait RecordView[T] extends Box[RecordViewChange] {
   def fieldClass(field:Int):Class[_]
   def fieldCount():Int
 }
+
+object ListLedger {
+  def apply[T](list:List[T], rView:RecordView[T]) = new ListLedger(list, rView)
+}
+
+class ListLedger[T](list:List[T], rView:RecordView[T]) extends Ledger {
+  def apply(record:Int, field:Int) = rView(record, field, list(record))
+  def fieldName(field:Int):String = rView.fieldName(field)
+  def fieldClass(field:Int) = rView.fieldClass(field)
+  def recordCount() = list.size
+  def fieldCount() = rView.fieldCount
+  
+  def editable(record:Int, field:Int) = rView.editable(record, field, list(record))
+  def update(record:Int, field:Int, value:Any) = {
+    rView.update(record, field, list(record), value)
+    this
+  }
+}
+
+//Calculated LedgerVar that will always hold a ListLedger made from the
+//current List and RecordView in the provided refs. Will also ensure that
+//the LedgerVar shows LedgerChanges accurately but minimally reflecting
+//the changes it shows, to allow for efficient viewing e.g. in a GUI
+object ListLedgerVar {
+  def apply[T](list: ListRef[T], rView:RefGeneral[RecordView[T], _]) = {
+    val v = LedgerVar(ListLedger(list(), rView()))
+    
+    //On list change, update the ledger in the var if necessary,
+    //making sure to do so with as small a LedgerChange as possible
+    val listReaction = new Reaction(){
+
+      private var lastProcessedChangeIndex = -1L
+
+      def isView = false
+      
+      def react {
+        var rowCountChanged = false;
+        var changed = false;
+        
+        for {
+          queue <- list.changes
+          (index, change) <- queue
+        } {
+          if (index > lastProcessedChangeIndex) {
+            lastProcessedChangeIndex = index
+            change match {
+              case ReplacementListChange(f, i)  => changed = true
+              //All changes except replacement may change size
+              case _ => {
+                changed = true
+                rowCountChanged = true
+              }
+            }
+          }
+        }
+        
+        if (changed) {
+          v.update{_ => Some((ListLedger(list(), rView()), LedgerChange(false, rowCountChanged)))}
+        }
+      }
+    }
+    Box.registerReaction(listReaction);
+    v.retainReaction(listReaction);
+    
+    //On record view change, update the ledger in the var if necessary,
+    //making sure to do so with as small a LedgerChange as possible
+    val recordViewReaction = new Reaction(){
+
+      def isView = false
+      
+      def react {
+        if (!rView.changes.isEmpty) {
+          v.update{_ => Some((ListLedger(list(), rView()), LedgerChange(true, false)))}
+        }
+      }
+    }
+    Box.registerReaction(recordViewReaction);
+    v.retainReaction(recordViewReaction);
+    
+    v
+  }
+  
+}
+
+object FieldCompositeLedger{
+  def apply(ledgers:List[Ledger]) = new FieldCompositeLedger(ledgers)
+}
+
+class FieldCompositeLedger(val ledgers:List[Ledger]) extends Ledger {
+
+  def recordCount = ledgers.foldLeft(ledgers.head.recordCount){(min, l) => math.min(l.recordCount, min)}
+  def fieldCount = ledgers.foldLeft(0){(sum, l) => sum + l.fieldCount}
+  private def cumulativeFieldCount = ledgers.scanLeft(0){(c, l) => c + l.fieldCount}.toList //Make cumulative field count, note starts with 0
+  
+  private def ledgerAndFieldAndLedgerIndex(field: Int): (Ledger, Int, Int) = {
+    //Note that -1 is to allow for leading 0 in cumulativeFieldCount
+    val ledgerIndex = cumulativeFieldCount.indexWhere(c => c > field) - 1
+
+    //This happens if EITHER findIndexOf fails and returns -1, OR field is negative and so matches first entry in cumulativeFieldCount
+    if (ledgerIndex < 0) throw new IndexOutOfBoundsException("Field " + field + " is not in composite ledger")
+
+    (ledgers(ledgerIndex), field - cumulativeFieldCount(ledgerIndex), ledgerIndex)
+  }
+  
+  def apply(record:Int, field:Int) = {
+    val (l, f, _) = ledgerAndFieldAndLedgerIndex(field)
+    l.apply(record, f)
+  }
+  
+  def fieldName(field:Int) = {
+    val (l, f, _) = ledgerAndFieldAndLedgerIndex(field)
+    l.fieldName(f)
+  }
+  
+  def fieldClass(field:Int) = {
+    val (l, f, _) = ledgerAndFieldAndLedgerIndex(field)
+    l.fieldClass(f)
+  }
+  
+  def editable(record:Int, field:Int):Boolean = {
+    val (l, f, _) = ledgerAndFieldAndLedgerIndex(field)
+    l.editable(record, f)
+  }
+  
+  def update(record:Int, field:Int, value:Any) = {
+    val (l, f, li) = ledgerAndFieldAndLedgerIndex(field)
+    val newLedger = l.update(record, f, value)
+    //Optimisation for ledgers that just update mutable data
+    //and return themselves - in that case we don't need to
+    //make a new FieldCompositeLedger, since it would just
+    //contain an equal list of ledgers anyway.
+    if (newLedger == l) {
+      this
+    } else {
+      val newList = ListUtils.replace(ledgers, li, newLedger)
+      FieldCompositeLedger(newList)      
+    }
+  }
+  
+}
+
+//Calculated LedgerVar that will always hold a ListLedger made from the
+//current List and RecordView in the provided refs. Will also ensure that
+//the LedgerVar shows LedgerChanges accurately but minimally reflecting
+//the changes it shows, to allow for efficient viewing e.g. in a GUI
+object FieldCompositeLedgerVar {
+  def apply[T](ledgers: ListRef[LedgerRef]) = {
+    
+    val v = LedgerVar(FieldCompositeLedger(ledgers().map(_.apply())))    
+    
+    //When a component ledger changes, register a change
+    //that covers all component ledgers' changes
+    val ledgersReaction = new Reaction() {
+      override def isView = false
+      override def react() = {
+  
+        val allChanges = for {
+          ledger <- ledgers()
+          changeQueue <- ledger.changes.toSeq
+          change <- changeQueue
+        } yield (change._2)
+  
+        //Should we track last processed index?
+        //See if any change affected columns, and same for rows.
+        val (columns, rows) = allChanges.foldLeft((false, false)){(cAndR, c) => (cAndR._1 | c.columnsChanged, cAndR._2 | c.rowCountChanged)}
+  
+        if (columns || rows) {
+          v.update{_ => Some(FieldCompositeLedger(ledgers().map(_.apply())), LedgerChange(columns, rows))}
+        }  
+      }
+    }
+    Box.registerReaction(ledgersReaction)
+    v.retainReaction(ledgersReaction);
+    
+    v
+  }
+  
+}
+
 
 object DirectRecordView{
   def apply[T](fieldName: String)(implicit valueManifest:Manifest[T]) = new DirectRecordView(fieldName)(valueManifest)
@@ -130,82 +325,6 @@ class DirectRecordView[T](fieldName: String)(implicit valueManifest:Manifest[T])
   def fieldName(field:Int):String = fieldName
   def fieldClass(field:Int):Class[_] = valueManifest.erasure
   def fieldCount() = 1
-}
-
-
-object ListLedger {
-  def apply[T](list:ListRef[T], rView:RecordView[T]) = new ListLedger(list, rView)
-}
-
-class ListLedger[T](list:ListRef[T], rView:RecordView[T]) extends Ledger {
-
-  //This reaction allows us to change correctly when we see a change
-  //to our list
-  private val listChangeReaction = new Reaction() {
-    private var lastProcessedChangeIndex = -1L
-    def respond() = {
-      var rowCountChanged = false;
-      var changed = false;
-      for {
-        queue <- list.changes
-        (index, change) <- queue
-      } {
-        if (index > lastProcessedChangeIndex) {
-          lastProcessedChangeIndex = index
-          change match {
-            case ReplacementListChange(f, i)  => changed = true
-            //All changes except replacement may change size
-            case _ => {
-              changed = true
-              rowCountChanged = true
-            }
-          }
-        }
-      }
-      if (changed) {
-        {()=> commitChange(LedgerChange(false, rowCountChanged))}
-      } else {
-        {()=>()}
-      }
-    }
-    override def isView = false
-    override def react {respond.apply()}
-  }
-  Box.registerReaction(listChangeReaction)
-
-  //This reaction allows us to change correctly when we see a change
-  //to our RecordView
-  private val recordViewChangeReaction = new Reaction() {
-    def respond() = {
-      val changed = (!rView.changes.isEmpty)
-      if (changed) {
-        {()=>commitChange(LedgerChange(true, false))}
-      } else {
-        {()=>()}
-      }
-    }
-    override def isView = false
-    override def react {respond.apply()}
-  }
-  Box.registerReaction(recordViewChangeReaction)
-
-  def update(record:Int, field:Int, value:Any) = {
-    try {
-      Box.beforeWrite(this)
-      rView(record, field, list(record)) = value
-      Box.commitWrite(this, LedgerChange(false, false))
-    } finally {
-      Box.afterWrite(this)
-    }
-  }
-
-  def editable(record:Int, field:Int) = boxRead{rView.editable(record, field, list(record))}
-  def apply(record:Int, field:Int) = boxRead{rView(record, field, list(record))}
-  def fieldName(field:Int):String = boxRead{rView.fieldName(field)}
-  def fieldClass(field:Int) = boxRead[Class[_]]{rView.fieldClass(field)}  //TODO work out why the explicit parametric type is needed
-  def recordCount() = boxRead{list().size}
-  def fieldCount() = boxRead{rView.fieldCount}
-
 }
 
 /**

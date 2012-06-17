@@ -2,12 +2,12 @@ package boxes.swing
 
 import java.awt.{Toolkit, Dimension, Color, BorderLayout, Component}
 import javax.swing.event.{PopupMenuEvent, PopupMenuListener}
-import boxes.{Cal, VarGeneral, Ledger, RefGeneral}
+import boxes._
 import javax.swing.{JComponent, SwingConstants, KeyStroke, JInternalFrame, AbstractAction, JToggleButton, SwingUtilities, JPopupMenu, JComboBox}
 import javax.swing.border.{EmptyBorder, MatteBorder}
 import java.awt.event.{FocusEvent, FocusAdapter, MouseEvent, MouseAdapter, KeyEvent, KeyAdapter, ActionEvent, ActionListener}
 
-class BoxesDropdownView(v:RefGeneral[_<:Ledger,_], i:VarGeneral[Option[Int], _], sorting:Boolean = false, minWidth:Int = 250, maxHeight:Int = 300, displayHeader:Boolean = false) extends SwingView {
+class BoxesDropdownView(v:LedgerVar, i:VarGeneral[Option[Int], _], sorting:Boolean = false, minWidth:Int = 250, maxHeight:Int = 300, displayHeader:Boolean = false) extends SwingView {
 
   val component = new DropdownButton()
 

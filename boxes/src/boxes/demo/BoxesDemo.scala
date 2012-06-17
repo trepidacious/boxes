@@ -531,28 +531,26 @@ object BoxesDemo {
       VarLens("Zombie?", _.zombie)
     )
 
-    val ledger = new ListLedger(list, view)
+    val ledger = ListLedgerVar(list, Val(view))
 
     ledger.update(0, 1, 42)
 
-    for (f <- 0 until ledger.fieldCount) {
-      print(ledger.fieldName(f) + "\t")
+    for (f <- 0 until ledger().fieldCount) {
+      print(ledger().fieldName(f) + "\t")
     }
     println()
-    for (f <- 0 until ledger.fieldCount) {
-      print(ledger.fieldClass(f) + "\t")
+    for (f <- 0 until ledger().fieldCount) {
+      print(ledger().fieldClass(f) + "\t")
     }
     println()
-    for (r <- 0 until ledger.recordCount) {
-      for (f <- 0 until ledger.fieldCount) {
+    for (r <- 0 until ledger().recordCount) {
+      for (f <- 0 until ledger().fieldCount) {
         print(ledger(r, f) + "\t")
       }
       println()
     }
 
-    val ledgerRef = Var(ledger)
-
-    val ledgerView = LedgerView.singleSelection(ledgerRef, index)
+    val ledgerView = LedgerView.singleSelection(ledger, index)
 
     val indexView = NumberOptionView(index, Step(1))
 
@@ -603,27 +601,27 @@ object BoxesDemo {
       VarLens("Name", _.name),
       VarLens("Age", _.age)
     )
-    val ledgerNA = new ListLedger(list, viewNA)
+    val ledgerNA = ListLedgerVar(list, viewNA)
 
     val viewZ = LensRecordView[OptionPerson](
       VarLens("Zombie?", _.zombie)
     )
-    val ledgerZ = new ListLedger(list, viewZ)
+    val ledgerZ = ListLedgerVar(list, viewZ)
 
-    val ledger = new FieldCompositeLedger(ledgerNA, ledgerZ)
+    val ledger = FieldCompositeLedgerVar(ListVal(ledgerNA, ledgerZ))
 
     ledger.update(0, 1, 42)
 
-    for (f <- 0 until ledger.fieldCount) {
-      print(ledger.fieldName(f) + "\t")
+    for (f <- 0 until ledger().fieldCount) {
+      print(ledger().fieldName(f) + "\t")
     }
     println()
-    for (f <- 0 until ledger.fieldCount) {
-      print(ledger.fieldClass(f) + "\t")
+    for (f <- 0 until ledger().fieldCount) {
+      print(ledger().fieldClass(f) + "\t")
     }
     println()
-    for (r <- 0 until ledger.recordCount) {
-      for (f <- 0 until ledger.fieldCount) {
+    for (r <- 0 until ledger().recordCount) {
+      for (f <- 0 until ledger().fieldCount) {
         print(ledger(r, f) + "\t")
       }
       println()
@@ -631,7 +629,7 @@ object BoxesDemo {
 
     val ledgerRef = Var(ledger)
 
-    val ledgerView = LedgerView.singleSelection(ledgerRef, index)
+    val ledgerView = LedgerView.singleSelection(ledger, index)
 
     val indexView = NumberOptionView(index, Step(1))
 
@@ -839,7 +837,7 @@ object BoxesDemo {
       VarLens("Zombie?", _.zombie)
     )
 
-    val ledger = Var(new ListLedger(list, view))
+    val ledger = ListLedgerVar(list, view)
 
     val ledgerView = LedgerView.singleSelectionScroll(ledger, index)
 
@@ -955,7 +953,7 @@ object BoxesDemo {
 
     val indices = ListIndices(list, defaultSelection = DefaultSelection.FirstIndex)
 
-    val ledger = Var(ListLedger(list, view))
+    val ledger = ListLedgerVar(list, view)
 
     val ledgerView = LedgerView.multiSelectionScroll(ledger, indices, sorting=true)
 
@@ -1064,7 +1062,6 @@ object BoxesDemo {
   def main(args: Array[String]) {
 //    simpleCalc
 //    simplePath
-    separateBIDIReactions
 //    nonConflictingReactions
 //
 //    bidiPath
@@ -1095,9 +1092,11 @@ object BoxesDemo {
 //    println(l2)
 
     swingRun{
-//      SwingView.nimbus()
+      SwingView.nimbus()
 //      backgroundReaction
 //      textViews
+    separateBIDIReactions
+      fieldCompositeLedger
       ledgerMulti
 
 //      ledgerAndSelected

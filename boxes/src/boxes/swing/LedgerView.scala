@@ -17,13 +17,13 @@ import javax.swing.{JTable, JPanel, JComponent}
 import java.awt.BorderLayout
 
 object LedgerView {
-  def apply(v:RefGeneral[_<:Ledger,_], sorting:Boolean = false) = {
+  def apply(v:LedgerVar, sorting:Boolean = false) = {
     val lv = new LedgerView(v)
     if (sorting) lv.component.setAutoCreateRowSorter(true)
     lv
   }
 
-  def singleSelection(v:RefGeneral[_<:Ledger,_], i:VarGeneral[Option[Int], _], sorting:Boolean = false) = {
+  def singleSelection(v:LedgerVar, i:VarGeneral[Option[Int], _], sorting:Boolean = false) = {
     val lv = new LedgerView(v)
     //Only allow the selection to be set when the table is NOT responding
     //to a model change.
@@ -35,14 +35,14 @@ object LedgerView {
     if (sorting) lv.component.setAutoCreateRowSorter(true)
     lv
   }
-  def multiSelection(v:RefGeneral[_<:Ledger,_], i:VarGeneral[immutable.Set[Int], _], sorting:Boolean = false) = {
+  def multiSelection(v:LedgerVar, i:VarGeneral[immutable.Set[Int], _], sorting:Boolean = false) = {
     val lv = new LedgerView(v)
     lv.component.setSelectionModel(new ListSelectionIndicesModel(i, !lv.component.isRespondingToChange, lv.component))
     if (sorting) lv.component.setAutoCreateRowSorter(true)
     lv
   }
 
-  def singleSelectionScroll(v:RefGeneral[_<:Ledger,_], i:VarGeneral[Option[Int], _], sorting:Boolean = false) = {
+  def singleSelectionScroll(v:LedgerVar, i:VarGeneral[Option[Int], _], sorting:Boolean = false) = {
     val lv = new LedgerView(v)
     lv.component.setSelectionModel(new ListSelectionIndexModel(i, !lv.component.isRespondingToChange, lv.component))
     //TODO is there a better way to do the match?
@@ -59,7 +59,7 @@ object LedgerView {
     lsv
   }
 
-  def multiSelectionScroll(v:RefGeneral[_<:Ledger,_], i:VarGeneral[immutable.Set[Int], _], sorting:Boolean = false) = {
+  def multiSelectionScroll(v:LedgerVar, i:VarGeneral[immutable.Set[Int], _], sorting:Boolean = false) = {
     val lv = new LedgerView(v)
     lv.component.setSelectionModel(new ListSelectionIndicesModel(i, !lv.component.isRespondingToChange, lv.component))
     val lsv = new LedgerScrollView(lv, v, i)
@@ -67,9 +67,9 @@ object LedgerView {
     lsv
   }
 
-  def list[T](list:ListVar[T], view:RecordView[T], i:VarGeneral[Option[Int], _], sorting:Boolean, source: => Option[T], target:T => Unit, component:JComponent, additionalViews:SwingView*) = {
+  def list[T](list:ListVar[T], view:RefGeneral[RecordView[T], _], i:VarGeneral[Option[Int], _], sorting:Boolean, source: => Option[T], target:T => Unit, component:JComponent, additionalViews:SwingView*) = {
     
-    val ledger = Var(ListLedger(list, view))
+    val ledger = ListLedgerVar(list, view)
     val ledgerView = singleSelectionScroll(ledger, i, sorting)
 
     val add = new ListAddOp(list, i, source)
@@ -90,7 +90,7 @@ object LedgerView {
 }
 
 
-class LedgerScrollView(val ledgerView:LedgerView, val ledger:RefGeneral[_<:Ledger,_], val indices:RefGeneral[immutable.Set[Int], _]) extends SwingView {
+class LedgerScrollView(val ledgerView:LedgerView, val ledger:LedgerVar, val indices:RefGeneral[immutable.Set[Int], _]) extends SwingView {
   val component = new LinkingJScrollPane(this, ledgerView.component)
   val dotModel = new DotModel()
   BoxesScrollBarUI.applyTo(component, new DotModel(), dotModel, false, true)
@@ -138,7 +138,7 @@ class LedgerScrollView(val ledgerView:LedgerView, val ledger:RefGeneral[_<:Ledge
   }
 }
 
-class LedgerView(v:RefGeneral[_<:Ledger,_]) extends SwingView{
+class LedgerView(v:LedgerVar) extends SwingView{
 
   class LedgerTableModel extends AbstractTableModel {
     override def getColumnClass(columnIndex:Int) = v().fieldClass(columnIndex)
@@ -147,7 +147,7 @@ class LedgerView(v:RefGeneral[_<:Ledger,_]) extends SwingView{
     override def getRowCount() = v().recordCount
     override def getValueAt(rowIndex:Int, columnIndex:Int) = v().apply(rowIndex, columnIndex).asInstanceOf[AnyRef]
     override def isCellEditable(rowIndex:Int, columnIndex:Int) = v().editable(rowIndex, columnIndex)
-    override def setValueAt(aValue:Object, rowIndex:Int, columnIndex:Int) = v().update(rowIndex, columnIndex, aValue)
+    override def setValueAt(aValue:Object, rowIndex:Int, columnIndex:Int) = v()=v().update(rowIndex, columnIndex, aValue)
   }
 
   val model = new LedgerTableModel()
@@ -173,7 +173,7 @@ class LedgerView(v:RefGeneral[_<:Ledger,_]) extends SwingView{
     var rowCountChanged = false
     var columnsChanged = false
     for {
-      queue <- ledger.changes
+      queue <- v.changes
       (_, change) <- queue
     } {
       rowCountChanged |= change.rowCountChanged
