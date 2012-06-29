@@ -5,8 +5,8 @@ and then installing jar files to this from the command line, using the following
 
 Examples for macwidgets and forms - note that you can get the local repository path from eclipse by viewing properties of the lifttest-local-repo folder in package explorer:
 
-mvn org.apache.maven.plugins:maven-install-plugin:2.3.1:install-file -Dfile=mac_widgets-0.9.5.401.jar -DgroupId=macwidgets -DartifactId=macwidgets -Dversion=0.9.5.401 -Dpackaging=jar -DlocalRepositoryPath=/Users/trepidacious/Documents/mavenboxes/boxes/boxes-local-repo
-mvn org.apache.maven.plugins:maven-install-plugin:2.3.1:install-file -Dfile=lib/forms-1.2.1.jar -DgroupId=forms -DartifactId=forms -Dversion=1.2.1 -Dpackaging=jar -DlocalRepositoryPath=/Users/trepidacious/Documents/mavenboxes/boxes/boxes-local-repo
+mvn org.apache.maven.plugins:maven-install-plugin:2.3.1:install-file -Dfile=mac_widgets-0.9.5.401.jar -DgroupId=macwidgets -DartifactId=macwidgets -Dversion=0.9.5.401 -Dpackaging=jar -DlocalRepositoryPath=/Users/trepidacious/Documents/boxes/boxes/boxes-local-repo
+mvn org.apache.maven.plugins:maven-install-plugin:2.3.1:install-file -Dfile=lib/forms-1.2.1.jar -DgroupId=forms -DartifactId=forms -Dversion=1.2.1 -Dpackaging=jar -DlocalRepositoryPath=/Users/trepidacious/Documents/boxes/boxes/boxes-local-repo
                          
 Blank example:                         
                          
@@ -22,3 +22,16 @@ https://oss.sonatype.org/content/repositories/snapshots/org/scalaz/scalaz-core_2
 
 https://github.com/scalaz/scalaz/blob/scalaz-seven/README.md
 
+Adding scalafx:
+
+  mvn install:install-file -DartifactId=scalafx \
+  -DgroupId=org.scalafx \
+  -Dpackaging=jar \
+  -DpomFile=scalafx-1.0-SNAPSHOT.pom \
+  -Dfile=scalafx-1.0-SNAPSHOT.jar \
+  -Dversion=1.0-SNAPSHOT \
+  -Dsources=scalafx-1.0-SNAPSHOT-sources.jar \
+  -DlocalRepositoryPath=/Users/trepidacious/Documents/boxes/boxes/boxes-local-repo
+
+
+-DlocalRepositoryPath=/Users/trepidacious/Documents/boxes/boxes/boxes-local-repo
