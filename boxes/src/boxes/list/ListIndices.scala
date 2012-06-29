@@ -139,12 +139,6 @@ class ListIndicesReaction[T](list:ListRef[T], indices:Var[Set[Int]], loseIndexOn
         i => if (insertion <= i) i+count else i
       }
 
-      //TODO
-      //TODO we should have a special case so that if the last selected index
-      //is deleted, and we don't want to lose index on deletion, then we select after the
-      //deletion range. Only do this when we run out of selections though, otherwise it could
-      //be irritating
-
       //filter out any indices in the deleted range, then adjust those after the range to move them back
       case RemovalListChange(_,_,removal, count) => {
         val newSet = is.collect {

@@ -18,3 +18,7 @@ our local jar files don't have their own onward dependencies. A good place to st
 Finally, if having trouble with maven complaining about things being out of date/not available, and waiting for a timeout, try running the mvn commandline with an added "-U" at the start, to force an update.
 
 
+https://oss.sonatype.org/content/repositories/snapshots/org/scalaz/scalaz-core_2.9.2/7.0-SNAPSHOT/
+
+https://github.com/scalaz/scalaz/blob/scalaz-seven/README.md
+

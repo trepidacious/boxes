@@ -5,18 +5,8 @@ import scala.collection.mutable.Set
 object Reaction {
 
   class SingleTargetReaction[T](v:VarBox[T, _], result: =>T) extends Reaction {
-
-    def respond : (()=>Unit) = {
-      //First apply the function, so that any reads are performed now
-      val r = result
-
-      //The write will be performed later
-      {() => (v() = r)}
-    }
-
     def isView = false
-    def react {respond.apply()}
-
+    def react {v()=result}
   }
 
   def apply[T](v:VarBox[T, _], result: =>T) = {
@@ -49,20 +39,8 @@ object Reaction {
 object OptionalReaction {
   
   class OptionalSingleTargetReaction[T](v:VarBox[T, _], result: =>Option[T]) extends Reaction {
-
-    def respond : (()=>Unit) = {
-      //First apply the function, so that any reads are performed now
-      val r = result
-
-      //If there is a result, apply it later, otherwise do nothing
-      result.map{ rVal => 
-        {() => (v() = rVal)}
-      }.getOrElse({() => ()})
-    }
-
     def isView = false
-    def react {respond.apply()}
-
+    def react {result.foreach{v() = _}}
   }
 
   def apply[T](v:VarBox[T, _], result: =>Option[T]) = {
@@ -83,8 +61,6 @@ object OptionalReaction {
  */
 trait Reaction {
 
-//  def respond : (()=>Unit)
-  
   def react()
 
   def isView : Boolean
