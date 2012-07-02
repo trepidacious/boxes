@@ -20,6 +20,7 @@ import java.awt.{BorderLayout, AlphaComposite, Dimension, BasicStroke, Rendering
 import boxes.swing.icons.IconFactory
 import boxes._
 import java.text.DecimalFormat
+import boxes.BooleanControlType._
 
 object SwingViewImplicits {
   implicit def varToBooleanView(v : Var[Boolean]) = BooleanView(v)
@@ -314,11 +315,6 @@ class BoxesJTextArea(r:Int, c:Int) extends JTextArea(r, c) {
   BoxesTextAreaUI(this)
 }
 
-object BooleanControlType extends Enumeration {
-   type BooleanControlType = Value
-   val CHECKBOX, TOGGLEBUTTON, TOOLBARBUTTON, SLIDECHECK, RADIO, TAB = Value
-}
-import BooleanControlType._
 
 object BooleanView {
   def apply(v:VarBox[Boolean,_], n:Box[String,_] = Val(""), controlType:BooleanControlType = SLIDECHECK, icon:Box[Option[Icon], _] = Val(None), toggle:Boolean = true) = new BooleanOptionView(v, n, new TConverter[Boolean], controlType, icon, toggle).asInstanceOf[SwingView]

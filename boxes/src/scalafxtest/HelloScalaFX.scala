@@ -15,12 +15,15 @@ import scene.paint. { Stops, LinearGradient }
 import scene.text.Text
 import javafx.scene.{ effect => jfxse }
 
+class HelloScalaFX
+
 object HelloScalaFX extends JFXApp {
   stage = new Stage {
     title = "ScalaFX Hello World"
     width = 650
     height = 450
     scene = new Scene {
+      stylesheets = List(classOf[HelloScalaFX].getResource("Buttons.css").toExternalForm())
       fill = BLACK
       content = new HBox {
 //        padding = Insets(5)

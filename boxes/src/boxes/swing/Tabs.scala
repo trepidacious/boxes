@@ -4,6 +4,7 @@ import boxes.general.RadioReaction
 import java.awt.{CardLayout, BorderLayout, Dimension, Container, Component, LayoutManager}
 import javax.swing.{JPanel, Icon, JComponent}
 import boxes.{View, Val, Box, Var}
+import boxes.BooleanControlType._
 
 object VerticalTabLayout {
   def apply(tabWidth:Int = 64, tabHeight:Int = 64) = new VerticalTabLayout(tabWidth, tabHeight)
@@ -30,7 +31,7 @@ class VerticalTabLayout(val tabWidth:Int, val tabHeight:Int) extends LayoutManag
 case class TabBuilder(toggles:List[Var[Boolean]] = List(), tabComponents:List[JComponent] = List(), contentComponents:List[JComponent] = List()) {
 
   def add(contents:JComponent, name:Box[String,_] = Val(""), icon:Box[Option[Icon], _] = Val(None), v:Var[Boolean] = Var(toggles.isEmpty)):TabBuilder = {
-    val view = BooleanView(v, name, BooleanControlType.TAB, icon, false)
+    val view = BooleanView(v, name, TAB, icon, false)
     TabBuilder(toggles:::List(v), tabComponents:::List(view.component), contentComponents:::List(contents))
   }
 

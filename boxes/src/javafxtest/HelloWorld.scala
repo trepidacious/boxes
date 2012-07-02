@@ -9,33 +9,97 @@ import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.layout.GridPane
 import javafx.stage.Stage
+import javafx.scene.control.Tab
+import javafx.scene.control.TabPane
+import javafx.scene.shape.Rectangle
+import javafx.scene.paint.Color
+import scalafx.geometry.Side
+import boxes.Var
+import boxes.javafx.LabelView
+import boxes.javafx.StringView
+import boxes.javafx.BooleanView
+import boxes.Cal
+import boxes.general.RadioReaction
+import boxes.Val
+import boxes.javafx.NumberView
  
 class HelloWorld extends Application {
     
-    override def start(primaryStage: Stage) {
-        primaryStage.setTitle("Hello World!")
-        val btn = new Button()
-        btn.setText("Say 'Hello World'")
-        btn.setOnAction(new EventHandler[ActionEvent]() {
-            override def handle(event: ActionEvent) {
-                println("Hello World!")
-            }
-        })
+  override def start(primaryStage: Stage) {
+    primaryStage.setTitle("Hello World!")
+
         
-        val grid = new GridPane()
-        grid.setAlignment(Pos.CENTER)
-        grid.setHgap(10)
-        grid.setVgap(10)
-        grid.setPadding(new Insets(25, 25, 25, 25))
+    val grid = new GridPane()
+    grid.setAlignment(Pos.CENTER)
+    grid.setHgap(10)
+    grid.setVgap(10)
+    grid.setPadding(new Insets(25, 25, 25, 25))
+    
+    val tabPane = new TabPane()
+    tabPane.setSide(Side.LEFT)
+    tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE)
+    val tab = new Tab()
+    tab.setText("Tab one");
+    tab.setContent(grid);
+    tabPane.getTabs().add(tab);
 
-        val scene = new Scene(grid, 300, 275)
-        primaryStage.setScene(scene)
+    val tab2 = new Tab()
+    tab2.setText("Tab two");
+    tabPane.getTabs().add(tab2);
 
-        grid.add(btn, 0, 0)
-        grid.add(new Button(), 1, 0)
+    val scene = new Scene(tabPane, 300, 275)
+    scene.getStylesheets.clear()
+    scene.getStylesheets.add(classOf[HelloWorld].getResource("Buttons.css").toExternalForm())
+    primaryStage.setScene(scene)
 
-        primaryStage.show()
-    }
+    val text = Var("Text")
+    
+    val btn = new Button()
+    btn.setText("Say 'Hello World'")
+    //btn.setId("record-sales")
+    btn.setOnAction(new EventHandler[ActionEvent]() {
+        override def handle(event: ActionEvent) {
+            text() = text() + " p"
+        }
+    })
+    grid.add(btn, 0, 0)
+    
+    val b = Var(true)
+    
+    val bString = Cal{if (b()) "True!" else "FALSE!" }
+    
+    grid.add(LabelView(text).node, 1, 0)
+    grid.add(StringView(text).node, 2, 0)
+    grid.add(BooleanView(b).node, 3, 0)
+    grid.add(LabelView(bString).node, 4, 0)
+    grid.add(BooleanView(b).node, 5, 0)
+    
+    val x = Var(true)
+    val y = Var(false)
+    val z = Var(false)
+    RadioReaction(x, y, z)
+
+    //Why do we need all the parameters here?
+    val xv = BooleanView(x, Val(""), boxes.BooleanControlType.CHECKBOX, Val(None), false)
+    val yv = BooleanView(y, Val(""), boxes.BooleanControlType.CHECKBOX, Val(None), false)
+    val zv = BooleanView(z, Val(""), boxes.BooleanControlType.CHECKBOX, Val(None), false)
+
+    grid.add(xv.node, 0, 1)
+    grid.add(yv.node, 1, 1)
+    grid.add(zv.node, 2, 1)
+    
+    val p = Var(10)
+    val q = Var(20)
+    
+    p << q() + 10
+    q << p() - 10
+    
+    grid.add(NumberView(p).node, 0, 2)
+    grid.add(NumberView(q).node, 1, 2)
+    
+    
+    primaryStage.show()
+  }
 }
 
 object HelloWorld {

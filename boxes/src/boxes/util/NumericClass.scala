@@ -1,6 +1,7 @@
 package boxes.util
 
 import java.text.{DecimalFormat, NumberFormat}
+import java.text.ParseException
 
 trait NumericClass[N] {
   def numericClass:Class[N]
@@ -11,6 +12,13 @@ trait NumericClass[N] {
   def formatInstance:NumberFormat
   def isWhole:Boolean
   def defaultSequence:Sequence[N]
+  def parseOption(s:String):Option[N] = {
+    try {
+      Some(parse(s))
+    } catch {
+      case pe: ParseException => None
+    }
+  }
 }
 
 object NumericClass {

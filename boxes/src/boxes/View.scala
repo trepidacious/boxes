@@ -19,3 +19,9 @@ object View {
 class View {
 
 }
+
+object BooleanControlType extends Enumeration {
+   type BooleanControlType = Value
+   val CHECKBOX, TOGGLEBUTTON, TOOLBARBUTTON, SLIDECHECK, RADIO, TAB = Value
+}
+import BooleanControlType._
