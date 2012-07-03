@@ -12,15 +12,15 @@ import boxes.util.OptionTConverter
 import boxes.swing.SwingView
 import boxes.Box
 import boxes.View
-import scalafx.scene.Node
-import scalafx.scene.control.Label
+import javafx.scene.Node
+import javafx.scene.control.Label
 import boxes.swing.BoxesScrollBarUI
 import boxes.VarBox
 import boxes.swing.BoxesTextFieldUI
 import boxes.swing.BoxesTextAreaUI
-import scalafx.scene.control.TextField
-import scalafx.scene.control.TextArea
-import scalafx.scene.control.ScrollPane
+import javafx.scene.control.TextField
+import javafx.scene.control.TextArea
+import javafx.scene.control.ScrollPane
 import javafx.scene.input.KeyEvent
 import javafx.beans.value.ChangeListener
 import javafx.beans.value.ObservableValue
@@ -30,7 +30,7 @@ import scalafx.event.EventHandler._
 import boxes.javafx.JFXImplicits._
 import boxes.BooleanControlType._
 import boxes.Val
-import scalafx.scene.control.CheckBox
+import javafx.scene.control.CheckBox
 import boxes.util.NumericClass
 import javafx.event.ActionEvent
 import boxes.util.Sequence
@@ -153,7 +153,9 @@ private class LabelOptionView[G](v:Box[G,_], c:GConverter[G, String]) extends JF
 
 //Special versions of components that link back to the JFXView using them,
 //so that if users only retain the component, they still also retain the JFXView.
-class LinkingLabel(val sv:JFXView) extends Label {}
+class LinkingLabel(val sv:JFXView) extends Label {
+  println("Made a linking label!")
+}
 
 object StringView {
   def apply(v:VarBox[String,_], multiline:Boolean = false) = new StringOptionView(v, new TConverter[String], multiline).asInstanceOf[JFXView]
@@ -281,7 +283,7 @@ private class BooleanOptionView[G](v:VarBox[G,_], n:Box[String,_], c:GConverter[
 //  }
 //
   
-  //TODO how do we handle toggle = false?
+  //TODO how do we handle toggle better?
   node.selectedProperty.addListener((selected: java.lang.Boolean) => {
     if (toggle) {
       v() = c.toG(selected)
