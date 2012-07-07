@@ -76,7 +76,7 @@ object SimpleColorfulCircles extends JFXApp {
 //        strokeType = OUTSIDE
 //        effect = new BoxBlur(10, 10, 3)
 //      }
-      circles = makeCircles(60, 1, None, 1)  ++ makeCircles(90, 0.5, Some(new BoxBlur(10,10,3)), 1.3) 
+      circles = makeCircles(60, 1, None, 1) // ++ makeCircles(90, 0.5, Some(new BoxBlur(10,10,3)), 1.3) 
       content = circles :+ new Rectangle {
         width <== scene.width
         height <== scene.height

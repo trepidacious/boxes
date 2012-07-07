@@ -136,7 +136,7 @@ private class LabelOptionView[G](v:Box[G,_], c:GConverter[G, String]) extends JF
   val node = new LinkingLabel(this)
 
   val view = View{
-    //Store the value for later use on Swing Thread
+    //Store the value for later use on JavaFX Thread
     val newV = v()
     //This will be called from Swing Thread
     replaceUpdate {display(newV)}

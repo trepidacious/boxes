@@ -11,3 +11,5 @@ boxes/.cache
 .idea/workspace.xml
 
 boxes/target
+
+*.DS_Store

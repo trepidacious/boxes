@@ -27,6 +27,7 @@ class HelloWorld extends Application {
     
   override def start(primaryStage: Stage) {
     primaryStage.setTitle("Hello World!")
+
         
     val grid = new GridPane()
     grid.setAlignment(Pos.CENTER)
@@ -35,6 +36,7 @@ class HelloWorld extends Application {
     grid.setPadding(new Insets(25, 25, 25, 25))
     grid.setStyle("-fx-background-color: #f0f0f0;");
 
+    
     val tabPane = new TabPane()
     tabPane.setSide(Side.LEFT)
     tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE)
@@ -80,9 +82,9 @@ class HelloWorld extends Application {
     RadioReaction(x, y, z)
 
     //Why do we need all the parameters here?
-    val xv = BooleanView(x, Val("X Label"), boxes.BooleanControlType.CHECKBOX, Val(None), false)
-    val yv = BooleanView(y, Val("Y Label"), boxes.BooleanControlType.CHECKBOX, Val(None), false)
-    val zv = BooleanView(z, Val("Z Label"), boxes.BooleanControlType.CHECKBOX, Val(None), false)
+    val xv = BooleanView(x, Val(""), boxes.BooleanControlType.CHECKBOX, Val(None), false)
+    val yv = BooleanView(y, Val(""), boxes.BooleanControlType.CHECKBOX, Val(None), false)
+    val zv = BooleanView(z, Val(""), boxes.BooleanControlType.CHECKBOX, Val(None), false)
 
     grid.add(xv.node, 0, 1)
     grid.add(yv.node, 1, 1)
@@ -96,11 +98,7 @@ class HelloWorld extends Application {
     
     grid.add(NumberView(p).node, 0, 2)
     grid.add(NumberView(q).node, 1, 2)
-
-    val dis = new Button()
-    dis.setText("Disabled")
-    dis.disableProperty.set(true)
-    grid.add(dis, 3, 2)
+    
     
     primaryStage.show()
   }
