@@ -27,6 +27,19 @@
 	
     -fx-focus-color: #7790a1;
     -fx-accent: -fx-focus-color;
+    
+    -fx-chocolate: #736a6a;
+    -fx-chocolate-dark: derive(-fx-chocolate, -35%);
+    -fx-chocolate-light: derive(-fx-chocolate, 15%);
+    -fx-chocolate-shadow: derive(-fx-chocolate, -15%);
+    -fx-chocolate-selected: derive(-fx-chocolate, -15%);
+
+    -fx-chocolate-bottom-shadow: linear-gradient(from 0% 85% to 0% 100%, -fx-chocolate 0%, derive(-fx-chocolate, -25%) 100%);
+    -fx-chocolate-light-bottom-shadow: linear-gradient(from 0% 85% to 0% 100%, -fx-chocolate-light 0%, derive(-fx-chocolate-light, -25%) 100%);
+    -fx-chocolate-dark-bottom-shadow: linear-gradient(from 0% 85% to 0% 100%, -fx-chocolate-dark 0%, derive(-fx-chocolate-dark, -25%) 100%);
+    -fx-chocolate-selected-bottom-shadow: linear-gradient(from 0% 85% to 0% 100%, -fx-chocolate-selected 0%, derive(-fx-chocolate-selected, -25%) 100%);
+
+    
 }
 .button	 {
 	-fx-background-color: -fx-shadow-highlight-color, -fx-outer-border, -fx-button-color;
@@ -51,9 +64,14 @@
 .button:show-mnemonics .mnemonic-underline {
     -fx-stroke: -fx-text-fill;
 } 
-.button Text {
+.button .text {
+	/*
     -fx-fill: white;
-    -fx-effect: dropshadow( gaussian , #a30000 , 0,0,0,2 );
+    -fx-effect: dropshadow( one-pass-box , pink , 0,1,0,1 );
+     */
+     
+    -fx-text-fill: black;
+    -fx-effect: dropshadow( one-pass-box , white , 0,0,0,1 );
 }
 
 .text-field	 {
@@ -90,34 +108,105 @@
  	-fx-background-insets: 0 0 -1 0, 0 0 0 0, 1 1 1 1;
     -fx-background-radius: 4,3,2;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
 .tab-pane:top *.tab-header-area {
-    -fx-background-insets: 0, 0 0 0 0;
+	-fx-background-color: pink;		
+    -fx-background-insets: 0;
     -fx-padding: 0 0 0 0;
 }
 .tab-pane:bottom *.tab-header-area {
-    -fx-background-insets: 0, 0 0 0 0;
+	-fx-background-color: pink;		
+    -fx-background-insets: 0;
     -fx-padding: 0 0 0 0;
 }
 .tab-pane:left *.tab-header-area {
-    -fx-background-insets: 0, 0 0 0 0;
+	-fx-background-color: pink;		
+    -fx-background-insets: 0;
     -fx-padding: 0 0 0 0;
 }
 .tab-pane:right *.tab-header-area {
-    -fx-background-insets: 0, 0 0 0 0;
+	-fx-background-color: pink;		
+    -fx-background-insets: 0;
     -fx-padding: 0 0 0 0;
 }
+
 .tab-pane .headers-region {
-/*
-    -fx-effect: dropshadow(two-pass-box , rgba(0,0,0,0.6) , 4, 0.0 , 0, 0);
-*/
+	-fx-background-color: -fx-chocolate-light-bottom-shadow;
+	-fx-padding: 0 0 0 1;
 }
+
+.tab-pane *.tab-header-background {
+	-fx-background-color: -fx-chocolate-light-bottom-shadow, -fx-chocolate-dark-bottom-shadow, -fx-chocolate-bottom-shadow;		
+ 	-fx-background-insets: 0 1 0 0, 0 0 0 1, 0 1 0 1;
+    -fx-background-radius: 0;    
+    -fx-effect: innershadow(two-pass-box , rgba(0,0,0,0.01) , 4, 0.0 , 0 , 0);
+}
+
 .tab {
-    -fx-background-color: rgb(45%, 40%, 40%);
-    -fx-background-radius: 0;
+	-fx-background-color: -fx-chocolate-light-bottom-shadow, -fx-chocolate-dark-bottom-shadow, -fx-chocolate-bottom-shadow;		
+ 	-fx-background-insets: 0 1 0 0, 0 0 0 1, 0 1 0 1;
+	-fx-effect: innershadow(three-pass-box , rgba(0,0,0,0.01) , 8, 0.0 , 0 , 0);
+    -fx-background-radius: 0;    
+    -fx-padding: 5 15 5 15;
 }
+
+.tab:left {
+	-fx-background-color: -fx-chocolate-dark-bottom-shadow, -fx-chocolate-light-bottom-shadow, -fx-chocolate-bottom-shadow;		
+}
+.tab:bottom {
+	-fx-background-color: -fx-chocolate-dark-bottom-shadow, -fx-chocolate-light-bottom-shadow, -fx-chocolate-bottom-shadow;		
+}
+
+.tab:selected {
+	-fx-background-color: -fx-chocolate-selected-bottom-shadow;		
+ 	-fx-background-insets: 0;
+
+    -fx-effect: innershadow(three-pass-box , rgba(0,0,0,0.5) , 8, 0.0 , 0 , 0);
+	-fx-background-radius: 0;
+
+/*
+	-fx-background-image: url("tab_arrow.png");
+	-fx-background-position: center bottom;
+	-fx-background-repeat: no-repeat;
+	-fx-background-size: auto;
+	*/
+}
+
 .tab .tab-label {
+    -fx-background-color: transparent;    
+    -fx-alignment: CENTER;
+    -fx-text-fill: #cccccc;
+    -fx-fill: white;
+    -fx-effect: dropshadow( one-pass-box , rgba(0, 0, 0, 0.3) , 0,0,0,1 );
+}
+
+.tab:selected .tab-label {
     -fx-background-color: transparent;    
     -fx-alignment: CENTER;
     -fx-text-fill: white;
     -fx-fill: white;
+    -fx-effect: dropshadow( one-pass-box , rgba(0, 0, 0, 0.3) , 0,0,0,1 );    
 }
+

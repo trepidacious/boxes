@@ -23,7 +23,7 @@ import boxes.general.RadioReaction
 import boxes.Val
 import boxes.javafx.NumberView
  
-class HelloWorld extends Application {
+class JavaFXDemo extends Application {
     
   override def start(primaryStage: Stage) {
     primaryStage.setTitle("Hello World!")
@@ -36,20 +36,20 @@ class HelloWorld extends Application {
     grid.setStyle("-fx-background-color: #f0f0f0;");
 
     val tabPane = new TabPane()
-    tabPane.setSide(Side.LEFT)
+    tabPane.setSide(Side.TOP)
     tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE)
     val tab = new Tab()
     tab.setText("Tab one");
     tab.setContent(grid);
     tabPane.getTabs().add(tab);
-
+    
     val tab2 = new Tab()
     tab2.setText("Tab two");
     tabPane.getTabs().add(tab2);
 
     val scene = new Scene(tabPane, 300, 275)
     scene.getStylesheets.clear()
-    scene.getStylesheets.add(classOf[HelloWorld].getResource("Buttons.css").toExternalForm())
+    scene.getStylesheets.add(classOf[JavaFXDemo].getResource("Buttons.css").toExternalForm())
     primaryStage.setScene(scene)
 
     val text = Var("Text")
@@ -106,6 +106,6 @@ class HelloWorld extends Application {
   }
 }
 
-object HelloWorld {
-  def main(args: Array[String]) = Application.launch(classOf[HelloWorld], args:_*)
+object JavaFXDemo {
+  def main(args: Array[String]) = Application.launch(classOf[JavaFXDemo], args:_*)
 }
