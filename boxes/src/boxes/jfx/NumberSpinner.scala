@@ -92,20 +92,20 @@ class NumberOptionSpinnerView[G, N](v:VarBox[G,_], c:GConverter[G, N], s:Sequenc
   private final NumberBinding buttonHeight
   private final NumberBinding spacing
 
-
-        // Painting the up and down arrows
-        Path arrowUp = new Path()
-        arrowUp.setId(ARROW)
-        arrowUp.getElements().addAll(new MoveTo(-ARROW_SIZE, 0), new LineTo(ARROW_SIZE, 0),
-                new LineTo(0, -ARROW_SIZE), new LineTo(-ARROW_SIZE, 0))
-        // mouse clicks should be forwarded to the underlying button
-        arrowUp.setMouseTransparent(true)
-
-        Path arrowDown = new Path()
-        arrowDown.setId(ARROW)
-        arrowDown.getElements().addAll(new MoveTo(-ARROW_SIZE, 0), new LineTo(ARROW_SIZE, 0),
-                new LineTo(0, ARROW_SIZE), new LineTo(-ARROW_SIZE, 0))
-        arrowDown.setMouseTransparent(true)
+//TODO do this with CSS
+//        // Painting the up and down arrows
+//        Path arrowUp = new Path()
+//        arrowUp.setId(ARROW)
+//        arrowUp.getElements().addAll(new MoveTo(-ARROW_SIZE, 0), new LineTo(ARROW_SIZE, 0),
+//                new LineTo(0, -ARROW_SIZE), new LineTo(-ARROW_SIZE, 0))
+//        // mouse clicks should be forwarded to the underlying button
+//        arrowUp.setMouseTransparent(true)
+//
+//        Path arrowDown = new Path()
+//        arrowDown.setId(ARROW)
+//        arrowDown.getElements().addAll(new MoveTo(-ARROW_SIZE, 0), new LineTo(ARROW_SIZE, 0),
+//                new LineTo(0, ARROW_SIZE), new LineTo(-ARROW_SIZE, 0))
+//        arrowDown.setMouseTransparent(true)
 
         // the spinner buttons scale with the textfield size
         // TODO: the following approach leads to the desired result, but it is 
@@ -133,10 +133,6 @@ class NumberOptionSpinnerView[G, N](v:VarBox[G,_], c:GConverter[G, N], s:Sequenc
             }
         })
 
-        // Paint arrow path on button using a StackPane
-        StackPane incPane = new StackPane()
-        incPane.getChildren().addAll(incrementButton, arrowUp)
-        incPane.setAlignment(Pos.CENTER)
 
         decrementButton = new Button()
         decrementButton.setId(SPINNER_BUTTON_DOWN)
@@ -156,50 +152,8 @@ class NumberOptionSpinnerView[G, N](v:VarBox[G,_], c:GConverter[G, N], s:Sequenc
             }
         })
 
-        StackPane decPane = new StackPane()
-        decPane.getChildren().addAll(decrementButton, arrowDown)
-        decPane.setAlignment(Pos.CENTER)
-
         buttons.getChildren().addAll(incPane, decPane)
         this.getChildren().addAll(numberField, buttons)
     }
 
-    /**
-     * increment number value by stepWidth
-     */
-    private void increment() {
-        BigDecimal value = numberField.getNumber()
-        value = value.add(stepWitdhProperty.get())
-        numberField.setNumber(value)
-    }
-
-    /**
-     * decrement number value by stepWidth
-     */
-    private void decrement() {
-        BigDecimal value = numberField.getNumber()
-        value = value.subtract(stepWitdhProperty.get())
-        numberField.setNumber(value)
-    }
-
-    public final void setNumber(BigDecimal value) {
-        numberField.setNumber(value)
-    }
-
-    public ObjectProperty<BigDecimal> numberProperty() {
-        return numberField.numberProperty()
-    }
-
-    public final BigDecimal getNumber() {
-        return numberField.getNumber()
-    }
-
-    // debugging layout bounds
-    public void dumpSizes() {
-        System.out.println("numberField (layout)=" + numberField.getLayoutBounds())
-        System.out.println("buttonInc (layout)=" + incrementButton.getLayoutBounds())
-        System.out.println("buttonDec (layout)=" + decrementButton.getLayoutBounds())
-        System.out.println("binding=" + buttonHeight.toString())
-        System.out.println("spacing=" + spacing.toString())
-    }
 }
