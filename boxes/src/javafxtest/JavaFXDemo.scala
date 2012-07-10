@@ -15,14 +15,11 @@ import javafx.scene.shape.Rectangle
 import javafx.scene.paint.Color
 import scalafx.geometry.Side
 import boxes.Var
-import boxes.javafx.LabelView
-import boxes.javafx.StringView
-import boxes.javafx.BooleanView
+import boxes.jfx._
 import boxes.Cal
 import boxes.general.RadioReaction
 import boxes.Val
-import boxes.javafx.NumberView
- 
+
 class JavaFXDemo extends Application {
     
   override def start(primaryStage: Stage) {

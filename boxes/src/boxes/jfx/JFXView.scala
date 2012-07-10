@@ -1,4 +1,4 @@
-package boxes.javafx
+package boxes.jfx
 
 import boxes.BooleanControlType._
 import scala.collection._
@@ -27,7 +27,7 @@ import javafx.beans.value.ObservableValue
 import javafx.event.EventHandler
 import javafx.scene.input.KeyCode
 import scalafx.event.EventHandler._
-import boxes.javafx.JFXImplicits._
+import boxes.jfx.JFXImplicits._
 import boxes.BooleanControlType._
 import boxes.Val
 import javafx.scene.control.CheckBox

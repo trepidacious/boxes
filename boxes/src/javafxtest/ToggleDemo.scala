@@ -19,41 +19,41 @@ import boxes.jfx._
 import boxes.Cal
 import boxes.general.RadioReaction
 import boxes.Val
- 
-class HelloWorld extends Application {
+import javafx.scene.control.ToggleButton
+import boxes.jfx.SlideCheck
+
+class ToggleDemo extends Application {
     
   override def start(primaryStage: Stage) {
     primaryStage.setTitle("Hello World!")
-
         
     val grid = new GridPane()
     grid.setAlignment(Pos.CENTER)
     grid.setHgap(10)
     grid.setVgap(10)
     grid.setPadding(new Insets(25, 25, 25, 25))
-    grid.setStyle("-fx-background-color: #f0f0f0;");
+    grid.setStyle("-fx-background-color: #f0f0f0;")
 
-    
     val tabPane = new TabPane()
-    tabPane.setSide(Side.LEFT)
+    tabPane.setSide(Side.TOP)
     tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE)
     val tab = new Tab()
     tab.setText("Tab one");
     tab.setContent(grid);
     tabPane.getTabs().add(tab);
-
+    
     val tab2 = new Tab()
     tab2.setText("Tab two");
     tabPane.getTabs().add(tab2);
 
     val scene = new Scene(tabPane, 300, 275)
     scene.getStylesheets.clear()
-    scene.getStylesheets.add(classOf[HelloWorld].getResource("Buttons.css").toExternalForm())
+    scene.getStylesheets.add(classOf[ToggleDemo].getResource("Buttons.css").toExternalForm())
     primaryStage.setScene(scene)
 
     val text = Var("Text")
     
-    val btn = new Button()
+    val btn = new SlideCheck()
     btn.setText("Say 'Hello World'")
 //    btn.setId("lion")
     btn.setOnAction(new EventHandler[ActionEvent]() {
@@ -63,44 +63,17 @@ class HelloWorld extends Application {
     })
     grid.add(btn, 0, 0)
     
-    val b = Var(true)
-    
-    val bString = Cal{if (b()) "True!" else "FALSE!" }
-    
-    grid.add(StringView(text).node, 1, 0)
-    grid.add(LabelView(text).node, 2, 0)
-    grid.add(BooleanView(b).node, 3, 0)
-    grid.add(LabelView(bString).node, 4, 0)
-    grid.add(BooleanView(b).node, 5, 0)
-    
-    val x = Var(true)
-    val y = Var(false)
-    val z = Var(false)
-    RadioReaction(x, y, z)
+    val r = new Rectangle
+    r.setWidth(10)
+    r.setHeight(10)
+    r.setStyle("-fx-background-color: pink;");
+//    btn.
 
-    //Why do we need all the parameters here?
-    val xv = BooleanView(x, Val(""), boxes.BooleanControlType.CHECKBOX, Val(None), false)
-    val yv = BooleanView(y, Val(""), boxes.BooleanControlType.CHECKBOX, Val(None), false)
-    val zv = BooleanView(z, Val(""), boxes.BooleanControlType.CHECKBOX, Val(None), false)
-
-    grid.add(xv.node, 0, 1)
-    grid.add(yv.node, 1, 1)
-    grid.add(zv.node, 2, 1)
-    
-    val p = Var(10)
-    val q = Var(20)
-    
-    p << q() + 10
-    q << p() - 10
-    
-    grid.add(NumberView(p).node, 0, 2)
-    grid.add(NumberView(q).node, 1, 2)
-    
     
     primaryStage.show()
   }
 }
 
-object HelloWorld {
-  def main(args: Array[String]) = Application.launch(classOf[HelloWorld], args:_*)
+object ToggleDemo {
+  def main(args: Array[String]) = Application.launch(classOf[ToggleDemo], args:_*)
 }
