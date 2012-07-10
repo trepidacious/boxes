@@ -39,8 +39,6 @@ object NumberOptionSpinnerView {
 
 class NumberOptionSpinnerView[G, N](v:VarBox[G,_], c:GConverter[G, N], s:Sequence[N], n:Numeric[N], nc:NumericClass[N]) extends JFXView {
 
-
-
   val textField = new TextField();
   {
     textField.setOnAction((event: ActionEvent) => commit)
@@ -80,80 +78,58 @@ class NumberOptionSpinnerView[G, N](v:VarBox[G,_], c:GConverter[G, N], s:Sequenc
     if (!textField.getText.equals(t)) textField.setText(t)
   }
   
-  private def increment(){}
+  private def increment(){
+    
+    s.next(t)
+  }
   private def decrement(){}
   
-  val component = new HBox() {
-    setId(NumberOptionSpinnerView.NUMBER_SPINNER)
-  }
+  val node = new HBox() {
+    //Reference view, so that as long as this node is retained, the view will be retained
+    val view = NumberOptionSpinnerView.this
     
-  private final Button incrementButton
-  private final Button decrementButton
-  private final NumberBinding buttonHeight
-  private final NumberBinding spacing
+    setId(NumberOptionSpinnerView.NUMBER_SPINNER)
 
-//TODO do this with CSS
-//        // Painting the up and down arrows
-//        Path arrowUp = new Path()
-//        arrowUp.setId(ARROW)
-//        arrowUp.getElements().addAll(new MoveTo(-ARROW_SIZE, 0), new LineTo(ARROW_SIZE, 0),
-//                new LineTo(0, -ARROW_SIZE), new LineTo(-ARROW_SIZE, 0))
-//        // mouse clicks should be forwarded to the underlying button
-//        arrowUp.setMouseTransparent(true)
-//
-//        Path arrowDown = new Path()
-//        arrowDown.setId(ARROW)
-//        arrowDown.getElements().addAll(new MoveTo(-ARROW_SIZE, 0), new LineTo(ARROW_SIZE, 0),
-//                new LineTo(0, ARROW_SIZE), new LineTo(-ARROW_SIZE, 0))
-//        arrowDown.setMouseTransparent(true)
-
-        // the spinner buttons scale with the textfield size
-        // TODO: the following approach leads to the desired result, but it is 
-        // not fully understood why and obviously it is not quite elegant
-        buttonHeight = numberField.heightProperty().subtract(3).divide(2)
-        // give unused space in the buttons VBox to the incrementBUtton
-        spacing = numberField.heightProperty().subtract(2).subtract(buttonHeight.multiply(2))
+    // the spinner buttons scale with the textfield size
+    // TODO: the following approach leads to the desired result, but it is 
+    // not fully understood why and obviously it is not quite elegant
+    val buttonHeight = textField.heightProperty().subtract(3).divide(2)
+    // give unused space in the buttons VBox to the incrementBUtton
+    val spacing = textField.heightProperty().subtract(2).subtract(buttonHeight.multiply(2))
 
         // inc/dec buttons
-        VBox buttons = new VBox()
-        buttons.setId(BUTTONS_BOX)
-        incrementButton = new Button()
-        incrementButton.setId(SPINNER_BUTTON_UP)
-        incrementButton.prefWidthProperty().bind(numberField.heightProperty())
-        incrementButton.minWidthProperty().bind(numberField.heightProperty())
-        incrementButton.maxHeightProperty().bind(buttonHeight.add(spacing))
-        incrementButton.prefHeightProperty().bind(buttonHeight.add(spacing))
-        incrementButton.minHeightProperty().bind(buttonHeight.add(spacing))
-        incrementButton.setFocusTraversable(false)
-        incrementButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent ae) {
-                increment()
-                ae.consume()
-            }
-        })
+    val buttons = new VBox()
+    buttons.setId(NumberOptionSpinnerView.BUTTONS_BOX)
+    val incrementButton = new Button()
+    incrementButton.setId(NumberOptionSpinnerView.SPINNER_BUTTON_UP)
+    incrementButton.prefWidthProperty().bind(textField.heightProperty())
+    incrementButton.minWidthProperty().bind(textField.heightProperty())
+    incrementButton.maxHeightProperty().bind(buttonHeight.add(spacing))
+    incrementButton.prefHeightProperty().bind(buttonHeight.add(spacing))
+    incrementButton.minHeightProperty().bind(buttonHeight.add(spacing))
+    incrementButton.setFocusTraversable(false)
+    incrementButton.setOnAction((ae: ActionEvent) => {
+        increment()
+        ae.consume()
+    })
 
 
-        decrementButton = new Button()
-        decrementButton.setId(SPINNER_BUTTON_DOWN)
-        decrementButton.prefWidthProperty().bind(numberField.heightProperty())
-        decrementButton.minWidthProperty().bind(numberField.heightProperty())
-        decrementButton.maxHeightProperty().bind(buttonHeight)
-        decrementButton.prefHeightProperty().bind(buttonHeight)
-        decrementButton.minHeightProperty().bind(buttonHeight)
+    val decrementButton = new Button()
+    decrementButton.setId(NumberOptionSpinnerView.SPINNER_BUTTON_DOWN)
+    decrementButton.prefWidthProperty().bind(textField.heightProperty())
+    decrementButton.minWidthProperty().bind(textField.heightProperty())
+    decrementButton.maxHeightProperty().bind(buttonHeight)
+    decrementButton.prefHeightProperty().bind(buttonHeight)
+    decrementButton.minHeightProperty().bind(buttonHeight)
 
-        decrementButton.setFocusTraversable(false)
-        decrementButton.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent ae) {
-                decrement()
-                ae.consume()
-            }
-        })
-
-        buttons.getChildren().addAll(incPane, decPane)
-        this.getChildren().addAll(numberField, buttons)
-    }
+    decrementButton.setFocusTraversable(false)
+    decrementButton.setOnAction((ae: ActionEvent) => {
+        decrement()
+        ae.consume()
+    })
+    
+    buttons.getChildren().addAll(incrementButton, decrementButton)
+    getChildren().addAll(textField, buttons)
+  }
 
 }
