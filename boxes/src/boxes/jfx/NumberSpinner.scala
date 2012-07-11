@@ -26,15 +26,25 @@ import boxes.util.Sequence
 import JFXImplicits._
 import boxes.View
 import javafx.scene.control.TextField
+import boxes.util.TConverter
+import boxes.util.OptionTConverter
 
 object NumberOptionSpinnerView {
-    val ARROW = "NumberSpinnerArrow"
-    val NUMBER_FIELD = "NumberField"
-    val NUMBER_SPINNER = "NumberSpinner"
-    val SPINNER_BUTTON_UP = "SpinnerButtonUp"
-    val SPINNER_BUTTON_DOWN = "SpinnerButtonDown"
-    val BUTTONS_BOX = "ButtonsBox"
-    val ARROW_SIZE = 4
+  val ARROW = "NumberSpinnerArrow"
+  val NUMBER_FIELD = "NumberField"
+  val NUMBER_SPINNER = "NumberSpinner"
+  val SPINNER_BUTTON_UP = "SpinnerButtonUp"
+  val SPINNER_BUTTON_DOWN = "SpinnerButtonDown"
+  val BUTTONS_BOX = "ButtonsBox"
+  val ARROW_SIZE = 4
+
+  def apply[N](v:VarBox[Option[N],_])(implicit n:Numeric[N], nc:NumericClass[N]):JFXView = apply(v, nc.defaultSequence)
+  def apply[N](v:VarBox[Option[N],_], s:Sequence[N])(implicit n:Numeric[N], nc:NumericClass[N]):JFXView = new NumberOptionSpinnerView(v, new OptionTConverter[N], s, n, nc): JFXView
+}
+
+object NumberSpinnerView {
+  def apply[N](v:VarBox[N,_])(implicit n:Numeric[N], nc:NumericClass[N]):JFXView = apply(v, nc.defaultSequence)
+  def apply[N](v:VarBox[N,_], s:Sequence[N])(implicit n:Numeric[N], nc:NumericClass[N]) = new NumberOptionSpinnerView(v, new TConverter[N], s, n, nc): JFXView
 }
 
 class NumberOptionSpinnerView[G, N](v:VarBox[G,_], c:GConverter[G, N], s:Sequence[N], n:Numeric[N], nc:NumericClass[N]) extends JFXView {
@@ -78,11 +88,8 @@ class NumberOptionSpinnerView[G, N](v:VarBox[G,_], c:GConverter[G, N], s:Sequenc
     if (!textField.getText.equals(t)) textField.setText(t)
   }
   
-  private def increment(){
-    
-    s.next(t)
-  }
-  private def decrement(){}
+  private def increment() = c.toOption(v()).foreach(n => v() = c.toG(s.next(n)))
+  private def decrement() = c.toOption(v()).foreach(n => v() = c.toG(s.previous(n)))
   
   val node = new HBox() {
     //Reference view, so that as long as this node is retained, the view will be retained

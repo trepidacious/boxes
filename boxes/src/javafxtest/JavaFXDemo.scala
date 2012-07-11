@@ -85,14 +85,14 @@ class JavaFXDemo extends Application {
     grid.add(yv.node, 1, 1)
     grid.add(zv.node, 2, 1)
     
-    val p = Var(10)
-    val q = Var(20)
+    val p = Var(10.1)
+    val q = Var(20.1)
     
     p << q() + 10
     q << p() - 10
     
-    grid.add(NumberView(p).node, 0, 2)
-    grid.add(NumberView(q).node, 1, 2)
+    grid.add(NumberSpinnerView(p).node, 0, 2)
+    grid.add(NumberSpinnerView(q).node, 1, 2)
 
     val dis = new Button()
     dis.setText("Disabled")
