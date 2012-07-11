@@ -28,6 +28,12 @@ import boxes.View
 import javafx.scene.control.TextField
 import boxes.util.TConverter
 import boxes.util.OptionTConverter
+import javafx.scene.layout.GridPane
+import javafx.scene.shape.Rectangle
+import javafx.beans.property.DoubleProperty
+import javafx.beans.value.ObservableDoubleValue
+import javafx.scene.input.MouseEvent
+import javafx.scene.control.Tooltip
 
 object NumberOptionSpinnerView {
   val ARROW = "NumberSpinnerArrow"
@@ -35,6 +41,8 @@ object NumberOptionSpinnerView {
   val NUMBER_SPINNER = "NumberSpinner"
   val SPINNER_BUTTON_UP = "SpinnerButtonUp"
   val SPINNER_BUTTON_DOWN = "SpinnerButtonDown"
+  val SPINNER_BUTTON_UP_ARROW = "SpinnerButtonUpArrow"
+  val SPINNER_BUTTON_DOWN_ARROW = "SpinnerButtonDownArrow"
   val BUTTONS_BOX = "ButtonsBox"
   val ARROW_SIZE = 4
 
@@ -91,51 +99,74 @@ class NumberOptionSpinnerView[G, N](v:VarBox[G,_], c:GConverter[G, N], s:Sequenc
   private def increment() = c.toOption(v()).foreach(n => v() = c.toG(s.next(n)))
   private def decrement() = c.toOption(v()).foreach(n => v() = c.toG(s.previous(n)))
   
+  def button(inc: Boolean, height: ObservableDoubleValue, width: ObservableDoubleValue) = {
+    val btn = new Button()
+    btn.setId(if (inc) NumberOptionSpinnerView.SPINNER_BUTTON_UP else NumberOptionSpinnerView.SPINNER_BUTTON_DOWN)
+    btn.minHeightProperty().set(2)
+    btn.prefHeightProperty().bind(height)
+    btn.minWidthProperty().bind(width)
+    btn.maxWidthProperty().bind(width)
+    btn.prefWidthProperty().bind(width)
+    
+    btn.setFocusTraversable(false)
+    btn.setOnAction((ae: ActionEvent) => {
+        if (inc) increment() else decrement()
+        ae.consume()
+    })
+    btn.setTooltip(new Tooltip("Click to " + (if (inc) "increase" else "decrease") + ", or drag to adjust"));
+
+
+    //A little state machine for dragging
+    var drag: Option[(N, Double)] = None
+    btn.setOnMousePressed((me: MouseEvent) => {
+      drag = c.toOption(v()).map(n => (n, me.getY))
+    })
+    btn.setOnMouseReleased((me: MouseEvent) => {
+      drag = None
+    })
+    btn.setOnMouseDragged((me: MouseEvent) => {
+      drag.foreach{case (n, startY) => {
+        val ticks = ((me.getY - startY) / 5).asInstanceOf[Int]
+        val newN = if (ticks > 0) {
+          Range(0, ticks).foldLeft(n){case (n, _) => s.previous(n)}
+        } else if (ticks < 0) {
+          Range(0, -ticks).foldLeft(n){case (n, _) => s.next(n)}          
+        } else {
+          n
+        }
+        v() = c.toG(newN)
+      }}
+    })
+
+    val arrow = new StackPane()
+    arrow.setId(if (inc) NumberOptionSpinnerView.SPINNER_BUTTON_UP_ARROW else NumberOptionSpinnerView.SPINNER_BUTTON_DOWN_ARROW)
+    arrow.setMouseTransparent(true);
+    
+    val pane = new StackPane();
+    pane.getChildren().addAll(btn, arrow);
+    pane.setAlignment(Pos.CENTER);
+    pane
+  }
+  
   val node = new HBox() {
     //Reference view, so that as long as this node is retained, the view will be retained
     val view = NumberOptionSpinnerView.this
     
     setId(NumberOptionSpinnerView.NUMBER_SPINNER)
 
-    // the spinner buttons scale with the textfield size
-    // TODO: the following approach leads to the desired result, but it is 
-    // not fully understood why and obviously it is not quite elegant
-    val buttonHeight = textField.heightProperty().subtract(3).divide(2)
-    // give unused space in the buttons VBox to the incrementBUtton
-    val spacing = textField.heightProperty().subtract(2).subtract(buttonHeight.multiply(2))
+    val firstHeight = textField.heightProperty().divide(2)
+    val secondHeight = textField.heightProperty().subtract(firstHeight)
+    val width = textField.heightProperty().multiply(0.75)
 
-        // inc/dec buttons
-    val buttons = new VBox()
+    // inc/dec buttons
+    val buttons = new GridPane()
+    buttons.setHgap(0)
+    buttons.setVgap(0)
+  
     buttons.setId(NumberOptionSpinnerView.BUTTONS_BOX)
-    val incrementButton = new Button()
-    incrementButton.setId(NumberOptionSpinnerView.SPINNER_BUTTON_UP)
-    incrementButton.prefWidthProperty().bind(textField.heightProperty())
-    incrementButton.minWidthProperty().bind(textField.heightProperty())
-    incrementButton.maxHeightProperty().bind(buttonHeight.add(spacing))
-    incrementButton.prefHeightProperty().bind(buttonHeight.add(spacing))
-    incrementButton.minHeightProperty().bind(buttonHeight.add(spacing))
-    incrementButton.setFocusTraversable(false)
-    incrementButton.setOnAction((ae: ActionEvent) => {
-        increment()
-        ae.consume()
-    })
 
-
-    val decrementButton = new Button()
-    decrementButton.setId(NumberOptionSpinnerView.SPINNER_BUTTON_DOWN)
-    decrementButton.prefWidthProperty().bind(textField.heightProperty())
-    decrementButton.minWidthProperty().bind(textField.heightProperty())
-    decrementButton.maxHeightProperty().bind(buttonHeight)
-    decrementButton.prefHeightProperty().bind(buttonHeight)
-    decrementButton.minHeightProperty().bind(buttonHeight)
-
-    decrementButton.setFocusTraversable(false)
-    decrementButton.setOnAction((ae: ActionEvent) => {
-        decrement()
-        ae.consume()
-    })
-    
-    buttons.getChildren().addAll(incrementButton, decrementButton)
+    buttons.add(button(true, firstHeight, width), 0, 0)
+    buttons.add(button(false, secondHeight, width), 0, 1)
     getChildren().addAll(textField, buttons)
   }
 

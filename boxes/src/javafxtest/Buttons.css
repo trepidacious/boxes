@@ -7,6 +7,9 @@
 	
 	-fx-shadow-highlight-color: white;
 	-fx-outer-border: #8c8c8c;
+	
+	-fx-drawing: #505050;
+	
 /*	-fx-inner-border	*/
 	-fx-shiny-sun-color: linear-gradient(from 0% 100% to 0% 0%, #dbdde6 0%, #d6d6de 54%, #e7e6e3 57%, #f6f5f2 100%);
 	-fx-button-color: -fx-shiny-sun-color;
@@ -110,15 +113,55 @@
 }
 
 
+/*
+Number spinner
+*/
+#NumberField {
+	 -fx-background-radius: 4 0 0 4, 3 0 0 3, 2 0 0 2;
+}
+#NumberField:focused {
+	-fx-background-radius: 4 0 0 4, 2 0 0 2;
+	
+	-fx-background-color: -fx-focus-color, -fx-white-background-color;		
+	-fx-background-insets: -1 0 -1 -1, 1 2 1 1;
+}
 
+#SpinnerButtonUp {
+	-fx-background-insets: 0 0 0 0, 0 0 0 0, 1 1 0 0;
+    -fx-background-radius: 0 3 0 0, 0 3 0 0, 0 2 0 0;    
+}
+#SpinnerButtonUpArrow {
+	-fx-background-color: -fx-drawing;
 
+    -fx-shape: "m 8,5 4,4 0,1 -1,0 L 8,7 5,10 4,10 4,9 z"; 
 
+/* 	-fx-shape: "M 0,8 L 4,2 8,8 "; */
+    -fx-scale-shape: false;
+    -fx-effect: dropshadow(two-pass-box , white, 1, 0.0 , 0, 1);
+}
+#SpinnerButtonDown {
+	-fx-background-insets: 0 0 -1 0, 0 0 0 0, 0 1 1 0;
+    -fx-background-radius: 0 0 3 0, 0 0 3 0, 0 0 2 0;
+    
+}
+#SpinnerButtonDownArrow {
+	-fx-background-color: -fx-drawing;
+    -fx-shape: "M 8,9 4,5 4,4 l 1,0 3,3 3,-3 1,0 0,1 z";
+    -fx-scale-shape: false;
+    -fx-effect: dropshadow(two-pass-box , white, 1, 0.0 , 0, 1);
+}
 
-
-
-
-
-
+/*
+#NumberSpinnerArrow {
+    -fx-fill: gray;
+    -fx-stroke: gray;
+}
+#ButtonsBox {
+    -fx-border-color:lightgray;
+    -fx-border-width: 1 1 1 0;
+    -fx-border-radius: 0 3 3 0;
+}
+*/
 
 .slide-check {
     -fx-skin: "boxes.jfx.SlideCheckSkin";
