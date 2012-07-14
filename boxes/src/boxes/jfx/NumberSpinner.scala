@@ -34,6 +34,12 @@ import javafx.beans.property.DoubleProperty
 import javafx.beans.value.ObservableDoubleValue
 import javafx.scene.input.MouseEvent
 import javafx.scene.control.Tooltip
+import javafx.stage.Popup
+import javafx.scene.control.Label
+import javafx.scene.Parent
+import javafx.animation.FadeTransition
+import javafx.util.Duration
+import javafx.animation.Timeline
 
 object NumberOptionSpinnerView {
   val ARROW = "NumberSpinnerArrow"
@@ -94,7 +100,7 @@ class NumberOptionSpinnerView[G, N](v:VarBox[G,_], c:GConverter[G, N], s:Sequenc
     val (e, t) = c.toOption(s).map((n: N) => (true, nc.format(n))).getOrElse(false, "")
     node.setDisable(!e)
     if (!textField.getText.equals(t)) textField.setText(t)
-  }
+  } 
   
   private def increment() = c.toOption(v()).foreach(n => v() = c.toG(s.next(n)))
   private def decrement() = c.toOption(v()).foreach(n => v() = c.toG(s.previous(n)))
@@ -106,24 +112,52 @@ class NumberOptionSpinnerView[G, N](v:VarBox[G,_], c:GConverter[G, N], s:Sequenc
     btn.prefHeightProperty().bind(height)
     btn.minWidthProperty().bind(width)
     btn.maxWidthProperty().bind(width)
-    btn.prefWidthProperty().bind(width)
+    btn.prefWidthProperty().bind(width) 
     
     btn.setFocusTraversable(false)
     btn.setOnAction((ae: ActionEvent) => {
         if (inc) increment() else decrement()
         ae.consume()
     })
-    btn.setTooltip(new Tooltip("Click to " + (if (inc) "increase" else "decrease") + ", or drag to adjust"));
+//    btn.setTooltip(new Tooltip("Click to " + (if (inc) "increase" else "decrease") + ", or drag to adjust"));
 
+    val popup = new Popup
+    val stack = new StackPane
+    val label = new Label
+    stack.setId("PopupStack") //TODO move to JFXView constant
+    stack.getChildren.add(label)
+    stack.setOpacity(0)
+    label.setText("Drag to adjust")
+    label.setId("PopupText")
+    popup.getContent().add(stack);
+    popup.setAutoHide(true);
+    popup.setHideOnEscape(true);
+    popup.setAutoFix(true);
+
+    val ft = new FadeTransition(Duration.millis(250), stack)
 
     //A little state machine for dragging
     var drag: Option[(N, Double)] = None
     btn.setOnMousePressed((me: MouseEvent) => {
       drag = c.toOption(v()).map(n => (n, me.getY))
+      
+      ft.setFromValue(stack.getOpacity);
+      ft.setToValue(1.0);
+      ft.setDelay(Duration.millis(150))
+      ft.playFromStart();
+      ft.setOnFinished((ae: ActionEvent)=>{})
+
+      popup.show(btn, me.getScreenX + 15, me.getScreenY-10);
     })
     btn.setOnMouseReleased((me: MouseEvent) => {
       drag = None
+      ft.setFromValue(stack.getOpacity);
+      ft.setToValue(0.0);
+      ft.setDelay(Duration.millis(0))
+      ft.playFromStart();
+      ft.setOnFinished((ae: ActionEvent)=>popup.hide())
     })
+    
     btn.setOnMouseDragged((me: MouseEvent) => {
       drag.foreach{case (n, startY) => {
         val ticks = ((me.getY - startY) / 5).asInstanceOf[Int]
@@ -134,6 +168,10 @@ class NumberOptionSpinnerView[G, N](v:VarBox[G,_], c:GConverter[G, N], s:Sequenc
         } else {
           n
         }
+        popup.setX(me.getScreenX + 15)
+        popup.setY(me.getScreenY-10)
+        label.setText("Drag to adjust: " + nc.format(newN))
+
         v() = c.toG(newN)
       }}
     })
