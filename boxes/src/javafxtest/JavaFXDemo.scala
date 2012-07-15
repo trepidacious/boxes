@@ -92,7 +92,7 @@ class JavaFXDemo extends Application {
     
     grid.add(NumberSpinnerView(p).node, 0, 2)
     grid.add(NumberSpinnerView(q).node, 1, 2)
-    grid.add(new SlideCheck, 2, 2)
+    grid.add(SlideCheck(x, true).node, 2, 2)
 
     val dis = new Button()
     dis.setText("Disabled")
