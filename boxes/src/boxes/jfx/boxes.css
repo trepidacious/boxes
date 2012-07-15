@@ -11,7 +11,7 @@
 	-fx-drawing: #505050;
 	
 /*	-fx-inner-border	*/
-	-fx-shiny-sun-color: linear-gradient(from 0% 100% to 0% 0%, #dbdde6 0%, #d6d6de 54%, #e7e6e3 57%, #f6f5f2 100%);
+	-fx-shiny-sun-color: linear-gradient(from 0% 100% to 0% 0%, #dbdde6 0%, #d6d6de 48%, #e7e6e3 51%, #f6f5f2 100%);
 	-fx-button-color: -fx-shiny-sun-color;
 	-fx-shiny-sun-highlight-color: linear-gradient(from 0% 100% to 0% 0%, 
 		derive(#dbdde6, 30%) 0%, 
@@ -27,7 +27,9 @@
 		derive(#f6f5f2, -20%) 100%
 	);
 	-fx-white-background-color: linear-gradient(from 0% -5 to 0% 10, #cdd1ea 0%, #ffffff 100%);
-	
+	-fx-grey-background-color: linear-gradient(from 0% -5 to 0% 10, derive(#cdd1ea, -20%) 0%, derive(#ffffff, -20%) 100%);
+	-fx-green-background-color: linear-gradient(from 0% -5 to 0% 10, derive(#7aab81, -20%) 0%, #7aab81 100%);
+
     -fx-focus-color: #7790a1;
     -fx-accent: -fx-focus-color;
     
@@ -54,10 +56,11 @@
 	-fx-background-insets: -1 -1 -1 -1, 1 1 1 1;
     -fx-background-radius: 4,2;
 }
-
+/*
 .button:hover {
 	-fx-button-color: -fx-shiny-sun-highlight-color;		
 }
+*/
 .button:pressed {
 	-fx-button-color: -fx-shiny-sun-pressed-color;
 }
@@ -117,7 +120,7 @@
 	-fx-background-color: -fx-chocolate-dark, -fx-chocolate;
 	-fx-background-insets: 0, 1;
 	-fx-background-radius: 4, 3;
-	-fx-padding: 5 7 5 7;
+	-fx-padding: 3 7 3 7;
 	-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.3), 9,0,0,3 );
 }
 
@@ -143,9 +146,22 @@ Number spinner
 }
 
 #SpinnerButtonUp {
-	-fx-background-insets: 0 0 0 0, 0 0 0 0, 1 1 0 0;
-    -fx-background-radius: 0 3 0 0, 0 3 0 0, 0 2 0 0;    
+	-fx-background-color: transparent;    
+    -fx-background-radius: 0 2 0 0;
+	-fx-background-insets: 1 1 0 0;
 }
+/*
+#SpinnerButtonUp:hover {
+	-fx-background-color: rgba(255, 255, 255, 0.3);    
+}
+*/
+#SpinnerButtonUp:pressed {
+	-fx-background-color: rgba(0, 0, 0, 0.1);    
+}
+#SpinnerButtonUp:disabled {
+    -fx-opacity: -fx-disabled-opacity;
+}
+
 #SpinnerButtonUpArrow {
 	-fx-background-color: -fx-drawing;
 
@@ -156,9 +172,20 @@ Number spinner
     -fx-effect: dropshadow(two-pass-box , white, 1, 0.0 , 0, 1);
 }
 #SpinnerButtonDown {
-	-fx-background-insets: 0 0 -1 0, 0 0 0 0, 0 1 1 0;
-    -fx-background-radius: 0 0 3 0, 0 0 3 0, 0 0 2 0;
-    
+	-fx-background-color: transparent;    
+	-fx-background-insets: 0 1 1 0;
+    -fx-background-radius: 0 0 2 0;
+}
+/*
+#SpinnerButtonDown:hover {
+	-fx-background-color: rgba(255, 255, 255, 0.3);    
+}
+*/
+#SpinnerButtonDown:pressed {
+	-fx-background-color: rgba(0, 0, 0, 0.1);    
+}
+#SpinnerButtonDown:disabled {
+    -fx-opacity: -fx-disabled-opacity;
 }
 #SpinnerButtonDownArrow {
 	-fx-background-color: -fx-drawing;
@@ -167,44 +194,46 @@ Number spinner
     -fx-effect: dropshadow(two-pass-box , white, 1, 0.0 , 0, 1);
 }
 
+#ButtonsBox {
+	-fx-background-color: -fx-shadow-highlight-color, -fx-outer-border, -fx-button-color;
+	-fx-background-insets: 0 0 -1 0, 0 0 0 0, 1 1 1 0;
+    -fx-background-radius: 0 3 3 0, 0 3 3 0, 0 2 2 0;
+}
+#ButtonsBox:disabled {
+    -fx-opacity: -fx-disabled-opacity;
+}
+
+
 /*
 #NumberSpinnerArrow {
     -fx-fill: gray;
     -fx-stroke: gray;
 }
-#ButtonsBox {
-    -fx-border-color:lightgray;
-    -fx-border-width: 1 1 1 0;
-    -fx-border-radius: 0 3 3 0;
-}
+
 */
 
 .slide-check {
-    -fx-skin: "boxes.jfx.SlideCheckSkin";
-    -fx-background-color: -fx-shadow-highlight-color, -fx-outer-border, -fx-inner-border, -fx-body-color;
-    -fx-background-insets: 0 0 -1 0, 0, 1, 2;
-    -fx-background-radius: 5, 5, 4, 3;
-    -fx-padding: 0.166667em 0.833333em 0.25em 0.833333em; /* 2 10 3 10 */
-    -fx-text-fill: -fx-text-base-color;
-    -fx-alignment: CENTER;
-    -fx-content-display: LEFT;
+	-fx-skin: "boxes.jfx.SlideCheckSkin";
+	-fx-background-color: -fx-shadow-highlight-color, -fx-outer-border, -fx-grey-background-color;
+	-fx-background-insets: 0 0 -1 0, 0 0 0 0, 1 1 1 1;
+    -fx-background-radius: 3,3,2;
+    -fx-padding: 3
 }
 
 .slide-check:focused {
-    -fx-color: -fx-focused-base;
-    -fx-background-color: -fx-focus-color, -fx-outer-border, -fx-inner-border, -fx-body-color;
-    -fx-background-insets: -1.4, 0, 1, 2;
-    -fx-background-radius: 6.4, 5, 4, 3;
+	-fx-background-color: -fx-focus-color, -fx-grey-background-color;
+	-fx-background-insets: -1 -1 -1 -1, 1 1 1 1;
+    -fx-background-radius: 4,2;
 }
 
+/*
 .slide-check:hover {
-    -fx-color: -fx-hover-base;
 }
 
 .slide-check:armed {
-    -fx-color: -fx-pressed-base;
 }
-
+*/
+/*
 .slide-check:selected {
     -fx-background-color:
         -fx-shadow-highlight-color,
@@ -212,7 +241,6 @@ Number spinner
         linear-gradient(to bottom, derive(-fx-color,-60%) 0%, derive(-fx-color,-35%) 50%, derive(-fx-color,-30%) 98%, derive(-fx-color,-50%) 100%),
         linear-gradient(to right, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 10%, rgba(0,0,0,0) 90%, rgba(0,0,0,0.3) 100%);
     -fx-background-insets: 0 0 -1 0, 0, 1, 1;
-    /* TODO: -fx-text-fill should be derived */
     -fx-text-fill: -fx-light-text-color;
 }
 
@@ -225,14 +253,11 @@ Number spinner
         linear-gradient(to right, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 10%, rgba(0,0,0,0) 90%, rgba(0,0,0,0.3) 100%);
     -fx-background-insets: -1.4, 0, 1, 1;
 }
+*/
 
 .slide-check:disabled {
     -fx-opacity: -fx-disabled-opacity;
 }
-
-.slide-check:show-mnemonics .mnemonic-underline {
-    -fx-stroke: -fx-text-fill;
-} 
 
 
 	

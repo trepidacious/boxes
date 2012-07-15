@@ -119,7 +119,6 @@ class NumberOptionSpinnerView[G, N](v:VarBox[G,_], c:GConverter[G, N], s:Sequenc
         if (inc) increment() else decrement()
         ae.consume()
     })
-//    btn.setTooltip(new Tooltip("Click to " + (if (inc) "increase" else "decrease") + ", or drag to adjust"));
 
     val popup = new Popup
     val stack = new StackPane
@@ -147,7 +146,7 @@ class NumberOptionSpinnerView[G, N](v:VarBox[G,_], c:GConverter[G, N], s:Sequenc
       ft.playFromStart();
       ft.setOnFinished((ae: ActionEvent)=>{})
 
-      popup.show(btn, me.getScreenX + 15, me.getScreenY-10);
+      popup.show(btn, me.getScreenX + 15, me.getScreenY-9);
     })
     btn.setOnMouseReleased((me: MouseEvent) => {
       drag = None
@@ -169,7 +168,7 @@ class NumberOptionSpinnerView[G, N](v:VarBox[G,_], c:GConverter[G, N], s:Sequenc
           n
         }
         popup.setX(me.getScreenX + 15)
-        popup.setY(me.getScreenY-10)
+        popup.setY(me.getScreenY-9)
         label.setText("Drag to adjust: " + nc.format(newN))
 
         v() = c.toG(newN)
@@ -177,6 +176,7 @@ class NumberOptionSpinnerView[G, N](v:VarBox[G,_], c:GConverter[G, N], s:Sequenc
     })
 
     val arrow = new StackPane()
+    //TODO Use a class instead of id
     arrow.setId(if (inc) NumberOptionSpinnerView.SPINNER_BUTTON_UP_ARROW else NumberOptionSpinnerView.SPINNER_BUTTON_DOWN_ARROW)
     arrow.setMouseTransparent(true);
     

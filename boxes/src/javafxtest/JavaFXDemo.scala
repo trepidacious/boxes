@@ -46,14 +46,13 @@ class JavaFXDemo extends Application {
 
     val scene = new Scene(tabPane, 300, 275)
     scene.getStylesheets.clear()
-    scene.getStylesheets.add(classOf[JavaFXDemo].getResource("Buttons.css").toExternalForm())
+    scene.getStylesheets.add(JFXView.css)
     primaryStage.setScene(scene)
 
     val text = Var("Text")
     
     val btn = new Button()
     btn.setText("Say 'Hello World'")
-//    btn.setId("lion")
     btn.setOnAction(new EventHandler[ActionEvent]() {
         override def handle(event: ActionEvent) {
             text() = text() + " p"
@@ -85,14 +84,15 @@ class JavaFXDemo extends Application {
     grid.add(yv.node, 1, 1)
     grid.add(zv.node, 2, 1)
     
-    val p = Var(10.1)
-    val q = Var(20.1)
+    val p = Var(10d)
+    val q = Var(20d)
     
     p << q() + 10
     q << p() - 10
     
     grid.add(NumberSpinnerView(p).node, 0, 2)
     grid.add(NumberSpinnerView(q).node, 1, 2)
+    grid.add(new SlideCheck, 2, 2)
 
     val dis = new Button()
     dis.setText("Disabled")

@@ -55,6 +55,8 @@ object JFXView {
   
   def format(d:Double) = defaultDecimalFormat.format(d)
 
+  def css = classOf[JFXView].getResource("boxes.css").toExternalForm()
+  
   def addUpdate(v:Any, update: => Unit) = {
     lock.synchronized{
       viewToUpdates.get(v) match {
