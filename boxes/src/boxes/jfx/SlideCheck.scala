@@ -32,6 +32,7 @@ import javafx.animation.Animation
 import javafx.scene.shape.LineTo
 import javafx.beans.value.ObservableDoubleValue
 import javafx.scene.shape.Circle
+import javafx.scene.control.Button
 
 
 object SlideCheck {
@@ -44,23 +45,13 @@ object SlideCheck {
 
 class SlideCheck[G](v:VarBox[G,_], c:GConverter[G, Boolean], toggle:Boolean) extends JFXView {
 
-  val btn = new ToggleButton
+  val btn = new Button
   btn.setId("SlideCheck")
   btn.setMaxHeight(10000)
   btn.setMaxWidth(10000)
   
-  btn.selectedProperty.addListener((selected: java.lang.Boolean) => {
-    if (toggle) {
-      v() = c.toG(selected)
-    } else {
-      if (selected) {
-        v() = c.toG(selected)
-      } else {
-        val newV = v()
-        //This will be called from Swing Thread
-        replaceUpdate { display(newV) } 
-      }
-    }
+  btn.setOnAction((e: ActionEvent) => {
+    c.toOption(v()).foreach(b => v() = c.toG(!toggle || !b))
   })
   
   val view = View{
@@ -75,11 +66,9 @@ class SlideCheck[G](v:VarBox[G,_], c:GConverter[G, Boolean], toggle:Boolean) ext
     c.toOption(newV) match {  
       case None => {
         btn.setDisable(true)
-        btn.setSelected(false)
       }
       case Some(b) => {
         btn.setDisable(false)
-        btn.setSelected(b)
         pt.setRate(if (b) 1 else -1)
         pt.play
       }
