@@ -106,7 +106,7 @@ class SlideCheck[G](v:VarBox[G,_], c:GConverter[G, Boolean], toggle:Boolean) ext
 //    buttons.add(r, 1, 0)
     buttons.getChildren.addAll(l, r)
 
-        val cover = new StackPane
+    val cover = new StackPane
     cover.setId("SlideCover")
     cover.setMouseTransparent(true)
 
@@ -116,6 +116,11 @@ class SlideCheck[G](v:VarBox[G,_], c:GConverter[G, Boolean], toggle:Boolean) ext
     cover.prefHeightProperty.bind(h);
     cover.minHeightProperty.bind(h);
     cover.maxHeightProperty.bind(h);
+
+    val grip = new StackPane
+    grip.setId("SlideGrip")
+    grip.setMouseTransparent(true)
+    cover.getChildren.addAll(grip)
     
     val path = new Path()
     val s = new MoveTo(4,0)

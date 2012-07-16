@@ -15,7 +15,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.2 r9819"
-   sodipodi:docname="Controls.svg"
+   sodipodi:docname="Shapes2.svg"
    inkscape:export-filename="/Users/trepidacious/Documents/boxes/boxes/src/boxes/swing/Text.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90"
@@ -1294,5 +1294,9 @@
        id="path5133"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="ccccccc" />
+    <path
+       style="fill:#000000;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1"
+       d="M 3 14 L 3 26 L 4 26 L 4 14 L 3 14 z M 7 14 L 7 26 L 8 26 L 8 14 L 7 14 z M 11 14 L 11 26 L 12 26 L 12 14 L 11 14 z "
+       id="path5822" />
   </g>
 </svg>

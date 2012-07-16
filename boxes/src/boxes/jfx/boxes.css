@@ -245,6 +245,12 @@ Number spinner
     -fx-effect: dropshadow(three-pass-box , rgba(0, 0, 0, 0.4), 6, 0.0 , 0, 0);
 }
 
+#SlideGrip {
+	-fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-shape: "M 3 14 L 3 26 L 4 26 L 4 14 L 3 14 z M 7 14 L 7 26 L 8 26 L 8 14 L 7 14 z M 11 14 L 11 26 L 12 26 L 12 14 L 11 14 z";
+    -fx-scale-shape: false;
+}
+
 /*
 .slide-check:hover {
 }
