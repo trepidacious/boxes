@@ -100,8 +100,8 @@ class JavaFXDemo extends Application {
     grid.add(dis, 3, 2)
 
     grid.add(SlideCheck(x, false).node, 0, 3)
-    grid.add(SlideCheck(y, false).node, 1, 3)
-    grid.add(SlideCheck(z, false).node, 2, 3)
+    grid.add(SlideCheck(y, false).node, 0, 4)
+    grid.add(SlideCheck(z, false).node, 0, 5)
     grid.add(SlideCheck(b, true).node, 3, 3)
 
     primaryStage.show()
