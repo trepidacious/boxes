@@ -70,8 +70,8 @@ class JavaFXDemo extends Application {
     grid.add(LabelView(bString).node, 4, 0)
     grid.add(BooleanView(b).node, 5, 0)
     
-    val x = Var(true)
-    val y = Var(false)
+    val x = Var(false)
+    val y = Var(true)
     val z = Var(false)
     RadioReaction(x, y, z)
 
@@ -92,13 +92,18 @@ class JavaFXDemo extends Application {
     
     grid.add(NumberSpinnerView(p).node, 0, 2)
     grid.add(NumberSpinnerView(q).node, 1, 2)
-    grid.add(SlideCheck(x, true).node, 2, 2)
+
 
     val dis = new Button()
     dis.setText("Disabled")
     dis.disableProperty.set(true)
     grid.add(dis, 3, 2)
-    
+
+    grid.add(SlideCheck(x, false).node, 0, 3)
+    grid.add(SlideCheck(y, false).node, 1, 3)
+    grid.add(SlideCheck(z, false).node, 2, 3)
+    grid.add(SlideCheck(b, true).node, 3, 3)
+
     primaryStage.show()
   }
 }

@@ -213,7 +213,7 @@ Number spinner
 */
 
 #SlideCheck {
-	-fx-background-color: -fx-shadow-highlight-color, -fx-outer-border, -fx-grey-background-color, -fx-green-background-color;
+ 	-fx-background-color: -fx-shadow-highlight-color, -fx-outer-border, -fx-grey-background-color, -fx-green-background-color;
 	-fx-background-insets: 0 0 -1 0, 0 0 0 0, 1 1 1 1, 1 36 1 1;
     -fx-background-radius: 3,3,2;
 }
@@ -229,7 +229,6 @@ Number spinner
     -fx-shape: "M 2,21 8,27 18,17 15,14 8,21 5,18 z";
     -fx-scale-shape: false;
     -fx-effect: dropshadow(two-pass-box , rgba(255, 255, 255, 0.3), 1, 0.0 , 0, 1);
-	
 }
 
 #SlideOff {
@@ -243,6 +242,7 @@ Number spinner
 	-fx-background-color: -fx-outer-border, -fx-button-color;
 	-fx-background-insets: 0 0 0 0, 1 1 1 1;
     -fx-background-radius: 3,2;
+    -fx-effect: dropshadow(three-pass-box , rgba(0, 0, 0, 0.4), 6, 0.0 , 0, 0);
 }
 
 /*
