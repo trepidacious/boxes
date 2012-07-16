@@ -30,7 +30,7 @@
 	-fx-grey-background-color: linear-gradient(from 0% -5 to 0% 10, derive(#cdd1ea, -20%) 0%, derive(#ffffff, -20%) 100%);
 	-fx-green-background-color: linear-gradient(from 0% -5 to 0% 10, derive(#7aab81, -20%) 0%, #7aab81 100%);
 
-    -fx-focus-color: #7790a1;
+    -fx-focus-color: #7790f1;
     -fx-accent: -fx-focus-color;
     
     -fx-chocolate: #736a6a;
@@ -232,7 +232,7 @@ Number spinner
 }
 
 #SlideOff {
-	-fx-background-color: white;
+	-fx-background-color: rgb(100, 100, 100);
     -fx-shape: "m 2,24 3,3 4,-4 4,4 3,-3 -4,-4 4,-4 -3,-3 -4,4 -4,-4 -3,3 4,4 z";
     -fx-scale-shape: false;
     -fx-effect: dropshadow(two-pass-box , rgba(255, 255, 255, 0.3), 1, 0.0 , 0, 1);	
@@ -240,7 +240,7 @@ Number spinner
 
 #SlideCover {
 	-fx-background-color: -fx-outer-border, -fx-button-color;
-	-fx-background-insets: 0 0 0 0, 1 1 1 1;
+	-fx-background-insets: 1 0 1 0, 1 1 1 1;
     -fx-background-radius: 3,2;
     -fx-effect: dropshadow(three-pass-box , rgba(0, 0, 0, 0.4), 6, 0.0 , 0, 0);
 }
