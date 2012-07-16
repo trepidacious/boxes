@@ -37,14 +37,17 @@ import javafx.scene.shape.Circle
 object SlideCheck {
   def apply(v:VarBox[Boolean,_], toggle:Boolean = true) = new SlideCheck(v, new TConverter[Boolean], toggle).asInstanceOf[JFXView]
   def option(v:VarBox[Option[Boolean],_], toggle:Boolean = true) = new SlideCheck(v,new OptionTConverter[Boolean], toggle).asInstanceOf[JFXView]
+  
+  val width = 72
+  val slideTime = Duration.seconds(0.05)
 }
 
 class SlideCheck[G](v:VarBox[G,_], c:GConverter[G, Boolean], toggle:Boolean) extends JFXView {
 
   val btn = new ToggleButton
   btn.setId("SlideCheck")
-  btn.setMinWidth(72)
   btn.setMaxHeight(10000)
+  btn.setMaxWidth(10000)
   
   btn.selectedProperty.addListener((selected: java.lang.Boolean) => {
     if (toggle) {
@@ -69,7 +72,6 @@ class SlideCheck[G](v:VarBox[G,_], c:GConverter[G, Boolean], toggle:Boolean) ext
 
   //Update display if necessary
   private def display(newV:G) {
-    println("display")
     c.toOption(newV) match {  
       case None => {
         btn.setDisable(true)
@@ -87,6 +89,10 @@ class SlideCheck[G](v:VarBox[G,_], c:GConverter[G, Boolean], toggle:Boolean) ext
   val node = new StackPane() {
     val view = this
     
+    setMinWidth(SlideCheck.width)
+    setMaxWidth(SlideCheck.width)
+    setPrefWidth(SlideCheck.width)
+
     val firstW = widthProperty().divide(2)
     val secondW = widthProperty().subtract(firstW)
     val coverW = widthProperty().divide(2).add(4)
@@ -131,7 +137,7 @@ class SlideCheck[G](v:VarBox[G,_], c:GConverter[G, Boolean], toggle:Boolean) ext
     e.xProperty.bind(firstW)
     path.getElements().add(e)
     
-    pt.setDuration(Duration.seconds(0.5))
+    pt.setDuration(SlideCheck.slideTime)
     pt.setPath(path)
     pt.setNode(cover)
 
