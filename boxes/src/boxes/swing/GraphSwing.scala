@@ -729,7 +729,6 @@ class GraphSwingBGView(graph:Ref[_ <: Graph]) extends SwingView {
   }
 
   def buildSpaces = {
-
     val size = componentSize()
     val area = graph().dataArea()
     val borders = graph().borders()
