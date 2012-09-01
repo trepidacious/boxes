@@ -19,5 +19,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Program Files/Java/jdk1.7.0_06/jre/lib/jfxrt.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

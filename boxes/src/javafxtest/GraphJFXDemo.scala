@@ -18,6 +18,8 @@ import javafx.stage.Stage
 import javafx.scene.layout.GridPane
 import javafx.geometry.Pos
 import javafx.geometry.Insets
+import javafx.scene.Scene
+import boxes.jfx.JFXView
 
 class GraphJFXDemo extends Application {
   
@@ -164,6 +166,11 @@ class GraphJFXDemo extends Application {
     val indices = ListIndices(sines, defaultSelection = DefaultSelection.AllIndices)
 
     grid.add(buildGraphPanel(sines, indices), 0, 0)
+    
+    val scene = new Scene(grid, 300, 275)
+    scene.getStylesheets.clear()
+    scene.getStylesheets.add(JFXView.css)
+    primaryStage.setScene(scene)
     
     primaryStage.show()
   }

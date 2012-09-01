@@ -50,7 +50,7 @@ object JFXView {
 
   val defaultDecimalFormat = new DecimalFormat("0.#")
   val viewToUpdates = new mutable.WeakHashMap[Any, mutable.ListBuffer[() => Unit]]()
-  val responder = new CoalescingResponder(respond)
+  val responder = new CoalescingResponder(respond, 5, 10)
   val lock = new Object()
   
   def format(d:Double) = defaultDecimalFormat.format(d)

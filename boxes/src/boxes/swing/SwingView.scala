@@ -36,6 +36,7 @@ object SwingView {
 
   val defaultDecimalFormat = new DecimalFormat("0.#")
   val viewToUpdates = new mutable.WeakHashMap[Any, mutable.ListBuffer[() => Unit]]()
+  //TODO consider using smaller intervals than default. 5, 10 makes graph use very smooth on a good PC. 
   val responder = new CoalescingResponder(respond)
   val lock = new Object()
   

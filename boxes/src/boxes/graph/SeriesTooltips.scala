@@ -46,9 +46,10 @@ class SeriesTooltips[K](enabled:Box[Boolean, _], series:Box[List[Series[K]], _],
 
   def paint() = {
     val e = enabled()
+    val tp = toPaint()
     (canvas:GraphCanvas) => {
       if (e) {
-        toPaint().foreach(pair => renderer.paint(canvas, pair._1, pair._2))
+        tp.foreach(pair => renderer.paint(canvas, pair._1, pair._2))
       }
     }
   }

@@ -39,20 +39,16 @@ import boxes.View
 import boxes.Box
 import boxes.graph.GraphBasic
 import boxes.graph.ColorSeriesBySelection
+import javafx.scene.canvas.Canvas
+import boxes.graph.GraphSpaces
 
-class GraphCanvasNode(val node: Group, val spaces:GraphSpaces) extends GraphCanvas {
+class GraphCanvasJFX(val canvas: Canvas, val spaces:GraphSpaces) extends GraphCanvas {
 
-//  val defaultClip = g.getClip
-//  val defaultFont = g.getFont
+  val gc = canvas.getGraphicsContext2D;
 
   var c = new javafx.scene.paint.Color(0.0, 0.0, 0.0, 1.0)
   var w = 1d
   var fs = 10d
-
-  private def add(n: Node) {
-    n.setMouseTransparent(true);
-    node.getChildren.add(n)
-  }
   
   def color_=(color:Color) {
     c = new javafx.scene.paint.Color(color.getRed.asInstanceOf[Double]/255d, color.getGreen.asInstanceOf[Double]/255d, color.getBlue.asInstanceOf[Double]/255d, color.getAlpha.asInstanceOf[Double]/255d)
@@ -75,9 +71,10 @@ class GraphCanvasNode(val node: Group, val spaces:GraphSpaces) extends GraphCanv
 
   def line(a:Vec2, b:Vec2) {
     val l = new Line(a.x, a.y, b.x, b.y)
-    l.setFill(c)
-    l.setStrokeWidth(w)
-    add(l)
+    gc.setFill(c)
+    gc.setLineWidth(w)
+    gc.moveTo(a.x, a.y)
+    gc.lineTo(b.x, b.y)
   }
 
   //Convert from a pair of vecs that may draw a "backwards"
@@ -124,16 +121,15 @@ class GraphCanvasNode(val node: Group, val spaces:GraphSpaces) extends GraphCanv
 
   def roundRect(origin: Vec2, size: Vec2, fill: Boolean, radius: Double) {
     val df = toDumbFormat(origin, size)
-    val r = new Rectangle(df._1, df._2, df._3, df._4)
-    r.setArcHeight(radius)
-    r.setArcWidth(radius)
+
     if (fill) {
-      r.setFill(c)
+      gc.setFill(c)
+      gc.fillRoundRect(df._1, df._2, df._3, df._4, radius, radius)
     } else {
-      r.setStroke(c)
-      r.setStrokeWidth(w)
+      gc.setStroke(c)
+      gc.setLineWidth(w)
+      gc.strokeRoundRect(df._1, df._2, df._3, df._4, radius, radius)
     }
-    add(r)
   }
 
   def roundRect(area: Area, fill: Boolean, radius: Double) {
@@ -164,11 +160,14 @@ class GraphCanvasNode(val node: Group, val spaces:GraphSpaces) extends GraphCanv
   }
 
   def path(path:List[Vec2]) {
-    val p = new Path
-    p.getElements.add(new MoveTo(path.head.x, path.head.y))
-    path.tail.foreach(v => p.getElements.add(new LineTo(v.x, v.y)))
-    p.setStrokeWidth(w)
-    p.setStroke(c)
+    gc.setLineWidth(w)
+    gc.setStroke(c)
+
+    gc.beginPath
+    gc.moveTo(path.head.x, path.head.y)
+    path.tail.foreach(v => gc.lineTo(v.x, v.y))
+    
+    gc.stroke()
   }
 
   def dataPath(dataPath:List[Vec2]) {
@@ -185,14 +184,10 @@ class GraphCanvasNode(val node: Group, val spaces:GraphSpaces) extends GraphCanv
 
   def string(s:String, v:Vec2, align:Vec2 = Vec2.zero, rotateQuadrants:Int = 0) {
 
-    val t = new Text
-    t.setFont(new Font(fs))
-    t.setText(s)
-    
-    t.setTranslateX(v.x)
-    t.setTranslateY(v.y)
-    
-    add(t)
+    gc.setStroke(c)
+    gc.setFill(c)
+    gc.setFont(new Font(fs))
+    gc.fillText(s, v.x, v.y)
     
     //TODO rotation, alignment
     
@@ -268,25 +263,24 @@ object GraphJFXView {
 }
 
 
-//TODO remove shared code from GraphSwingView and GraphSwingBGView
 class GraphJFXView(graph:Ref[_ <: Graph]) extends JFXView {
 
-  val componentSize = Var(Vec2(10, 10))
+  val componentSize = Var(Vec2(500, 500))
 
   val node = new StackPane()
-  val mainNode = new StackPane()
-  mainNode.setMouseTransparent(true)
-  val overlayNode = new StackPane()
-  overlayNode.setMouseTransparent(true)
-  node.getChildren.addAll(mainNode, overlayNode)
+  val mainCanvas = new Canvas(500, 500)
+  mainCanvas.setMouseTransparent(true)
+  val overlayCanvas = new Canvas(500, 500)
+  overlayCanvas.setMouseTransparent(true)
+  node.getChildren.addAll(mainCanvas, overlayCanvas)
   
-  val updateSize = new ChangeListener[Number](){
-    def changed(observable: ObservableValue[_ <: Number] , oldValue: Number, newValue: Number) {
-      componentSize() = Vec2(node.getWidth, node.getHeight)
-    }
-  }
-  node.widthProperty.addListener(updateSize)
-  node.heightProperty.addListener(updateSize)
+//  val updateSize = new ChangeListener[Number](){
+//    def changed(observable: ObservableValue[_ <: Number] , oldValue: Number, newValue: Number) {
+//      componentSize() = Vec2(node.getWidth, node.getHeight)
+//    }
+//  }
+//  node.widthProperty.addListener(updateSize)
+//  node.heightProperty.addListener(updateSize)
   
   def buildSpaces = {
 
@@ -340,34 +334,28 @@ class GraphJFXView(graph:Ref[_ <: Graph]) extends JFXView {
   node.setOnMouseClicked((r: MouseEvent) => fireMouse(r, CLICK))
   node.setOnMouseEntered((r: MouseEvent) => fireMouse(r, ENTER))
   node.setOnMouseExited((r: MouseEvent) => fireMouse(r, EXIT))
-  
-  val mainView = View {
-    val newNode = drawBuffer(graph().layers())
-    replaceUpdate {
-      mainNode.getChildren.setAll(newNode)
-    }
-  }
 
-  val overView = View {
-    val newNode = drawBuffer(graph().overlayers())
-    replaceUpdate {
-      overlayNode.getChildren.setAll(newNode)
-    }
-  }
-
-  def drawBuffer(layers:List[GraphLayer]) = {
+  val view = View {
     val spaces = buildSpaces
-    val newNode = new Group()
+    val overlayPaints = graph().overlayers().map(_.paint)
+    val mainPaints = graph().layers().map(_.paint)
+    replaceUpdate {
+      drawLayersToCanvas(overlayPaints, overlayCanvas, spaces)
+      drawLayersToCanvas(mainPaints, mainCanvas, spaces)
+    }
+  }
 
-    //Each layer paints on a fresh canvas, to avoid side effects from one affecting the next
-    layers.foreach(layer => {
-      val paint = layer.paint()
+  def drawLayersToCanvas(paints:List[GraphCanvas => Unit], canvas: Canvas, spaces: GraphSpaces) = {
+    canvas.getGraphicsContext2D.clearRect(0, 0, 500, 500)
+    val gcjfx = new GraphCanvasJFX(canvas, spaces)
+    gcjfx.color = Color.BLACK
+    gcjfx.line(Vec2(0,0), Vec2(100,100))
+
+    paints.foreach(paint => {
       Box.withoutReading {
-        paint.apply(new GraphCanvasNode(newNode, spaces))
+        paint.apply(gcjfx)
       }
     })
-
-    newNode
   }
 }
 
