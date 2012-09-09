@@ -12,9 +12,6 @@ case class Cached(ref:Int) extends CacheResult
 case class New(id:Int) extends CacheResult
 
 trait DataSource {
-//  def get():Int
-//  def get(bytes:Array[Byte]):Int
-//  def get(bytes:Array[Byte], offset:Int, length:Int):Int
 
   /**
    * Store something in the cache.
@@ -28,7 +25,9 @@ trait DataSource {
 
   /**
    * Retrieve a thing cached by a previous
-   * codec with a given id.
+   * codec with a given id. The ref parameter
+   * is the id of the object, and is presumably
+   * present in the decoded data from the source.
    */
   def retrieveCached(ref:Int):Any
 
@@ -90,13 +89,22 @@ trait DataSource {
  * Output of the most basic data types, whose representation
  * is different between different basic file types. For example,
  * XML will use a standard string representation for Ints, whereas
- * a binary format will
+ * a binary format will use a particular binary representation
  */
 trait DataTarget {
-//  def put(i:Int)
-//  def put(bytes:Array[Byte])
-//  def put(bytes:Array[Byte], offset:Int, length:Int)
 
+  /**
+   * Try to cache a thing. The result will tell us whether the thing
+   * is already cached:
+   * 
+   *   If already cached, the CacheResult is Cached(ref), where the
+   *   supplied ref can be written out in place of the object. This
+   *   refers back to the previous instance with the matching id.
+   *  
+   *   If NOT already cached, the CacheResult is New(id), where the
+   *   id should be written out with the object, so that it can be
+   *   referenced by future refs.
+   */
   def cache(thing:Any):CacheResult
 
   def putBoolean(b:Boolean)
@@ -108,9 +116,11 @@ trait DataTarget {
   def putFloat(f:Float)
   def putDouble(d:Double)
   def putUTF(s:String)
+    
   def openTag(s:String)
   def openClassTag(c:Class[_], id:Option[Int]=None, ref:Option[Int]=None)
   def closeTag()
+  
   def flush()
   def close()
 }
