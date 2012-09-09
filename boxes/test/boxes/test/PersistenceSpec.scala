@@ -19,6 +19,12 @@ import org.scalatest.WordSpec
 import scala.collection.Map
 import scala.io.Source
 
+object PersistenceSpec {
+  def main(args: Array[String]) {
+    (new PersistenceSpec).execute()
+  }
+}
+
 class Person extends Node {
   val name = Var("name")
   val age = Var(32)
@@ -193,21 +199,18 @@ class PersistenceSpec extends WordSpec {
       assert(s3.b() === false)
     }
   }
+  
 
   "XMLDataSource and XMLDataTarget" should {
     "encode and decode an empty String" in {
       val s = new StringWriter()
       val target = new XMLDataTarget(s, new ClassAliases)
-      target.openClassTag(classOf[String])
       target.putUTF("")
-      target.closeTag
 
       val xml = s.toString
       val source = new XMLDataSource(Source.fromString(xml), new ClassAliases)
 
-      source.assertOpenClassTag(ClassTag(classOf[String]))
       val emptyString = source.getUTF
-      source.getCloseTag
 
       assert(emptyString === "")
     }

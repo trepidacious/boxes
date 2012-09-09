@@ -17,24 +17,18 @@ trait CodecWithClass[T] extends Codec[T]{
   def clazz():Class[_]
 }
 
+//import ValCodecs._
+//object ValCodec {
+//  def apply[T]()(implicit codec:CodecWithClass[T]) = codec
+//}
+
 class CodecByClass extends Codec[Any] {
 
   private val root = new CodecNode(AnyCodec, classOf[Any])
   private val codecs = mutable.Set[Codec[_]]()
 
-  //Common default codecs
 
   {
-    add(new ValCodec[Int](ValHandlers.IntHandler))
-    add(new ValCodec[Short](ValHandlers.ShortHandler))
-    add(new ValCodec[Byte](ValHandlers.ByteHandler))
-    add(new ValCodec[Long](ValHandlers.LongHandler))
-    add(new ValCodec[Float](ValHandlers.FloatHandler))
-    add(new ValCodec[Double](ValHandlers.DoubleHandler))
-    add(new ValCodec[Char](ValHandlers.CharHandler))
-    add(new ValCodec[Boolean](ValHandlers.BooleanHandler))
-    add(new ValCodec[String](ValHandlers.StringHandler))
-
     //FIXME reinstate this shorter version if I ever work out why implicits
     //aren't working
 //    add(ValCodec[Int])
@@ -46,6 +40,17 @@ class CodecByClass extends Codec[Any] {
 //    add(ValCodec[Char])
 //    add(ValCodec[Boolean])
 //    add(ValCodec[String])
+
+    //Common default codecs
+    add(ValCodecs.IntCodec)
+    add(ValCodecs.ShortCodec)
+    add(ValCodecs.ByteCodec)
+    add(ValCodecs.LongCodec)
+    add(ValCodecs.FloatCodec)
+    add(ValCodecs.DoubleCodec)
+    add(ValCodecs.CharCodec)
+    add(ValCodecs.BooleanCodec)
+    add(ValCodecs.StringCodec)
 
 
     add(new ListCodec(this), classOf[List[_]])
@@ -264,21 +269,56 @@ class NodeCodec(delegate:Codec[Any]) extends Codec[Node] {
   }
 }
 
-object ValCodec {
-  def apply[T]()(implicit handler:ValHandler[T]) = new ValCodec[T](handler)
+object ValCodecs {
+  implicit object BooleanCodec extends CodecWithClass[Boolean] {
+    override def clazz = classOf[java.lang.Boolean]
+    override def code(t : Boolean, target : DataTarget) = target.putBoolean(t)
+    override def decode(source : DataSource) = source.getBoolean
+  }
+  implicit object IntCodec extends CodecWithClass[Int] {
+    override def clazz = classOf[java.lang.Integer]
+    override def code(t : Int, target : DataTarget) = target.putInt(t)
+    override def decode(source : DataSource) = source.getInt
+  }
+  implicit object ShortCodec extends CodecWithClass[Short] {
+    override def clazz = classOf[java.lang.Short]
+    override def code(t : Short, target : DataTarget) = target.putShort(t)
+    override def decode(source : DataSource) = source.getShort
+  }
+  implicit object ByteCodec extends CodecWithClass[Byte] {
+    override def clazz = classOf[java.lang.Byte]
+    override def code(t : Byte, target : DataTarget) = target.putByte(t)
+    override def decode(source : DataSource) = source.getByte
+  }
+  implicit object LongCodec extends CodecWithClass[Long] {
+    override def clazz = classOf[java.lang.Long]
+    override def code(t : Long, target : DataTarget) = target.putLong(t)
+    override def decode(source : DataSource) = source.getLong
+  }
+  implicit object FloatCodec extends CodecWithClass[Float] {
+    override def clazz = classOf[java.lang.Float]
+    override def code(t : Float, target : DataTarget) = target.putFloat(t)
+    override def decode(source : DataSource) = source.getFloat
+  }
+  implicit object DoubleCodec extends CodecWithClass[Double] {
+    override def clazz = classOf[java.lang.Double]
+    override def code(t : Double, target : DataTarget) = target.putDouble(t)
+    override def decode(source : DataSource) = source.getDouble
+  }
+  implicit object CharCodec extends CodecWithClass[Char] {
+    override def clazz = classOf[java.lang.Character]
+    override def code(t : Char, target : DataTarget) = target.putChar(t)
+    override def decode(source : DataSource) = source.getChar
+  }
+  implicit object StringCodec extends CodecWithClass[String] {
+    override def clazz = classOf[java.lang.String]
+    override def code(t : String, target : DataTarget) = target.putUTF(t)
+    override def decode(source : DataSource) = source.getUTF
+  }
+
 }
 
-class ValCodec[T](handler:ValHandler[T]) extends CodecWithClass[T] {
-  override def decode(source : DataSource) = {
-    source.assertOpenClassTag(ClassTag(handler.clazz))
-    val t = handler.get(source)
-    source.getCloseTag
-    t
-  }
-  override def code(t : T, target : DataTarget) = {
-    target.openClassTag(handler.clazz)
-    handler.put(target, t)
-    target.closeTag
-  }
-  override def clazz() = handler.clazz
-}
+
+
+
+

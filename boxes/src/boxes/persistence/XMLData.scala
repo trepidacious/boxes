@@ -5,6 +5,7 @@ import scala.io.Source
 import collection._
 import xml.Node
 import java.io.{OutputStreamWriter, InputStream, Writer, OutputStream}
+import boxes.persistence.ValCodecs._
 
 class XMLDataSource(s:Source, aliases:ClassAliases) extends DataSource {
 
@@ -72,15 +73,24 @@ class XMLDataSource(s:Source, aliases:ClassAliases) extends DataSource {
     }
   }
 
-  override def getBoolean() = getText.trim.toBoolean
-  override def getByte() = getText.trim.toByte
-  override def getShort() = getText.trim.toShort
-  override def getChar() = getText.trim.toCharArray.apply(0)
-  override def getInt() = getText.trim.toInt
-  override def getLong() = getText.trim.toLong
-  override def getFloat() = getText.trim.toFloat
-  override def getDouble() = getText.trim.toDouble
-  override def getUTF():String = getText
+  //Might seem odd to use codec, but we are just looking up the class to use for our "internal"
+  //tag
+  private def getPrimitive[P](c: (String)=>P)(implicit codec:CodecWithClass[P]):P = {
+    assertOpenClassTag(ClassTag(codec.clazz))
+    val t = c(getText)
+    getCloseTag
+    t
+  }
+  
+  override def getBoolean() = getPrimitive(_.trim.toBoolean)
+  override def getByte() = getPrimitive(_.trim.toByte)
+  override def getShort() = getPrimitive(_.trim.toShort)
+  override def getChar() = getPrimitive(_.trim.toCharArray.apply(0))
+  override def getInt() = getPrimitive(_.trim.toInt)
+  override def getLong() = getPrimitive(_.trim.toLong)
+  override def getFloat() = getPrimitive(_.trim.toFloat)
+  override def getDouble() = getPrimitive(_.trim.toDouble)
+  override def getUTF():String = getPrimitive((s)=>s)
 
   override def close() = {
     cache.clear
@@ -95,6 +105,7 @@ class XMLDataSource(s:Source, aliases:ClassAliases) extends DataSource {
   }
 
   override def getOpenTag(consume:Boolean) = {
+    //TODO check for prohibited tag names, the names of primitive types used exclusively to tag primitives "internally"
     getNextEvent(consume) match {
       case start:EvElemStart => Tag(start.label, intAttr(start, "id"), intAttr(start, "ref"))
       case wrong:Any => throw new RuntimeException("Next tag is not an open tag, it is " + wrong)
@@ -102,6 +113,7 @@ class XMLDataSource(s:Source, aliases:ClassAliases) extends DataSource {
   }
 
   override def getOpenClassTag(consume:Boolean):ClassTag = {
+    //TODO check for prohibited tag names, the names of primitive types used exclusively to tag primitives "internally"
     val ot = getOpenTag(consume)
     ClassTag(aliases.forAlias(ot.text), ot.id, ot.ref)
   }
@@ -137,17 +149,6 @@ class XMLDataTarget(writer:Writer, aliases:ClassAliases) extends DataTarget {
   private val cache = mutable.Map[Any, Int]()
   private var nextId = 0
 
-  private val condensedClasses = Set[Class[_]](
-    classOf[java.lang.Long],
-    classOf[java.lang.Integer],
-    classOf[java.lang.Short],
-    classOf[java.lang.Byte],
-    classOf[java.lang.Boolean],
-    classOf[java.lang.Double],
-    classOf[java.lang.Float],
-    classOf[java.lang.String]
-  )
-
   override def cache(thing:Any) = {
     cache.get(thing) match {
       case None => {
@@ -169,25 +170,30 @@ class XMLDataTarget(writer:Writer, aliases:ClassAliases) extends DataTarget {
     writer.write(s)
   }
 
-  //No tab or newline for primitives. This is particularly important
-  //for strings, we want the tags around the string value
-  //to contain only the string value itself, no extra whitespace.
-  def putBoolean(b:Boolean) =   print(""+b)
-  def putByte(i:Byte) =         print(""+i)
-  def putShort(i:Short) =       print(""+i)
-  def putChar(i:Char) =         print(""+i)
-  def putInt(i:Int) =           print(""+i)
-  def putLong(l:Long) =         print(""+l)
-  def putFloat(f:Float) =       print(""+f)
-  def putDouble(d:Double) =     print(""+d)
-  def putUTF(s:String) =        print(s)
+  //Might seem odd to use codec, but we are just looking up the class to use for our "internal"
+  //tag
+  private def putTaggedPrimitive[P](p:P)(implicit codec:CodecWithClass[P]) {
+    openClassTag(codec.clazz, None, None, true)
+    print("" + p)
+    closeTag()
+  }
+  
+  def putBoolean(b:Boolean) =   putTaggedPrimitive(b)
+  def putByte(i:Byte) =         putTaggedPrimitive(i)
+  def putShort(i:Short) =       putTaggedPrimitive(i)
+  def putChar(i:Char) =         putTaggedPrimitive(i)
+  def putInt(i:Int) =           putTaggedPrimitive(i)
+  def putLong(l:Long) =         putTaggedPrimitive(l)
+  def putFloat(f:Float) =       putTaggedPrimitive(f)
+  def putDouble(d:Double) =     putTaggedPrimitive(d)
+  def putUTF(s:String) =        putTaggedPrimitive(s)
 
   def openTag(s:String) = {
     printWithFormatting("<" + s + ">")
     tagStack.append((s, false))
   }
 
-  def openClassTag(c:Class[_], id:Option[Int], ref:Option[Int]) = {
+  def openClassTag(c:Class[_], id:Option[Int], ref:Option[Int], condensed:Boolean) = {
     var label = aliases.forClass(c)
     var s = label
 
@@ -195,7 +201,7 @@ class XMLDataTarget(writer:Writer, aliases:ClassAliases) extends DataTarget {
     ref.foreach(ref => s = s + " ref='" + ref + "'")
 
     //When opening a condensed class tag, don't print a newline
-    if (condensedClasses.contains(c)) {
+    if (condensed) {
       printWithFormatting("<" + s + ">", false)
       tagStack.append((label, true))
     } else {
@@ -203,6 +209,8 @@ class XMLDataTarget(writer:Writer, aliases:ClassAliases) extends DataTarget {
       tagStack.append((label, false))
     }
   }
+  
+  def openClassTag(c:Class[_], id:Option[Int], ref:Option[Int]) = openClassTag(c, id, ref, false)
 
   def closeTag() = {
     val tag = tagStack.remove(tagStack.size-1)
