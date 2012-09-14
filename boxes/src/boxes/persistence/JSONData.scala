@@ -8,6 +8,9 @@ import boxes.Var
 import boxes.list.ListVar
 import boxes.Node
 import java.io.StringWriter
+import boxes.persistence.json.JsonParser._
+import boxes.persistence.json.JsonParser
+import scala.annotation.tailrec
 
 class Person extends Node {
   val name = Var("name")
@@ -25,6 +28,7 @@ object JSONData {
   def main(args: Array[String]) {
     
     val p = new Person
+    p.nicknames.insert(0, "Mr. Person")
     
     val encode = new CodecByClass()
 
@@ -41,6 +45,17 @@ object JSONData {
     encode.code(p, xmlTarget)
     println(xml.toString)
 
+    val parser = JsonParser(json.toString)
+    
+    @tailrec
+	def printNext(): Unit = {
+	  val t = parser.nextToken
+	  println(t)
+	  if (t != JsonParser.End) printNext()
+	}
+	
+    printNext()
+    
   }
 }
 
@@ -61,15 +76,15 @@ class JSONDataTarget(writer:Writer, aliases:ClassAliases) extends DataTarget {
   private def popTag() = tagStack.remove(tagStack.size-1)
   private def peekTag() = if (tagStack.isEmpty) None else Some(tagStack(tagStack.size-1))
   private def fillTag(checkState: Boolean) = {
-    if (tagStack.isEmpty) {
-      if (checkState) {
-        throw new RuntimeException("Tried to fill when no tags open")
-      } 
-    } else {
-      val t = tagStack(tagStack.size - 1)
-      if (t == ClassTagType) throw new RuntimeException("Tried to fill a class tag")
-      tagStack(tagStack.size - 1) = PlainFullTagType
-    }
+//    if (tagStack.isEmpty) {
+//      if (checkState) {
+//        throw new RuntimeException("Tried to fill when no tags open")
+//      } 
+//    } else {
+//      val t = tagStack(tagStack.size - 1)
+//      if (t == ClassTagType) throw new RuntimeException("Tried to fill a class tag")
+//      tagStack(tagStack.size - 1) = PlainFullTagType
+//    }
   }
   
   private val cache = mutable.Map[Any, Int]()
@@ -89,6 +104,11 @@ class JSONDataTarget(writer:Writer, aliases:ClassAliases) extends DataTarget {
 
   private def print(s:String) = {
     writer.write(s)
+  }
+  private def println(s:String) = {
+    writer.write(s)
+    writer.write("\n")
+    Range(0, tagStack.count(_==ClassTagType)).foreach{i=>writer.write("  ")}
   }
 
   private def quoted(s: String) = JSONDataTarget.dq + s + JSONDataTarget.dq;
@@ -110,22 +130,33 @@ class JSONDataTarget(writer:Writer, aliases:ClassAliases) extends DataTarget {
   def putUTF(s:String) =        putPrimitive(quoted(s))
 
   def openTag(s:String) = {
-    print("," + quoted(s) + ":")
+    println(",")
+    print(quoted(s) + ":")
     pushTag(PlainEmptyTagType)
   }
   def openClassTag(c:Class[_], id:Option[Int]=None, ref:Option[Int]=None) {
     val label = aliases.forClass(c)
-    print("{\"_type_\":" + quoted(label))
-    id.foreach(i => print(",\"_id_\":" + i))
-    ref.foreach(i => print(",\"_ref_\":" + i))
     fillTag(false)
     pushTag(ClassTagType)
+    println("{")
+    print("\"_type_\":" + quoted(label))
+    id.foreach(i => {
+    	println(",") 
+    	print("\"_id_\":" + i) 
+    })
+    ref.foreach(i => {
+    	println(",") 
+    	print("\"_ref_\":" + i) 
+    })
   }
   
   def closeTag() = {
     val t = popTag
     t match {
-      case ClassTagType => print("}")
+      case ClassTagType => {
+        println("")
+        print("}") 
+      }
       case PlainEmptyTagType => print("1") //Tags in JSON always need a value, so just use 1
       case PlainFullTagType => 
     }
