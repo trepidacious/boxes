@@ -10,6 +10,8 @@ import boxes.Node
 import boxes.persistence.json.JsonParser._
 import boxes.persistence.json.JsonParser
 import scala.annotation.tailrec
+import java.io.Reader
+import java.io.StringReader
 
 sealed trait Link
 case class LinkRef(id: Int) extends Link	//Link is a reference to another obj
@@ -18,7 +20,7 @@ case object LinkEmpty extends Link		//There is no link
 
 sealed trait Token
 
-case class OpenObj(link: Link, clazz: Class[_]) extends Token
+case class OpenObj(clazz: Class[_], link: Link = LinkEmpty) extends Token
 case object CloseObj extends Token
 
 sealed trait Prim[P] extends Token {
@@ -26,9 +28,6 @@ sealed trait Prim[P] extends Token {
 }
 
 case class BooleanToken(p: Boolean) extends Prim[Boolean] 
-case class ByteToken(p: Byte) extends Prim[Byte] 
-case class ShortToken(p: Short) extends Prim[Short] 
-case class CharToken(p: Char) extends Prim[Char] 
 case class IntToken(p: Int) extends Prim[Int] 
 case class LongToken(p: Long) extends Prim[Long] 
 case class FloatToken(p: Float) extends Prim[Float] 
@@ -36,7 +35,6 @@ case class DoubleToken(p: Double) extends Prim[Double]
 case class StringToken(p: String) extends Prim[String] 
 
 case class OpenField(name: String) extends Token
-case object CloseField extends Token
 
 case object OpenArr extends Token
 case object CloseArr extends Token
@@ -76,7 +74,7 @@ class XMLTokenWriter(writer:Writer, aliases:ClassAliases) extends TokenWriter {
   
   def write(t: Token) {
     t match {
-      case OpenObj(link, clazz) => {        
+      case OpenObj(clazz, link) => {        
         val s = aliases.forClass(clazz);
         val linkS = link match {
           case LinkRef(id) => 	" ref='" + id + "'"
@@ -88,15 +86,12 @@ class XMLTokenWriter(writer:Writer, aliases:ClassAliases) extends TokenWriter {
       }
       case CloseObj => {
         tokens.pop() match {
-          case OpenObj(link, clazz) => print("</" + aliases.forClass(clazz) + ">")
+          case OpenObj(clazz, link) => print("</" + aliases.forClass(clazz) + ">")
           case _ => throw new RuntimeException("Mismatched CloseObj token")
         }        
       }
       
       case BooleanToken(p) 	=> printPrim(p) 
-      case ByteToken(p)  	=> printPrim(p)
-      case ShortToken(p)  	=> printPrim(p)
-      case CharToken(p)  	=> printPrim(p)
       case IntToken(p)  	=> printPrim(p)
       case LongToken(p)  	=> printPrim(p)
       case FloatToken(p)  	=> printPrim(p)
@@ -106,12 +101,6 @@ class XMLTokenWriter(writer:Writer, aliases:ClassAliases) extends TokenWriter {
       case OpenField(name) => {
     	  print("<" + name + ">")
     	  tokens.push(t)
-      }
-      case CloseField => {
-        tokens.pop() match {
-          case OpenField(name) => print("</" + name + ">")
-          case _ => throw new RuntimeException("Mismatched CloseField token")
-        }
       }
       
       case OpenArr => {
@@ -150,11 +139,21 @@ class JSONTokenWriter(writer:Writer, aliases:ClassAliases, pretty: Boolean = fal
     }
   }
   
-  private def printPrim[P](p:P) {
+  private def commaIfNeeded() = {
     if (commaNeeded) {
       print(",")
       println()
     }
+  }
+
+  private def printObjPrim[P](p:P)(implicit codec:CodecWithClass[P]) {
+    commaIfNeeded()
+    //object with _type_ as class alias, _val_ as primitive.
+	print("{\"_val_type_\":" + quoted(aliases.forClass(codec.clazz)) + ", \"_val_\":" + p + "}")
+  }
+  
+  private def printPrim[P](p:P) {
+    commaIfNeeded()
 	print("" + p)
   }
 
@@ -177,11 +176,8 @@ class JSONTokenWriter(writer:Writer, aliases:ClassAliases, pretty: Boolean = fal
   
   def write(t: Token) {
     t match {
-      case OpenObj(link, clazz) => {        
-        if (commaNeeded) {
-          print(",")
-          println()
-        }
+      case OpenObj(clazz, link) => {        
+        commaIfNeeded()
         print("{")
         tokens.push(t)
         val s = "\"_type_\":" + quoted(aliases.forClass(clazz))
@@ -202,34 +198,24 @@ class JSONTokenWriter(writer:Writer, aliases:ClassAliases, pretty: Boolean = fal
         }        
       }
       
+      //First-class primitives - represented directly in JSON
       case BooleanToken(p) 	=> printPrim(p) 
-      case ByteToken(p)  	=> printPrim(p)
-      case ShortToken(p)  	=> printPrim(p)
-      case CharToken(p)  	=> printPrim(p)
       case IntToken(p)  	=> printPrim(p)
-      case LongToken(p)  	=> printPrim(p)
-      case FloatToken(p)  	=> printPrim(p)
       case DoubleToken(p)  	=> printPrim(p)
       case StringToken(p)   => printPrim(quoted(p))
+      
+      //Second-class primitives - represented as objects in JSON
+      case LongToken(p)  	=> printObjPrim(p)
+      case FloatToken(p)  	=> printObjPrim(p)
       
       case OpenField(name) => {
     	  print(",")
     	  println()
     	  print(quoted(name) + ":")
-    	  tokens.push(t)
-      }
-      case CloseField => {
-        tokens.pop() match {
-          case OpenField(name) => {}
-          case _ => throw new RuntimeException("Mismatched CloseField token")
-        }
       }
       
       case OpenArr => {
-        if (commaNeeded) {
-          print(",")
-          println()
-        }
+    	commaIfNeeded()
     	print("[")
     	tokens.push(t)
     	println()
@@ -254,28 +240,139 @@ class JSONTokenWriter(writer:Writer, aliases:ClassAliases, pretty: Boolean = fal
   }
 }
 
+class JSONTokenReader(reader: Reader, aliases: ClassAliases) extends TokenReader {
+  private val parser = JsonParser(reader)
+  
+  private var nextToken: Option[Token] = None
+  
+  def peek = {
+    nextToken.getOrElse{
+      val t = pullToken()
+      nextToken = Some(t)
+      t
+    }
+  }
+  def pull() = {
+    val t = peek
+    if (t != End) nextToken = None
+    t
+  }
+  
+  def assert(t:Token) {
+    val p = pull()
+    if (p != t) throw new RuntimeException("Expected " + t + ", got " + pull)
+  }
+  
+  private def pullClassField() = {
+    val classToken = parser.pull
+	classToken match {
+	  case JsonParser.StringVal(alias) => aliases.forAlias(alias)
+	  case _ => throw new RuntimeException("Unexpected type field value, not a string: " + classToken)
+	} 
+  }
+
+  private def pullInt() = {
+    val token = parser.pull
+	token match {
+	  case JsonParser.IntVal(i) => i
+	  case _ => throw new RuntimeException("Unexpected int field value, not an int: " + token)
+	} 
+  }
+
+  private def pullDouble() = {
+    val token = parser.pull
+	token match {
+	  case JsonParser.DoubleVal(i) => i
+	  case _ => throw new RuntimeException("Unexpected double field value, not a double: " + token)
+	} 
+  }
+
+  private def pullLink() = {
+    val l = parser.peek
+    l match {
+      case JsonParser.FieldStart("_id_") => {
+        parser.pull
+        LinkId(pullInt().intValue)
+      }
+      case JsonParser.FieldStart("_ref_") => {
+        parser.pull
+        LinkRef(pullInt().intValue)
+      }
+      case _ => LinkEmpty
+    } 
+  }
+  
+  private def pullSecondClassPrim[P](clazz: Class[P]) = {
+    val valToken = parser.pull
+    if (valToken != JsonParser.FieldStart("_val_")) throw new RuntimeException("Unexpected val token for second class primitive: " + valToken)
+    
+    val t = if (clazz == LongCodec.clazz) LongToken(pullInt().longValue)
+    else if (clazz == FloatCodec.clazz) FloatToken(pullDouble().floatValue)
+    else throw new RuntimeException("Unexpected second class primitive clazz: " + clazz)
+    
+    val closeToken = parser.pull
+    if (closeToken != JsonParser.CloseObj) throw new RuntimeException("Unexpected close token for second class primitive: " + closeToken)
+
+    t
+  }
+
+  private def pullToken(): Token = {
+    parser.pull match {
+        case JsonParser.OpenObj => {
+          val t = parser.pull
+          t match {
+            case JsonParser.FieldStart("_type_") => {
+              val clazz = pullClassField()
+              val link = pullLink()
+              OpenObj(clazz, link)
+            }
+            case JsonParser.FieldStart("_val_type_") => {
+              val clazz = pullClassField()
+              pullSecondClassPrim(clazz)
+            }
+            case _ => throw new RuntimeException("Unexpected first token in Obj, not a type or valType: " + t)
+          }
+        }
+        case JsonParser.CloseObj => CloseObj
+        case JsonParser.FieldStart(name) => OpenField(name)
+        case JsonParser.End => End
+        case JsonParser.StringVal(value) => StringToken(value)
+        case JsonParser.IntVal(value) => IntToken(value.intValue)
+        case JsonParser.DoubleVal(value) => DoubleToken(value)
+        case JsonParser.BoolVal(value) => BooleanToken(value)
+        case JsonParser.NullVal => throw new RuntimeException("Unexpected null token")
+        case JsonParser.OpenArr => OpenArr
+        case JsonParser.CloseArr => CloseArr
+    }
+  }
+  
+}
+
+
 class Thingy {}
 
-object XMLTokenWriter {
+object Tokens {
   def main(args: Array[String]) {
     
     val stream = List(
-      OpenObj(LinkId(0), classOf[Thingy]),
+      OpenObj(classOf[Thingy], LinkId(0)),
       OpenField("fieldName"),
       IntToken(42),
-      CloseField,
+      OpenField("longField"),
+      LongToken(42),
       OpenField("listFieldName"),
       OpenArr,
       IntToken(42),
+      BooleanToken(false),
+      FloatToken(42),
+      DoubleToken(42),
       IntToken(43),
       IntToken(44),
-      OpenObj(LinkId(1), classOf[Thingy]),
+      OpenObj(classOf[Thingy], LinkId(1)),
       OpenField("fieldName"),
       IntToken(24),
-      CloseField,
       CloseObj,
       CloseArr,
-      CloseField,
       CloseObj,
       End
     )
@@ -292,16 +389,25 @@ object XMLTokenWriter {
     val jsonWriter = new JSONTokenWriter(json, aliases, true)
     stream.foreach(jsonWriter.write(_))
     println(json.toString)
+        
+//    val parser = JsonParser(json.toString)
+//    
+//    @tailrec
+//	def printNext(): Unit = {
+//	  val t = parser.nextToken
+//	  println(t)
+//	  if (t != JsonParser.End) printNext()
+//	}
+//	
+//    printNext()
     
-//    new Parser(new Buffer(new StringReader(json.toString)))
-    
-    val parser = JsonParser(json.toString)
+    val reader = new JSONTokenReader(new StringReader(json.toString), aliases)
     
     @tailrec
 	def printNext(): Unit = {
-	  val t = parser.nextToken
+	  val t = reader.pull
 	  println(t)
-	  if (t != JsonParser.End) printNext()
+	  if (t != End) printNext()
 	}
 	
     printNext()

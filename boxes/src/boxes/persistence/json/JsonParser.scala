@@ -16,6 +16,22 @@ package boxes.persistence.json
  * limitations under the License.
  */
 
+class JsonParser(parser: JsonParser.Parser) {
+  private var nextToken: Option[JsonParser.Token] = None
+  def peek: JsonParser.Token = {
+    nextToken.getOrElse{
+      val t = parser.nextToken
+      nextToken = Some(t)
+      t
+    }
+  }
+  def pull: JsonParser.Token = {
+    val t = peek
+    if (t != JsonParser.End) nextToken = None
+    t
+  }
+}
+
 /** Fast imperative parser.
  */
 object JsonParser {
@@ -38,7 +54,9 @@ object JsonParser {
   case object OpenArr extends Token
   case object CloseArr extends Token
 
-  def apply[A](s: String): Parser = new Parser(new Buffer(new StringReader(s), true))
+  def apply[A](r: Reader): JsonParser = new JsonParser(new Parser(new Buffer(r, true)))
+
+  def apply[A](s: String): JsonParser = apply(new StringReader(s))
 
   private[json] def unquote(string: String): String = 
     unquote(new JsonParser.Buffer(new java.io.StringReader(string), false))
