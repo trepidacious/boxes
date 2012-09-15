@@ -433,68 +433,69 @@ object BoxesDemo {
     println("From Person: " + Node.accessors(new Person()))
   }
 
-  def data() {
-    val s = new StringWriter()
-    val a = new ClassAliases
-    val d = new XMLDataTarget(s, a)
-    d.openTag("Person")
-    d.openTag("Name")
-    d.putUTF("Bob")
-    d.closeTag
-    d.openTag("Address")
-    d.openTag("Street")
-    d.putUTF("One Way Street")
-    d.closeTag
-    d.closeTag
-    d.closeTag
+  //TODO reinstate
+//  def data() {
+//    val s = new StringWriter()
+//    val a = new ClassAliases
+//    val d = new XMLDataTarget(s, a)
+//    d.openTag("Person")
+//    d.openTag("Name")
+//    d.putUTF("Bob")
+//    d.closeTag
+//    d.openTag("Address")
+//    d.openTag("Street")
+//    d.putUTF("One Way Street")
+//    d.closeTag
+//    d.closeTag
+//    d.closeTag
+//
+//    println(s.toString)
+//  }
 
-    println(s.toString)
-  }
-
-  def code() = {
-
-    val io = XMLIO()
-    io.alias(classOf[OptionPerson], "Person")
-
-    val p = new OptionPerson()
-    p.accounts() = Map("current" -> 10, "savings" -> 100, "secretswiss" -> 10000000)
-    p.numbers() = List(10,20,30)
-    p.age() = 100
-    val q = new OptionPerson()
-    q.numbers() = List(1, 4, 9)
-    p.friend() = Some(q)
-    p.spouse() = Some(q)
-    q.name() = "q"
-
-
-    val output = new ByteArrayOutputStream()
-
-    io.code(p, output)
-
-    val s = output.toString("UTF-8")
-
-    println("Start of output, " + output.size + " bytes")
-    println(s)
-    println("End of output")
-
-    s
-  }
-
-  def decode(xml:String) = {
-
-    val input = new ByteArrayInputStream(xml.getBytes("UTF-8"))
-
-    val io = XMLIO()
-    io.alias(classOf[OptionPerson], "Person")
-
-    val p = io.decode(input).asInstanceOf[OptionPerson]
-
-    println(p)
-
-    p.friend().foreach(_.name() = "qe2")
-    println(p)
-
-  }
+//  def code() = {
+//
+//    val io = XMLIO()
+//    io.alias(classOf[OptionPerson], "Person")
+//
+//    val p = new OptionPerson()
+//    p.accounts() = Map("current" -> 10, "savings" -> 100, "secretswiss" -> 10000000)
+//    p.numbers() = List(10,20,30)
+//    p.age() = 100
+//    val q = new OptionPerson()
+//    q.numbers() = List(1, 4, 9)
+//    p.friend() = Some(q)
+//    p.spouse() = Some(q)
+//    q.name() = "q"
+//
+//
+//    val output = new ByteArrayOutputStream()
+//
+//    io.code(p, output)
+//
+//    val s = output.toString("UTF-8")
+//
+//    println("Start of output, " + output.size + " bytes")
+//    println(s)
+//    println("End of output")
+//
+//    s
+//  }
+//
+//  def decode(xml:String) = {
+//
+//    val input = new ByteArrayInputStream(xml.getBytes("UTF-8"))
+//
+//    val io = XMLIO()
+//    io.alias(classOf[OptionPerson], "Person")
+//
+//    val p = io.decode(input).asInstanceOf[OptionPerson]
+//
+//    println(p)
+//
+//    p.friend().foreach(_.name() = "qe2")
+//    println(p)
+//
+//  }
 
   def listPath() {
     class ListNode {

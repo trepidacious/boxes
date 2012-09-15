@@ -4,12 +4,12 @@ import collection._
 import boxes._
 
 /**
-* Codes objects to a DataTarget, and
-* decodes them from a DataSource
+* Writes objects to a TokenWriter, and
+* reads them from a TokenReader
 */
 trait Codec[T] {
-  def decode(target : DataSource) : T
-  def code(t : T, target : DataTarget) : Unit
+  def read(reader : TokenReader) : T
+  def write(t : T, writer : TokenWriter) : Unit
 }
 
 trait CodecWithClass[T] extends Codec[T]{
@@ -17,41 +17,19 @@ trait CodecWithClass[T] extends Codec[T]{
   def clazz():Class[_]
 }
 
-//import ValCodecs._
-//object ValCodec {
-//  def apply[T]()(implicit codec:CodecWithClass[T]) = codec
-//}
-
 class CodecByClass extends Codec[Any] {
 
   private val root = new CodecNode(AnyCodec, classOf[Any])
   private val codecs = mutable.Set[Codec[_]]()
 
-
   {
-    //FIXME reinstate this shorter version if I ever work out why implicits
-    //aren't working
-//    add(ValCodec[Int])
-//    add(ValCodec[Short])
-//    add(ValCodec[Byte])
-//    add(ValCodec[Long])
-//    add(ValCodec[Float])
-//    add(ValCodec[Double])
-//    add(ValCodec[Char])
-//    add(ValCodec[Boolean])
-//    add(ValCodec[String])
-
     //Common default codecs
     add(ValCodecs.IntCodec)
-    add(ValCodecs.ShortCodec)
-    add(ValCodecs.ByteCodec)
     add(ValCodecs.LongCodec)
     add(ValCodecs.FloatCodec)
     add(ValCodecs.DoubleCodec)
-    add(ValCodecs.CharCodec)
     add(ValCodecs.BooleanCodec)
     add(ValCodecs.StringCodec)
-
 
     add(new ListCodec(this), classOf[List[_]])
     add(new MapCodec(this), classOf[Map[_,_]])
@@ -77,15 +55,28 @@ class CodecByClass extends Codec[Any] {
   def get(clazz:Class[_]) = mostSpecific(root, clazz).codec
 
   //Need to look up class from tag, then use appropriate codec
-  override def decode(source : DataSource) = {
-    val c = source.getOpenClassTag(false).clazz
+  override def read(reader : TokenReader) = {
+    val t = reader.peek
+    val c = t match {
+      case OpenObj(clazz, _) => clazz
+      case BooleanToken(p: Boolean) 	=> ValCodecs.BooleanCodec.clazz 
+      case IntToken(p: Int) 			=> ValCodecs.IntCodec.clazz 
+      case LongToken(p: Long) 			=> ValCodecs.LongCodec.clazz 
+      case FloatToken(p: Float) 		=> ValCodecs.FloatCodec.clazz 
+      case DoubleToken(p: Double) 		=> ValCodecs.DoubleCodec.clazz 
+      case StringToken(p: String) 		=> ValCodecs.StringCodec.clazz 
+      case OpenArr 						=> ListCodec.clazz 
+
+      case _ => throw new RuntimeException("Expected OpenObj, OpenArr, or value Token got " + t)
+    }
+    
     val codec = get(c)
-    codec.decode(source)
+    codec.read(reader)
   }
 
-  override def code(t : Any, target : DataTarget) = {
+  override def write(t : Any, writer: TokenWriter) = {
     val tClass = t.asInstanceOf[AnyRef].getClass
-    get(tClass).asInstanceOf[Codec[Any]].code(t, target)
+    get(tClass).asInstanceOf[Codec[Any]].write(t, writer)
   }
 
   private def mostSpecific(node:CodecNode, clazz:Class[_]):CodecNode = {
@@ -95,174 +86,186 @@ class CodecByClass extends Codec[Any] {
     }
   }
 
-  case class CodecNode(codec:Codec[_], clazz:Class[_]) {
+  private case class CodecNode(codec:Codec[_], clazz:Class[_]) {
     val subNodes = mutable.ListBuffer[CodecNode]()
   }
 
 }
 
 object AnyCodec extends Codec[Any] {
-  override def decode(source : DataSource) = throw new RuntimeException("Can't decode Any")
-  override def code(t : Any, target : DataTarget) = throw new RuntimeException("Can't code Any")
+  override def read(reader: TokenReader) = throw new RuntimeException("Can't read Any")
+  override def write(t : Any, writer: TokenWriter) = throw new RuntimeException("Can't write Any")
 }
 
 class OptionCodec(delegate:Codec[Any]) extends Codec[Option[_]] {
-  override def decode(source : DataSource) = {
-    source.assertOpenClassTag(ClassTag(classOf[Option[_]]))
-    val t = source.getOpenTag(consume=true).text match {
-      case "None" => None
-      case "Some" => Some(delegate.decode(source))
+  override def read(reader: TokenReader) = {
+    reader.pullAndAssert(OpenObj(classOf[Option[_]]))
+    
+    val t = reader.pull
+    t match {
+      case CloseObj => None						//None is just an empty Option obj
+      case OpenField("Some") => {				//Some has a single field, "Some". Remember to get the object close tag afterwards
+        val s = Some(delegate.read(reader))
+        reader.pullAndAssert(CloseObj)
+        s
+      }
+      case _ => throw new RuntimeException("Expected CloseObj or OpenField(Some), got " + t)
     }
-    source.getCloseTag  //Some/None
-    source.getCloseTag  //Option
-    t
   }
-  override def code(o : Option[_], target : DataTarget) = {
-    target.openClassTag(classOf[Option[_]])
+  override def write(o : Option[_], writer: TokenWriter) = {
+    writer.write(OpenObj(classOf[Option[_]]))
     o match {
-      case None => {
-        target.openTag("None")
-        target.closeTag
-      }
+      case None => {}
       case Some(s) => {
-        target.openTag("Some")
-        delegate.code(s, target)
-        target.closeTag
+        writer.write(OpenField("Some"))
+        delegate.write(s, writer)
       }
     }
-    target.closeTag
+    writer.write(CloseObj)
   }
 }
 
-class ListCodec(delegate:Codec[Any]) extends Codec[List[_]] {
-  override def decode(source : DataSource) = {
-    source.assertOpenClassTag(ClassTag(classOf[List[_]]))
+object ListCodec {
+  val clazz = classOf[List[_]]
+}
+class ListCodec(delegate:Codec[Any]) extends CodecWithClass[List[_]] {
+  override def read(reader: TokenReader) = {
+    reader.pullAndAssert(OpenArr)
     val lb = mutable.ListBuffer[Any]()
-    while (!source.peekCloseTag) {
-      lb.append(delegate.decode(source))
+    while (reader.peek != CloseArr) {
+      lb.append(delegate.read(reader))
     }
-    source.getCloseTag
+    reader.pullAndAssert(CloseArr)
     List(lb:_*)
   }
-  override def code(list : List[_], target : DataTarget) = {
-    target.openClassTag(classOf[List[_]])
-    list.foreach(e => delegate.code(e, target))
-    target.closeTag
+  override def write(list : List[_], writer: TokenWriter) = {
+    writer.write(OpenArr)
+    list.foreach(e => delegate.write(e, writer))
+    writer.write(CloseArr)
   }
+  override def clazz = ListCodec.clazz
 }
 
-class SetCodec(delegate:Codec[Any]) extends Codec[Set[_]] {
-  override def decode(source : DataSource) = {
-    source.assertOpenClassTag(ClassTag(classOf[Set[_]]))
+class SetCodec(delegate:Codec[Any]) extends CodecWithClass[Set[_]] {
+  override def read(reader: TokenReader) = {
+	reader.pullAndAssert(OpenObj(classOf[Set[_]]))
+    reader.pullAndAssert(OpenArr)
     val lb = mutable.ListBuffer[Any]()
-    while (!source.peekCloseTag) {
-      lb.append(delegate.decode(source))
+    while (reader.peek != CloseArr) {
+      lb.append(delegate.read(reader))
     }
-    source.getCloseTag
+    reader.pullAndAssert(CloseArr)
+    reader.pullAndAssert(CloseObj)
     Set(lb:_*)
   }
-  override def code(list : Set[_], target : DataTarget) = {
-    target.openClassTag(classOf[Set[_]])
-    list.foreach(e => delegate.code(e, target))
-    target.closeTag
+  override def write(set : Set[_], writer : TokenWriter) = {
+    writer.write(OpenObj(classOf[Set[_]]))
+    writer.write(OpenArr)
+    set.foreach(e => delegate.write(e, writer))
+    writer.write(CloseArr)
+    writer.write(CloseObj)
   }
+  override def clazz = classOf[Set[_]]
 }
 
-
-class MapCodec(delegate:Codec[Any]) extends Codec[Map[_,_]] {
-  override def decode(source : DataSource) = {
-    source.assertOpenClassTag(ClassTag(classOf[Map[_,_]]))
+class MapCodec(delegate:Codec[Any]) extends CodecWithClass[Map[_,_]] {
+  override def read(reader : TokenReader) = {
     val entries = mutable.ListBuffer[(Any,Any)]()
-    while (!source.peekCloseTag) {
-      if (source.getOpenTag(consume=true).text != "key") throw new RuntimeException("Expected key tag for map")
-      val key = delegate.decode(source)
-      source.getCloseTag
-      if (source.getOpenTag(consume=true).text != "value") throw new RuntimeException("Expected value tag for map")
-      val value = delegate.decode(source)
-      source.getCloseTag
+	reader.pullAndAssert(OpenObj(classOf[Map[_, _]]))
+    reader.pullAndAssert(OpenArr)
+    val lb = mutable.ListBuffer[Any]()
+    while (reader.peek != CloseArr) {
+      reader.pullAndAssert(OpenArr)
+      val key = delegate.read(reader)
+      val value = delegate.read(reader)
       entries.append((key, value))
+      reader.pullAndAssert(CloseArr)
     }
-    source.getCloseTag
+    reader.pullAndAssert(CloseArr)
+    reader.pullAndAssert(CloseObj)
+
     Map(entries:_*)
   }
 
-  override def code(map : Map[_,_], target : DataTarget) = {
-    target.openClassTag(classOf[Map[_,_]])
+  override def write(map : Map[_,_], writer: TokenWriter) = {
+    writer.write(OpenObj(classOf[Map[_,_]]))
+    writer.write(OpenArr)
     map.foreach(entry => {
-      target.openTag("key")
-      delegate.code(entry._1, target)
-      target.closeTag
-      target.openTag("value")
-      delegate.code(entry._2, target)
-      target.closeTag
+      writer.write(OpenArr)
+      delegate.write(entry._1, writer)
+      delegate.write(entry._2, writer)
+      writer.write(CloseArr)
     })
-    target.closeTag
+    writer.write(CloseArr)
+    writer.write(CloseObj)
   }
+  override def clazz = classOf[Map[_, _]]
 }
 
 
 class NodeCodec(delegate:Codec[Any]) extends Codec[Node] {
-  override def decode(source : DataSource) = {
-    val tag = source.getOpenClassTag(consume=true)
+  
+  override def read(reader: TokenReader) = {
+    val t = reader.pull
+    val tag = t match {
+      case OpenObj(c, l) => OpenObj(c, l)
+      case _ => throw new RuntimeException("Expected OpenObj token, got " + t)
+    }
     val c = tag.clazz
 
-    tag.ref match {
-      //If we have no ref, we are a new object, so create it
-      case None => {
+    tag.link match {
+      case LinkRef(id) => {
+        val o = reader.retrieveCached(id)
+        //Still need to close the tag - there is nothing inside the tag, since we are just a ref
+        reader.pullAndAssert(CloseObj)
+        o.asInstanceOf[Node]
+      }
+      case LinkId(id) => {
+
         val n = c.newInstance
-
-        //Cache the object for any future refs to it, if it has an id
-        //We do this early to allow nodes to refer to themselves in their
-        //own Vars, if really necessary!
-        tag.id match {
-          case None => throw new RuntimeException("No ref for " + n + ", so assumed we would have an id, but none found")
-          case Some(id) => source.cache(id, n)
-        }
-
+        reader.cache(id, n)
+        
         //Fill out the node's Vars
         val accMap = Node.accessorsOfClass(c)
-        while (!source.peekCloseTag) {
-          val accessorName = source.getOpenTag(consume=true).text
-          val accessorValue = delegate.decode(source)
+        while (reader.peek != CloseObj) {
+          val t = reader.pull
+          val accessorName = t match {
+            case OpenField(n) => n
+            case _ => throw new RuntimeException("Expected OpenField, got " + t)
+          }
+          val accessorValue = delegate.read(reader)
           accMap.get(accessorName) match {
             case None => {}
             case Some(m) => m.invoke(n).asInstanceOf[VarBox[Any, Change[Any]]].update(accessorValue)
           }
-          source.getCloseTag
         }
-        source.getCloseTag
+        reader.pullAndAssert(CloseObj)
 
         n.asInstanceOf[Node]
       }
-      //If we have a ref, then we just look ourselves up from cache
-      case Some(ref) => {
-        val o = source.retrieveCached(ref)
-        //Still need to close the tag - there is nothing inside the tag, since we are just a ref
-        source.getCloseTag
-        o.asInstanceOf[Node]
-      }
+      case LinkEmpty => throw new RuntimeException("A Node has neither ref nor id, which should not happen.")
     }
 
+
   }
-  override def code(n : Node, target : DataTarget) = {
+  override def write(n : Node, writer: TokenWriter) = {
 
     //First, see if we are new
-    target.cache(n) match {
+    writer.cache(n) match {
       //We were cached, just write out as a ref
       case Cached(ref) => {
-        target.openClassTag(n.getClass, None, Some(ref))
-        target.closeTag
+        writer.write(OpenObj(n.getClass, LinkRef(ref)))
+        writer.write(CloseObj)
       }
 
       //We are new, write out as normal, and include the id
       case New(id) => {
-        target.openClassTag(n.getClass, Some(id), None)
+        writer.write(OpenObj(n.getClass, LinkId(id)))
         Node.accessors(n).foreach(entry => {
-          target.openTag(entry._1)
-          delegate.code(entry._2.invoke(n).asInstanceOf[VarBox[_,_]].apply, target)
-          target.closeTag
+          writer.write(OpenField(entry._1))
+          delegate.write(entry._2.invoke(n).asInstanceOf[VarBox[_,_]].apply, writer)
         })
-        target.closeTag
+        writer.write(CloseObj)
       }
     }
 
@@ -272,48 +275,51 @@ class NodeCodec(delegate:Codec[Any]) extends Codec[Node] {
 object ValCodecs {
   implicit object BooleanCodec extends CodecWithClass[Boolean] {
     override def clazz = classOf[java.lang.Boolean]
-    override def code(t : Boolean, target : DataTarget) = target.putBoolean(t)
-    override def decode(source : DataSource) = source.getBoolean
+    override def write(t : Boolean, writer: TokenWriter) = writer.write(BooleanToken(t))
+    override def read(reader: TokenReader) = reader.pull match {
+      case BooleanToken(t) => t
+      case _ => throw new RuntimeException("Expected Boolean token")
+    }
   }
   implicit object IntCodec extends CodecWithClass[Int] {
     override def clazz = classOf[java.lang.Integer]
-    override def code(t : Int, target : DataTarget) = target.putInt(t)
-    override def decode(source : DataSource) = source.getInt
-  }
-  implicit object ShortCodec extends CodecWithClass[Short] {
-    override def clazz = classOf[java.lang.Short]
-    override def code(t : Short, target : DataTarget) = target.putShort(t)
-    override def decode(source : DataSource) = source.getShort
-  }
-  implicit object ByteCodec extends CodecWithClass[Byte] {
-    override def clazz = classOf[java.lang.Byte]
-    override def code(t : Byte, target : DataTarget) = target.putByte(t)
-    override def decode(source : DataSource) = source.getByte
+    override def write(t : Int, writer: TokenWriter) = writer.write(IntToken(t))
+    override def read(reader: TokenReader) = reader.pull match {
+      case IntToken(t) => t
+      case _ => throw new RuntimeException("Expected Int token")
+    }
   }
   implicit object LongCodec extends CodecWithClass[Long] {
     override def clazz = classOf[java.lang.Long]
-    override def code(t : Long, target : DataTarget) = target.putLong(t)
-    override def decode(source : DataSource) = source.getLong
+    override def write(t : Long, writer: TokenWriter) = writer.write(LongToken(t))
+    override def read(reader: TokenReader) = reader.pull match {
+      case LongToken(t) => t
+      case _ => throw new RuntimeException("Expected Long token")
+    }
   }
   implicit object FloatCodec extends CodecWithClass[Float] {
     override def clazz = classOf[java.lang.Float]
-    override def code(t : Float, target : DataTarget) = target.putFloat(t)
-    override def decode(source : DataSource) = source.getFloat
+    override def write(t : Float, writer: TokenWriter) = writer.write(FloatToken(t))
+    override def read(reader: TokenReader) = reader.pull match {
+      case FloatToken(t) => t
+      case _ => throw new RuntimeException("Expected Float token")
+    }
   }
   implicit object DoubleCodec extends CodecWithClass[Double] {
     override def clazz = classOf[java.lang.Double]
-    override def code(t : Double, target : DataTarget) = target.putDouble(t)
-    override def decode(source : DataSource) = source.getDouble
-  }
-  implicit object CharCodec extends CodecWithClass[Char] {
-    override def clazz = classOf[java.lang.Character]
-    override def code(t : Char, target : DataTarget) = target.putChar(t)
-    override def decode(source : DataSource) = source.getChar
+    override def write(t : Double, writer: TokenWriter) = writer.write(DoubleToken(t))
+    override def read(reader: TokenReader) = reader.pull match {
+      case DoubleToken(t) => t
+      case _ => throw new RuntimeException("Expected Double token")
+    }
   }
   implicit object StringCodec extends CodecWithClass[String] {
     override def clazz = classOf[java.lang.String]
-    override def code(t : String, target : DataTarget) = target.putUTF(t)
-    override def decode(source : DataSource) = source.getUTF
+    override def write(t : String, writer: TokenWriter) = writer.write(StringToken(t))
+    override def read(reader: TokenReader) = reader.pull match {
+      case StringToken(t) => t
+      case _ => throw new RuntimeException("Expected String token")
+    }
   }
 
 }

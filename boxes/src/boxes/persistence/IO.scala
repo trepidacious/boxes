@@ -47,8 +47,8 @@ class ClassAliases {
 }
 
 trait DataFactory {
-  def source(input:InputStream, aliases:ClassAliases):DataSource
-  def target(output:OutputStream, aliases:ClassAliases):DataTarget
+  def reader(input:InputStream, aliases:ClassAliases):TokenReader
+  def writer(output:OutputStream, aliases:ClassAliases):TokenWriter
 }
 
 class IO(val dataFactory:DataFactory, val aliases:ClassAliases = new ClassAliases) {
@@ -58,8 +58,8 @@ class IO(val dataFactory:DataFactory, val aliases:ClassAliases = new ClassAliase
   def code(t:Any, output:OutputStream) = {
     //Code as a transaction, to prevent concurrent modification
     Box.transact {
-      val target = dataFactory.target(output, aliases)
-      codecByClass.code(t, target)
+      val target = dataFactory.writer(output, aliases)
+      codecByClass.write(t, target)
       target.close
     }
   }
@@ -67,8 +67,8 @@ class IO(val dataFactory:DataFactory, val aliases:ClassAliases = new ClassAliase
   def decode(input:InputStream) = {
     //Decode, so we run as a transaction, AND reactions are handled properly
     Box.decode {
-      val source = dataFactory.source(input, aliases)
-      val t = codecByClass.decode(source)
+      val source = dataFactory.reader(input, aliases)
+      val t = codecByClass.read(source)
       source.close
       t
     }
