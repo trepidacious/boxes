@@ -272,6 +272,7 @@ class NodeCodec(delegate:Codec[Any]) extends Codec[Node] {
   }
 }
 
+//TODO share code, via implicits? Make exception print the token we got instead of expected one.
 object ValCodecs {
   implicit object BooleanCodec extends CodecWithClass[Boolean] {
     override def clazz = classOf[java.lang.Boolean]
