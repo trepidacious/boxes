@@ -4,28 +4,27 @@ import collection._
 import java.io.{InputStream, OutputStream}
 import boxes.Box
 
+object ClassAliases {
+  def apply() = new ClassAliases
+  val reservedAliases = Set("Long", "Int", "Boolean", "Double", "Float", "String")
+}
+
 class ClassAliases {
   private val aliases = mutable.Map[Class[_], String]()
   private val aliasesReverse = mutable.Map[String, Class[_]]()
 
-  //Common default aliases
-
+  //Required aliases
   {
-//    alias(classOf[java.lang.Long],    "Long")
-//    alias(classOf[java.lang.Integer], "Int")
-//    alias(classOf[java.lang.Boolean], "Boolean")
-//    alias(classOf[java.lang.Double],  "Double")
-//    alias(classOf[java.lang.Float],   "Float")
-//    alias(classOf[java.lang.String],  "String")
-
     alias(classOf[List[_]],           "List")
     alias(classOf[Map[_,_]],          "Map")
     alias(classOf[Set[_]],            "Set")
     alias(classOf[Option[_]],         "Option")
-
   }
 
   def alias(c:Class[_], s:String) = {
+    
+    if (ClassAliases.reservedAliases.contains(s)) throw new RuntimeException(s + " is a reserved alias")
+    
     //Note that we enforce that each string is only used for at most one class,
     //BUT we allow each class to map to multiple strings. The last-set alias
     //is the one used for encoding, but any string is valid for decoding. This
@@ -49,7 +48,7 @@ trait DataFactory {
   def writer(output:OutputStream, aliases:ClassAliases):TokenWriter
 }
 
-class IO(val dataFactory:DataFactory, val aliases:ClassAliases = new ClassAliases) {
+class IO(val dataFactory: DataFactory, val aliases: ClassAliases = new ClassAliases) {
 
   val codecByClass = new CodecByClass()
 
