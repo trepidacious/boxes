@@ -86,7 +86,9 @@ trait TokenWriter {
     }
   }
   
-  def close()
+  def close() {
+    c.clear()
+  }
 }
 
 trait TokenReader {
@@ -127,7 +129,9 @@ trait TokenReader {
     }
   }
   
-  def close()
+  def close() {
+    c.clear()
+  }
 
 }
 
@@ -233,11 +237,11 @@ object Tokens {
     val reader = new JSONTokenReader(new StringReader(json.toString), aliases)
     
     @tailrec
-	def printNext(): Unit = {
-	  val t = reader.pull
-	  println(t)
-	  if (t != End) printNext()
-	}
+  	def printNext(): Unit = {
+  	  val t = reader.pull
+  	  println(t)
+  	  if (t != End) printNext()
+  	}
 	
     printNext()
 

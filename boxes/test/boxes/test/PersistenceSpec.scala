@@ -21,6 +21,7 @@ import boxes.persistence.json.JSONTokenWriter
 import boxes.persistence.json.JSONTokenWriter
 import boxes.persistence.StringToken
 import boxes.persistence.json.JSONIO
+import boxes.persistence.xml.XMLTokenWriter
 
 object PersistenceSpec {
   def main(args: Array[String]) {
@@ -203,8 +204,38 @@ class PersistenceSpec extends WordSpec {
     }
   }
   
-  "XMLDataSource and XMLDataTarget" should {
+  "XMLTokenReader and XMLTokenWriter" should {
     "encode and decode an empty String" is (pending)
+    
+    "write a person" in {
+      val p = new Person()
+      p.accounts() = Map("current" -> 10.0, "savings" -> 100.0, "secretswiss" -> 10000000.0)
+      p.numbers() = List(10,20,30)
+      p.age() = 100
+      p.nicknames() = List("Pico", "Pi")
+
+      val q = new Person()
+      q.accounts() = Map("current" -> 0.0)
+      q.numbers() = List(1, 4, 9)
+      q.name() = "q"
+      q.nicknames() = List("Queue", "Cue", "QED")
+
+      p.friend() = Some(q)
+      p.spouse() = Some(q)
+
+      val codec = new CodecByClass()
+
+      val aliases = new ClassAliases
+
+      val writer = new StringWriter()
+      val target = new XMLTokenWriter(writer, aliases)
+
+      codec.write(p, target)
+
+      val xml = writer.toString
+      println(xml)
+
+    }
   }
 
   "JSONTokenReader and JSONTokenWriter" should {

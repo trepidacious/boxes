@@ -1,17 +1,20 @@
 package boxes.persistence
-//
+
 //import scala.xml.pull._
 //import scala.io.Source
 //import collection._
-//import xml.Node
+//import scala.xml.Node
 //import java.io.{OutputStreamWriter, InputStream, Writer, OutputStream}
 //import boxes.persistence.ValCodecs._
 //
-//class XMLDataSource(s:Source, aliases:ClassAliases) extends DataSource {
+//trait AnyTag
+//case class Tag(text:String, id:Option[Int]=None, ref:Option[Int]=None) extends AnyTag
+//case class ClassTag(clazz:Class[_], id:Option[Int]=None, ref:Option[Int]=None) extends AnyTag
+//
+//class XMLDataSource(s:Source, aliases:ClassAliases) {
 //
 //  val events = new XMLEventReader(s)
 //  var nextEvent:Option[XMLEvent] = None
-//  private val cache = mutable.Map[Int, Any]()
 //
 //  private def pullEvent(tag:Boolean) = {
 //    //Text events are only wanted if we are NOT looking for
@@ -61,18 +64,6 @@ package boxes.persistence
 //    }
 //  }
 //
-//  override def cache(id:Int, thing:Any) = {
-//    cache.put(id, thing).foreach(existing => {
-//      throw new RuntimeException("Tried to cache " + thing + " with id " + id + " but this was already used for " + existing)
-//    })
-//  }
-//  override def retrieveCached(ref:Int) = {
-//    cache.get(ref) match {
-//      case None => throw new RuntimeException("Nothing found in cache for id (ref) " + ref)
-//      case Some(thing) => thing
-//    }
-//  }
-//
 //  //Might seem odd to use codec, but we are just looking up the class to use for our "internal"
 //  //tag
 //  private def getPrimitive[P](c: (String)=>P)(implicit codec:CodecWithClass[P]):P = {
@@ -83,9 +74,6 @@ package boxes.persistence
 //  }
 //  
 //  override def getBoolean() = getPrimitive(_.trim.toBoolean)
-//  override def getByte() = getPrimitive(_.trim.toByte)
-//  override def getShort() = getPrimitive(_.trim.toShort)
-//  override def getChar() = getPrimitive(_.trim.toCharArray.apply(0))
 //  override def getInt() = getPrimitive(_.trim.toInt)
 //  override def getLong() = getPrimitive(_.trim.toLong)
 //  override def getFloat() = getPrimitive(_.trim.toFloat)
@@ -93,7 +81,6 @@ package boxes.persistence
 //  override def getUTF():String = getPrimitive((s)=>s)
 //
 //  override def close() = {
-//    cache.clear
 //    s.close
 //  }
 //

@@ -58,14 +58,14 @@ class CodecByClass extends Codec[Any] {
   override def read(reader : TokenReader) = {
     val t = reader.peek
     val c = t match {
-      case OpenObj(clazz, _) => clazz
-      case BooleanToken(p: Boolean) 	=> ValCodecs.BooleanCodec.clazz 
-      case IntToken(p: Int) 			=> ValCodecs.IntCodec.clazz 
-      case LongToken(p: Long) 			=> ValCodecs.LongCodec.clazz 
-      case FloatToken(p: Float) 		=> ValCodecs.FloatCodec.clazz 
-      case DoubleToken(p: Double) 		=> ValCodecs.DoubleCodec.clazz 
-      case StringToken(p: String) 		=> ValCodecs.StringCodec.clazz 
-      case OpenArr 						=> ListCodec.clazz 
+      case OpenObj(clazz, _)           => clazz
+      case BooleanToken(p: Boolean) 	 => ValCodecs.BooleanCodec.clazz 
+      case IntToken(p: Int) 			     => ValCodecs.IntCodec.clazz 
+      case LongToken(p: Long) 			   => ValCodecs.LongCodec.clazz 
+      case FloatToken(p: Float) 		   => ValCodecs.FloatCodec.clazz 
+      case DoubleToken(p: Double) 		 => ValCodecs.DoubleCodec.clazz 
+      case StringToken(p: String) 		 => ValCodecs.StringCodec.clazz 
+      case OpenArr 						         => ListCodec.clazz 
 
       case _ => throw new RuntimeException("Expected OpenObj, OpenArr, or value Token got " + t)
     }

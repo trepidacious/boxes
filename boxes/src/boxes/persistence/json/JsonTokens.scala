@@ -57,12 +57,12 @@ class JSONTokenWriter(writer:Writer, aliases:ClassAliases, pretty: Boolean = fal
   }
   private def println() {
     if (pretty) {
-	  writer.write("\n")
-	  Range(0, tokens.count(t => t match {
-	    case OpenObj(_,_) => true
-	    case OpenArr => true
-	    case _ => false
-	  })).foreach{i=>writer.write("  ")}
+  	  writer.write("\n")
+  	  Range(0, tokens.count(t => t match {
+  	    case OpenObj(_,_) => true
+  	    case OpenArr => true
+  	    case _ => false
+  	  })).foreach{i => writer.write("  ")}
     }
   }
   
@@ -107,15 +107,15 @@ class JSONTokenWriter(writer:Writer, aliases:ClassAliases, pretty: Boolean = fal
       }
       
       case OpenArr => {
-    	commaIfNeeded()
-    	print("[")
-    	tokens.push(t)
-    	println()
+      	commaIfNeeded()
+      	print("[")
+      	tokens.push(t)
+      	println()
       }
       case CloseArr => {
         tokens.pop() match {
           case OpenArr => {
-        	println()
+            println()
             print("]")
           }
           case _ => throw new RuntimeException("Mismatched CloseArr token")
@@ -130,7 +130,8 @@ class JSONTokenWriter(writer:Writer, aliases:ClassAliases, pretty: Boolean = fal
     previousToken = Some(t)
   }
   
-  def close() {
+  override def close() {
+    super.close()
     writer.flush
     writer.close    
   }
@@ -157,7 +158,7 @@ class JSONTokenReader(reader: Reader, aliases: ClassAliases) extends TokenReader
   
   private def pullClassField() = {
     val classToken = parser.pull
-	classToken match {
+  	classToken match {
 	  case JsonParser.StringVal(alias) => aliases.forAlias(alias)
 	  case _ => throw new RuntimeException("Unexpected type field value, not a string: " + classToken)
 	} 
@@ -238,7 +239,8 @@ class JSONTokenReader(reader: Reader, aliases: ClassAliases) extends TokenReader
     }
   }
   
-  def close() {
+  override def close() {
+    super.close()
     reader.close()
   }
   

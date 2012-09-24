@@ -6,7 +6,8 @@ import boxes.Box
 
 object ClassAliases {
   def apply() = new ClassAliases
-  val reservedAliases = Set("Long", "Int", "Boolean", "Double", "Float", "String")
+  val primitiveAliases = Set("Long", "Int", "Boolean", "Double", "Float", "String")
+  val reservedAliases: Set[String] = Set()
 }
 
 class ClassAliases {
@@ -15,6 +16,13 @@ class ClassAliases {
 
   //Required aliases
   {
+    alias(classOf[java.lang.Long],    "Long")
+    alias(classOf[java.lang.Integer], "Int")
+    alias(classOf[java.lang.Boolean], "Boolean")
+    alias(classOf[java.lang.Double],  "Double")
+    alias(classOf[java.lang.Float],   "Float")
+    alias(classOf[java.lang.String],  "String")
+    
     alias(classOf[List[_]],           "List")
     alias(classOf[Map[_,_]],          "Map")
     alias(classOf[Set[_]],            "Set")
