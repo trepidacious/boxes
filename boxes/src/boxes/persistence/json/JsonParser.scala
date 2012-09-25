@@ -16,6 +16,40 @@ package boxes.persistence.json
  * limitations under the License.
  */
 
+object JsonUtils {
+  def quote(string: String) = {
+    if (string.isEmpty) {
+      "\"\"";
+    } else {
+      val sb = new StringBuilder(string.length() + 4)
+
+      sb.append('"')
+      for (i <- Range(0, string.length())) {
+        string.charAt(i) match {
+          case '\\' => sb.append("\\\\")
+          case '"' => sb.append("\\\"")
+          case '/' => sb.append("\\/")
+          case '\b' => sb.append("\\b")
+          case '\t' => sb.append("\\t")
+          case '\n' => sb.append("\\n")
+          case '\f' => sb.append("\\f")
+          case '\r' => sb.append("\\r")
+          case c => {
+            if (c < ' ') {
+              val t = "000" + Integer.toHexString(c);
+              sb.append("\\u" + t.substring(t.length() - 4));
+            } else {
+              sb.append(c);
+            }
+          }
+        }
+      }
+      sb.append('"')
+      sb.toString() 
+    }
+  }
+}
+
 class JsonParser(parser: JsonParser.Parser) {
   private var nextToken: Option[JsonParser.Token] = None
   def peek: JsonParser.Token = {

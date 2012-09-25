@@ -22,6 +22,7 @@ import boxes.persistence.json.JSONTokenWriter
 import boxes.persistence.StringToken
 import boxes.persistence.json.JSONIO
 import boxes.persistence.xml.XMLTokenWriter
+import boxes.persistence.xml.XMLTokenReader
 
 object PersistenceSpec {
   def main(args: Array[String]) {
@@ -205,7 +206,21 @@ class PersistenceSpec extends WordSpec {
   }
   
   "XMLTokenReader and XMLTokenWriter" should {
-    "encode and decode an empty String" is (pending)
+    "encode and decode an empty String" in {
+      val s = new StringWriter()
+      val target = new XMLTokenWriter(s, new ClassAliases)
+      target.write(StringToken(""))
+
+      val xml = s.toString
+      val source = new XMLTokenReader(Source.fromString(xml), new ClassAliases)
+
+      val emptyString = source.pull match {
+        case StringToken(s) => s
+        case _ => "WRONG TOKEN"
+      }
+
+      assert(emptyString === "")
+    }
     
     "write a person" in {
       val p = new Person()
@@ -236,6 +251,25 @@ class PersistenceSpec extends WordSpec {
       println(xml)
 
     }
+    
+    "properly escape strings" in {
+      
+      val awkwardString = "<>&\""
+      
+      val s = new StringWriter()
+      val target = new XMLTokenWriter(s, new ClassAliases)
+      target.write(StringToken(awkwardString))
+
+      val xml = s.toString
+      val source = new XMLTokenReader(Source.fromString(xml), new ClassAliases)
+      val readString = source.pull match {
+        case StringToken(s) => s
+        case _ => "WRONG TOKEN"
+      }
+
+      assert(xml === "<String>&lt;&gt;&amp;&quot;</String>")
+      assert(readString === awkwardString)
+    }
   }
 
   "JSONTokenReader and JSONTokenWriter" should {
@@ -255,7 +289,25 @@ class PersistenceSpec extends WordSpec {
       assert(emptyString === "")
     }
     
-    "properly escape strings" is (pending)
+    "properly escape strings" in {
+      
+      val awkwardString = "\"\t\b\n\f\r\\/\u0010"
+      
+      val s = new StringWriter()
+      val target = new JSONTokenWriter(s, new ClassAliases, false)
+      target.write(StringToken(awkwardString))
+
+      val json = s.toString
+      val source = new JSONTokenReader(new StringReader(json), new ClassAliases)
+
+      val readString = source.pull match {
+        case StringToken(s) => s
+        case _ => "WRONG TOKEN"
+      }
+
+      assert(json === "\"\\\"\\t\\b\\n\\f\\r\\\\\\/\\u0010\"") //I think there should be more backslashes
+      assert(readString === awkwardString)
+    }
   }
 
 

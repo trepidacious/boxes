@@ -49,8 +49,7 @@ class JSONTokenWriter(writer:Writer, aliases:ClassAliases, pretty: Boolean = fal
 	print("" + p)
   }
 
-  //TODO perform escaping
-  private def quoted(s: String) = "\"" + s + "\"";
+  private def quoted(s: String) = JsonUtils.quote(s)
 
   private def print(s:String) = {
     writer.write(s)

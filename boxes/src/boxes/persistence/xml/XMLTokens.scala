@@ -319,7 +319,7 @@ class XMLTokenWriter(writer:Writer, aliases:ClassAliases) extends TokenWriter {
       case LongToken(p)  	  => printPrim(p)
       case FloatToken(p)  	=> printPrim(p)
       case DoubleToken(p)  	=> printPrim(p)
-      case StringToken(p)   => printPrim(p)
+      case StringToken(p)   => printPrim(scala.xml.Utility.escape(p))
   
       case OpenField(name) => {
         print("<" + name + ">")
