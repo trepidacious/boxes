@@ -227,7 +227,7 @@ class PersistenceSpec extends WordSpec {
       p.accounts() = Map("current" -> 10.0, "savings" -> 100.0, "secretswiss" -> 10000000.0)
       p.numbers() = List(10,20,30)
       p.age() = 100
-      p.nicknames() = List("Pico", "Pi")
+      p.nicknames() = List("Pi<>co", "Pi")
 
       val q = new Person()
       q.accounts() = Map("current" -> 0.0)

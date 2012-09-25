@@ -120,7 +120,7 @@ private class XMLEvents(s: Source) {
       t
     }
   }
-  def pull: XMLEvent = {
+  def pull(): XMLEvent = {
     val t = peek
     nextEvent = None
     t
@@ -174,16 +174,33 @@ class XMLTokenReader(s:Source, aliases:ClassAliases) extends TokenReader {
     }
   }
 
-  private def pullText() = {
+  private def pullTextAndEntities(sb: StringBuilder): String = {
     events.peek match {
-      case text:EvText => {
-        events.pull
-        text.text
+      case text: EvText => {
+        events.pull()
+        sb.append(text.text)
+        pullTextAndEntities(sb)
       }
-      case end:EvElemEnd => ""
-      case wrong:Any => throw new RuntimeException("Next event is not text, it is " + wrong)
+      case r: EvEntityRef => {
+        events.pull()
+        val text = r.entity match {
+          case "lt" => "<"
+          case "gt" => ">"
+          case "amp" => "&"
+          case "apos" => "'"
+          case "quot" => "\""
+          case _ => throw new RuntimeException("Got an unrecognised entity: " + r)
+        }
+        sb.append(text)
+        pullTextAndEntities(sb)
+      }
+      case end: EvElemEnd => sb.toString
+      case wrong: Any => throw new RuntimeException("Next event is not text, it is " + wrong)
     }
   }
+
+  
+  private def pullText() = pullTextAndEntities(new StringBuilder)
 
   private def pullPrimitive[P](c: (String)=>P)(implicit codec:CodecWithClass[P]):P = {
     val t = c(pullText)
