@@ -192,8 +192,8 @@ class PersistenceSpec extends WordSpec {
       //Now we encode and decode s2 with JSONIO, which uses Box.decode, and so decodes correctly
       val io = JSONIO()
       val baos = new ByteArrayOutputStream()
-      io.code(s2, baos)
-      val s4 = io.decode(new ByteArrayInputStream(baos.toByteArray)).asInstanceOf[SpecificStateReaction]
+      io.write(s2, baos)
+      val s4 = io.read(new ByteArrayInputStream(baos.toByteArray)).asInstanceOf[SpecificStateReaction]
 
       assert(s4.a() === true)
       assert(s4.b() === true)

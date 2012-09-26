@@ -172,6 +172,7 @@ class MapCodec(delegate:Codec[Any]) extends CodecWithClass[Map[_,_]] {
   override def read(reader : TokenReader) = {
     val entries = mutable.ListBuffer[(Any,Any)]()
 	reader.pullAndAssert(OpenObj(classOf[Map[_, _]]))
+    reader.pullAndAssert(OpenField("entries"))
     reader.pullAndAssert(OpenArr)
     val lb = mutable.ListBuffer[Any]()
     while (reader.peek != CloseArr) {
@@ -189,6 +190,7 @@ class MapCodec(delegate:Codec[Any]) extends CodecWithClass[Map[_,_]] {
 
   override def write(map : Map[_,_], writer: TokenWriter) = {
     writer.write(OpenObj(classOf[Map[_,_]]))
+    writer.write(OpenField("entries"))
     writer.write(OpenArr)
     map.foreach(entry => {
       writer.write(OpenArr)

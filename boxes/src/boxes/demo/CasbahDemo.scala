@@ -13,6 +13,8 @@ import com.explodingpixels.macwidgets.{SourceList, SourceListItem, SourceListCat
 import com.mongodb.casbah.Imports._
 import com.mongodb.DBObject
 import com.mongodb.casbah.commons.MongoDBObject
+import com.mongodb.util.JSON
+import boxes.persistence.json.JSONIO
 
 object CasbahDemo {
 
@@ -20,11 +22,26 @@ object CasbahDemo {
     val mongoConn = MongoConnection()
     
     val nanos = mongoConn("nanos")
-    val plates = nanos("plates")
-    plates.foreach(println(_))
     
-    val boxes = nanos.createCollection("boxes", MongoDBObject())
-//    boxes.
+//    val boxes = nanos.createCollection("boxes", MongoDBObject())
+    
+    val boxes = nanos("boxes")
+    
+    val io = JSONIO()
+    
+    val p = Person.testPerson
+    
+    val json = io.write(p)
+    
+    val obj = JSON.parse(json).asInstanceOf[DBObject]
+    
+//    boxes.insert(obj)
+
+    boxes.foreach(o => {
+      println("Object id: " + o.get("_id"))
+      o.removeField("_id")
+      println(io.read(o.toString).asInstanceOf[Person])
+    })
   }
 
 }

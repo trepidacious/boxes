@@ -15,6 +15,8 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.io.OutputStreamWriter
 import java.io.InputStreamReader
+import java.io.ByteArrayOutputStream
+import boxes.Box
 
 class JSONTokenWriter(writer:Writer, aliases:ClassAliases, pretty: Boolean = false) extends TokenWriter {
   
@@ -250,6 +252,29 @@ object JSONDataFactory extends DataFactory {
   def writer(output:OutputStream, aliases:ClassAliases) = new JSONTokenWriter(new OutputStreamWriter(output, "UTF-8"), aliases)
 }
 
+class JSONIO(aliases:ClassAliases) extends IO(JSONDataFactory, aliases) {
+  def write(t: Any): String = {
+    val s = new StringWriter()
+    val w = new JSONTokenWriter(s, aliases)
+    Box.transact {
+      codecByClass.write(t, w)
+      w.close
+    }
+    s.toString()
+  }
+  
+  def read(s: String) = {
+    //Decode, so we run as a transaction, AND reactions are handled properly
+    Box.decode {
+      val source = new JSONTokenReader(new StringReader(s), aliases)
+      val t = codecByClass.read(source)
+      source.close
+      t
+    }
+  }
+
+}
+
 object JSONIO {
-  def apply(aliases:ClassAliases = new ClassAliases) = new IO(JSONDataFactory, aliases)
+  def apply(aliases:ClassAliases = new ClassAliases): JSONIO = new JSONIO(aliases)
 }

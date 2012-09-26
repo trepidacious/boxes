@@ -60,7 +60,7 @@ class IO(val dataFactory: DataFactory, val aliases: ClassAliases = new ClassAlia
 
   val codecByClass = new CodecByClass()
 
-  def code(t:Any, output:OutputStream) = {
+  def write(t:Any, output:OutputStream) = {
     //Code as a transaction, to prevent concurrent modification
     Box.transact {
       val target = dataFactory.writer(output, aliases)
@@ -69,7 +69,7 @@ class IO(val dataFactory: DataFactory, val aliases: ClassAliases = new ClassAlia
     }
   }
 
-  def decode(input:InputStream) = {
+  def read(input:InputStream) = {
     //Decode, so we run as a transaction, AND reactions are handled properly
     Box.decode {
       val source = dataFactory.reader(input, aliases)
