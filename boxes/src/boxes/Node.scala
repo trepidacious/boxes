@@ -38,5 +38,13 @@ object Node {
   }
 }
 
-//Just a marker trait for things that want to be serialised as Nodes, using accessors
-trait Node
+//Nodes contain Refs provided read-only accessor methods, and these constitute the whole of
+//the node's state. Any state that must be persisted is in Vars.
+//Allows for retaining/releasing of reactions that are required to keep the Node in
+//a valid state, or synchronise it with storage, etc.
+trait Node {
+  private val retainedReactions = mutable.Set[Reaction]()
+
+  def retainReaction(r:Reaction) = retainedReactions.add(r)
+  def releaseReaction(r:Reaction) = retainedReactions.remove(r)
+}
