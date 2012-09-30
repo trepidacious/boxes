@@ -87,7 +87,7 @@ class CodecByClass extends Codec[Any] {
   }
 
   private case class CodecNode(codec:Codec[_], clazz:Class[_]) {
-    val subNodes = mutable.ListBuffer[CodecNode]()
+    val subNodes = mutable.ArrayBuffer[CodecNode]()
   }
 
 }
@@ -136,7 +136,7 @@ class ListCodec(delegate:Codec[Any]) extends CodecWithClass[List[_]] {
       lb.append(delegate.read(reader))
     }
     reader.pullAndAssert(CloseArr)
-    List(lb:_*)
+    lb.toList
   }
   override def write(list : List[_], writer: TokenWriter) = {
     writer.write(OpenArr)
@@ -171,10 +171,9 @@ class SetCodec(delegate:Codec[Any]) extends CodecWithClass[Set[_]] {
 class MapCodec(delegate:Codec[Any]) extends CodecWithClass[Map[_,_]] {
   override def read(reader : TokenReader) = {
     val entries = mutable.ListBuffer[(Any,Any)]()
-	reader.pullAndAssert(OpenObj(classOf[Map[_, _]]))
+	  reader.pullAndAssert(OpenObj(classOf[Map[_, _]]))
     reader.pullAndAssert(OpenField("entries"))
     reader.pullAndAssert(OpenArr)
-    val lb = mutable.ListBuffer[Any]()
     while (reader.peek != CloseArr) {
       reader.pullAndAssert(OpenArr)
       val key = delegate.read(reader)

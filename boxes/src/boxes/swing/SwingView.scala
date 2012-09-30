@@ -35,7 +35,7 @@ object SwingViewImplicits {
 object SwingView {
 
   val defaultDecimalFormat = new DecimalFormat("0.#")
-  val viewToUpdates = new mutable.WeakHashMap[Any, mutable.ListBuffer[() => Unit]]()
+  val viewToUpdates = new mutable.WeakHashMap[Any, mutable.ArrayBuffer[() => Unit]]()
   //TODO consider using smaller intervals than default. 5, 10 makes graph use very smooth on a good PC. 
   val responder = new CoalescingResponder(respond)
   val lock = new Object()
@@ -49,7 +49,7 @@ object SwingView {
   def addUpdate(v:Any, update: => Unit) = {
     lock.synchronized{
       viewToUpdates.get(v) match {
-        case None => viewToUpdates.put(v, mutable.ListBuffer(() => update))
+        case None => viewToUpdates.put(v, mutable.ArrayBuffer(() => update))
         case Some(list) => list.append(() => update)
       }
       responder.request
@@ -58,7 +58,7 @@ object SwingView {
 
   def replaceUpdate(v:Any, update: => Unit) = {
     lock.synchronized{
-      viewToUpdates.put(v, mutable.ListBuffer(() => update))
+      viewToUpdates.put(v, mutable.ArrayBuffer(() => update))
       responder.request
     }
   }

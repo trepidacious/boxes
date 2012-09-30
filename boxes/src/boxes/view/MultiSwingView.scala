@@ -75,7 +75,7 @@ object ViewSource{
 
 class ViewSourceByManifest() extends Function1[Box[Option[AnyRef], _], Option[SwingView]]{
   
-  private val sources = mutable.ListBuffer.empty[ManifestViewSource[_]]
+  private val sources = mutable.ArrayBuffer.empty[ManifestViewSource[_]]
   private val cachedViews = new mutable.HashMap[Class[_], SwingView]
   
   def makeView(ref: Box[Option[AnyRef], _]) = for {
@@ -123,7 +123,7 @@ private class ManifestViewSource[T](source: Ref[T] => SwingView, default: T)(imp
 
 class ViewSourceByInstance() extends Function1[Box[Option[AnyRef], _], Option[SwingView]] {
   
-  private val sources = mutable.ListBuffer.empty[InstanceViewSource[_]]
+  private val sources = mutable.ArrayBuffer.empty[InstanceViewSource[_]]
   private val cachedViews = new mutable.WeakHashMap[AnyRef, SwingView]
   
   def makeView(ref: Box[Option[AnyRef], _]) = for {

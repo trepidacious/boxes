@@ -18,6 +18,8 @@ import java.io.InputStreamReader
 import java.io.ByteArrayOutputStream
 import boxes.Box
 import boxes.persistence.mongo.MongoTokens
+import boxes.persistence.mongo.StoringTokenWriter
+import boxes.persistence.mongo.StoringTokenReader
 
 class JSONTokenWriter(writer:Writer, aliases:ClassAliases, pretty: Boolean = false) extends TokenWriter {
   
@@ -275,13 +277,22 @@ class JSONIO(aliases:ClassAliases) extends IO(JSONDataFactory, aliases) {
   }
 
   def readDBO(dbo: Any) = {
-    val r = MongoTokens.toTokenReader(dbo, aliases)
+    val r = MongoTokens.toTokens(dbo, aliases)
     //Decode, so we run as a transaction, AND reactions are handled properly
     Box.decode {
       val t = codecByClass.read(r)
       r.close
       t
     }
+  }
+
+  def writeDBO(t: Any) = {
+    val w = new StoringTokenWriter
+    Box.transact {
+      codecByClass.write(t, w)
+      w.close()
+    }
+    MongoTokens.toDBO(new StoringTokenReader(w.tokens:_*), aliases)
   }
 
 }

@@ -37,11 +37,14 @@ object Box {
   //for reads/writes, if there is none then reads/writes are external
   private var activeReaction:Option[Reaction] = None
 
+  //TODO should probably use a mutable.Queue, but they have a memory leak with last0
+  //https://issues.scala-lang.org/browse/SI-6452
   //Reactions that WILL be processed this cycle
-  private val reactionsPending = mutable.ListBuffer[Reaction]()
+  private val reactionsPending = mutable.ArrayBuffer[Reaction]()
 
+  //TODO Should be queue, as above
   //Reactions that are also views
-  private val viewReactionsPending = mutable.ListBuffer[Reaction]()
+  private val viewReactionsPending = mutable.ArrayBuffer[Reaction]()
 
   //Track reactions that are newly added to the system (added AFTER the most recent full cycle), and so may need extra checks.
   private val newReactions = new mutable.HashSet[Reaction]()
