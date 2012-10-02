@@ -27,8 +27,6 @@ object MongoBox {
 //    val idA = new ObjectId("50688bdc3004c7e2cc92a11b")
 //    val idB = new ObjectId("5068649b3004c70bee79b45b")
     
-    
-    
     val p = mb.findById[Person](new ObjectId("50688bdc3004c7e2cc92a11b"))
     println(p)
     p.foreach(_.name() = "Renamed again After findById")
@@ -39,9 +37,16 @@ object MongoBox {
 
     for (a <- p; b <- p2) {println("p identical to p2?" + (a eq b))}
     
-    val p3 = mb.findByQuery[Person](MongoDBObject("name" -> "Renamed again After findById"))
+    val p3 = mb.findOne[Person](MongoDBObject("name" -> "Renamed again After findById"))
     println(p3)
     p3.foreach(person => println(mb.id(person)))
+    
+    val namedB = mb.find[Person](MongoDBObject("name" -> "nameb"))
+    namedB.foreach(person => println(person.name()))
+    
+//    val containsMed = mb.find[Person]("name" $exists true)
+//    namedB.foreach(person => println(person.name()))
+
   }
 }
 
@@ -51,45 +56,40 @@ class MongoBox(dbName: String, aliases: ClassAliases) {
   private val db = mongoConn(dbName)
   private val io = JSONIO(aliases)
   
+  //TODO might be better as soft references, to reduce unneeded db access?
   private val m = new WeakKeysBIDIMap[Node, ObjectId]()
   
   def id(t: Node) = Box.transact{m.toValue(t)}
-  
-//  def findById[T <: Node](id: ObjectId)(implicit man: Manifest[T]): Option[T] = {
-//    Box.transact {
-//      
-//      val alias = aliases.forClass(man.erasure)
-//      //We will only return the item if it is in mongo in the correct
-//      //collection, indicating the correct class
-//      db(alias).findOne(MongoDBObject("_id" -> id)).map(dbo => {
-//        val inMap = m.toKey(id).map(_.asInstanceOf[T]);
-//        inMap.getOrElse{
-//          val fromMongo = io.readDBO(dbo).asInstanceOf[T]
-//          track(alias, fromMongo, id)
-//          fromMongo
-//        }
-//      })
-//    }
-//  }
-  
-  def findById[T <: Node](id: ObjectId)(implicit man: Manifest[T]): Option[T] = findByQuery(MongoDBObject("_id" -> id))(man) 
-    
-  def findByQuery[T <: Node](query: MongoDBObject)(implicit man: Manifest[T]): Option[T] = {
-    Box.transact {
-      
-      val alias = aliases.forClass(man.erasure)
-      //We will only return the item if it is in mongo in the correct
-      //collection, indicating the correct class
-      for {
-        dbo <- db(alias).findOne(query);
-        id <- dbo._id
-      } yield {
-        m.toKey(id).map(_.asInstanceOf[T]).getOrElse {
-          val fromMongo = io.readDBO(dbo).asInstanceOf[T]
-          track(alias, fromMongo, id)
-          fromMongo
-        }
+
+  private def toNode[T <: Node](alias: String, dbo: MongoDBObject) = {
+    for {
+      id <- dbo._id
+    } yield {
+      m.toKey(id).map(_.asInstanceOf[T]).getOrElse {
+        val fromMongo = io.readDBO(dbo).asInstanceOf[T]
+        track(alias, fromMongo, id)
+        fromMongo
       }
+    }    
+  }
+
+  def findById[T <: Node](id: ObjectId)(implicit man: Manifest[T]): Option[T] = findOne(MongoDBObject("_id" -> id))(man) 
+    
+  def findOne[T <: Node](query: MongoDBObject)(implicit man: Manifest[T]): Option[T] = {
+    Box.transact {
+      val alias = aliases.forClass(man.erasure)
+      for {
+        dbo <- db(alias).findOne(query)
+        n <- toNode[T](alias, dbo)
+      } yield n
+    }
+  }
+  
+  def find[T <: Node](query: MongoDBObject)(implicit man: Manifest[T]): Iterator[T] = {
+    Box.transact {
+      val alias = aliases.forClass(man.erasure)
+      val cursor = db(alias).find(query)
+      cursor.flatMap(dbo => toNode[T](alias, dbo))
     }
   }
   

@@ -19,7 +19,9 @@ private class MongoTokenWriting(aliases: ClassAliases) {
   private[mongo] def writeThing(value: Any) {
     value match {
       case obj: BasicDBObject => writeObjOrSecondClassPrim(obj)
+      case obj: MongoDBObject => writeObjOrSecondClassPrim(obj)
       case arr: BasicDBList => writeArr(arr)
+      case arr: MongoDBList => writeArr(arr)
       case v: String => t.write(StringToken(v))
       case v: Int => t.write(IntToken(v))
       case v: Double => t.write(DoubleToken(v))
