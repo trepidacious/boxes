@@ -48,10 +48,14 @@ trait ListRef[T] extends Box[List[T], ListChange[T]] {
 }
 
 trait ListVar[T] extends ListRef[T] with VarBox[List[T], ListChange[T]] {
+  def update(u : (List[T] => Option[(List[T], ListChange[T])]))
+  //NOTE only use this inside reactions, or using Box.transact, or when
+  //entirely replacing the list, to avoid thread issues.
   def updateWithChanges(newT:List[T], c:ListChange[T]*)
   def update(i:Int, e:T)
   def insert(i:Int, e:T*)
   def remove(i:Int, c:Int)
+  def append(e:T*)
   override def <<(c: =>List[T]) = Reaction(this, c)
   override def <<?(c: =>Option[List[T]]) = OptionalReaction(this, c)
 }
@@ -74,7 +78,11 @@ object ListUtils {
     lb.update(i, t)
     lb.toList
   }
-
+  def append[T](l:List[T], t:T*):List[T] = {
+    val lb = mutable.ListBuffer(l:_*)
+    lb.append(t:_*)
+    lb.toList
+  }
 }
 
 object ListVal {
@@ -110,7 +118,7 @@ object ListVar {
 
 private class ListVarDefault[T] (private var t:List[T]) extends ListVar[T] {
 
-  private def update(u : (List[T] => Option[(List[T], ListChange[T])])) = {
+  def update(u : (List[T] => Option[(List[T], ListChange[T])])) = {
     try {
       Box.beforeWrite(this)
       u.apply(t) match {
@@ -142,17 +150,29 @@ private class ListVarDefault[T] (private var t:List[T]) extends ListVar[T] {
     }
   }
 
+  def append(e:T*) = {
+    update(list => {
+      val oldList = t
+      val i = oldList.size
+      val newList = ListUtils.insert(t, i, e:_*)
+      Some((newList, InsertionListChange(oldList, newList, i, e.size)))
+    })    
+  }
 
   def insert(i:Int, e:T*) = {
-    val oldList = t
-    val newList = ListUtils.insert(t, i, e:_*)
-    updateWithChanges(newList, InsertionListChange(oldList, newList, i, e.size))
+    update(list => {
+      val oldList = t
+      val newList = ListUtils.insert(t, i, e:_*)
+      Some((newList, InsertionListChange(oldList, newList, i, e.size)))
+    })
   }
 
   def remove(i:Int, c:Int) = {
-    val oldList = t
-    val newList = ListUtils.remove(t, i, c)
-    updateWithChanges(newList, RemovalListChange(oldList, newList, i, c))
+    update(list => {
+      val oldList = t
+      val newList = ListUtils.remove(t, i, c)
+      Some((newList, RemovalListChange(oldList, newList, i, c)))
+    })
   }
 
   def update(i:Int, e:T) {
