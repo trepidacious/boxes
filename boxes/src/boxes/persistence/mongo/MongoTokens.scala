@@ -83,7 +83,7 @@ private class MongoTokenWriting(aliases: ClassAliases) {
 
 private class MongoTokenReading(t: TokenReader, aliases: ClassAliases) {
 
-  //If next token starts a field, read that field, put it in object, and return true. Otherwise return false.
+  //If next token starts a field, read that field, put it in object o, and return true. Otherwise return false.
   def readField(o: MongoDBObject): Boolean = {
     t.peek match {
       case OpenField(name) => {
@@ -98,7 +98,7 @@ private class MongoTokenReading(t: TokenReader, aliases: ClassAliases) {
     }
   }
 
-  //If next token can be an Arr element, read that element, put it in object, and return true. Otherwise return false.
+  //If next token can be an Arr element, read that element, put it in list l, and return true. Otherwise return false.
   def readElement(l: MongoDBList): Boolean = {
     t.peek match {
       case CloseArr => false
@@ -110,13 +110,6 @@ private class MongoTokenReading(t: TokenReader, aliases: ClassAliases) {
       }
     }
   }
-
-//  def readDBObject():DBObject = {
-//    read() match {
-//      case m:DBObject => m
-//      case t:Any => throw new RuntimeException()
-//    }
-//  }
   
   def read() = {
     t.pull() match {

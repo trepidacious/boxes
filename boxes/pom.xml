@@ -29,17 +29,15 @@
   </properties>
 
   <repositories>
-    <repository>
-      <id>scala-tools.releases</id>
-      <name>Scala-Tools Dependencies Repository for Releases</name>
-      <url>http://scala-tools.org/repo-releases</url>
+  
+	<repository>
+      <id>sonatype releases</id>
+      <url>https://oss.sonatype.org/content/repositories/releases</url>
     </repository>
-
     <repository>
-      <id>sonatype-oss-snapshots</id>
-      <name>Sonatype snapshot repository</name>
+      <id>sonatype snapshots</id>
       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </repository>
+    </repository>        
 
     <repository>
       <id>boxes-local-repo</id>
@@ -78,6 +76,20 @@
       <version>2.4.1</version>
       <type>pom</type>
 	</dependency>
+
+	<dependency>
+      <groupId>com.novus</groupId>
+      <artifactId>salat_${scala.version}</artifactId>
+      <version>1.9.0</version>
+      <scope>compile</scope>
+      <type>pom</type>
+      <exclusions>
+        <exclusion>
+          <groupId>org.mongodb</groupId>
+          <artifactId>casbah_${scala.version}</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
 
 	<dependency>
       <groupId>org.scalatest</groupId>
