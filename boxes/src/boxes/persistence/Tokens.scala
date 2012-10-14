@@ -138,6 +138,13 @@ trait TokenReader {
 
 class Thingy {}
 
+class NodeWithBlah extends Node {
+  val name = Var("Default Name")
+  val optionalBlah: Var[Option[Blah]] = Var(None)
+  override def toString() = "name()=\"" + name() + "\"; optionalBlah()=" + optionalBlah()
+}
+case class Blah(s:String = "sVal", i:Int = 42, l: List[Double] = List(1.0, 2.2, 3.9))
+
 object Tokens {
   def main(args: Array[String]) {
     
@@ -153,34 +160,45 @@ object Tokens {
       override def toString = name() + ", " + age() + ", friend: " + friend() + ", spouse " + spouse() + ", numbers " + numbers() + ", accounts " + accounts() + ", nicknames " + nicknames()
     }
     
-    val p = new Person()
-    p.accounts() = Map("current" -> 10.0, "savings" -> 100.0, "secretswiss" -> 10000000.0)
-    p.numbers() = List(10,20,30)
-    p.age() = 100
-    p.nicknames() = List("Pico", "Pi")
-
-    val q = new Person()
-    q.accounts() = Map("current" -> 0.0)
-    q.numbers() = List(1, 4, 9)
-    q.name() = "q"
-    q.nicknames() = List("Queue", "Cue", "QED")
-
-    p.friend() = Some(q)
-    p.spouse() = Some(q)
-    
+//    val p = new Person()
+//    p.accounts() = Map("current" -> 10.0, "savings" -> 100.0, "secretswiss" -> 10000000.0)
+//    p.numbers() = List(10,20,30)
+//    p.age() = 100
+//    p.nicknames() = List("Pico", "Pi")
+//
+//    val q = new Person()
+//    q.accounts() = Map("current" -> 0.0)
+//    q.numbers() = List(1, 4, 9)
+//    q.name() = "q"
+//    q.nicknames() = List("Queue", "Cue", "QED")
+//
+//    p.friend() = Some(q)
+//    p.spouse() = Some(q)
+//    
     val aliases = new ClassAliases
     aliases.alias(classOf[Person], "Person")
- 
+    aliases.alias(classOf[NodeWithBlah], "NodeWithBlah")
+    aliases.alias(classOf[Blah], "Blah")
+     
     val json = new StringWriter
     val jsonWriter = new JSONTokenWriter(json, aliases, true)
 
     val codec = new CodecByClass()
-
-    codec.write(p, jsonWriter)
-    println(json.toString)
+    
+    val nb = new NodeWithBlah()
+    nb.optionalBlah() = Some(Blah())
+    
+    codec.write(nb, jsonWriter)
+    println(json.toString)    
 
     val jsonReader = new JSONTokenReader(new StringReader(json.toString), aliases)
     println(codec.read(jsonReader))
+
+//    codec.write(p, jsonWriter)
+//    println(json.toString)
+//
+//    val jsonReader = new JSONTokenReader(new StringReader(json.toString), aliases)
+//    println(codec.read(jsonReader))
     
 //
 //

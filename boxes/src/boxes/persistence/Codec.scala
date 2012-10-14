@@ -2,6 +2,7 @@ package boxes.persistence
 
 import collection._
 import boxes._
+import com.novus.salat._
 
 /**
 * Writes objects to a TokenWriter, and
@@ -35,6 +36,7 @@ class CodecByClass extends Codec[Any] {
     add(new MapCodec(this), classOf[Map[_,_]])
     add(new SetCodec(this), classOf[Set[_]])
     add(new NodeCodec(this), classOf[Node])
+    add(new CaseClassCodec(this), classOf[Product])
     add(new OptionCodec(this), classOf[Option[_]])
   }
 
@@ -269,6 +271,61 @@ class NodeCodec(delegate:Codec[Any]) extends Codec[Node] {
         writer.write(CloseObj)
       }
     }
+
+  }
+}
+
+object CaseClassCodec {
+  val ctx = new Context {
+    val name = "boxes"
+  }
+}
+
+class CaseClassCodec(delegate:Codec[Any]) extends Codec[Product] {
+  
+  def genericGrater(c: Class[_]) = grater[AnyRef](CaseClassCodec.ctx, Manifest.classType(c))
+
+  override def read(reader: TokenReader) = {
+    val t = reader.pull
+    val tag = t match {
+      case OpenObj(c, l) => OpenObj(c, l)
+      case _ => throw new RuntimeException("Expected OpenObj token, got " + t)
+    }
+    val c = tag.clazz
+
+    tag.link match {
+      case LinkEmpty => {
+
+        //Retrieve fields into a map
+        val builder = Map.newBuilder[String, Any]
+        while (reader.peek != CloseObj) {
+          val t = reader.pull
+          val fieldName = t match {
+            case OpenField(n) => n
+            case _ => throw new RuntimeException("Expected OpenField, got " + t)
+          }
+          val fieldValue = delegate.read(reader)
+          builder += fieldName -> fieldValue
+        }
+        reader.pullAndAssert(CloseObj)
+
+        genericGrater(c).fromMap(builder.result().toMap).asInstanceOf[Product]
+      }
+      case _ => throw new RuntimeException("A case class has a non-empty link, which should not happen.")
+    }
+
+
+  }
+  override def write(n : Product, writer: TokenWriter) = {
+
+    writer.write(OpenObj(n.getClass, LinkEmpty))
+    val map = genericGrater(n.getClass()).toMap(n)
+    
+    map.foreach(entry => {
+      writer.write(OpenField(entry._1))
+      delegate.write(entry._2, writer)
+    })
+    writer.write(CloseObj)
 
   }
 }
