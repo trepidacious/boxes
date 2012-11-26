@@ -151,6 +151,7 @@ class ListCodec(delegate:Codec[Any]) extends CodecWithClass[List[_]] {
 class SetCodec(delegate:Codec[Any]) extends CodecWithClass[Set[_]] {
   override def read(reader: TokenReader) = {
 	reader.pullAndAssert(OpenObj(classOf[Set[_]]))
+    reader.pullAndAssert(OpenField("elements"))
     reader.pullAndAssert(OpenArr)
     val lb = mutable.ListBuffer[Any]()
     while (reader.peek != CloseArr) {
@@ -162,6 +163,7 @@ class SetCodec(delegate:Codec[Any]) extends CodecWithClass[Set[_]] {
   }
   override def write(set : Set[_], writer : TokenWriter) = {
     writer.write(OpenObj(classOf[Set[_]]))
+    writer.write(OpenField("elements"))
     writer.write(OpenArr)
     set.foreach(e => delegate.write(e, writer))
     writer.write(CloseArr)

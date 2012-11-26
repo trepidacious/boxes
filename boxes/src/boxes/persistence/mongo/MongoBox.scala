@@ -10,44 +10,63 @@ import boxes._
 import boxes.persistence.ClassAliases
 import boxes.persistence.CodecByClass
 import boxes.util.WeakKeysBIDIMap
+import com.mongodb.casbah.commons.MongoDBObject
+import com.mongodb.MongoException
 
 object MongoBox {
   def main(args: Array[String]) {
-    val aliases = new ClassAliases
-    aliases.alias(classOf[Person], "Person")
-    val mb = new MongoBox("boxes", aliases)
-
-//    val p = Person.testPerson
-//    println("Kept with id " + mb.keep(p))
-//    
-//    println(p)
-//    p.name() = p.name() + "b"
-//    println(p)
-
-//    val idA = new ObjectId("50688bdc3004c7e2cc92a11b")
-//    val idB = new ObjectId("5068649b3004c70bee79b45b")
+    val aliases = {
+      val a = new ClassAliases
+      a.alias(classOf[TestNode], "TestNode")
+      a
+    }
+    val mb = new MongoBox("boxestest", aliases)
     
-    val p = mb.findById[Person](new ObjectId("50688bdc3004c7e2cc92a11b"))
-    println(p)
-    p.foreach(_.name() = "Renamed again After findById")
-    println(p)
-
-    val p2 = mb.findById[Person](new ObjectId("50688bdc3004c7e2cc92a11b"))
-    println(p2)
-
-    for (a <- p; b <- p2) {println("p identical to p2?" + (a eq b))}
+    val bob = new TestNode
+    bob.index() = 1
+    val bobDup = new TestNode
+    bobDup.index() = 2
     
-    val p3 = mb.findOne[Person](MongoDBObject("name" -> "Renamed again After findById"))
-    println(p3)
-    p3.foreach(person => println(mb.id(person)))
-    
-    val namedB = mb.find[Person](MongoDBObject("name" -> "nameb"))
-    namedB.foreach(person => println(person.name()))
-    
-//    val containsMed = mb.find[Person]("name" $exists true)
-//    namedB.foreach(person => println(person.name()))
+    val bill = new TestNode
+    bill.name() = "bill"
+    bill.index() = 42
 
+    mb.keep(bobDup)
+    mb.keep(bob)
+    mb.keep(bill)
   }
+  
+  def tryOption[T](f: =>T): Option[T] = {
+    try {
+      Some(f)
+    } catch {
+      case c => None
+    }
+  }
+}
+
+import MongoBox._
+
+object TestNode extends MongoMetaNode {
+    override val indices = List(MongoNodeIndex("name"))
+}
+
+class TestNode extends MongoNode {
+  def meta = TestNode
+  val name = Var("bob")
+  val index = Var(0)
+}
+
+case class MongoNodeIndex(key: String, unique: Boolean = true, ascending: Boolean = true)
+
+trait MongoMetaNode {
+  def indices: List[MongoNodeIndex] = List()  
+}
+
+object DefaultMongoMetaNode extends MongoMetaNode
+
+trait MongoNode extends Node {
+  def meta: MongoMetaNode
 }
 
 class MongoBox(dbName: String, aliases: ClassAliases) {
@@ -73,7 +92,12 @@ class MongoBox(dbName: String, aliases: ClassAliases) {
     }    
   }
 
+  def findById[T <: Node](id: String)(implicit man: Manifest[T]): Option[T] = 
+    tryOption(new ObjectId(id)).flatMap(oid => findById(oid)(man))
+  
   def findById[T <: Node](id: ObjectId)(implicit man: Manifest[T]): Option[T] = findOne(MongoDBObject("_id" -> id))(man) 
+
+  def findOne[T <: Node](key: String, value: Any)(implicit man: Manifest[T]): Option[T] = findOne(MongoDBObject(key -> value))(man)
     
   def findOne[T <: Node](query: MongoDBObject)(implicit man: Manifest[T]): Option[T] = {
     Box.transact {
@@ -93,14 +117,28 @@ class MongoBox(dbName: String, aliases: ClassAliases) {
     }
   }
   
+  private def useMongoNode(alias: String, t: Node) {
+    t match {
+      case mn: MongoNode => mn.meta.indices.foreach(
+          i => db(alias).ensureIndex(
+            MongoDBObject(i.key -> (if (i.ascending) "1" else "-1")), 
+            i.key, 
+            i.unique))
+      case _ => {}
+    }
+  }
+  
   private def track(alias:String, t: Node, id: ObjectId) {
-      //Set up a View that writes any changes to mongo
-      val query = MongoDBObject("_id" -> id)
-      t.retainReaction(View {
-        val dbo = io.writeDBO(t).asInstanceOf[MongoDBObject]
-        db(alias).update(query, dbo)
-      })
-      m.put(t, id)
+    //First make sure any indices are in place, so we respect them from the View we will create
+    useMongoNode(alias, t)
+
+    //Set up a View that writes any changes to mongo
+    val query = MongoDBObject("_id" -> id)
+    t.retainReaction(View {
+      val dbo = io.writeDBO(t).asInstanceOf[MongoDBObject]
+      db(alias).update(query, dbo)
+    })
+    m.put(t, id)
   }
   
   //Register a Node to be kept in mongodb. Returns the ObjectId used. If the
@@ -112,12 +150,21 @@ class MongoBox(dbName: String, aliases: ClassAliases) {
       m.toValue(t).getOrElse{        
         val alias = aliases.forClass(t.getClass())
         
+        //First make sure any indices are in place, so we respect them when writing the
+        //new record to DB
+        useMongoNode(alias, t)
+        
         //Make a DB object with new id, and insert it to mongo
         val id = new ObjectId()
         val dbo = io.writeDBO(t).asInstanceOf[MongoDBObject]
         dbo.put("_id", id)
+        
+        //TODO detect errors, e.g. index problems (duplicate ObjectId, or conflict with an index from MongoNode)
         db(alias).insert(dbo)
-
+        
+        val leOrNull = db(alias).lastError.getException()
+        if (leOrNull != null) throw leOrNull 
+          
         //Set up View and add to map
         track(alias, t, id)
         id        
