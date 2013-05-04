@@ -63,8 +63,6 @@ trait MongoMetaNode {
   def indices: List[MongoNodeIndex] = List()  
 }
 
-object DefaultMongoMetaNode extends MongoMetaNode
-
 trait MongoNode extends Node {
   def meta: MongoMetaNode
 }

@@ -16,8 +16,8 @@ import boxes.BoxImplicits._
 import boxes.swing.{EmbossedLabel, TabBuilder, TabSpacer, SheetBuilder, BoxesDropdownView, SwingButton, GraphSwingBGView, GraphSwingView, SwingButtonBar, SwingOp, SwingBarButton}
 import boxes.swing.icons.IconFactory
 import boxes.swing._
-
 import com.mongodb.casbah.Imports._
+import boxes.Box
 
 object BoxesDemo {
 
@@ -777,14 +777,12 @@ object BoxesDemo {
 
     val p = Var{0d}
 
-    //Note that we keep a reference so the reaction isn't GCed
     val br = BackgroundReaction{
 
       val sval = s()  //We store the actual value (String) here, so that we DON'T read the Var s in our background function
 
       //This is the background function - it uses the stored String value sval, and so doesn't read any Box state
       (cancel:AtomicBoolean) => {
-
         //Create an artificial delay
         Range(0, 100, 1).foreach(pc => {
           val n = pc/100d
@@ -794,7 +792,7 @@ object BoxesDemo {
         p() = 1
 
         //TODO implement test to confirm that doing this (reading s()) causes an exception
-        //println(s())
+//        println(s())
 
         if (!cancel.get()) t() = sval + "_T"  //If cancelled, don't make the update. Note - in some cases you might
                                               // want to make a partial update, it depends on the purpose of the reaction.
@@ -806,8 +804,10 @@ object BoxesDemo {
     val tView = StringView(t)
     val pView = PieView(p, Cal{math.min(1, 7*(0.5 - math.abs(p() - 0.5)))})
 
-
-    val frame = new JFrame()
+    //Note that we keep a reference so the reaction isn't GCed
+    class LinkingJFrame(val br:BackgroundReaction) extends JFrame;    
+    val frame = new LinkingJFrame(br)
+    
     val panel = new JPanel(new GridLayout(2, 1))
     panel.add(sView.component)
     panel.add(tView.component)
@@ -817,6 +817,7 @@ object BoxesDemo {
     frame.setMinimumSize(new Dimension(300, 50))
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
     frame.setVisible(true)
+    
   }
 
   def ledgerAndSelected() {
@@ -1094,11 +1095,11 @@ object BoxesDemo {
 
     swingRun{
       SwingView.nimbus()
-//      backgroundReaction
+      backgroundReaction
 //      textViews
-    separateBIDIReactions
-      fieldCompositeLedger
-      ledgerMulti
+//    separateBIDIReactions
+//      fieldCompositeLedger
+//      ledgerMulti
 
 //      ledgerAndSelected
 
