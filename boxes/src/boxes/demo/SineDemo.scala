@@ -22,6 +22,7 @@ object SineDemo {
     val enabled = Var(true)
     val points = Var(false)
     val description = Var("Default Description\nCan have multiple lines")
+    override def toString = name() + ": " + description()
   }
 
   def buildLedgerMulti() = {
@@ -121,6 +122,7 @@ object SineDemo {
         selection = indices,
         grabEnabled = grabEnabled,
         seriesTooltipsEnabled = seriesTooltipsEnabled,
+        seriesTooltipsPrint = (i:Int) => sines(i).toString(),
         axisTooltipsEnabled = axisTooltipsEnabled,
         extraOverLayers = List(xThreshold, yThreshold)
       )
@@ -160,6 +162,104 @@ object SineDemo {
     panel
   }
 
+  def buildBarChartPanel(sines: ListVar[Sine], indices:Var[Set[Int]]) = {
+
+    val selectEnabled = Var(false)
+    val zoomEnabled = Var(true)
+    val grabEnabled = Var(false)
+    val axisTooltipsEnabled = Var(true)
+    val seriesTooltipsEnabled = Var(true)
+    val manualBounds = Var(None:Option[Area])
+    RadioReaction(selectEnabled, zoomEnabled, grabEnabled)
+
+    val data = Cal {
+      val bars = sines().zipWithIndex.map{case (s, i) => 
+        ((0, i), Bar(s.phase(), s.phase(), s.phase(), Some(Color.getHSBColor((9-i)/14f, 1f, 1f))))
+      }
+      Map(bars:_*);
+//
+//      Map( 
+//           (0, 0)->Bar(-1, -1, -1, Some(Color.gray)),
+//           (0, 1)->Bar(0, 0, 0, Some(Color.blue)),
+//           (0, 2)->Bar(1, 1, 1, Some(Color.red)),
+//           (0, 3)->Bar(2, 2, 2, Some(Color.green.darker())),
+//           (0, 4)->Bar(3, 3, 3, Some(Color.yellow.darker())),
+//
+//           (1, 0)->Bar(2, 2, 2, Some(Color.yellow.darker())),
+//           (1, 1)->Bar(3, 3, 3, Some(Color.yellow.darker())),
+//           (1, 2)->Bar(4, 4, 4, Some(Color.yellow.darker()))
+//
+//      )
+    }
+    
+//    val series = Cal{
+//      sines().zipWithIndex.map{case (s, i) => 
+//        Series(i,
+//          if (s.enabled()) Range(0, 100).map(x => x/100d).map(x => Vec2(x, math.sin((x + s.phase()) * 2 * 3.1415) * s.amplitude())).toList else List[Vec2](),
+//          Color.getHSBColor((9-i)/14f, 1f, 1f),
+//          2,
+//          if (s.points()) SeriesStyles.cross else SeriesStyles.line
+//        )
+//      }
+//    }
+
+    import boxes.graph.Axis._
+
+    val y = Var(0.5d)
+    val yThreshold = GraphThreshold(Y, y, Color.red, "Y Threshold", true)
+
+    val graph = Var (
+      GraphBasic.withBars (
+        data,
+        xName = "Sine",
+        yName = "Phase",
+        zoomEnabled = zoomEnabled,
+        manualBounds = manualBounds,
+//        selectEnabled = selectEnabled,
+//        selection = indices,
+        grabEnabled = grabEnabled,
+        yAxis = Val(GraphZoomerAxis(Val(None), Val(0), Val(0.01))),
+//        seriesTooltipsEnabled = seriesTooltipsEnabled,
+//        seriesTooltipsPrint = (i:Int) => sines(i).toString(),
+        axisTooltipsEnabled = axisTooltipsEnabled,
+        extraOverLayers = List(yThreshold)
+      )
+    )
+
+    val v = GraphSwingBGView(graph)
+
+    //Zoom out by clearing manual bounds to None
+    val zoomOutButton = SwingBarButton(SwingOp("", Some(GraphSwingView.zoomOut), SetOp(manualBounds, None:Option[Area])))
+
+    val zoomEnabledView = BooleanView(zoomEnabled, "", BooleanControlType.TOOLBARBUTTON, Some(GraphSwingView.zoomSelect), false)
+    val selectEnabledView = BooleanView(selectEnabled, "", BooleanControlType.TOOLBARBUTTON, Some(GraphSwingView.boxSelect), false)
+
+    val grabEnabledView = BooleanView(grabEnabled, "", BooleanControlType.TOOLBARBUTTON, Some(GraphSwingView.move), false)
+
+    val graphProperties = SheetBuilder()
+      .blankTop()
+      .view("Axis Tooltips", BooleanView(axisTooltipsEnabled))
+      .view("Series Tooltips", BooleanView(seriesTooltipsEnabled))
+    .panel()
+
+    val settingsPopup = BoxesPopupView(icon = Some(SwingView.wrench), popupContents = graphProperties)
+
+    val buttons = SwingButtonBar()
+                    .add(selectEnabledView)
+                    .add(grabEnabledView)
+                    .add(zoomEnabledView)
+                    .add(zoomOutButton)
+                    .add(settingsPopup)
+                  .buildWithListStyleComponent(EmbossedLabel("Demo Graph"))
+
+    val panel = new JPanel(new BorderLayout())
+    panel.add(v.component, BorderLayout.CENTER)
+
+    panel.add(buttons, BorderLayout.SOUTH)
+
+    panel
+  }
+  
   def properties(sine:Ref[Option[Sine]]) = {
     val nameView = StringOptionView(for (s <- sine()) yield s.name)
     val amplitudeView = NumberOptionView(for (s <- sine()) yield s.amplitude)
@@ -184,6 +284,7 @@ object SineDemo {
     val stuff = buildLedgerMulti()
     val table = stuff._1
     val graph = buildGraphPanel(stuff._2, stuff._3)
+    val barchart = buildBarChartPanel(stuff._2, stuff._3)
 
     val sine = stuff._4
 
@@ -208,6 +309,7 @@ object SineDemo {
     val tabs =
       TabBuilder()
         .add(graph,       "Graph",  Some(graphIcon))
+        .add(barchart,    "Bar Chart",  Some(graphIcon))
         .add(table,       "Table",  Some(tableIcon))
         .add(properties,  "Edit",   Some(propertiesIcon))
       .panel()
@@ -243,7 +345,7 @@ object SineDemo {
     SwingView.swingRun{
       SwingView.nimbus()
       tabs
-      source
+//      source
     }
   }
 

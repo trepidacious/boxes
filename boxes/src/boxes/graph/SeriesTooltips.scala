@@ -9,9 +9,9 @@ trait SeriesTooltipRenderer[K] {
   def paint(canvas:GraphCanvas, series:Series[K], pixelPos:Vec2)
 }
 
-class StringSeriesTooltipRenderer[K] extends SeriesTooltipRenderer[K]{
+class StringSeriesTooltipRenderer[K](print:(K=>String) = (k:K) => k.toString()) extends SeriesTooltipRenderer[K]{
   def paint(canvas:GraphCanvas, series:Series[K], pixelPos:Vec2) {
-    val s = series.key.toString
+    val s = print(series.key)
     val size = canvas.stringSize(s)
 
     canvas.color = SwingView.shadedBoxColor
@@ -36,7 +36,7 @@ object SeriesTooltips {
 
   def apply[K](series:Box[List[Series[K]], _], enabled:Box[Boolean, _] = Val(true), renderer:SeriesTooltipRenderer[K] = new StringSeriesTooltipRenderer[K]()) = new SeriesTooltips[K](enabled, series, renderer)
 
-  def string[K](series:Box[List[Series[K]], _], enabled:Box[Boolean, _] = Val(true)) = new SeriesTooltips[K](enabled, series, new StringSeriesTooltipRenderer[K]())
+  def string[K](series:Box[List[Series[K]], _], enabled:Box[Boolean, _] = Val(true), print:(K=>String) = (k:K) => k.toString()) = new SeriesTooltips[K](enabled, series, new StringSeriesTooltipRenderer[K](print))
   def highlight[K](series:Box[List[Series[K]], _], enabled:Box[Boolean, _] = Val(true)) = new SeriesTooltips[K](enabled, series, new HighlightSeriesTooltipRenderer[K]())
 }
 

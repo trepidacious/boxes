@@ -139,6 +139,9 @@ class PointSeriesPainter(val pointPainter:PointPainter = new CrossPointPainter()
 object GraphSeries {
   val shadowColor = new Color(220, 220, 220)
   val shadowOffset = Vec2(1, 1)
+  val barShadowColor = new Color(205, 205, 205)
+  val barOutlineColor = SwingView.dividingColor
+  val barShadowOffset = Vec2(3, 3)
 }
 
 class GraphSeries[K](series:Box[List[Series[K]], _], shadow:Boolean = false) extends GraphLayer {
@@ -221,6 +224,7 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
       Area(Vec2(x, y), Vec2(w, h))
     }
   }
+  def translate(v: Vec2) = Area(origin + v, size)
   def extendToContain(v:Vec2) = {
     if (contains(v)) {
       this
@@ -481,7 +485,7 @@ object GraphAxis {
   def apply(axis:Axis, pixelsPerMajor:Int = 100, format:DecimalFormat = GraphAxis.defaultFormat) = new GraphAxis(axis, pixelsPerMajor, format)
 }
 
-class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalFormat = GraphAxis.defaultFormat) extends UnboundedGraphDisplayLayer {
+class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalFormat = GraphAxis.defaultFormat, val gridlines: Boolean = true) extends UnboundedGraphDisplayLayer {
 
   def paint() = {
     (canvas:GraphCanvas) => {
@@ -512,8 +516,10 @@ class GraphAxis(val axis:Axis, val pixelsPerMajor:Int = 100, val format:DecimalF
             case X => canvas.string(format.format(p), start + Vec2(0, 10), Vec2(0.5, 1))
             case Y => canvas.string(format.format(p), start + Vec2(-10, 0), Vec2(1, 0.5))
           }
-          canvas.color = GraphAxis.gridMajorColor
-          canvas.line(start, start + canvas.spaces.pixelArea.axisPerpVec2(axis))
+          if (gridlines) {
+            canvas.color = GraphAxis.gridMajorColor
+            canvas.line(start, start + canvas.spaces.pixelArea.axisPerpVec2(axis))
+          }
         }
 //        } else {
 //          canvas.color = GraphAxis.gridMinorColor
@@ -625,7 +631,7 @@ class GraphClick[K](enabled:Box[Boolean, _] = Val(true), selectionOut:VarBox[Set
       Box.transact{
         current.eventType match {
           case RELEASE => {
-            //Find closest series, and select it
+            //TODO Find closest series, and select it
             println("Got a release!")
             true
           }
@@ -970,6 +976,7 @@ object GraphBasic {
       selection:Var[Set[K]] = Var(Set[K]()),
       grabEnabled:Ref[Boolean] = Val(false),
       seriesTooltipsEnabled:Ref[Boolean] = Val(true),
+      seriesTooltipsPrint:(K=>String) = (k:K) => k.toString(),
       axisTooltipsEnabled:Ref[Boolean] = Val(true),
       extraMainLayers:List[GraphLayer] = List[GraphLayer](),
       extraOverLayers:List[GraphLayer] = List[GraphLayer]()
@@ -1012,7 +1019,7 @@ object GraphBasic {
         GraphGrab(grabEnabled, manualBounds, zoomer.dataArea),
         AxisTooltip(X, axisTooltipsEnabled),
         AxisTooltip(Y, axisTooltipsEnabled),
-        SeriesTooltips.string(series, seriesTooltipsEnabled)
+        SeriesTooltips.string(series, seriesTooltipsEnabled, seriesTooltipsPrint)
                       //TODO is this in the right place?
         //GraphClick(Val(true), selection)
       )
@@ -1025,6 +1032,80 @@ object GraphBasic {
       borders
     )
   }
+  
+  
+  def withBars[C1, C2](
+      data: Ref[Map[(C1, C2), Bar]],
+      barWidth: Ref[Double] = Val(1.0), catPadding: Ref[Double] = Val(1.0), barPadding: Ref[Double] = Val(0.4),
+      xName:Ref[String] = Val("x"),
+      yName:Ref[String] = Val("y"),
+      borders:Ref[Borders] = Val(Borders(16, 74, 53, 16)),
+      zoomEnabled:Ref[Boolean] = Val(true),
+      manualBounds:Var[Option[Area]] = Var(None),
+      xAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
+      yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
+      //selectEnabled:Ref[Boolean] = Val(false),
+      //selection:Var[Set[K]] = Var(Set[K]()),
+      grabEnabled:Ref[Boolean] = Val(false),
+      //seriesTooltipsEnabled:Ref[Boolean] = Val(true),
+      //seriesTooltipsPrint:(K=>String) = (k:K) => k.toString(),
+      axisTooltipsEnabled:Ref[Boolean] = Val(true),
+      extraMainLayers:List[GraphLayer] = List[GraphLayer](),
+      extraOverLayers:List[GraphLayer] = List[GraphLayer]()
+      )(implicit ord1: Ordering[C1], ord2: Ordering[C2]) = {
+
+    val layers = ListVal[GraphLayer](
+      extraMainLayers ::: List(
+        new GraphBG(SwingView.background, Color.white),
+        new GraphHighlight(),
+        new GraphBars(data, barWidth, catPadding, barPadding, true)(ord1, ord2),  //Shadows
+        new GraphAxis(Y, 50),
+        new GraphAxis(X, gridlines = false),
+        new GraphShadow(),
+        new GraphBars(data, barWidth, catPadding, barPadding, false)(ord1, ord2), //Data
+        new GraphOutline(),
+        new GraphAxisTitle(X, xName),
+        new GraphAxisTitle(Y, yName)
+      )
+    )
+
+    val dataBounds = Cal{
+      layers().foldLeft(None:Option[Area]){
+        (areaOption, layer) => areaOption match {
+          case None => layer.dataBounds()
+
+          case Some(area) => layer.dataBounds() match {
+            case None => Some(area)
+            case Some(layerArea) => Some(area.extendToContain(layerArea))
+          }
+        }
+      }
+    }
+
+    val zoomer = new GraphZoomer(dataBounds, manualBounds, xAxis, yAxis)
+
+    val overlayers = ListVal[GraphLayer](
+//      List(SeriesTooltips.highlight(series, seriesTooltipsEnabled)) ::: 
+        extraOverLayers ::: List(
+        GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), manualBounds, zoomEnabled),
+//        GraphSelectBox(series, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100)), selection, selectEnabled),
+        GraphGrab(grabEnabled, manualBounds, zoomer.dataArea),
+        AxisTooltip(X, axisTooltipsEnabled),
+        AxisTooltip(Y, axisTooltipsEnabled)
+//        SeriesTooltips.string(series, seriesTooltipsEnabled, seriesTooltipsPrint)
+                      //TODO is this in the right place?
+        //GraphClick(Val(true), selection)
+      )
+    )
+
+    new GraphBasic(
+      layers,
+      overlayers,
+      zoomer.dataArea,
+      borders
+    )
+  }
+  
 }
 
 object ColorSeriesBySelection {
