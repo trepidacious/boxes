@@ -640,36 +640,6 @@ object GraphZoomBox {
   }
 }
 
-object GraphClick{
-  def apply[K](enabled:Box[Boolean, _] = Val(true), selectionOut:VarBox[Set[K], _]) = new GraphClick(enabled, selectionOut)
-}
-
-class GraphClick[K](enabled:Box[Boolean, _] = Val(true), selectionOut:VarBox[Set[K], _]) extends GraphLayer {
-
-  def paint() = (canvas:GraphCanvas) => {}
-
-  def onMouse(current:GraphMouseEvent) = {
-    if (enabled()) {
-      Box.transact{
-        current.eventType match {
-          case RELEASE => {
-            //TODO Find closest series, and select it
-            println("Got a release!")
-            true
-          }
-          case _ => false
-        }
-      }
-    } else {
-      false
-    }
-  }
-
-  val dataBounds = Val(None:Option[Area])
-
-}
-
-
 object GraphGrab{
   def apply(enabled:Box[Boolean, _] = Val(true), manualDataArea:VarBox[Option[Area], _], displayedDataArea:Box[Area, _]) = new GraphGrab(enabled, manualDataArea, displayedDataArea)
 }
@@ -982,6 +952,35 @@ class GraphZoomer(
   }
 }
 
+object GraphClick{
+  def apply[K](series:ListRef[Series[K]], selectionOut:VarBox[Set[K], _], enabled:Box[Boolean, _] = Val(true)) = new GraphClick(series, selectionOut, enabled)
+}
+
+class GraphClick[K](series:ListRef[Series[K]], selectionOut:VarBox[Set[K], _], enabled:Box[Boolean, _] = Val(true)) extends GraphLayer {
+
+  def paint() = (canvas:GraphCanvas) => {}
+
+  def onMouse(e:GraphMouseEvent) = {
+    if (enabled()) {
+      Box.transact{
+        e.eventType match {
+          case CLICK => {
+            val selectedSeries = SeriesSelection.selectedSeries(series(), e)
+            selectedSeries.foreach((ss) => selectionOut() = Set(ss.key))
+            selectedSeries.isDefined
+          }
+          case _ => false
+        }
+      }
+    } else {
+      false
+    }
+  }
+
+  val dataBounds = Val(None:Option[Area])
+
+}
+
 case class GraphBasic(layers:ListRef[GraphLayer], overlayers:ListRef[GraphLayer], dataArea:Ref[Area], borders:Ref[Borders]) extends Graph {}
 
 object GraphBasic {
@@ -996,6 +995,7 @@ object GraphBasic {
       xAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
       yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
       selectEnabled:Ref[Boolean] = Val(false),
+      clickSelectEnabled:Ref[Boolean] = Val(true),
       selection:Var[Set[K]] = Var(Set[K]()),
       grabEnabled:Ref[Boolean] = Val(false),
       seriesTooltipsEnabled:Ref[Boolean] = Val(true),
@@ -1040,11 +1040,11 @@ object GraphBasic {
         GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), manualBounds, zoomEnabled),
         GraphSelectBox(series, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100)), selection, selectEnabled),
         GraphGrab(grabEnabled, manualBounds, zoomer.dataArea),
+        GraphClick(series, selection, clickSelectEnabled),
         AxisTooltip(X, axisTooltipsEnabled),
         AxisTooltip(Y, axisTooltipsEnabled),
         SeriesTooltips.string(series, seriesTooltipsEnabled, seriesTooltipsPrint)
                       //TODO is this in the right place?
-        //GraphClick(Val(true), selection)
       )
     )
 

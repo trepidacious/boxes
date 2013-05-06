@@ -38,15 +38,18 @@ class GraphThreshold(axis:Box[Axis, _], value:VarBox[Double, _], color:Box[Color
     case Y => point.y
   }
 
+  
   def onMouse(e:GraphMouseEvent) = {
     if (enabled()) {
       val pixelPoint = e.spaces.toPixel(e.dataPoint)
       val valuePoint = e.spaces.toPixel(e.spaces.dataArea.axisPosition(axis(), value()))
       val pixelPerpDistance = (valuePoint - pixelPoint).onAxis(axis())
       val pixelDistance = (valuePoint - pixelPoint).onAxis(Axis.other(axis())) * (if (axis() == X) 1 else -1)
+      val insideHandle = ((pixelPerpDistance > -2 && pixelPerpDistance < 18 && pixelDistance > 0 && pixelDistance < labelWidth.get()) || math.abs(pixelPerpDistance) < GraphThreshold.handleRadius)
       e.eventType match {
+        case CLICK => insideHandle  //Consume clicks in handle - may use later
         case PRESS => {
-          if ((pixelPerpDistance > -2 && pixelPerpDistance < 18 && pixelDistance > 0 && pixelDistance < labelWidth.get()) || math.abs(pixelPerpDistance) < GraphThreshold.handleRadius) {
+          if (insideHandle) {
             pressOffset = Some(value() - dataPointValue(e.dataPoint))
             true
           } else {
