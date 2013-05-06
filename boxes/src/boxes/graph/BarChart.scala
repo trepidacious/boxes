@@ -10,6 +10,7 @@ import java.text.DecimalFormat
 import boxes.{VarBox, Val, Box}
 import java.util.concurrent.atomic.AtomicReference
 import scala.collection.immutable.SortedSet
+import scala.collection._
 
 trait BarPainter{
   def paint(canvas:GraphCanvas, 
@@ -25,7 +26,9 @@ class PlainBarPainter extends BarPainter {
       shadow:Boolean = false) {
     
     val area = Area(Vec2(x, 0), Vec2(barWidth, bar.value))
-    val pixelArea = canvas.spaces.toPixel(area);
+    
+    //Round before drawing, so that inset works exactly on pixels.
+    val pixelArea = canvas.spaces.toPixel(area).round();
     
     if (shadow) {
       canvas.color = GraphSeries.barShadowColor
@@ -34,6 +37,8 @@ class PlainBarPainter extends BarPainter {
       bar.fill.foreach((c:Color) => {
         canvas.color = c
         canvas.fillRect(pixelArea)
+        canvas.color = new Color(1f, 1f, 1f, 0.4f)
+        canvas.drawRect(pixelArea.inset(1, 1, 1, 1))
       })
       bar.outline.foreach((c:Color) => {
         canvas.color = c
@@ -56,6 +61,126 @@ case class Bar(value: Double, rangeMin: Double, rangeMax: Double, fill: Option[C
   def interval = Vec2(min, max)
 }
 
+case class GraphBarPosition[C1, C2](cat1: C1, cat2: C2, x: Double)
+case class GraphBarLayout[C1, C2](positions: List[GraphBarPosition[C1, C2]], cat1Positions: Map[C1, Vec2])
+
+object GraphBars {
+  def layout[C1, C2](d: Map[(C1, C2), Bar], barWidth: Double, catPadding: Double, ord1: Ordering[C1], ord2: Ordering[C2]) = {
+    val cat1s = SortedSet(d.keySet.map(_._1).toSeq:_*)(ord1)
+    val cat2s = SortedSet(d.keySet.map(_._2).toSeq:_*)(ord2)
+
+    val xs = mutable.ListBuffer[GraphBarPosition[C1, C2]]()
+    val cat1Positions = mutable.Map[C1, Vec2]()
+    
+    var x = 0.0;
+    for (cat1 <- cat1s) {
+      val xStart = x
+      for (cat2 <- cat2s) {
+        d.get((cat1, cat2)).foreach((bar: Bar) => {
+          xs.append(GraphBarPosition(cat1, cat2, x))
+          x+=barWidth;
+        })
+      }
+      cat1Positions.put(cat1, Vec2(xStart, x))
+      x+=catPadding;
+    }
+    
+    GraphBarLayout(List(xs: _*), cat1Positions.toMap)
+  }
+  
+  def integerTicks(range:(Double,Double)) = {
+    val firstTick = math.floor(range._1).asInstanceOf[Int]
+    val lastTick = math.ceil(range._2).asInstanceOf[Int]
+
+    Range.inclusive(firstTick, lastTick).filter(x => x >= range._1 && x <= range._2)
+  }
+
+}
+
+
+class GraphBarAxis[C1, C2](data: Box[Map[(C1, C2), Bar], _], barWidth: Box[Double, _], catPadding: Box[Double, _], 
+    barPadding: Box[Double, _], val axis:Axis, 
+    cat1Print: (C1 => String) = (c: C1)=>c.toString, 
+    cat2Print: (C2 => String) = (c: C2)=>c.toString)
+    (implicit ord1: Ordering[C1], ord2: Ordering[C2]) extends UnboundedGraphDisplayLayer {
+
+  def paint() = {
+    val d = data()
+    val bw = barWidth()
+    val cp = catPadding()
+    val bp = barPadding()
+    
+    (canvas:GraphCanvas) => {
+      val dataArea = canvas.spaces.dataArea
+      
+      val ticks = GraphBars.integerTicks(dataArea.axisBounds(axis))
+
+      val layout = GraphBars.layout(d, bw, cp, ord1, ord2)
+      
+      //Secondary category labels
+      for (pos <- layout.positions; bar <- d.get(pos.cat1, pos.cat2)) {
+        
+        val p = pos.x + bw/2
+        if (canvas.spaces.dataArea.axisContains(axis, p)) {
+          val start = canvas.spaces.toPixel(dataArea.axisPosition(axis, p))
+          val text = cat2Print(pos.cat2)
+          canvas.color = GraphAxis.fontColor
+          canvas.fontSize = GraphAxis.fontSize
+          axis match {
+            case X => canvas.string(text, start + Vec2(0, 10), Vec2(0.5, 1))
+            case Y => canvas.string(text, start + Vec2(-10, 0), Vec2(1, 0.5))
+          }
+        }
+      }
+
+      //Now primary category labels
+      for (cat1 <- layout.cat1Positions.keySet; pos <- layout.cat1Positions.get(cat1)) {
+        
+        val p = (pos.x + pos.y)/2
+        if (canvas.spaces.dataArea.axisContains(axis, p)) {
+          val start = canvas.spaces.toPixel(dataArea.axisPosition(axis, p))
+          val text = cat1Print(cat1)
+          canvas.color = GraphAxis.fontColor
+          canvas.fontSize = GraphAxis.titleFontSize
+          axis match {
+            case X => canvas.string(text, start + Vec2(0, 28), Vec2(0.5, 1))
+            case Y => canvas.string(text, start + Vec2(-28, 0), Vec2(1, 0.5))
+          }
+        }
+      }
+      
+      ticks.foreach(p => {
+
+        val start = canvas.spaces.toPixel(dataArea.axisPosition(axis, p))
+
+        canvas.color = GraphAxis.axisColor
+        axis match {
+          case X => canvas.line(start, start + Vec2(0, 8))
+          case Y => canvas.line(start, start + Vec2(-8, 0))
+        }
+        canvas.color = GraphAxis.axisHighlightColor
+        axis match {
+          case X => canvas.line(start + Vec2(1, 0), start + Vec2(1, 8))
+          case Y => canvas.line(start + Vec2(0, 1), start + Vec2(-8, 1))
+        }
+
+//        if (major) {
+//          canvas.color = GraphAxis.fontColor
+//          canvas.fontSize = GraphAxis.fontSize
+//          axis match {
+//            case X => canvas.string(format.format(p), start + Vec2(0, 10), Vec2(0.5, 1))
+//            case Y => canvas.string(format.format(p), start + Vec2(-10, 0), Vec2(1, 0.5))
+//          }
+//        }
+//        } else {
+//          canvas.color = GraphAxis.gridMinorColor
+//          canvas.line(start, start + canvas.spaces.pixelArea.axisPerpVec2(axis))
+//        }
+      })
+    }
+  }
+}
+
 class GraphBars[C1, C2](
     data: Box[Map[(C1, C2), Bar], _],
     barWidth: Box[Double, _], catPadding: Box[Double, _], 
@@ -69,21 +194,12 @@ class GraphBars[C1, C2](
     val cp = catPadding()
     val bp = barPadding()
     (canvas:GraphCanvas) => {
-      val cat1s = SortedSet(d.keySet.map(_._1).toSeq:_*)(ord1)
-      val cat2s = SortedSet(d.keySet.map(_._2).toSeq:_*)(ord2)
-      
       canvas.clipToData
-      
-      var x = 0.0;
-      for (cat1 <- cat1s) {
-        for (cat2 <- cat2s) {
-          d.get((cat1, cat2)).foreach((bar: Bar) => {
-            bar.painter.paint(canvas, x + bp/2, bw-bp, bar, shadow)
-            x+=bw;
-          })
-        }
-        x+=cp;
+
+      for (pos <- GraphBars.layout(d, bw, cp, ord1, ord2).positions; bar <- d.get(pos.cat1, pos.cat2)) {
+        bar.painter.paint(canvas, pos.x + bp/2, bw-bp, bar, shadow)
       }
+      
     }
   }
   

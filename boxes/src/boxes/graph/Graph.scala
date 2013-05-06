@@ -55,6 +55,8 @@ case class Vec2(x:Double = 0, y:Double = 0) {
   //The union of the intervals defined by this Vec2 and b. Each interval is from
   //a minimum at the Vec2 x value to at maximum at the Vec2 y value.
   def intervalUnion(b: Vec2) = Vec2(math.min(x, b.x), math.max(y, b.y))
+  
+  def round() = Vec2(math.round(x), math.round(y))
 }
 
 object Vec2 {
@@ -143,7 +145,7 @@ class PointSeriesPainter(val pointPainter:PointPainter = new CrossPointPainter()
 object GraphSeries {
   val shadowColor = new Color(220, 220, 220)
   val shadowOffset = Vec2(1, 1)
-  val barShadowColor = new Color(205, 205, 205)
+  val barShadowColor = new Color(215, 215, 215)
   val barOutlineColor = SwingView.dividingColor
   val barShadowOffset = Vec2(3, 3)
 }
@@ -180,6 +182,10 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
     case X => (origin.x, origin.x + size.x)
     case Y => (origin.y, origin.y + size.y)
   }
+  def axisContains(a:Axis, p: Double) = a match {
+    case X => (p >= origin.x && p<= origin.x + size.x)
+    case Y => (p >= origin.y && p<= origin.y + size.y)
+  }
   def axisSize(a:Axis) = a match {
     case X => size.x
     case Y => size.y
@@ -199,6 +205,11 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
   def axisPerpVec2(a:Axis) = a match {
     case X => Vec2(0, size.y)
     case Y => Vec2(size.x, 0)
+  }
+  def round() = {
+    val o = origin.round()
+    val c = (origin + size).round()
+    Area(o, c-o)
   }
   def contains(v:Vec2) = normalise.rawContains(v)
   private def rawContains(v:Vec2) = (v.x >= origin.x && v.y >= origin.y && v.x <= origin.x + size.x && v.y <= origin.y + size.y)
@@ -305,7 +316,14 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
     val s = size + beforePadding + size * after
     Area(o, s)
   }
-  
+
+  def inset(r: Double, u: Double, l: Double, d: Double): Area = normalise.rawInset(r, u, l, d)
+  def rawInset(r: Double, u: Double, l: Double, d: Double) = {
+    val o = origin + Vec2(l, d)
+    val s = size + Vec2(-l-r, -u-d)
+    Area(o, s)
+  }
+
   def sizeAtLeast(minSize:Vec2) = normalise.rawSizeAtLeast(minSize)
   def rawSizeAtLeast(minSize:Vec2) = {
     if (size.x >= minSize.x && size.y >= minSize.y) {
@@ -478,6 +496,7 @@ class GraphShadow extends UnboundedGraphDisplayLayer {
 
 object GraphAxis {
   val fontSize = 10
+  val titleFontSize = 12
   val fontColor = SwingView.textColor
   val axisColor = SwingView.dividingColor
   val axisHighlightColor = SwingView.alternateBackgroundColor.brighter
@@ -543,7 +562,7 @@ class GraphAxisTitle(val axis:Axis, name:Box[String, _]) extends UnboundedGraphD
       val br = a.origin + a.size.withY(0)
 
       canvas.color = GraphAxis.fontColor
-      canvas.fontSize = 12
+      canvas.fontSize = GraphAxis.titleFontSize
       axis match {
         case X => canvas.string(currentName, br + Vec2(-10, 28), Vec2(1, 1))
         case Y => canvas.string(currentName, tl + Vec2(-52, 10 ), Vec2(1, 0), -1)
@@ -1041,7 +1060,6 @@ object GraphBasic {
   def withBars[C1, C2](
       data: Ref[Map[(C1, C2), Bar]],
       barWidth: Ref[Double] = Val(1.0), catPadding: Ref[Double] = Val(1.0), barPadding: Ref[Double] = Val(0.4),
-      xName:Ref[String] = Val("x"),
       yName:Ref[String] = Val("y"),
       borders:Ref[Borders] = Val(Borders(16, 74, 53, 16)),
       zoomEnabled:Ref[Boolean] = Val(true),
@@ -1064,11 +1082,10 @@ object GraphBasic {
         new GraphHighlight(),
         new GraphBars(data, barWidth, catPadding, barPadding, true)(ord1, ord2),  //Shadows
         new GraphAxis(Y, 50),
-        new GraphAxis(X, gridlines = false),
+        new GraphBarAxis(data, barWidth, catPadding, barPadding, X)(ord1, ord2),
         new GraphShadow(),
         new GraphBars(data, barWidth, catPadding, barPadding, false)(ord1, ord2), //Data
         new GraphOutline(),
-        new GraphAxisTitle(X, xName),
         new GraphAxisTitle(Y, yName)
       )
     )
@@ -1094,7 +1111,6 @@ object GraphBasic {
         GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), manualBounds, zoomEnabled),
 //        GraphSelectBox(series, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100)), selection, selectEnabled),
         GraphGrab(grabEnabled, manualBounds, zoomer.dataArea),
-        AxisTooltip(X, axisTooltipsEnabled),
         AxisTooltip(Y, axisTooltipsEnabled)
 //        SeriesTooltips.string(series, seriesTooltipsEnabled, seriesTooltipsPrint)
                       //TODO is this in the right place?

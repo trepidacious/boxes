@@ -174,7 +174,7 @@ object SineDemo {
 
     val data = Cal {
       val bars = sines().zipWithIndex.map{case (s, i) => 
-        ((0, i), Bar(s.phase(), s.phase(), s.phase(), Some(Color.getHSBColor((9-i)/14f, 1f, 1f))))
+        (("Group " + i/3, s.name()), Bar(s.phase(), s.phase(), s.phase(), Some(Color.getHSBColor((9-i)/14f, 1f, 1f))))
       }
       Map(bars:_*);
 //
@@ -211,7 +211,6 @@ object SineDemo {
     val graph = Var (
       GraphBasic.withBars (
         data,
-        xName = "Sine",
         yName = "Phase",
         zoomEnabled = zoomEnabled,
         manualBounds = manualBounds,
@@ -317,7 +316,7 @@ object SineDemo {
     frame.add(tabs)
 
     frame.pack
-    frame.setMinimumSize(new Dimension(50, 50))
+    frame.setMinimumSize(new Dimension(650, 550))
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
     frame.setVisible(true)
 
