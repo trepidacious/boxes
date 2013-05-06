@@ -51,6 +51,10 @@ case class Vec2(x:Double = 0, y:Double = 0) {
   }
   def squaredLength = x * x + y * y
   def length = math.sqrt(squaredLength)
+  
+  //The union of the intervals defined by this Vec2 and b. Each interval is from
+  //a minimum at the Vec2 x value to at maximum at the Vec2 y value.
+  def intervalUnion(b: Vec2) = Vec2(math.min(x, b.x), math.max(y, b.y))
 }
 
 object Vec2 {
@@ -293,14 +297,15 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
     Area(bottomLeft, topRight - bottomLeft)
   }
 
-  def pad(v:Vec2) = normalise.rawPad(v)
-  def rawPad(v:Vec2) = {
-    val padding = size * v
-    val o = origin - padding
-    val s = size + padding * (Vec2(2,2))
+  def pad(v:Vec2): Area = pad(v, v)
+  def pad(before: Vec2, after: Vec2): Area = normalise.rawPad(before, after)
+  def rawPad(before: Vec2, after: Vec2) = {
+    val beforePadding = size * before
+    val o = origin - beforePadding
+    val s = size + beforePadding + size * after
     Area(o, s)
   }
-
+  
   def sizeAtLeast(minSize:Vec2) = normalise.rawSizeAtLeast(minSize)
   def rawSizeAtLeast(minSize:Vec2) = {
     if (size.x >= minSize.x && size.y >= minSize.y) {
@@ -311,8 +316,6 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
       Area(newOrigin, newSize)
     }
   }
-
-
 }
 
 trait Graph {
@@ -920,7 +923,8 @@ class GraphBox(fill:Box[Color, _], outline:Box[Color, _], enabled:Box[Boolean, _
 
 case class GraphZoomerAxis(
     requiredRange:Ref[Option[(Double, Double)]] = Var(None),
-    padding:Ref[Double] = Var(0.05),
+    paddingBefore:Ref[Double] = Var(0.05),
+    paddingAfter:Ref[Double] = Var(0.05),
     minSize:Ref[Double] = Var(0.01)
 )
 
@@ -941,7 +945,7 @@ class GraphZoomer(
       }
       case Some(area) => {
         //We have a data bounds area, so pad it appropriately
-        val auto = area.pad(Vec2(xAxis().padding(), yAxis().padding()))
+        val auto = area.pad(Vec2(xAxis().paddingBefore(), yAxis().paddingBefore()), Vec2(xAxis().paddingAfter(), yAxis().paddingAfter()))
 
         val padX = xAxis().requiredRange().foldLeft(auto){(area, range) => area.extendToContain(Vec2(range._1, auto.origin.y)).extendToContain(Vec2(range._2, auto.origin.y))}
         val padY = yAxis().requiredRange().foldLeft(padX){(area, range) => area.extendToContain(Vec2(auto.origin.x, range._1)).extendToContain(Vec2(auto.origin.x, range._2))}

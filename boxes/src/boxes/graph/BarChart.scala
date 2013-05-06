@@ -53,6 +53,7 @@ object BarStyles {
 case class Bar(value: Double, rangeMin: Double, rangeMax: Double, fill: Option[Color], outline: Option[Color] = Some(GraphSeries.barOutlineColor), width: Double = 1, painter: BarPainter = BarStyles.plain) {
   def min = math.min(math.min(value, rangeMin), rangeMax)
   def max = math.max(math.max(value, rangeMin), rangeMax)  
+  def interval = Vec2(min, max)
 }
 
 class GraphBars[C1, C2](
@@ -92,9 +93,10 @@ class GraphBars[C1, C2](
       None
     } else {
       //Convert Bars to Vec2 of min/max, then find the overall range min/max
-      val range = d.values.toList.map((v) => Vec2(v.min, v.max)).reduceLeft((a, b) => Vec2(math.min(a.x, b.x), math.max(a.y, b.y)))
+      val range = d.values.toList.map(_.interval).reduceLeft(_ intervalUnion _)
       val cat1s = SortedSet(d.keySet.map(_._1).toSeq:_*)(ord1)
       val barCount = d.size
+      
       //We display with specified width per Bar. We pad on between eachcat1 group with
       //an additional specified padding unit
       val width = (math.max(0, cat1s.size - 1)) * catPadding() + barCount * barWidth();

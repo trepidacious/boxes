@@ -218,7 +218,7 @@ object SineDemo {
 //        selectEnabled = selectEnabled,
 //        selection = indices,
         grabEnabled = grabEnabled,
-        yAxis = Val(GraphZoomerAxis(Val(None), Val(0), Val(0.01))),
+        yAxis = Val(GraphZoomerAxis(paddingBefore = 0.0, paddingAfter = 0.05)),
 //        seriesTooltipsEnabled = seriesTooltipsEnabled,
 //        seriesTooltipsPrint = (i:Int) => sines(i).toString(),
         axisTooltipsEnabled = axisTooltipsEnabled,
