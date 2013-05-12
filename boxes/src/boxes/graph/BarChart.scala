@@ -55,9 +55,9 @@ object BarStyles {
   val plain = new PlainBarPainter()
 }
 
-case class Bar(value: Double, rangeMin: Double, rangeMax: Double, fill: Option[Color], outline: Option[Color] = Some(GraphSeries.barOutlineColor), width: Double = 1, painter: BarPainter = BarStyles.plain) {
-  def min = math.min(math.min(value, rangeMin), rangeMax)
-  def max = math.max(math.max(value, rangeMin), rangeMax)  
+case class Bar(value: Double, rangeMin: Option[Double] = None, rangeMax: Option[Double] = None, fill: Option[Color], outline: Option[Color] = Some(GraphSeries.barOutlineColor), width: Double = 1, painter: BarPainter = BarStyles.plain) {
+  def min = math.min(math.min(value, rangeMin.getOrElse(value)), rangeMax.getOrElse(value))
+  def max = math.max(math.max(value, rangeMin.getOrElse(value)), rangeMax.getOrElse(value))  
   def interval = Vec2(min, max)
 }
 
@@ -164,18 +164,6 @@ class GraphBarAxis[C1, C2](data: Box[Map[(C1, C2), Bar], _], barWidth: Box[Doubl
           case Y => canvas.line(start + Vec2(0, 1), start + Vec2(-8, 1))
         }
 
-//        if (major) {
-//          canvas.color = GraphAxis.fontColor
-//          canvas.fontSize = GraphAxis.fontSize
-//          axis match {
-//            case X => canvas.string(format.format(p), start + Vec2(0, 10), Vec2(0.5, 1))
-//            case Y => canvas.string(format.format(p), start + Vec2(-10, 0), Vec2(1, 0.5))
-//          }
-//        }
-//        } else {
-//          canvas.color = GraphAxis.gridMinorColor
-//          canvas.line(start, start + canvas.spaces.pixelArea.axisPerpVec2(axis))
-//        }
       })
     }
   }

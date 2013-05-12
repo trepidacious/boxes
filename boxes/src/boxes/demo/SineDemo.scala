@@ -174,35 +174,11 @@ object SineDemo {
 
     val data = Cal {
       val bars = sines().zipWithIndex.map{case (s, i) => 
-        (("Group " + i/3, s.name()), Bar(s.phase(), s.phase(), s.phase(), Some(Color.getHSBColor((9-i)/14f, 1f, 1f))))
+        (("Group " + i/3, s.name()), Bar(s.phase(), None, None, Some(Color.getHSBColor((9-i)/14f, 1f, 1f))))
       }
       Map(bars:_*);
-//
-//      Map( 
-//           (0, 0)->Bar(-1, -1, -1, Some(Color.gray)),
-//           (0, 1)->Bar(0, 0, 0, Some(Color.blue)),
-//           (0, 2)->Bar(1, 1, 1, Some(Color.red)),
-//           (0, 3)->Bar(2, 2, 2, Some(Color.green.darker())),
-//           (0, 4)->Bar(3, 3, 3, Some(Color.yellow.darker())),
-//
-//           (1, 0)->Bar(2, 2, 2, Some(Color.yellow.darker())),
-//           (1, 1)->Bar(3, 3, 3, Some(Color.yellow.darker())),
-//           (1, 2)->Bar(4, 4, 4, Some(Color.yellow.darker()))
-//
-//      )
     }
     
-//    val series = Cal{
-//      sines().zipWithIndex.map{case (s, i) => 
-//        Series(i,
-//          if (s.enabled()) Range(0, 100).map(x => x/100d).map(x => Vec2(x, math.sin((x + s.phase()) * 2 * 3.1415) * s.amplitude())).toList else List[Vec2](),
-//          Color.getHSBColor((9-i)/14f, 1f, 1f),
-//          2,
-//          if (s.points()) SeriesStyles.cross else SeriesStyles.line
-//        )
-//      }
-//    }
-
     import boxes.graph.Axis._
 
     val y = Var(0.5d)

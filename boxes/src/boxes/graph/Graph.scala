@@ -56,6 +56,8 @@ case class Vec2(x:Double = 0, y:Double = 0) {
   //a minimum at the Vec2 x value to at maximum at the Vec2 y value.
   def intervalUnion(b: Vec2) = Vec2(math.min(x, b.x), math.max(y, b.y))
   
+  def intervalContains(d: Double) = d >= math.min(x, y) && d <= math.max(x, y)
+  
   def round() = Vec2(math.round(x), math.round(y))
 }
 
@@ -1069,8 +1071,8 @@ object GraphBasic {
       //selectEnabled:Ref[Boolean] = Val(false),
       //selection:Var[Set[K]] = Var(Set[K]()),
       grabEnabled:Ref[Boolean] = Val(false),
-      //seriesTooltipsEnabled:Ref[Boolean] = Val(true),
-      //seriesTooltipsPrint:(K=>String) = (k:K) => k.toString(),
+      barTooltipsEnabled:Ref[Boolean] = Val(true),
+      barTooltipsPrint:((C1, C2, Bar) => String) = BarTooltips.defaultPrint,
       axisTooltipsEnabled:Ref[Boolean] = Val(true),
       extraMainLayers:List[GraphLayer] = List[GraphLayer](),
       extraOverLayers:List[GraphLayer] = List[GraphLayer]()
@@ -1111,8 +1113,8 @@ object GraphBasic {
         GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), manualBounds, zoomEnabled),
 //        GraphSelectBox(series, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100)), selection, selectEnabled),
         GraphGrab(grabEnabled, manualBounds, zoomer.dataArea),
-        AxisTooltip(Y, axisTooltipsEnabled)
-//        SeriesTooltips.string(series, seriesTooltipsEnabled, seriesTooltipsPrint)
+        AxisTooltip(Y, axisTooltipsEnabled),
+        BarTooltips.string(barTooltipsEnabled, data, barWidth, catPadding, barPadding, barTooltipsPrint)(ord1, ord2)
                       //TODO is this in the right place?
         //GraphClick(Val(true), selection)
       )
