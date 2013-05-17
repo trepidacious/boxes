@@ -148,8 +148,95 @@ object GraphSeries {
   val shadowColor = new Color(220, 220, 220)
   val shadowOffset = Vec2(1, 1)
   val barShadowColor = new Color(215, 215, 215)
-  val barOutlineColor = SwingView.dividingColor
+  val barOutlineColor = SwingView.dividingColor.darker()
+  val barOutlineUnselectedColor = SwingView.dividingColor
   val barShadowOffset = Vec2(3, 3)
+  val unselectedColor = new Color(230, 230, 230)
+  
+  
+  /**
+   * Scale a {@link Color} by the same factor across red, green and blue,
+   * then clip to 0-255 and return as a new {@link Color}
+   * @param c     The input color
+   * @param factor  The factor
+   * @return      The output scaled color
+   */
+   def scaleColor(c: Color, factor: Double) = new Color( 
+     clip((c.getRed() * factor).asInstanceOf[Int], 0, 255), 
+     clip((c.getGreen() * factor).asInstanceOf[Int], 0, 255),
+     clip((c.getBlue() * factor).asInstanceOf[Int], 0, 255)
+   )
+    
+  /**
+   * Scale a {@link Color} alpha value by a factor,
+   * then clip to 0-255 and return as a new {@link Color}
+   * @param c     The input color
+   * @param factor  The factor
+   * @return      The output scaled color
+   */
+   def transparentColor(c: Color, factor: Double) = new Color( 
+     c.getRed(), 
+     c.getGreen(),
+     c.getBlue(),
+     clip((c.getAlpha() * factor).asInstanceOf[Int], 0, 255)
+   )
+  
+  /**
+   * Fade a {@link Color} to white by the same factor across red, green and blue,
+   * then clip to 0-255 and return as a new {@link Color}
+   * @param c     The input color
+   * @param factor  The factor
+   * @return      The output faded color
+   */
+   def fadeColorToWhite(c: Color, factor: Double) = new Color( 
+     clip((lerp(c.getRed(), 255, factor).asInstanceOf[Int]), 0, 255), 
+     clip((lerp(c.getGreen(), 255, factor).asInstanceOf[Int]), 0, 255),
+     clip((lerp(c.getBlue(), 255, factor).asInstanceOf[Int]), 0, 255)
+   )
+    
+  /**
+   * Blend from one {@link Color} to another
+   * then clip to 0-255 and return as a new {@link Color}
+   * @param first     The first input color
+   * @param second      The second input color
+   * @param factor  The factor - 0 gives first color, 1 gives second, values in between
+   *          interpolate, values outside 0-1 extrapolate (but are clipped)
+   * @return      The output scaled color
+   */
+   def blendColors(c1: Color, c2: Color, factor: Double) = new Color( 
+     clip((lerp(c1.getRed(), c2.getRed(), factor).asInstanceOf[Int]), 0, 255), 
+     clip((lerp(c1.getGreen(), c2.getGreen(), factor).asInstanceOf[Int]), 0, 255),
+     clip((lerp(c1.getBlue(), c2.getBlue(), factor).asInstanceOf[Int]), 0, 255)
+   )
+ 
+    
+  /**
+   * Linearly interpolate/extrapolate from one double to another, by a certain
+   * scale
+   * @param from    The value returned when by == 0 
+   * @param to    The value returned when by == 1
+   * @param by    The interpolation/extrapolation position
+   * @return      The lerped value
+   */
+  def lerp(from: Double, to: Double, by: Double) =  (from * (1-by)) + to * by
+  
+  /**
+   * Return a double value clipped to lie from min to max, inclusive
+   * @param value   The value
+   * @param min   The minimum (inclusive)
+   * @param max   The maximum (inclusive)
+   * @return      The clipped value
+   */
+  def clip(value: Double, min: Double, max: Double) = if (value < min) min else if (value > max) max else value
+  
+  /**
+   * Return an int value clipped to lie from min to max, inclusive
+   * @param value   The value
+   * @param min   The minimum (inclusive)
+   * @param max   The maximum (inclusive)
+   * @return      The clipped value
+   */
+  def clip(value: Int, min: Int, max: Int) = if (value < min) min else if (value > max) max else value
 }
 
 class GraphSeries[K](series:Box[List[Series[K]], _], shadow:Boolean = false) extends GraphLayer {
@@ -195,6 +282,10 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
   def axisRelativePosition(a:Axis, v:Vec2) = a match {
     case X => (v - origin).x
     case Y => (v - origin).y
+  }
+  def axisToUnit(a:Axis, v:Vec2) = a match {
+    case X => toUnit(v).x
+    case Y => toUnit(v).y
   }
   def axisPosition(a:Axis, p:Double) = a match {
     case X => Vec2(p, origin.y)
@@ -954,11 +1045,11 @@ class GraphZoomer(
   }
 }
 
-object GraphClick{
-  def apply[K](series:ListRef[Series[K]], selectionOut:VarBox[Set[K], _], enabled:Box[Boolean, _] = Val(true)) = new GraphClick(series, selectionOut, enabled)
+object GraphClickToSelectSeries{
+  def apply[K](series:ListRef[Series[K]], selectionOut:VarBox[Set[K], _], enabled:Box[Boolean, _] = Val(true)) = new GraphClickToSelectSeries(series, selectionOut, enabled)
 }
 
-class GraphClick[K](series:ListRef[Series[K]], selectionOut:VarBox[Set[K], _], enabled:Box[Boolean, _] = Val(true)) extends GraphLayer {
+class GraphClickToSelectSeries[K](series:ListRef[Series[K]], selectionOut:VarBox[Set[K], _], enabled:Box[Boolean, _] = Val(true)) extends GraphLayer {
 
   def paint() = (canvas:GraphCanvas) => {}
 
@@ -1042,7 +1133,7 @@ object GraphBasic {
         GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), manualBounds, zoomEnabled),
         GraphSelectBox(series, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100)), selection, selectEnabled),
         GraphGrab(grabEnabled, manualBounds, zoomer.dataArea),
-        GraphClick(series, selection, clickSelectEnabled),
+        GraphClickToSelectSeries(series, selection, clickSelectEnabled),
         AxisTooltip(X, axisTooltipsEnabled),
         AxisTooltip(Y, axisTooltipsEnabled),
         SeriesTooltips.string(series, seriesTooltipsEnabled, seriesTooltipsPrint)
@@ -1069,7 +1160,8 @@ object GraphBasic {
       xAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
       yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
       //selectEnabled:Ref[Boolean] = Val(false),
-      //selection:Var[Set[K]] = Var(Set[K]()),
+      clickSelectEnabled:Ref[Boolean] = Val(true),
+      selection:Var[Set[(C1, C2)]] = Var(Set[(C1, C2)]()),
       grabEnabled:Ref[Boolean] = Val(false),
       barTooltipsEnabled:Ref[Boolean] = Val(true),
       barTooltipsPrint:((C1, C2, Bar) => String) = BarTooltips.defaultPrint,
@@ -1113,6 +1205,7 @@ object GraphBasic {
         GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), manualBounds, zoomEnabled),
 //        GraphSelectBox(series, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100)), selection, selectEnabled),
         GraphGrab(grabEnabled, manualBounds, zoomer.dataArea),
+        GraphClickToSelectBar(data, selection, barWidth, catPadding, barPadding, clickSelectEnabled),
         AxisTooltip(Y, axisTooltipsEnabled),
         BarTooltips.string(barTooltipsEnabled, data, barWidth, catPadding, barPadding, barTooltipsPrint)(ord1, ord2)
                       //TODO is this in the right place?
@@ -1128,17 +1221,6 @@ object GraphBasic {
     )
   }
   
-}
-
-object ColorSeriesBySelection {
-  def apply[K](series:Box[List[Series[K]], _], indices:Box[Set[K],_], unselectedColor:Color = new Color(230, 230, 230), unselectedWidth:Option[Double] = Some(1d)) = ListCal{
-    val unselected = series().collect{
-      case s:Series[K] if !indices().contains(s.key) => s.copy(color = unselectedColor, width = unselectedWidth.getOrElse(s.width))
-    }
-    val selected = series().filter(s => indices().contains(s.key))
-
-    unselected ::: selected
-  }
 }
 
 trait GraphCanvas {
@@ -1174,6 +1256,7 @@ trait GraphCanvas {
   def path(path:List[Vec2])
   def dataPath(path:List[Vec2])
 
+  def drawTooltip(s: String, v: Vec2)
 }
 
 

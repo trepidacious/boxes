@@ -12,14 +12,7 @@ trait SeriesTooltipRenderer[K] {
 class StringSeriesTooltipRenderer[K](print:(K=>String) = (k:K) => k.toString()) extends SeriesTooltipRenderer[K]{
   def paint(canvas:GraphCanvas, series:Series[K], pixelPos:Vec2) {
     val s = print(series.key)
-    val size = canvas.stringSize(s)
-
-    canvas.color = SwingView.shadedBoxColor
-    canvas.fillRoundRect(pixelPos - Vec2(-8, 4 + size.y + 8), size + Vec2(8, 8), 6)
-
-    canvas.color = SwingView.selectedTextColor
-    canvas.string(s, pixelPos + Vec2(12, -12))
-
+    canvas.drawTooltip(s, pixelPos)
   }
 }
 

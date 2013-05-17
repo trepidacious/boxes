@@ -16,13 +16,7 @@ class StringBarTooltipRenderer[C1, C2](
   //TODO refactor this method, maybe into GraphCanvas - very similar in SeriesToolTip stuff.
   def paint(canvas:GraphCanvas, cat1: C1, cat2: C2, bar: Bar, pixelPos:Vec2) {
     val s = print(cat1, cat2, bar)
-    val size = canvas.stringSize(s)
-
-    canvas.color = SwingView.shadedBoxColor
-    canvas.fillRoundRect(pixelPos - Vec2(-8, 4 + size.y + 8), size + Vec2(8, 8), 6)
-
-    canvas.color = SwingView.selectedTextColor
-    canvas.string(s, pixelPos + Vec2(12, -12))
+    canvas.drawTooltip(s, pixelPos)
   }
 }
 

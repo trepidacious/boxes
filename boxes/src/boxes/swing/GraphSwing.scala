@@ -195,6 +195,23 @@ class GraphCanvasFromGraphics2D(g:Graphics2D, val spaces:GraphSpaces) extends Gr
     path(dataPath.map(p => spaces.toPixel(p)))
     g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_DEFAULT)
   }
+  
+  def drawTooltip(s: String, v: Vec2) {
+    val size = stringSize(s)
+
+    val offRight = (v.round + size).x - spaces.pixelArea.axisBounds(Axis.X)._2 + 8;
+    val pp = if (offRight > 0) {
+      v.round - (Vec2(offRight, 0))
+    } else {
+      v.round
+    }
+    
+    color = SwingView.shadedBoxColor
+    fillRoundRect(pp - Vec2(-8, 4 + size.y + 8), size + Vec2(8, 8), 6)
+
+    color = SwingView.selectedTextColor
+    string(s, pp + Vec2(12, -12))
+  }
 }
 
 

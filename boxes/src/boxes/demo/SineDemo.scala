@@ -184,18 +184,46 @@ object SineDemo {
     val y = Var(0.5d)
     val yThreshold = GraphThreshold(Y, y, Color.red, "Y Threshold", true)
 
+//    val selection = Cal{
+//      val s = sines()
+//      indices().map(i => ("Group " + i/3, s(i).name()))
+//    }
+
+    //Just for demonstration purposes we set up a truly terrifying (but working) bidirectional reaction.
+    //This is NOT meant to be a robust means of mapping - in a genuine example, the barchart
+    //categories would have genuine meaning and so translating between categories and selected
+    //indices would be easier.
+    //The interesting thing here is that selection still works when more than one Sine has the same
+    //name - it just causes the same-named Sines to be selected together.
+    //The simple bit is that when indices() changes, we change selection to contain the
+    //categories we generate for the selected sines.
+    val selection = Var(Set[(String, String)]())
+    selection << {
+      val s = sines()
+      indices().map(i => ("Group " + i/3, s(i).name()))
+    }
+    //The terrifying bit is that when selection (or names of sines) change, we
+    //update the selected indices to select the indices of those sines with
+    //names matching any selected secondary categories.
+    indices << {
+      val selNames = selection().map(_._2)
+      Set(sines().zipWithIndex.flatMap{
+        case (s, i) if selNames.contains(s.name()) => Some(i)
+        case _ => None
+      }: _*)
+    }
+    
     val graph = Var (
       GraphBasic.withBars (
-        data,
+        ColorBarBySelection(data, selection),
         yName = "Phase",
         zoomEnabled = zoomEnabled,
         manualBounds = manualBounds,
 //        selectEnabled = selectEnabled,
-//        selection = indices,
+        selection = selection,
         grabEnabled = grabEnabled,
         yAxis = Val(GraphZoomerAxis(paddingBefore = 0.0, paddingAfter = 0.05)),
-//        seriesTooltipsEnabled = seriesTooltipsEnabled,
-//        seriesTooltipsPrint = (i:Int) => sines(i).toString(),
+        barTooltipsEnabled = seriesTooltipsEnabled,
         axisTooltipsEnabled = axisTooltipsEnabled,
         extraOverLayers = List(yThreshold)
       )
@@ -207,7 +235,6 @@ object SineDemo {
     val zoomOutButton = SwingBarButton(SwingOp("", Some(GraphSwingView.zoomOut), SetOp(manualBounds, None:Option[Area])))
 
     val zoomEnabledView = BooleanView(zoomEnabled, "", BooleanControlType.TOOLBARBUTTON, Some(GraphSwingView.zoomSelect), false)
-    val selectEnabledView = BooleanView(selectEnabled, "", BooleanControlType.TOOLBARBUTTON, Some(GraphSwingView.boxSelect), false)
 
     val grabEnabledView = BooleanView(grabEnabled, "", BooleanControlType.TOOLBARBUTTON, Some(GraphSwingView.move), false)
 
@@ -220,7 +247,6 @@ object SineDemo {
     val settingsPopup = BoxesPopupView(icon = Some(SwingView.wrench), popupContents = graphProperties)
 
     val buttons = SwingButtonBar()
-                    .add(selectEnabledView)
                     .add(grabEnabledView)
                     .add(zoomEnabledView)
                     .add(zoomOutButton)
