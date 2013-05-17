@@ -4,6 +4,8 @@ import boxes.graph.GraphMouseEventType._
 import boxes.{Var, Val, Box}
 import boxes.swing.SwingView
 import java.awt.geom.{Line2D}
+import java.awt.Color
+import boxes.list.ListCal
 
 
 object SeriesSelection {
@@ -63,4 +65,15 @@ object SeriesSelection {
   }
     
   def selectedSeries[K](currentSeries: List[Series[K]], e:GraphMouseEvent): Option[Series[K]] = selectedSeriesIndex(currentSeries, e).map(currentSeries(_))
+}
+
+object ColorSeriesBySelection {
+  def apply[K](series:Box[List[Series[K]], _], indices:Box[Set[K],_], unselectedColor:Color = GraphSeries.unselectedColor, unselectedWidth:Option[Double] = Some(1d)) = ListCal{
+    val unselected = series().collect{
+      case s:Series[K] if !indices().contains(s.key) => s.copy(color = unselectedColor, width = unselectedWidth.getOrElse(s.width))
+    }
+    val selected = series().filter(s => indices().contains(s.key))
+
+    unselected ::: selected
+  }
 }
