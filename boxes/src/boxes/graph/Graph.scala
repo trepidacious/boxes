@@ -400,6 +400,19 @@ case class Area(origin:Vec2 = Vec2(), size:Vec2 = Vec2(1, 1)) {
     //Produce area from corners
     Area(bottomLeft, topRight - bottomLeft)
   }
+  
+  private def left = origin.x
+  private def right = origin.x + size.x
+  private def bottom = origin.y
+  private def top = origin.y + size.y
+  
+  def intersects(a:Area) = normalise.rawIntersects(a.normalise)
+  def rawIntersects(a:Area) = !(
+    a.left > right || 
+    a.right < left || 
+    a.top < bottom ||
+    a.bottom > top
+  )
 
   def pad(v:Vec2): Area = pad(v, v)
   def pad(before: Vec2, after: Vec2): Area = normalise.rawPad(before, after)
@@ -1159,7 +1172,7 @@ object GraphBasic {
       manualBounds:Var[Option[Area]] = Var(None),
       xAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
       yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
-      //selectEnabled:Ref[Boolean] = Val(false),
+      selectEnabled:Ref[Boolean] = Val(false),
       clickSelectEnabled:Ref[Boolean] = Val(true),
       selection:Var[Set[(C1, C2)]] = Var(Set[(C1, C2)]()),
       grabEnabled:Ref[Boolean] = Val(false),
@@ -1203,13 +1216,11 @@ object GraphBasic {
 //      List(SeriesTooltips.highlight(series, seriesTooltipsEnabled)) ::: 
         extraOverLayers ::: List(
         GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), manualBounds, zoomEnabled),
-//        GraphSelectBox(series, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100)), selection, selectEnabled),
+        GraphSelectBarsWithBox(data, selection, barWidth, catPadding, barPadding, selectEnabled, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100))),
         GraphGrab(grabEnabled, manualBounds, zoomer.dataArea),
         GraphClickToSelectBar(data, selection, barWidth, catPadding, barPadding, clickSelectEnabled),
         AxisTooltip(Y, axisTooltipsEnabled),
         BarTooltips.string(barTooltipsEnabled, data, barWidth, catPadding, barPadding, barTooltipsPrint)(ord1, ord2)
-                      //TODO is this in the right place?
-        //GraphClick(Val(true), selection)
       )
     )
 

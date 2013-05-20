@@ -6,6 +6,7 @@ import boxes.swing.SwingView
 import java.awt.geom.{Line2D}
 import boxes.Cal
 import boxes.VarBox
+import java.awt.Color
 
 object BarSelection {
 
@@ -31,6 +32,25 @@ object BarSelection {
     o.headOption
   }
   
+  def selectedBar[C1, C2](data: Map[(C1, C2), Bar],
+    barWidth: Double, catPadding: Double, 
+    barPadding: Double, dataArea: Area)(implicit ord1: Ordering[C1], ord2: Ordering[C2]): List[(C1, C2, Bar)] = {
+    
+    val d = data
+    val bw = barWidth
+    val cp = catPadding
+    val bp = barPadding
+
+    //Look for any bar containing the data point
+    val layout = GraphBars.layout(d, bw, cp, ord1, ord2)
+    
+    def contained(x: Double, bar: Bar) = {
+      val barArea = Area(Vec2(x + bp/2, 0), Vec2(bw - bp, bar.value))
+      barArea.intersects(dataArea)
+    }
+    
+    for {pos <- layout.positions; bar <- data.get(pos.cat1, pos.cat2) if contained(pos.x, bar)} yield (pos.cat1, pos.cat2, bar)
+  }
 }
 
 object ColorBarBySelection {
@@ -71,4 +91,14 @@ class GraphClickToSelectBar[C1, C2](data: Box[Map[(C1, C2), Bar], _], selection:
 
   val dataBounds = Val(None:Option[Area])
 
+}
+
+object GraphSelectBarsWithBox {
+  def apply[C1, C2](data: Box[Map[(C1, C2), Bar], _], selection:VarBox[Set[(C1, C2)],_], barWidth: Box[Double, _], catPadding: Box[Double, _], 
+    barPadding: Box[Double, _], enabled:Box[Boolean, _], fill:Box[Color, _], outline:Box[Color, _])
+    (implicit ord1: Ordering[C1], ord2: Ordering[C2]) = 
+      new GraphBox(fill, outline, enabled, (area:Area, spaces:GraphSpaces) => {
+        val bs = BarSelection.selectedBar(data(), barWidth(), catPadding(), barPadding(), area);
+        selection() = Set(bs.map(b => (b._1, b._2)): _*)
+    })
 }

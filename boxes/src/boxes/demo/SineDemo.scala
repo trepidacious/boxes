@@ -219,7 +219,7 @@ object SineDemo {
         yName = "Phase",
         zoomEnabled = zoomEnabled,
         manualBounds = manualBounds,
-//        selectEnabled = selectEnabled,
+        selectEnabled = selectEnabled,
         selection = selection,
         grabEnabled = grabEnabled,
         yAxis = Val(GraphZoomerAxis(paddingBefore = 0.0, paddingAfter = 0.05)),
@@ -234,6 +234,8 @@ object SineDemo {
     //Zoom out by clearing manual bounds to None
     val zoomOutButton = SwingBarButton(SwingOp("", Some(GraphSwingView.zoomOut), SetOp(manualBounds, None:Option[Area])))
 
+    val selectEnabledView = BooleanView(selectEnabled, "", BooleanControlType.TOOLBARBUTTON, Some(GraphSwingView.boxSelect), false)
+
     val zoomEnabledView = BooleanView(zoomEnabled, "", BooleanControlType.TOOLBARBUTTON, Some(GraphSwingView.zoomSelect), false)
 
     val grabEnabledView = BooleanView(grabEnabled, "", BooleanControlType.TOOLBARBUTTON, Some(GraphSwingView.move), false)
@@ -247,6 +249,7 @@ object SineDemo {
     val settingsPopup = BoxesPopupView(icon = Some(SwingView.wrench), popupContents = graphProperties)
 
     val buttons = SwingButtonBar()
+                    .add(selectEnabledView)
                     .add(grabEnabledView)
                     .add(zoomEnabledView)
                     .add(zoomOutButton)
