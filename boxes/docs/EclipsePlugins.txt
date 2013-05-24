@@ -14,8 +14,15 @@
   Update site for maven eclipse scala thingy, whatever it is called:  
   http://alchim31.free.fr/m2e-scala/update-site
   
-  Also obviously also scala ide for eclipse.
+  Also obviously also scala ide for eclipse - this is apparently happier with eclipse 3.7, but 4.2 is supported experimentally...
   
+  Check out this project with git, then after eclipse is set up, import it:
+  File > import > maven > Existing Maven Project ...
+
+  For JavaFX, also use e(fx)clipse at:
+  http://www.efxclipse.org/install.html#for-the-lazy
+
+
   Full list, in case exact versions are important:
   
   CollabNet Merge Client	2.2.4	com.collabnet.subversion.merge.feature.feature.group	CollabNet
