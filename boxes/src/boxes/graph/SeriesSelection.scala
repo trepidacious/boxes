@@ -68,12 +68,25 @@ object SeriesSelection {
 }
 
 object ColorSeriesBySelection {
-  def apply[K](series:Box[List[Series[K]], _], indices:Box[Set[K],_], unselectedColor:Color = GraphSeries.unselectedColor, unselectedWidth:Option[Double] = Some(1d)) = ListCal{
+  def defaultSeriesToUnselected[K](s: Series[K]) = s.copy(color = GraphSeries.blendColors(s.color, GraphSeries.unselectedColor, 0.4), width = 1, shadow = false)
+    
+  def apply[K](series:Box[List[Series[K]], _], indices:Box[Set[K],_], seriesToUnselected: (Series[K] => Series[K]) = defaultSeriesToUnselected[K] _) = ListCal{
     val unselected = series().collect{
-      case s:Series[K] if !indices().contains(s.key) => s.copy(color = unselectedColor, width = unselectedWidth.getOrElse(s.width))
+      case s:Series[K] if !indices().contains(s.key) => seriesToUnselected(s)
     }
     val selected = series().filter(s => indices().contains(s.key))
 
     unselected ::: selected
   }
 }
+
+//object ColorSeriesBySelection {
+//  def apply[K](series:Box[List[Series[K]], _], indices:Box[Set[K],_], unselectedColor:Color = GraphSeries.unselectedColor, unselectedWidth:Option[Double] = Some(1d)) = ListCal{
+//    val unselected = series().collect{
+//      case s:Series[K] if !indices().contains(s.key) => s.copy(color = unselectedColor, width = unselectedWidth.getOrElse(s.width))
+//    }
+//    val selected = series().filter(s => indices().contains(s.key))
+//
+//    unselected ::: selected
+//  }
+//}

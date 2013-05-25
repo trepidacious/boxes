@@ -4,17 +4,18 @@ import boxes.graph.GraphMouseEventType._
 import boxes.{Var, Val, Box}
 import boxes.swing.SwingView
 import java.awt.geom.{Line2D}
+import java.text.DecimalFormat
 
-trait BarTooltipRenderer[C1, C2] {
-  def paint(canvas:GraphCanvas, cat1: C1, cat2: C2, bar: Bar, pixelPos:Vec2)
+trait BarTooltipRenderer[C1, C2, K] {
+  def paint(canvas:GraphCanvas, cat1: C1, cat2: C2, bar: Bar[K], pixelPos:Vec2)
 }
 
-class StringBarTooltipRenderer[C1, C2](
-    print:((C1, C2, Bar)=>String) = BarTooltips.defaultPrint)
-    extends BarTooltipRenderer[C1, C2]{
+class StringBarTooltipRenderer[C1, C2, K](
+    print:((C1, C2, Bar[K])=>String) = BarTooltips.defaultPrint)
+    extends BarTooltipRenderer[C1, C2, K]{
   
   //TODO refactor this method, maybe into GraphCanvas - very similar in SeriesToolTip stuff.
-  def paint(canvas:GraphCanvas, cat1: C1, cat2: C2, bar: Bar, pixelPos:Vec2) {
+  def paint(canvas:GraphCanvas, cat1: C1, cat2: C2, bar: Bar[K], pixelPos:Vec2) {
     val s = print(cat1, cat2, bar)
     canvas.drawTooltip(s, pixelPos)
   }
@@ -22,30 +23,43 @@ class StringBarTooltipRenderer[C1, C2](
 
 object BarTooltips {
 
-  def defaultPrint[C1, C2] = (cat1: C1, cat2: C2, bar: Bar) => cat1.toString() + ", " + cat2.toString() + " = " + bar.value
+  val format = new DecimalFormat("0.###")
+
+  def printRange(bar: Bar[_]) = {
+    val l = List(bar.rangeMin, bar.rangeMax).flatten.map(format.format _)
+    if (l.isEmpty) {
+      ""
+    } else {
+      "(" + l.mkString(" to ") + ")"
+    }
+  }
   
-  def apply[C1, C2](enabled:Box[Boolean, _], 
-    data: Box[Map[(C1, C2), Bar], _],
+  def printValueAndRange(bar: Bar[_]) = format.format(bar.value) + " " + printRange(bar)
+    
+  def defaultPrint[C1, C2, K] = (cat1: C1, cat2: C2, bar: Bar[K]) => cat1.toString() + ", " + cat2.toString() + " = " + printValueAndRange(bar)
+  
+  def apply[C1, C2, K](enabled:Box[Boolean, _], 
+    data: Box[Map[(C1, C2), Bar[K]], _],
     barWidth: Box[Double, _], catPadding: Box[Double, _], 
     barPadding: Box[Double, _],
-    renderer:BarTooltipRenderer[C1, C2])
+    renderer:BarTooltipRenderer[C1, C2, K])
     (implicit ord1: Ordering[C1], ord2: Ordering[C2]) = new BarTooltips(enabled, data, barWidth, catPadding, barPadding, renderer)(ord1, ord2)
 
-  def string[C1, C2](enabled:Box[Boolean, _], 
-    data: Box[Map[(C1, C2), Bar], _],
+  def string[C1, C2, K](enabled:Box[Boolean, _], 
+    data: Box[Map[(C1, C2), Bar[K]], _],
     barWidth: Box[Double, _], catPadding: Box[Double, _], 
-    barPadding: Box[Double, _], print:((C1, C2, Bar)=>String) = BarTooltips.defaultPrint)
+    barPadding: Box[Double, _], print:((C1, C2, Bar[K])=>String) = BarTooltips.defaultPrint)
     (implicit ord1: Ordering[C1], ord2: Ordering[C2]) = new BarTooltips(enabled, data, barWidth, catPadding, barPadding, new StringBarTooltipRenderer(print))(ord1, ord2)
 }
 
-class BarTooltips[C1, C2](enabled:Box[Boolean, _], 
-    data: Box[Map[(C1, C2), Bar], _],
+class BarTooltips[C1, C2, K](enabled:Box[Boolean, _], 
+    data: Box[Map[(C1, C2), Bar[K]], _],
     barWidth: Box[Double, _], catPadding: Box[Double, _], 
     barPadding: Box[Double, _],
-    renderer:BarTooltipRenderer[C1, C2])
+    renderer:BarTooltipRenderer[C1, C2, K])
     (implicit ord1: Ordering[C1], ord2: Ordering[C2]) extends GraphLayer {
 
-  private val toPaint:Var[Option[(C1, C2, Bar, Vec2)]] = Var(None)
+  private val toPaint:Var[Option[(C1, C2, Bar[K], Vec2)]] = Var(None)
 
   def paint() = {
     val e = enabled()

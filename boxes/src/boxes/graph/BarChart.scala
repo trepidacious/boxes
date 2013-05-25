@@ -15,20 +15,21 @@ import scala.collection._
 trait BarPainter{
   def paint(canvas:GraphCanvas, 
       x: Double, barWidth: Double,
-      bar: Bar,
+      bar: Bar[_],
       shadow:Boolean = false)
 }
 
 class PlainBarPainter extends BarPainter {
   def paint(canvas:GraphCanvas,
       x: Double, barWidth: Double,
-      bar: Bar,
+      bar: Bar[_],
       shadow:Boolean = false) {
     
     val area = Area(Vec2(x, 0), Vec2(barWidth, bar.value))
     
     //Round before drawing, so that inset works exactly on pixels.
-    val pixelArea = canvas.spaces.toPixel(area).round();
+    val pixelArea = canvas.spaces.toPixel(area).round
+    val midEnd = pixelArea.fromUnit(Vec2(0.5, 1)).round
     
     if (shadow) {
       canvas.color = GraphSeries.barShadowColor
@@ -41,10 +42,26 @@ class PlainBarPainter extends BarPainter {
         canvas.drawRect(pixelArea.inset(1, 1, 1, 1))
       })
       bar.outline.foreach((c:Color) => {
+      canvas.lineWidth = bar.width
         canvas.color = c
-        canvas.lineWidth = bar.width
         canvas.drawRect(pixelArea)
       })
+      def drawRange(range: Option[Double], halo: Boolean) = for {c <- bar.outline; r <- range}{
+        val lineEnd = Vec2(midEnd.x, canvas.spaces.toPixel(Vec2(0, r)).y).round
+        if (halo) {
+          canvas.color = new Color(1f, 1f, 1f, 0.8f)
+          canvas.lineWidth = bar.width + 2
+        } else {
+          canvas.color = c
+          canvas.lineWidth = bar.width          
+        }
+        canvas.line(midEnd, lineEnd)
+        canvas.line(lineEnd - Vec2(4, 0), lineEnd + Vec2(4, 0))
+      }
+      drawRange(bar.rangeMin, true)
+      drawRange(bar.rangeMax, true)
+      drawRange(bar.rangeMin, false)
+      drawRange(bar.rangeMax, false)
     }
     
     //TODO draw the range bars
@@ -55,17 +72,22 @@ object BarStyles {
   val plain = new PlainBarPainter()
 }
 
-case class Bar(value: Double, rangeMin: Option[Double] = None, rangeMax: Option[Double] = None, fill: Option[Color], outline: Option[Color] = Some(GraphSeries.barOutlineColor), width: Double = 1, painter: BarPainter = BarStyles.plain) {
-  def min = math.min(math.min(value, rangeMin.getOrElse(value)), rangeMax.getOrElse(value))
-  def max = math.max(math.max(value, rangeMin.getOrElse(value)), rangeMax.getOrElse(value))  
+case class Bar[K](key: K, value: Double, rangeMin: Option[Double] = None, rangeMax: Option[Double] = None, fill: Option[Color], outline: Option[Color] = Some(GraphSeries.barOutlineColor), width: Double = 1, painter: BarPainter = BarStyles.plain) {
+  private val values = List(0, value, rangeMin.getOrElse(value), rangeMax.getOrElse(value))
+  def min = values.reduceLeft(_ min _)
+  def max = values.reduceLeft(_ max _)
   def interval = Vec2(min, max)
 }
 
 case class GraphBarPosition[C1, C2](cat1: C1, cat2: C2, x: Double)
 case class GraphBarLayout[C1, C2](positions: List[GraphBarPosition[C1, C2]], cat1Positions: Map[C1, Vec2])
 
+//case class GraphBarLayout[C1, C2](barWidth: Double, catPadding: Double, barPadding: Double, ord1: Ordering[C1], ord2: Ordering[C2]) {
+//  
+//}
+
 object GraphBars {
-  def layout[C1, C2](d: Map[(C1, C2), Bar], barWidth: Double, catPadding: Double, ord1: Ordering[C1], ord2: Ordering[C2]) = {
+  def layout[C1, C2](d: Map[(C1, C2), Bar[_]], barWidth: Double, catPadding: Double, ord1: Ordering[C1], ord2: Ordering[C2]) = {
     val cat1s = SortedSet(d.keySet.map(_._1).toSeq:_*)(ord1)
     val cat2s = SortedSet(d.keySet.map(_._2).toSeq:_*)(ord2)
 
@@ -76,7 +98,7 @@ object GraphBars {
     for (cat1 <- cat1s) {
       val xStart = x
       for (cat2 <- cat2s) {
-        d.get((cat1, cat2)).foreach((bar: Bar) => {
+        d.get((cat1, cat2)).foreach((bar: Bar[_]) => {
           xs.append(GraphBarPosition(cat1, cat2, x))
           x+=barWidth;
         })
@@ -98,7 +120,7 @@ object GraphBars {
 }
 
 
-class GraphBarAxis[C1, C2](data: Box[Map[(C1, C2), Bar], _], barWidth: Box[Double, _], catPadding: Box[Double, _], 
+class GraphBarAxis[C1, C2](data: Box[Map[(C1, C2), Bar[_]], _], barWidth: Box[Double, _], catPadding: Box[Double, _], 
     barPadding: Box[Double, _], val axis:Axis, 
     cat1Print: (C1 => String) = (c: C1)=>c.toString, 
     cat2Print: (C2 => String) = (c: C2)=>c.toString)
@@ -133,7 +155,7 @@ class GraphBarAxis[C1, C2](data: Box[Map[(C1, C2), Bar], _], barWidth: Box[Doubl
         }
       }
 
-      //Now primary category labels
+      //Now primary category labels, if there is more than one primary category
       for (cat1 <- layout.cat1Positions.keySet; pos <- layout.cat1Positions.get(cat1)) {
         
         val p = (pos.x + pos.y)/2
@@ -169,8 +191,8 @@ class GraphBarAxis[C1, C2](data: Box[Map[(C1, C2), Bar], _], barWidth: Box[Doubl
   }
 }
 
-class GraphBars[C1, C2](
-    data: Box[Map[(C1, C2), Bar], _],
+class GraphBars[C1, C2, K](
+    data: Box[Map[(C1, C2), Bar[K]], _],
     barWidth: Box[Double, _], catPadding: Box[Double, _], 
     barPadding: Box[Double, _],
     shadow: Boolean = false)

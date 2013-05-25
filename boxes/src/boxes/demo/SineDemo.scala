@@ -98,6 +98,7 @@ object SineDemo {
           if (s.enabled()) Range(0, 100).map(x => x/100d).map(x => Vec2(x, math.sin((x + s.phase()) * 2 * 3.1415) * s.amplitude())).toList else List[Vec2](),
           Color.getHSBColor((9-i)/14f, 1f, 1f),
           2,
+          true,
           if (s.points()) SeriesStyles.cross else SeriesStyles.line
         )
       }
@@ -171,12 +172,19 @@ object SineDemo {
     val seriesTooltipsEnabled = Var(true)
     val manualBounds = Var(None:Option[Area])
     RadioReaction(selectEnabled, zoomEnabled, grabEnabled)
-
+    
+    //Normally we would have some intrinsic property of the displayed values that would form natural categories.
+    //In this case we really don't - it's just a list of things. Therefore we assign a single primary category "Sines"
+    //which acts as an axis title, with all bars in one group. Then we use a secondary category based on the name of the
+    //Sine. Since this may not be unique, we make a tuple of the index in the list plus the name, which we know will be
+    //unique. By providing custom print functions for the axis and tooltips, we can display just the name, ignoring the
+    //index (see withBarsSelectByKey call below)
     val data = Cal {
       val bars = sines().zipWithIndex.map{case (s, i) => 
-        (("Group " + i/3, s.name()), Bar(s.phase(), None, None, Some(Color.getHSBColor((9-i)/14f, 1f, 1f))))
+//        (("Group " + i/3, s.name()), Bar(i, s.phase(), Some(s.phase()*0.9), Some(s.phase()*1.1), Some(Color.getHSBColor((9-i)/14f, 1f, 1f))))
+        (("Sines", (i, s.name())), Bar(i, s.phase(), Some(s.phase()*0.9), Some(s.phase()*1.1), Some(Color.getHSBColor((9-i)/14f, 1f, 1f))))
       }
-      Map(bars:_*);
+      Map(bars:_*)
     }
     
     import boxes.graph.Axis._
@@ -184,11 +192,7 @@ object SineDemo {
     val y = Var(0.5d)
     val yThreshold = GraphThreshold(Y, y, Color.red, "Y Threshold", true)
 
-//    val selection = Cal{
-//      val s = sines()
-//      indices().map(i => ("Group " + i/3, s(i).name()))
-//    }
-
+    /*
     //Just for demonstration purposes we set up a truly terrifying (but working) bidirectional reaction.
     //This is NOT meant to be a robust means of mapping - in a genuine example, the barchart
     //categories would have genuine meaning and so translating between categories and selected
@@ -214,13 +218,35 @@ object SineDemo {
     }
     
     val graph = Var (
-      GraphBasic.withBars (
-        ColorBarBySelection(data, selection),
+      GraphBasic.withBarsSelectByCat (
+        ColorBarByCatSelection(data, selection),
         yName = "Phase",
         zoomEnabled = zoomEnabled,
         manualBounds = manualBounds,
         selectEnabled = selectEnabled,
         selection = selection,
+        grabEnabled = grabEnabled,
+        yAxis = Val(GraphZoomerAxis(paddingBefore = 0.0, paddingAfter = 0.05)),
+        barTooltipsEnabled = seriesTooltipsEnabled,
+        axisTooltipsEnabled = axisTooltipsEnabled,
+        extraOverLayers = List(yThreshold)
+      )
+    )
+    */
+
+    //Special print code for tooltips, see data definition above
+    def tooltipsPrint(c1: String, c2: (Int, String), bar: Bar[Int]) = c2._2 + " = " + BarTooltips.printValueAndRange(bar)
+    
+    val graph = Var (
+      GraphBasic.withBarsSelectByKey (
+        ColorBarByKeySelection(data, indices),
+        cat2Print = (c2: (Int, String)) => c2._2, //Special print code for category 2 axis labels, see data definition above
+        barTooltipsPrint = tooltipsPrint, 
+        yName = "Phase",
+        zoomEnabled = zoomEnabled,
+        manualBounds = manualBounds,
+        selectEnabled = selectEnabled,
+        selection = indices,
         grabEnabled = grabEnabled,
         yAxis = Val(GraphZoomerAxis(paddingBefore = 0.0, paddingAfter = 0.05)),
         barTooltipsEnabled = seriesTooltipsEnabled,

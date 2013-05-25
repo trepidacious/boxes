@@ -74,13 +74,13 @@ trait SeriesPainter{
   def linesDrawn(series:Series[_]):Boolean
 }
 
-case class Series[K](key:K, curve:List[Vec2], color:Color = Color.black, width:Double = 1, painter:SeriesPainter = SeriesStyles.line) {
+case class Series[K](key:K, curve:List[Vec2], color:Color = Color.black, width:Double = 1, shadow: Boolean = true, painter:SeriesPainter = SeriesStyles.line) {
   def pixelCurve(spaces:GraphSpaces) = curve.map(p => spaces.toPixel(p))
 }
 
 class LineSeriesPainter extends SeriesPainter {
   def paint(canvas:GraphCanvas, s:Series[_], shadow:Boolean = false) {
-    if (shadow) {
+    if (shadow && s.shadow) {
       canvas.color = GraphSeries.shadowColor
       canvas.lineWidth = s.width + 1
       canvas.path(s.curve.map(p => canvas.spaces.toPixel(p) + GraphSeries.shadowOffset))
@@ -127,7 +127,7 @@ object SeriesStyles {
 class PointSeriesPainter(val pointPainter:PointPainter = new CrossPointPainter()) extends SeriesPainter {
 
   def paint(canvas:GraphCanvas, s:Series[_], shadow:Boolean = false) {
-    if (shadow) {
+    if (shadow && s.shadow) {
       canvas.color = GraphSeries.shadowColor
       canvas.lineWidth = s.width + 1
       for (p <- s.curve.map(p => canvas.spaces.toPixel(p) + GraphSeries.shadowOffset)) {
@@ -1163,8 +1163,10 @@ object GraphBasic {
   }
   
   
-  def withBars[C1, C2](
-      data: Ref[Map[(C1, C2), Bar]],
+  def withBarsSelectByCat[C1, C2, K](
+      data: Ref[Map[(C1, C2), Bar[K]]],
+      cat1Print: (C1 => String) = (c: C1)=>c.toString, 
+      cat2Print: (C2 => String) = (c: C2)=>c.toString,
       barWidth: Ref[Double] = Val(1.0), catPadding: Ref[Double] = Val(1.0), barPadding: Ref[Double] = Val(0.4),
       yName:Ref[String] = Val("y"),
       borders:Ref[Borders] = Val(Borders(16, 74, 53, 16)),
@@ -1177,7 +1179,7 @@ object GraphBasic {
       selection:Var[Set[(C1, C2)]] = Var(Set[(C1, C2)]()),
       grabEnabled:Ref[Boolean] = Val(false),
       barTooltipsEnabled:Ref[Boolean] = Val(true),
-      barTooltipsPrint:((C1, C2, Bar) => String) = BarTooltips.defaultPrint,
+      barTooltipsPrint:((C1, C2, Bar[K]) => String) = BarTooltips.defaultPrint[C1, C2, K],
       axisTooltipsEnabled:Ref[Boolean] = Val(true),
       extraMainLayers:List[GraphLayer] = List[GraphLayer](),
       extraOverLayers:List[GraphLayer] = List[GraphLayer]()
@@ -1189,7 +1191,7 @@ object GraphBasic {
         new GraphHighlight(),
         new GraphBars(data, barWidth, catPadding, barPadding, true)(ord1, ord2),  //Shadows
         new GraphAxis(Y, 50),
-        new GraphBarAxis(data, barWidth, catPadding, barPadding, X)(ord1, ord2),
+        new GraphBarAxis(data, barWidth, catPadding, barPadding, X, cat1Print, cat2Print)(ord1, ord2),
         new GraphShadow(),
         new GraphBars(data, barWidth, catPadding, barPadding, false)(ord1, ord2), //Data
         new GraphOutline(),
@@ -1216,9 +1218,9 @@ object GraphBasic {
 //      List(SeriesTooltips.highlight(series, seriesTooltipsEnabled)) ::: 
         extraOverLayers ::: List(
         GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), manualBounds, zoomEnabled),
-        GraphSelectBarsWithBox(data, selection, barWidth, catPadding, barPadding, selectEnabled, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100))),
+        GraphSelectBarsByCatWithBox(data, selection, barWidth, catPadding, barPadding, selectEnabled, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100))),
         GraphGrab(grabEnabled, manualBounds, zoomer.dataArea),
-        GraphClickToSelectBar(data, selection, barWidth, catPadding, barPadding, clickSelectEnabled),
+        GraphClickToSelectBarByCat(data, selection, barWidth, catPadding, barPadding, clickSelectEnabled),
         AxisTooltip(Y, axisTooltipsEnabled),
         BarTooltips.string(barTooltipsEnabled, data, barWidth, catPadding, barPadding, barTooltipsPrint)(ord1, ord2)
       )
@@ -1231,7 +1233,78 @@ object GraphBasic {
       borders
     )
   }
-  
+ 
+    def withBarsSelectByKey[C1, C2, K](
+      data: Ref[Map[(C1, C2), Bar[K]]],
+      cat1Print: (C1 => String) = (c: C1)=>c.toString, 
+      cat2Print: (C2 => String) = (c: C2)=>c.toString,
+      barWidth: Ref[Double] = Val(1.0), catPadding: Ref[Double] = Val(1.0), barPadding: Ref[Double] = Val(0.4),
+      yName:Ref[String] = Val("y"),
+      borders:Ref[Borders] = Val(Borders(16, 74, 53, 16)),
+      zoomEnabled:Ref[Boolean] = Val(true),
+      manualBounds:Var[Option[Area]] = Var(None),
+      xAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
+      yAxis:Ref[GraphZoomerAxis] = Val(GraphZoomerAxis()),
+      selectEnabled:Ref[Boolean] = Val(false),
+      clickSelectEnabled:Ref[Boolean] = Val(true),
+      selection:Var[Set[K]] = Var(Set[K]()),
+      grabEnabled:Ref[Boolean] = Val(false),
+      barTooltipsEnabled:Ref[Boolean] = Val(true),
+      barTooltipsPrint:((C1, C2, Bar[K]) => String) = BarTooltips.defaultPrint[C1, C2, K],
+      axisTooltipsEnabled:Ref[Boolean] = Val(true),
+      extraMainLayers:List[GraphLayer] = List[GraphLayer](),
+      extraOverLayers:List[GraphLayer] = List[GraphLayer]()
+      )(implicit ord1: Ordering[C1], ord2: Ordering[C2]) = {
+
+    val layers = ListVal[GraphLayer](
+      extraMainLayers ::: List(
+        new GraphBG(SwingView.background, Color.white),
+        new GraphHighlight(),
+        new GraphBars(data, barWidth, catPadding, barPadding, true)(ord1, ord2),  //Shadows
+        new GraphAxis(Y, 50),
+        new GraphBarAxis(data, barWidth, catPadding, barPadding, X, cat1Print, cat2Print)(ord1, ord2),
+        new GraphShadow(),
+        new GraphBars(data, barWidth, catPadding, barPadding, false)(ord1, ord2), //Data
+        new GraphOutline(),
+        new GraphAxisTitle(Y, yName)
+      )
+    )
+
+    val dataBounds = Cal{
+      layers().foldLeft(None:Option[Area]){
+        (areaOption, layer) => areaOption match {
+          case None => layer.dataBounds()
+
+          case Some(area) => layer.dataBounds() match {
+            case None => Some(area)
+            case Some(layerArea) => Some(area.extendToContain(layerArea))
+          }
+        }
+      }
+    }
+
+    val zoomer = new GraphZoomer(dataBounds, manualBounds, xAxis, yAxis)
+
+    val overlayers = ListVal[GraphLayer](
+//      List(SeriesTooltips.highlight(series, seriesTooltipsEnabled)) ::: 
+        extraOverLayers ::: List(
+        GraphZoomBox(Val(new Color(0, 0, 200, 50)), Val(new Color(100, 100, 200)), manualBounds, zoomEnabled),
+        GraphSelectBarsByKeyWithBox(data, selection, barWidth, catPadding, barPadding, selectEnabled, Val(new Color(0, 200, 0, 50)), Val(new Color(100, 200, 100))),
+        GraphGrab(grabEnabled, manualBounds, zoomer.dataArea),
+        GraphClickToSelectBarByKey(data, selection, barWidth, catPadding, barPadding, clickSelectEnabled),
+        AxisTooltip(Y, axisTooltipsEnabled),
+        BarTooltips.string(barTooltipsEnabled, data, barWidth, catPadding, barPadding, barTooltipsPrint)(ord1, ord2)
+      )
+    )
+
+    new GraphBasic(
+      layers,
+      overlayers,
+      zoomer.dataArea,
+      borders
+    )
+  }
+ 
 }
 
 trait GraphCanvas {

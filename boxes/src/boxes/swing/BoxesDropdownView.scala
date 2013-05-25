@@ -78,15 +78,10 @@ class BoxesDropdownView(v:LedgerVar, i:VarBox[Option[Int], _], sorting:Boolean =
   })
 
   //Do nothing on pressing enter - otherwise it moves selection down one row
-  val jpropellerNullAction = new AbstractAction() {
+  val nullAction = new AbstractAction() {
     override def actionPerformed(e:ActionEvent) {}
   }
-
-  table.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-    .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "jpropellerNullAction");
-  table.getInputMap(JComponent.WHEN_FOCUSED)
-    .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "jpropellerNullAction");
-  table.getActionMap().put("jpropellerNullAction", jpropellerNullAction);
+  ledgerScrollView.ledgerView.replaceEnterAction(nullAction)
 
   if (!displayHeader) {
     table.setTableHeader(null)

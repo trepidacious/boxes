@@ -14,36 +14,11 @@ import java.awt.Point
 
 private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:Option[Component], invoker:Component) extends WindowListener with ComponentListener {
 
-  private val xOffset = 0
+  private val xOffset = 3
 
   var popupOption = None: Option[JDialog]
 
-  override def windowOpened(e: WindowEvent) {}
-  override def windowClosing(e: WindowEvent) {}
-  override def windowClosed(e: WindowEvent) {}
-  override def windowIconified(e: WindowEvent) {}
-  override def windowDeiconified(e: WindowEvent) {}
-  override def windowActivated(e: WindowEvent) {}
-  override def windowDeactivated(e: WindowEvent) {
-    //Hide when user deactivates dialog (e.g. alt-tab, clicking outside dialog, etc.)
-    popupOption.foreach{popup => {
-        popup.setVisible(false)
-      }
-    }
-  }
-
-  override def componentResized(e: ComponentEvent) {}
-  override def componentMoved(e: ComponentEvent) {}
-  override def componentShown(e: ComponentEvent) {
-    SwingUtilities.invokeLater(new Runnable() {
-      override def run() {
-        //Start with correct focus component selected
-        focusComponent.foreach(_.requestFocus())
-      }
-    })
-  }
-  
-  override def componentHidden(e: ComponentEvent) {
+  def onDialogGone() {
     invoker match {
       case button:ToolbarPopupButton => {
         button.setSelected(false)
@@ -63,7 +38,38 @@ private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:O
         }        
       }
     }
-    
+
+    destroyPopup()
+
+  }
+  
+  override def windowOpened(e: WindowEvent) {}
+  override def windowClosing(e: WindowEvent) {}
+  override def windowClosed(e: WindowEvent) {}
+  override def windowIconified(e: WindowEvent) {}
+  override def windowDeiconified(e: WindowEvent) {}
+  override def windowActivated(e: WindowEvent) {}
+  override def windowDeactivated(e: WindowEvent) {
+    //Hide when user deactivates dialog (e.g. alt-tab, clicking outside dialog, etc.)
+    onDialogGone()
+  }
+
+  override def componentResized(e: ComponentEvent) {}
+  override def componentMoved(e: ComponentEvent) {}
+  override def componentShown(e: ComponentEvent) {
+    SwingUtilities.invokeLater(new Runnable() {
+      override def run() {
+        //Start with correct focus component selected
+        focusComponent.foreach(_.requestFocus())
+      }
+    })
+  }
+  
+  override def componentHidden(e: ComponentEvent) {
+    onDialogGone()
+  }
+  
+  def destroyPopup() {
     //We are now finished with this dialog - don't listen to it,
     //remove our component, and dispose of it so it can be GCed, and
     //clear our Option to avoid retaining it
@@ -74,7 +80,6 @@ private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:O
       popup.dispose();
     }}
     popupOption = None
-
   }
 
   def show() = {
@@ -108,6 +113,8 @@ private class BoxesPopupButtonHandler(popupComponent:Component, focusComponent:O
 
     top
   }
+
+  
 }
 
 object BoxesPopupView {
@@ -150,7 +157,11 @@ class BoxesPopupView(n:Box[String,_] = Val(""), icon:Box[Option[Icon], _] = Val(
       }
     }
   })
-
+  
+  def hide() = {
+    handler.destroyPopup()
+    component.setSelected(false)
+  }
 }
 
 class ToolbarPopupButton(val sv:SwingView) extends EPToggleButton{

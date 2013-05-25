@@ -180,7 +180,10 @@ object Box {
 
     if (checkingConflicts) {
       activeReaction match {
-        case Some(r) => throw new InvalidReactionException("Conflicting reaction", r, b)
+        case Some(r) => {
+          println("Conflicting changes: " + changes)
+          throw new InvalidReactionException("Conflicting reaction", r, b)
+        }
         case None => {
           throw new RuntimeException("Conflicting reaction with no active reaction - code error")
         }
@@ -335,6 +338,7 @@ object Box {
 
         } catch {
           case e:BoxException => {
+            println("Reaction failed with: " + e)
             //Remove the reaction completely from the system, but remember that it failed
             clearReactionSourcesAndTargets(nextReaction)
             conflictReactions.remove(nextReaction)
@@ -342,6 +346,7 @@ object Box {
             failedReactions.add(nextReaction)
           }
           case e:Exception => {
+            println("Reaction failed with: " + e)
               //TODO need to respond better, but can't allow uncaught exception to just stop cycling
             e.printStackTrace()
             clearReactionSourcesAndTargets(nextReaction)
@@ -390,11 +395,14 @@ object Box {
             reactionRespondAndApply(r)
           } catch {
             case e:BoxException => {
+              println("Reaction conflicted with box exception: " + e)
+              e.printStackTrace()
               //Remove the reaction completely from the system, but remember that it failed
               clearReactionSourcesAndTargets(r)
               failedReactions.add(r)
             }
             case e:Exception => {
+              println("Reaction conflicted with exception: " + e)
               //TODO need to respond better, but can't allow uncaught exception to just stop cycling
               e.printStackTrace()
               //Remove the reaction completely from the system, but remember that it failed

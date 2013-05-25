@@ -96,7 +96,7 @@ class CodecByClass extends Codec[Any] {
 
 object AnyCodec extends Codec[Any] {
   override def read(reader: TokenReader) = throw new RuntimeException("Can't read Any")
-  override def write(t : Any, writer: TokenWriter) = throw new RuntimeException("Can't write Any")
+  override def write(t : Any, writer: TokenWriter) = throw new RuntimeException("Can't write Any, instance " + t)
 }
 
 class OptionCodec(delegate:Codec[Any]) extends Codec[Option[_]] {

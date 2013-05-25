@@ -135,6 +135,9 @@ trait TokenReader {
 
 }
 
+class NullTokenWriter extends TokenWriter {
+  def write(t: Token) {}
+}
 
 class Thingy {}
 

@@ -26,3 +26,4 @@ class ViewOpDefault(action: => Unit, val canApply:Box[Boolean, _], val icon:Box[
 object ViewOp {
   def apply(action: => Unit, canApply:Box[Boolean, _] = Val(true), icon:Box[Option[Image], _] = Val(None), label:Box[String, _] = Val("")) = new ViewOpDefault(action, canApply, icon, label)
 }
+

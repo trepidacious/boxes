@@ -1,9 +1,7 @@
 package boxes.swing
 
 import java.util.concurrent.atomic.AtomicBoolean
-
 import scala.collection.immutable
-
 import boxes._
 import boxes.list._
 import javax.swing.event.ChangeEvent
@@ -13,8 +11,11 @@ import javax.swing.table.AbstractTableModel
 import javax.swing.table.TableCellEditor
 import javax.swing.table.TableCellRenderer
 import javax.swing.table.TableModel
-import javax.swing.{JTable, JPanel, JComponent}
+import javax.swing.{JTable, JPanel, JComponent, Action, KeyStroke, AbstractAction}
 import java.awt.BorderLayout
+import java.awt.event.{KeyEvent, ActionEvent, MouseListener, MouseEvent}
+import java.awt.Dimension
+import boxes.swing.icons.IconFactory
 
 object LedgerView {
   def apply(v:LedgerVar, sorting:Boolean = false) = {
@@ -79,6 +80,104 @@ object LedgerView {
     val down = new ListMoveOp(list, i, false)
 
     val buttons = SwingButtonBar().add(add).add(delete).add(up).add(down);
+    val panel = additionalViews.foldLeft(buttons){case (b, a) => b.add(a)}.buildWithListStyleComponent(component)
+
+    val mainPanel = new JPanel(new BorderLayout())
+    mainPanel.add(ledgerView.component, BorderLayout.CENTER)
+    mainPanel.add(panel, BorderLayout.SOUTH)
+
+    mainPanel
+  }
+  
+  def listAddPopup[T](list:ListVar[T], 
+      view:Box[RecordView[T], _], 
+      i:VarBox[Option[Int], _], 
+      sorting:Boolean, 
+      source: => List[T], 
+      addView:Box[RecordView[T],_], 
+      target:T => Unit, component:JComponent, 
+      additionalViews:SwingView*) = {
+
+    //Make a ledger view to select from when adding instances
+    val addListVar = ListVar[T](source)
+    val addLedger = ListLedgerVar(addListVar, addView)
+    val addSelection = ListIndices(addListVar)
+    val addLedgerView = multiSelectionScroll(addLedger, addSelection)
+
+    val addPanel = new JPanel(new BorderLayout)
+    addPanel.add(addLedgerView.component)
+    val addPopup = BoxesPopupView(icon = Val(Some(IconFactory.icon("Plus"))), popupContents = addPanel)
+
+    val addOp = new Op {
+      val canApply = Val(true)
+    
+      def apply() = {
+        Box.transact{
+          val insertion = i() match {
+            case Some(someI) => someI + 1
+            case None => list().size
+          }
+
+          val itemsToAdd = addSelection().toList.sort((x, y) => x > y).map(i => addListVar(i))
+          if (!itemsToAdd.isEmpty) {
+            itemsToAdd.foreach(list.insert(insertion, _))
+            i() = Some(insertion + itemsToAdd.size - 1)
+          }
+        }
+        addPopup.hide()
+        addListVar() = source
+        addSelection() = Set[Int]()
+      }
+    }
+    
+    val hideOp = new Op {
+      val canApply = Val(true)
+    
+      def apply() = {
+        addPopup.hide()
+        addListVar() = source
+        addSelection() = Set[Int]()
+      }
+    }
+        
+    val addButtons = SwingButtonBar()
+        .add(SwingBarButton(name="Add ", icon = Some(IconFactory.icon("Plus")), op = addOp))
+        .build(SwingBarButton(name="Cancel", icon = None, op=hideOp))
+    
+    addPanel.add(addButtons, BorderLayout.SOUTH)
+    addPanel.setPreferredSize(new Dimension(300, 300))
+
+    val addAction = new AbstractAction() {
+      override def actionPerformed(e:ActionEvent) {
+        addOp.apply()
+      }
+    }
+  
+    addLedgerView.ledgerView.replaceEnterAction(addAction)
+    addLedgerView.ledgerView.replaceSpaceAction(addAction)
+    addLedgerView.ledgerView.component.addMouseListener(new MouseListener(){
+      def mouseClicked(e: MouseEvent) {
+        if (e.getClickCount() > 1) addOp.apply()
+      }
+      def mousePressed(e: MouseEvent) {
+      }
+      def mouseReleased(e: MouseEvent) {
+      }
+      def mouseEntered(e: MouseEvent) {
+      }
+      def mouseExited(e: MouseEvent) {
+      }
+    })
+    
+    val ledger = ListLedgerVar(list, view)
+    val ledgerView = singleSelectionScroll(ledger, i, sorting)
+    
+    val delete = new ListDeleteOp(list, i, target)
+
+    val up = new ListMoveOp(list, i, true)
+    val down = new ListMoveOp(list, i, false)
+
+    val buttons = SwingButtonBar().add(addPopup).add(delete).add(up).add(down);
     val panel = additionalViews.foldLeft(buttons){case (b, a) => b.add(a)}.buildWithListStyleComponent(component)
 
     val mainPanel = new JPanel(new BorderLayout())
@@ -214,6 +313,21 @@ class LedgerView(v:LedgerVar) extends SwingView{
   def rowHeight_=(rowHeight:Int) = component.setRowHeight(rowHeight)
 
   def removeHeader = component.setTableHeader(null)
+
+  def replaceEnterAction(a: Action) {
+    replaceKeyEventAction(a, KeyEvent.VK_ENTER)
+  }
+  def replaceSpaceAction(a: Action) {
+    replaceKeyEventAction(a, KeyEvent.VK_SPACE)
+  }
+
+  def replaceKeyEventAction(a: Action, keyCode: Int) {
+    component.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+      .put(KeyStroke.getKeyStroke(keyCode, 0), "boxesNewTableEnterAction");
+    component.getInputMap(JComponent.WHEN_FOCUSED)
+      .put(KeyStroke.getKeyStroke(keyCode, 0), "boxesNewTableEnterAction");
+    component.getActionMap().put("boxesNewTableEnterAction", a);
+  }
 }
 
 class LinkingJTable(val sv:SwingView, m:TableModel) extends JTable(m) {
