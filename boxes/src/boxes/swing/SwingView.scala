@@ -642,6 +642,9 @@ private class NumberOptionView[G, N](v:VarBox[G,_], s:Sequence[N], c:GConverter[
      update()
   }
 
+  //FIXME there is an issue with JSpinner where it can end up on a value like 0.21000000000000002,
+  //when we decrease this the text component first commits itself as 0.21, then we decrement and hit 0.20.
+  //This generates two changes to the viewed Var, which is slightly annoying. 
   private class AutoSpinnerModel extends SpinnerNumberModel {
 		private var firing = false
     var currentValue = n.zero

@@ -12,10 +12,13 @@ trait ViewOp extends Op {
 }
 
 class OpDefault(action: => Unit, val canApply:Box[Boolean, _]) extends Op {
-  def apply() = action
+  def apply() {
+    action    //Note that just using the name of action applies that function, no () required.
+  }
 }
 
 object Op {
+  //Make sure to provide the action properly - if you have a function, pass as function() not just function
   def apply(action: => Unit, canApply:Box[Boolean, _] = Val(true)) = new OpDefault(action, canApply)
 }
 

@@ -16,8 +16,9 @@ object View {
   }
 }
 
-class View {
+trait View extends Reaction {
 
+  def isView = true
 }
 
 object BooleanControlType extends Enumeration {

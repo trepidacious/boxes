@@ -108,6 +108,12 @@ object LedgerView {
     addPanel.add(addLedgerView.component)
     val addPopup = BoxesPopupView(icon = Val(Some(IconFactory.icon("Plus"))), popupContents = addPanel)
 
+    def hideAndResetPopup() {
+      addPopup.hide()
+      addListVar() = source
+      addSelection() = Set[Int]()
+    }
+    
     val addOp = new Op {
       val canApply = Val(true)
     
@@ -124,25 +130,13 @@ object LedgerView {
             i() = Some(insertion + itemsToAdd.size - 1)
           }
         }
-        addPopup.hide()
-        addListVar() = source
-        addSelection() = Set[Int]()
+        hideAndResetPopup()
       }
     }
-    
-    val hideOp = new Op {
-      val canApply = Val(true)
-    
-      def apply() = {
-        addPopup.hide()
-        addListVar() = source
-        addSelection() = Set[Int]()
-      }
-    }
-        
+            
     val addButtons = SwingButtonBar()
         .add(SwingBarButton(name="Add ", icon = Some(IconFactory.icon("Plus")), op = addOp))
-        .build(SwingBarButton(name="Cancel", icon = None, op=hideOp))
+        .build(SwingBarButton(name="Cancel", icon = None, op=Op{hideAndResetPopup()}))
     
     addPanel.add(addButtons, BorderLayout.SOUTH)
     addPanel.setPreferredSize(new Dimension(300, 300))
