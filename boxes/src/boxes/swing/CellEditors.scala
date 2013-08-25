@@ -170,20 +170,24 @@ object SelectingTextCellEditor {
 }
 
 class BoxesTableCellRenderer extends DefaultTableCellRenderer {
+  
   override def getTableCellRendererComponent(table:JTable, value:Object, isSelected:Boolean, hasFocus:Boolean, row:Int, column:Int) = {
-    if (isSelected) {
-      super.setForeground(table.getSelectionForeground())
-      super.setBackground(table.getSelectionBackground())
-	  } else {
-      var background = table.getBackground()
-      val alternateColor = UIManager.getColor("Table.alternateRowColor")
-      if (alternateColor != null && row % 2 == 0) background = alternateColor
-      super.setForeground(table.getForeground())
-      super.setBackground(background);
-	  }
+    super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
+//    if (isSelected) {
+//      super.setForeground(table.getSelectionForeground())
+//      super.setBackground(table.getSelectionBackground())
+//    } else {
+//    var background = UIManager.getColor("Table.rowColor")//Color.red//table.getBackground()
+//    val alternateColor = UIManager.getColor("Table.alternateRowColor")
+//    if (alternateColor != null && row % 2 == 0) background = alternateColor
+//      super.setForeground(table.getForeground())
+//      super.setBackground(background);
+//    }
 
-	  setFont(table.getFont())
+//    setFont(table.getFont())
 
+//    setOpaque(true)
+    
 //	if (hasFocus) {
 //            Border border = null;
 //            if (isSelected) {
@@ -217,7 +221,7 @@ class BoxesTableCellRenderer extends DefaultTableCellRenderer {
     setValue(value)
     this
   }
-//  setBorder(CellEditorBorders.rendererBorder)
+  setBorder(CellEditorBorders.rendererBorder)
 }
 
 object BooleanCellRenderer {

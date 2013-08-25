@@ -339,7 +339,7 @@ class LinkingJTable(val sv:SwingView, m:TableModel) extends JTable(m) {
 
   setDefaultRenderer(classOf[Boolean],  BooleanCellRenderer.opaque)
   setDefaultRenderer(classOf[Char],     defaultRenderer)
-  setDefaultRenderer(classOf[String],     defaultRenderer)
+  setDefaultRenderer(classOf[String],   defaultRenderer)
 
   //We want to use implicits, so we can't use a list of classes, unfortunately
   setDefaultEditor(classOf[Byte],       NumberCellEditor(classOf[Byte]))
